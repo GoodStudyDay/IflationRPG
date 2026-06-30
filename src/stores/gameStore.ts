@@ -1,0 +1,1263 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment } from '@/types';
+import { BonusState } from '@/types';
+import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
+import { getRandomEnemy } from '@/data/enemies';
+import { getEquipmentById } from '@/data/equipment';
+import { getExpToNextLevel, getLevelBonus, clamp } from '@/utils/helpers';
+import { saveCollection, getCollection } from '@/utils/collectionStorage';
+import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
+import { eneDropItemInit, equipmentIdToItemTypeAndIndex, itemTypeAndIndexToEquipmentId } from '@/utils/dropManager';
+import { battleVarInit } from '@/utils/battleVar';
+import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
+
+interface GameStore {
+  player: Player;
+  inventory: InventoryItem[];
+  skills: Skill[];
+  currentScene: GameScene;
+  encounterRate: number;
+  battle: BattleState;
+  battleInterval: number | null;
+  battlePoints: number;
+  maxBattlePoints: number;
+  playTimes: number;
+  Highlv: number;
+  HighCombo: number;
+  HighDamage: number;
+  winbattle: number;
+  losebattle: number;
+  newgamecount: number;
+  gameovercount: number;
+  kyarakutalv: number;
+  hardmodeUnlock: number;
+  hellmodeUnlock: number;
+  playerid: number;
+  DropRate: number;
+  speedNum: number;
+  dropNum: number;
+  presetNum: number;
+  bonus: BonusState;
+  setPlayer: (player: Player) => void;
+  updatePlayerHp: (amount: number) => void;
+  updatePlayerMana: (amount: number) => void;
+  addGold: (amount: number) => void;
+  addExp: (amount: number) => void;
+  levelUp: () => void;
+  addToInventory: (equipmentId: string, quantity: number) => void;
+  removeFromInventory: (equipmentId: string, quantity: number) => void;
+  equipItem: (equipment: Equipment) => void;
+  useConsumable: (equipmentId: string) => void;
+  setCurrentScene: (scene: GameScene) => void;
+  goToTitle: () => void;
+  addEncounterRate: (amount: number) => void;
+  resetEncounterRate: () => void;
+  startBattle: () => void;
+  endBattle: (victory: boolean) => void;
+  clearBattleResult: () => void;
+  toggleBattle: () => void;
+  resumeBattle: () => void;
+  pauseBattle: () => void;
+  tryEscape: () => void;
+  addBattleLog: (message: string) => void;
+  updateCooldowns: () => void;
+  resetGame: () => void;
+  startGame: () => void;
+  startBattleLoop: () => void;
+  stopBattleLoop: () => void;
+  setRecoverNextTurn: (value: boolean) => void;
+  incrementWinBattle: () => void;
+  incrementLoseBattle: () => void;
+  incrementNewGameCount: () => void;
+  updateHighCombo: (combo: number) => void;
+  updateHighDamage: (damage: number) => void;
+  updateHighLv: (level: number) => void;
+  addMapBonus: () => void;
+  clearMapBonus: () => void;
+  getBonusInfo: () => { type: number; name: string; description: string; icon: string; color: string } | null;
+}
+
+const STORAGE_KEY = 'inflation-rpg-storage';
+const BASE_CRIT_RATE = 0.05;
+const BASE_COMBO_RATE = 0.05;
+
+const getStoredData = () => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed;
+    }
+  } catch {
+    console.warn('Failed to load stored game data');
+  }
+  return null;
+};
+
+const storedData = getStoredData();
+
+const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
+  if (!player) return initialPlayer;
+  
+  let fixedPlayer = { ...player };
+  
+  // Ensure gold is always a valid number
+  if (typeof fixedPlayer.gold !== 'number' || Number.isNaN(fixedPlayer.gold)) {
+    fixedPlayer.gold = 0;
+  }
+  
+  // Ensure other numeric fields are valid
+  if (typeof fixedPlayer.hp !== 'number' || Number.isNaN(fixedPlayer.hp)) {
+    fixedPlayer.hp = fixedPlayer.maxHp || 1000;
+  }
+  if (typeof fixedPlayer.maxHp !== 'number' || Number.isNaN(fixedPlayer.maxHp)) {
+    fixedPlayer.maxHp = 1000;
+  }
+  if (typeof fixedPlayer.attack !== 'number' || Number.isNaN(fixedPlayer.attack)) {
+    fixedPlayer.attack = 1000;
+  }
+  if (typeof fixedPlayer.defense !== 'number' || Number.isNaN(fixedPlayer.defense)) {
+    fixedPlayer.defense = 1000;
+  }
+  if (typeof fixedPlayer.agility !== 'number' || Number.isNaN(fixedPlayer.agility)) {
+    fixedPlayer.agility = 1000;
+  }
+  if (typeof fixedPlayer.luck !== 'number' || Number.isNaN(fixedPlayer.luck)) {
+    fixedPlayer.luck = 1000;
+  }
+  
+  if (fixedPlayer.equippedWeapon) {
+    const weapon = getEquipmentById(fixedPlayer.equippedWeapon.id);
+    if (weapon) {
+      fixedPlayer.equippedWeapon = weapon;
+    } else {
+      fixedPlayer.equippedWeapon = null;
+    }
+  }
+  
+  if (fixedPlayer.equippedArmor) {
+    const armor = getEquipmentById(fixedPlayer.equippedArmor.id);
+    if (armor) {
+      fixedPlayer.equippedArmor = armor;
+    } else {
+      fixedPlayer.equippedArmor = null;
+    }
+  }
+  
+  if (fixedPlayer.equippedAccessories) {
+    fixedPlayer.equippedAccessories = fixedPlayer.equippedAccessories
+      .map(acc => {
+        const found = getEquipmentById(acc.id);
+        return found || acc;
+      })
+      .filter(acc => getEquipmentById(acc.id));
+  }
+  
+  return fixedPlayer;
+};
+
+const calculateCritRate = (hpPercent: number): number => {
+  let rate = BASE_CRIT_RATE;
+  if (hpPercent <= 0.25) {
+    rate += 0.05;
+    if (hpPercent <= 0.15) rate += 0.04;
+    if (hpPercent <= 0.1) rate += 0.045;
+    if (hpPercent <= 0.05) rate += 0.03;
+  }
+  return Math.min(rate, 0.7) * 100;
+};
+
+const calculateComboRate = (hpPercent: number): number => {
+  let rate = BASE_COMBO_RATE;
+  if (hpPercent <= 0.25) {
+    rate += 0.08;
+    if (hpPercent <= 0.15) rate += 0.11;
+    if (hpPercent <= 0.1) rate += 0.13;
+    if (hpPercent <= 0.05) rate += 0.08;
+  }
+  return Math.min(rate, 0.8) * 100;
+};
+
+const calculatePlayerDamage = (
+  playerAttack: number,
+  enemyDefense: number,
+  isCrit: boolean,
+  comboCount: number
+): { damage: number; isCrit: boolean } => {
+  let damage: number;
+  
+  if (isCrit) {
+    const critBonus = Math.random() * 1.2;
+    const critMultiplier = 1.75 + critBonus / 5;
+    damage = (playerAttack + 1) * critMultiplier + 4;
+  } else {
+    damage = playerAttack;
+  }
+  
+  let defense = enemyDefense;
+  if (defense > damage) {
+    defense = (defense * 3 + damage * 2) / 5;
+  }
+  defense *= 0.3;
+  if (defense >= damage * 0.32) {
+    defense = (defense + damage * 0.32 * 99) / 100;
+  }
+  defense = defense + Math.random() * enemyDefense * 0.02 + enemyDefense * 0.02;
+  if (defense >= damage * 0.44) {
+    defense = (defense + damage * 0.44 * 199) / 200;
+  }
+  
+  damage -= defense;
+  damage *= 0.88;
+  damage = damage + Math.random() * damage * 0.2 - damage * 0.1 + Math.random() * 4 - 2;
+  
+  if (damage <= 0) {
+    damage = Math.random() * 10 + 1;
+  }
+  
+  if (comboCount >= 2) {
+    damage = Math.floor(damage * (1 + (comboCount - 1) * 0.1));
+  }
+  
+  return { damage: Math.floor(damage), isCrit };
+};
+
+const calculateEnemyDamage = (enemyAttack: number, playerDefense: number): number => {
+  let damage = (enemyAttack * 2 + (enemyAttack - playerDefense * 0.5) * 12) / 14;
+  
+  let threshold = enemyAttack * 0.5;
+  if (damage < threshold) {
+    damage = (threshold + damage) / 2;
+  }
+  
+  threshold = enemyAttack * 0.3;
+  if (damage < threshold) {
+    damage = (threshold * 3 + damage) / 4;
+  }
+  
+  threshold = enemyAttack * 0.2;
+  if (damage < threshold) {
+    damage = (threshold * 5 + damage) / 6;
+  }
+  
+  threshold = enemyAttack * 0.1;
+  if (damage < threshold) {
+    damage = (threshold * 7 + damage) / 8;
+  }
+  
+  damage = damage + Math.random() * damage * 0.2 - damage * 0.1 + Math.random() * 4 - 2;
+  damage = damage + Math.random() * enemyAttack * 0.0225 + enemyAttack * 0.0025;
+  
+  if (damage <= 0) {
+    damage = Math.random() * 10 + 1;
+  }
+  
+  return Math.floor(damage);
+};
+
+const collectionData = getCollection();
+const saveData = loadSaveData();
+
+export const useGameStore = create<GameStore>()(
+  persist(
+    (set, get) => ({
+      player: fixStoredPlayerEquipment(storedData?.player),
+      inventory: storedData?.inventory || (collectionData.length > 0 ? collectionData : initialInventory),
+      skills: storedData?.skills || initialSkills,
+      currentScene: 'title',
+      encounterRate: storedData?.encounterRate || 0,
+      battle: {
+        enemy: null,
+        status: 'idle',
+        battleLog: [],
+        comboCount: 0,
+        comboRate: 5,
+        critRate: 5,
+        hpRate: 100,
+        dropRate: 0,
+        dropItemName: '',
+        turn: 'player',
+        turnCount: 0,
+        recoverNextTurn: false,
+        playerAnimation: 'idle',
+        enemyAnimation: 'idle',
+        dropType: -1,
+        dropIndex: -1,
+        isDropSuccess: false,
+        goldMultiplier: 1,
+        battleResult: null,
+      },
+      battleInterval: null,
+      battlePoints: storedData?.battlePoints || 30,
+      maxBattlePoints: 30,
+      playTimes: saveData.playTimes,
+      Highlv: saveData.Highlv,
+      HighCombo: saveData.HighCombo,
+      HighDamage: saveData.HighDamage,
+      winbattle: saveData.winbattle,
+      losebattle: saveData.losebattle,
+      newgamecount: saveData.newgamecount,
+      gameovercount: saveData.gameovercount,
+      kyarakutalv: saveData.kyarakutalv,
+      hardmodeUnlock: saveData.hardmodeUnlock,
+      hellmodeUnlock: saveData.hellmodeUnlock,
+      playerid: saveData.playerid,
+      DropRate: saveData.DropRate,
+      speedNum: saveData.speedNum,
+      dropNum: saveData.dropNum,
+      presetNum: saveData.presetNum,
+      bonus: {
+        addUsesLeft: 5,
+        clearUsesLeft: 5,
+        currentBonus: null,
+      },
+      setPlayer: (player) => set({ player }),
+      updatePlayerHp: (amount) => {
+        const { player, battle } = get();
+        const newHp = clamp(player.hp + amount, 0, player.maxHp);
+        const hpPercent = newHp / player.maxHp;
+        const newCritRate = calculateCritRate(hpPercent);
+        const newComboRate = calculateComboRate(hpPercent);
+        set({ 
+          player: { ...player, hp: newHp },
+          battle: { 
+            ...battle, 
+            critRate: newCritRate,
+            comboRate: newComboRate,
+          },
+        });
+      },
+      updatePlayerMana: (amount) => {
+        const { player } = get();
+        const newMana = clamp(player.mana + amount, 0, player.maxMana);
+        set({ player: { ...player, mana: newMana } });
+      },
+      addGold: (amount) => {
+        const { player } = get();
+        set({ player: { ...player, gold: player.gold + amount } });
+      },
+      addExp: (amount) => {
+        const { player, levelUp } = get();
+        const newExp = player.exp + amount;
+        if (newExp >= player.expToNextLevel) {
+          set({ player: { ...player, exp: newExp } });
+          levelUp();
+        } else {
+          set({ player: { ...player, exp: newExp } });
+        }
+      },
+      levelUp: () => {
+        const { player, battle, updateHighLv } = get();
+        const newLevel = player.level + 1;
+        const bonus = getLevelBonus(newLevel);
+        const expRemaining = player.exp - player.expToNextLevel;
+        const expToNext = getExpToNextLevel(newLevel);
+        
+        const newMaxHp = player.maxHp + bonus.hp;
+        const newMaxMana = player.maxMana + bonus.mana;
+        
+        updateHighLv(newLevel);
+        
+        set({
+          player: {
+            ...player,
+            level: newLevel,
+            maxHp: newMaxHp,
+            hp: newMaxHp,
+            attack: player.attack + bonus.attack,
+            defense: player.defense + bonus.defense,
+            maxMana: newMaxMana,
+            mana: newMaxMana,
+            exp: expRemaining,
+            expToNextLevel: expToNext,
+          },
+          battle: {
+            ...battle,
+            hpRate: 100,
+          },
+        });
+      },
+      addToInventory: (equipmentId, quantity) => {
+        const { inventory } = get();
+        const newItem: InventoryItem = { equipmentId, quantity };
+        saveCollection([newItem]);
+        
+        const existingItem = inventory.find(item => item.equipmentId === equipmentId);
+        if (existingItem) {
+          const newInventory = inventory.map(item =>
+            item.equipmentId === equipmentId
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+          set({ inventory: newInventory });
+        } else {
+          set({ inventory: [...inventory, newItem] });
+        }
+      },
+      removeFromInventory: (equipmentId, quantity) => {
+        const { inventory } = get();
+        const newInventory = inventory
+          .map(item =>
+            item.equipmentId === equipmentId
+              ? { ...item, quantity: item.quantity - quantity }
+              : item
+          )
+          .filter(item => item.quantity > 0);
+        set({ inventory: newInventory });
+      },
+      equipItem: (equipment) => {
+        const { player } = get();
+        
+        let newPlayer = { ...player };
+        
+        if (equipment.type === 'weapon') {
+          if (player.equippedWeapon?.id === equipment.id) {
+            return;
+          }
+          newPlayer.equippedWeapon = equipment;
+        } else if (equipment.type === 'armor') {
+          if (player.equippedArmor?.id === equipment.id) {
+            return;
+          }
+          newPlayer.equippedArmor = equipment;
+        } else if (equipment.type === 'accessory') {
+          if (newPlayer.equippedAccessories.length < 6) {
+            newPlayer.equippedAccessories = [...newPlayer.equippedAccessories, equipment];
+          } else {
+            return;
+          }
+        }
+        
+        const weaponBonus = newPlayer.equippedWeapon?.attackBonus || 0;
+        const armorBonus = newPlayer.equippedArmor?.defenseBonus || 0;
+        const armorHpBonus = newPlayer.equippedArmor?.hpBonus || 0;
+        
+        const accessories = newPlayer.equippedAccessories || [];
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
+        
+        newPlayer.attack = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponBonus + accessoryAtkBonus;
+        newPlayer.defense = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorBonus + accessoryDefBonus;
+        newPlayer.maxHp = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpBonus + accessoryHpBonus;
+        
+        set({ player: newPlayer });
+      },
+      useConsumable: (equipmentId) => {
+        const { inventory, updatePlayerHp, updatePlayerMana, removeFromInventory } = get();
+        const item = inventory.find(i => i.equipmentId === equipmentId);
+        if (!item) return;
+        
+        const equipment = getEquipmentById(equipmentId);
+        if (!equipment || equipment.type !== 'consumable') return;
+        
+        if (equipment.hpBonus > 0) {
+          updatePlayerHp(equipment.hpBonus);
+        }
+        
+        const { player } = get();
+        if (player.maxMana > 0 && equipment.hpBonus === 0) {
+          updatePlayerMana(50);
+        }
+        
+        removeFromInventory(equipmentId, 1);
+      },
+      setCurrentScene: (scene) => set({ currentScene: scene }),
+      goToTitle: () => {
+        set({ currentScene: 'title' });
+      },
+      startGame: () => {
+        const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
+        
+        set({
+          player: {
+            ...player,
+            hp: player.maxHp,
+            mana: player.maxMana,
+          },
+          inventory,
+          skills,
+          currentScene: 'world',
+          encounterRate: 0,
+          battlePoints: battlePoints > 0 ? battlePoints : maxBattlePoints,
+          battle: {
+            enemy: null,
+            status: 'idle',
+            battleLog: [],
+            comboCount: 0,
+            comboRate: 5,
+            critRate: 5,
+            hpRate: 100,
+            dropRate: 0,
+            dropItemName: '',
+            turn: 'player',
+            turnCount: 0,
+            recoverNextTurn: false,
+            playerAnimation: 'idle',
+            enemyAnimation: 'idle',
+            dropType: -1,
+            dropIndex: -1,
+            isDropSuccess: false,
+            goldMultiplier: 1,
+            battleResult: null,
+          },
+        });
+      },
+      addEncounterRate: (amount) => {
+        const { encounterRate } = get();
+        const newRate = Math.min(encounterRate + amount, GAME_CONFIG.ENCOUNTER_MAX);
+        set({ encounterRate: newRate });
+        if (newRate >= GAME_CONFIG.ENCOUNTER_MAX) {
+          get().startBattle();
+        }
+      },
+      resetEncounterRate: () => set({ encounterRate: 0 }),
+      startBattle: () => {
+        const { player, battlePoints, inventory, Highlv, dropNum } = get();
+        
+        if (battlePoints <= 0) {
+          return;
+        }
+        
+        const enemy = getRandomEnemy(player.level);
+        
+        const dropSlots = enemy.drops.map(drop => {
+          const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
+          return {
+            itemType,
+            itemIndex,
+            baseRate: drop.dropRate,
+          };
+        });
+        
+        const slot1 = dropSlots[0] || null;
+        const slot2 = dropSlots[1] || null;
+        const slot3 = dropSlots[2] || null;
+        
+        const battleVarResult = battleVarInit(
+          {
+            hp: player.hp,
+            maxHp: player.maxHp,
+            attack: player.attack,
+            defense: player.defense,
+            agility: player.agility,
+            luck: player.luck,
+          },
+          {
+            hp: enemy.maxHp,
+            attack: enemy.attack,
+            exp: enemy.expReward,
+            gold: enemy.goldReward,
+            level: enemy.level * 100,
+          },
+          dropSlots.length,
+          {
+            hardmode: 0,
+            renzokuPlusKakuritu: 0,
+            crihPlusKakuritu: 0,
+            speedwariai: 0,
+            lukwariai: 0,
+            hourGlassON: false,
+            hourGlassON1: false,
+            expbairitu: 1,
+          }
+        );
+        
+        const settings = {
+          donyokuOn: false,
+          goyokuOn: false,
+          twilightON: false,
+          hardmode: 0,
+          dropBoost: 1,
+        };
+        
+        const saveSettings = {
+          dropNum,
+          Highlv,
+        };
+        
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings);
+        
+        const dropEquipment = dropResult.getItemDropType !== -1 
+          ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
+          : null;
+        
+        // 应用地图奖励效果
+        const bonus = get().bonus;
+        if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
+          switch (bonus.currentBonus.bonusType) {
+            case 0: // 敌HP半减
+              enemy.hp = Math.floor(enemy.maxHp * 0.5);
+              break;
+            case 1: // 敌攻击力半减
+              enemy.attack = Math.floor(enemy.attack * 0.5);
+              break;
+            case 2: // 会心连続率上昇
+              battleVarResult.critRate = Math.min(1, battleVarResult.critRate + 0.15);
+              battleVarResult.comboRate = Math.min(1, battleVarResult.comboRate + 0.15);
+              break;
+            case 3: // 金币2倍
+              battleVarResult.goldMultiplier *= 2;
+              break;
+            case 4:
+              battleVarResult.goldMultiplier *= 3;
+              break;
+            case 5:
+              battleVarResult.goldMultiplier *= 4;
+              break;
+            case 6:
+              battleVarResult.goldMultiplier *= 7;
+              break;
+            case 7: // 经验1.5倍 - 直接修改敌人经验值
+              enemy.expReward = Math.floor(enemy.expReward * 1.5);
+              break;
+            case 8:
+              enemy.expReward = Math.floor(enemy.expReward * 2);
+              break;
+          }
+          // Reduce bonus remaining count
+          const newRemaining = bonus.currentBonus.remainingCount - 1;
+          console.log('[Bonus] Remaining after this battle:', newRemaining);
+          set((s) => ({
+            bonus: {
+              ...s.bonus,
+              currentBonus: newRemaining > 0 ? {
+                ...s.bonus.currentBonus!,
+                remainingCount: newRemaining,
+              } : null,
+            },
+          }));
+        }
+        
+        set({
+          player: { ...player, hp: player.maxHp },
+          currentScene: 'battle',
+          encounterRate: 0,
+          battlePoints: battlePoints - 1,
+          battle: {
+            enemy,
+            status: 'idle',
+            battleLog: ['敌人出现了！', '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
+            comboCount: 0,
+            comboRate: battleVarResult.comboRate * 100,
+            critRate: battleVarResult.critRate * 100,
+            hpRate: 100,
+            dropRate: dropResult.getItemDropRate * 100,
+            dropItemName: dropEquipment ? dropEquipment.name : '------',
+            turn: 'player',
+            turnCount: 0,
+            recoverNextTurn: false,
+            playerAnimation: 'idle',
+            enemyAnimation: 'idle',
+            dropType: dropResult.getItemDropType,
+            dropIndex: dropResult.getItemDropIndex,
+            isDropSuccess: dropResult.isDropSuccess,
+            goldMultiplier: battleVarResult.goldMultiplier,
+            battleResult: null,
+          },
+        });
+      },
+      endBattle: (victory) => {
+        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, battle: { comboCount, goldMultiplier } } = get();
+        
+        if (battle.battleResult || battle.status !== 'fighting') {
+          return;
+        }
+        
+        const { battleInterval } = get();
+        if (battleInterval) {
+          clearInterval(battleInterval);
+          set({ battleInterval: null });
+        }
+        
+        let goldReward = 0;
+        let expReward = 0;
+        let dropItem = undefined;
+        let battlePointsChange = 0;
+        
+        if (victory && battle.enemy) {
+          goldReward = Math.floor(battle.enemy.goldReward * goldMultiplier);
+          expReward = battle.enemy.expReward;
+          addGold(goldReward);
+          addExp(expReward);
+          
+          if (battle.isDropSuccess && battle.dropType !== -1 && battle.dropIndex !== -1) {
+            const equipmentId = itemTypeAndIndexToEquipmentId(battle.dropType, battle.dropIndex);
+            dropItem = getEquipmentById(equipmentId);
+            if (dropItem) {
+              addToInventory(equipmentId, 1);
+            }
+          }
+          
+          incrementWinBattle();
+          updateHighCombo(comboCount);
+        } else if (!victory) {
+          const damage = Math.floor(player.maxHp * 0.3);
+          updatePlayerHp(-damage);
+          incrementLoseBattle();
+          battlePointsChange = -3;
+        }
+        
+        const newBattlePoints = battlePoints + battlePointsChange;
+        
+        if (!victory && newBattlePoints <= 0) {
+          set({
+            battle: {
+              ...battle,
+              status: 'idle',
+              battleResult: {
+                victory,
+                goldReward,
+                expReward,
+                dropItem,
+                battlePointsChange,
+              },
+            },
+          });
+          setTimeout(() => get().resetGame(), 2000);
+          return;
+        }
+        
+        set({
+          battlePoints: newBattlePoints,
+          battle: {
+            ...battle,
+            status: 'idle',
+            battleResult: {
+              victory,
+              goldReward,
+              expReward,
+              dropItem,
+              battlePointsChange,
+            },
+          },
+        });
+
+        // 胜利后如果没有 bonus，40% 概率生成新 bonus
+        if (victory) {
+          const { bonus: currentBonus } = get();
+          if (!currentBonus.currentBonus && Math.random() < 0.4) {
+            const newBonusType = getRandomBonusType(player.level * 100);
+            const bonusCount = Math.floor(Math.random() * 5) + 1; // 1-5 次
+            console.log('[Bonus] Auto-generated after victory: type=', newBonusType, 'count=', bonusCount);
+            set((s) => ({
+              bonus: {
+                ...s.bonus,
+                currentBonus: {
+                  bonusType: newBonusType,
+                  remainingCount: bonusCount,
+                },
+              },
+            }));
+          }
+        }
+      },
+      clearBattleResult: () => {
+        set((state) => ({ battle: { ...state.battle, battleResult: null } }));
+      },
+      toggleBattle: () => {
+        const { battle, startBattleLoop, stopBattleLoop } = get();
+        
+        if (battle.status === 'idle') {
+          if (battle.battleResult) {
+            return;
+          }
+          set({ battle: { ...battle, status: 'fighting' } });
+          startBattleLoop();
+        } else if (battle.status === 'fighting') {
+          stopBattleLoop();
+          set({ battle: { ...battle, status: 'paused' } });
+        }
+      },
+      resumeBattle: () => {
+        const { startBattleLoop, battle } = get();
+        if (battle.battleResult) {
+          return;
+        }
+        set((state) => ({ battle: { ...state.battle, status: 'fighting' } }));
+        startBattleLoop();
+      },
+      pauseBattle: () => {
+        const { stopBattleLoop } = get();
+        stopBattleLoop();
+        set((state) => ({ battle: { ...state.battle, status: 'paused' } }));
+      },
+      setRecoverNextTurn: (value) => {
+        set((state) => ({ battle: { ...state.battle, recoverNextTurn: value } }));
+      },
+      startBattleLoop: () => {
+        const { battleInterval, battle } = get();
+        if (battleInterval) return;
+        if (battle.battleResult) {
+          return;
+        }
+        
+        let mode = 3;
+        let eefi = 0;
+        let isProcessing = false;
+        let tdame = 0;
+        let renzokukaisu = 1;
+        let whichTurn = 0;
+        let battleEnded = false;
+        
+        const interval = window.setInterval(() => {
+          const state = get();
+          const { battle, player, updatePlayerHp, endBattle, addBattleLog, updateHighDamage } = state;
+          
+          if (battle.status !== 'fighting' || !battle.enemy || battleEnded) {
+            return;
+          }
+          
+          if (mode === 3) {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            if (whichTurn === 0) {
+              if (battle.recoverNextTurn) {
+                updatePlayerHp(player.maxHp);
+                addBattleLog('全部恢复了');
+                set((s) => ({
+                  battle: { ...s.battle, recoverNextTurn: false },
+                }));
+                whichTurn = 1;
+                isProcessing = false;
+                return;
+              }
+              
+              const totalAttack = player.attack + (player.equippedWeapon?.attackBonus || 0);
+              const hpPercent = player.hp / player.maxHp;
+              const critRate = calculateCritRate(hpPercent);
+              const isCrit = Math.random() * 100 < critRate;
+              
+              const currentComboCount = renzokukaisu >= 1 ? renzokukaisu : 1;
+              const { damage } = calculatePlayerDamage(
+                totalAttack,
+                battle.enemy.defense,
+                isCrit,
+                currentComboCount
+              );
+              
+              tdame = damage;
+              updateHighDamage(damage);
+              
+              let logMessage = `攻击 ${Math.floor(damage)}伤害！`;
+              if (currentComboCount >= 2) {
+                logMessage += ` ${currentComboCount} 连击！`;
+              }
+              if (isCrit) {
+                logMessage += ' 暴击！';
+              }
+              addBattleLog(logMessage);
+              
+              set((s) => ({
+                battle: {
+                  ...s.battle,
+                  playerAnimation: 'attack',
+                  enemyAnimation: 'hurt',
+                },
+              }));
+              
+              eefi = 0;
+              mode = 4;
+              isProcessing = false;
+            } else {
+              const totalDefense = player.defense + (player.equippedArmor?.defenseBonus || 0);
+              const enemyDamage = calculateEnemyDamage(
+                battle.enemy.attack,
+                totalDefense
+              );
+              tdame = enemyDamage;
+              
+              set((s) => ({
+                battle: {
+                  ...s.battle,
+                  playerAnimation: 'hurt',
+                  enemyAnimation: 'attack',
+                },
+              }));
+              
+              eefi = 0;
+              mode = 4;
+              isProcessing = false;
+            }
+          } else if (mode === 4) {
+            eefi++;
+            
+            if (eefi >= 5) {
+              if (whichTurn === 0) {
+                const newEnemyHp = Math.max(0, battle.enemy.hp - tdame);
+                const newHpRate = (newEnemyHp / battle.enemy.maxHp) * 100;
+                
+                set((s) => ({
+                  battle: {
+                    ...s.battle,
+                    enemy: { ...s.battle.enemy!, hp: newEnemyHp },
+                    hpRate: newHpRate,
+                    playerAnimation: 'idle',
+                    enemyAnimation: 'idle',
+                  },
+                }));
+                
+                if (newEnemyHp <= 0) {
+                  addBattleLog('战斗胜利！');
+                  battleEnded = true;
+                  setTimeout(() => {
+                    endBattle(true);
+                  }, 500);
+                  return;
+                }
+              } else {
+                updatePlayerHp(-tdame);
+                addBattleLog(`敌人攻击 受到${Math.floor(tdame)}伤害`);
+                
+                set((s) => ({
+                  battle: {
+                    ...s.battle,
+                    playerAnimation: 'idle',
+                    enemyAnimation: 'idle',
+                  },
+                }));
+                
+                const { player: newPlayer } = get();
+                if (newPlayer.hp <= 0) {
+                  addBattleLog('战斗失败了');
+                  battleEnded = true;
+                  setTimeout(() => {
+                    endBattle(false);
+                  }, 500);
+                  return;
+                }
+              }
+              
+              eefi = 0;
+              mode = 5;
+            }
+          } else if (mode === 5) {
+            eefi++;
+            
+            if (eefi >= 2) {
+              if (whichTurn === 0) {
+                const currentHpPercent = battle.enemy.hp / battle.enemy.maxHp;
+                const comboCheckRate = calculateComboRate(1 - currentHpPercent);
+                const isCombo = Math.random() * 100 < comboCheckRate;
+                
+                if (isCombo) {
+                  renzokukaisu++;
+                  whichTurn = 0;
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      comboCount: renzokukaisu,
+                      comboRate: comboCheckRate,
+                      critRate: calculateCritRate(1 - currentHpPercent),
+                    },
+                  }));
+                } else {
+                  renzokukaisu = 1;
+                  whichTurn = 1;
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      comboCount: 1,
+                      turnCount: s.battle.turnCount + 1,
+                      comboRate: comboCheckRate,
+                      critRate: calculateCritRate(1 - currentHpPercent),
+                    },
+                  }));
+                }
+              } else {
+                whichTurn = 0;
+              }
+              
+              mode = 3;
+            }
+          }
+        }, 33);
+        
+        set({ battleInterval: interval });
+      },
+      stopBattleLoop: () => {
+        const { battleInterval } = get();
+        if (battleInterval) {
+          clearInterval(battleInterval);
+          set({ battleInterval: null });
+        }
+      },
+      tryEscape: () => {
+        const { battle, addBattleLog, resetEncounterRate, setCurrentScene } = get();
+        
+        if (battle.status !== 'paused' || !battle.enemy) return;
+        
+        if (Math.random() < GAME_CONFIG.ESCAPE_CHANCE) {
+          addBattleLog('成功逃跑了！');
+          setTimeout(() => {
+            resetEncounterRate();
+            setCurrentScene('world');
+            set({
+            battle: {
+              enemy: null,
+              status: 'idle',
+              battleLog: [],
+              comboCount: 0,
+              comboRate: 5,
+              critRate: 5,
+              hpRate: 100,
+              dropRate: 0,
+              dropItemName: '',
+              turn: 'player',
+              turnCount: 0,
+              recoverNextTurn: false,
+              playerAnimation: 'idle',
+              enemyAnimation: 'idle',
+              dropType: -1,
+              dropIndex: -1,
+              isDropSuccess: false,
+              goldMultiplier: 1,
+              battleResult: null,
+            },
+          });
+          }, 1000);
+        } else {
+          addBattleLog('逃跑失败！');
+          get().resumeBattle();
+        }
+      },
+      addBattleLog: (message) => {
+        const { battle } = get();
+        const newLogs = [...battle.battleLog, message];
+        if (newLogs.length > 10) {
+          newLogs.shift();
+        }
+        set({
+          battle: { ...battle, battleLog: newLogs },
+        });
+      },
+      updateCooldowns: () => {
+        const { skills } = get();
+        set({
+          skills: skills.map(s => ({
+            ...s,
+            currentCooldown: Math.max(0, s.currentCooldown - 1),
+          })),
+        });
+      },
+      resetGame: () => {
+        const currentPlayer = get().player;
+        localStorage.removeItem(STORAGE_KEY);
+        const collection = getCollection();
+        const savedInventory = collection.length > 0 ? collection : initialInventory;
+        const saveData = loadSaveData();
+        
+        set({
+          player: {
+            ...initialPlayer,
+            equippedWeapon: currentPlayer.equippedWeapon,
+            equippedArmor: currentPlayer.equippedArmor,
+            equippedAccessories: [...(currentPlayer.equippedAccessories || [])],
+          },
+          inventory: savedInventory,
+          skills: initialSkills,
+          currentScene: 'title',
+          encounterRate: 0,
+          battlePoints: 30,
+          maxBattlePoints: 30,
+          bonus: {
+            addUsesLeft: 5,
+            clearUsesLeft: 5,
+            currentBonus: null,
+          },
+          battle: {
+            enemy: null,
+            status: 'idle',
+            battleLog: [],
+            comboCount: 0,
+            comboRate: 5,
+            critRate: 5,
+            hpRate: 100,
+            dropRate: 0,
+            dropItemName: '',
+            turn: 'player',
+            turnCount: 0,
+            recoverNextTurn: false,
+            playerAnimation: 'idle',
+            enemyAnimation: 'idle',
+            dropType: -1,
+            dropIndex: -1,
+            isDropSuccess: false,
+            goldMultiplier: 1,
+            battleResult: null,
+          },
+          battleInterval: null,
+          playTimes: saveData.playTimes,
+          Highlv: saveData.Highlv,
+          HighCombo: saveData.HighCombo,
+          HighDamage: saveData.HighDamage,
+          winbattle: saveData.winbattle,
+          losebattle: saveData.losebattle,
+          newgamecount: saveData.newgamecount,
+          gameovercount: saveData.gameovercount,
+          kyarakutalv: saveData.kyarakutalv,
+          hardmodeUnlock: saveData.hardmodeUnlock,
+          hellmodeUnlock: saveData.hellmodeUnlock,
+          playerid: saveData.playerid,
+          DropRate: saveData.DropRate,
+          speedNum: saveData.speedNum,
+          dropNum: saveData.dropNum,
+          presetNum: saveData.presetNum,
+        });
+      },
+      incrementWinBattle: () => {
+        const { winbattle, Highlv, player } = get();
+        const newWinbattle = winbattle + 1;
+        const newHighlv = Math.max(Highlv, player.level);
+        set({ winbattle: newWinbattle, Highlv: newHighlv });
+        
+        const data = loadSaveData();
+        data.winbattle = newWinbattle;
+        data.Highlv = newHighlv;
+        saveSaveData(data);
+      },
+      incrementLoseBattle: () => {
+        const { losebattle, gameovercount } = get();
+        const newLosebattle = losebattle + 1;
+        const newGameovercount = gameovercount + 1;
+        set({ losebattle: newLosebattle, gameovercount: newGameovercount });
+        
+        const data = loadSaveData();
+        data.losebattle = newLosebattle;
+        data.gameovercount = newGameovercount;
+        saveSaveData(data);
+      },
+      incrementNewGameCount: () => {
+        const { newgamecount } = get();
+        const newCount = newgamecount + 1;
+        set({ newgamecount: newCount });
+        
+        const data = loadSaveData();
+        data.newgamecount = newCount;
+        saveSaveData(data);
+      },
+      updateHighCombo: (combo) => {
+        const { HighCombo } = get();
+        if (combo > HighCombo) {
+          set({ HighCombo: combo });
+          
+          const data = loadSaveData();
+          data.HighCombo = combo;
+          saveSaveData(data);
+        }
+      },
+      updateHighDamage: (damage) => {
+        const { HighDamage } = get();
+        if (damage > HighDamage) {
+          set({ HighDamage: damage });
+          
+          const data = loadSaveData();
+          data.HighDamage = damage;
+          saveSaveData(data);
+        }
+      },
+      updateHighLv: (level) => {
+        const { Highlv } = get();
+        if (level > Highlv) {
+          set({ Highlv: level });
+          
+          const data = loadSaveData();
+          data.Highlv = level;
+          saveSaveData(data);
+        }
+      },
+      // 奖励系统
+      addMapBonus: () => {
+        const { bonus, player } = get();
+        if (bonus.addUsesLeft <= 0) return;
+        
+        const bonusType = getRandomBonusType(player.level * 100);
+        const count = Math.floor(Math.random() * 3) + 1;
+        
+        set((s) => ({
+          bonus: {
+            ...s.bonus,
+            addUsesLeft: s.bonus.addUsesLeft - 1,
+            currentBonus: {
+              bonusType,
+              remainingCount: count,
+            },
+          },
+        }));
+      },
+      clearMapBonus: () => {
+        const { bonus } = get();
+        if (bonus.clearUsesLeft <= 0) return;
+        set((s) => ({
+          bonus: {
+            ...s.bonus,
+            clearUsesLeft: s.bonus.clearUsesLeft - 1,
+            currentBonus: null,
+          },
+        }));
+      },
+      getBonusInfo: () => {
+        const { bonus } = get();
+        if (!bonus.currentBonus) return null;
+        return BONUS_LIST[bonus.currentBonus.bonusType] || null;
+      },
+    }),
+    {
+      name: STORAGE_KEY,
+      version: 2,
+      migrate: (persistedState, _version) => {
+        const state = persistedState as any;
+        
+        // Fix player gold if it's NaN
+        if (state.player) {
+          if (typeof state.player.gold !== 'number' || Number.isNaN(state.player.gold)) {
+            state.player.gold = 0;
+          }
+          if (typeof state.player.hp !== 'number' || Number.isNaN(state.player.hp)) {
+            state.player.hp = state.player.maxHp || 1000;
+          }
+          if (typeof state.player.maxHp !== 'number' || Number.isNaN(state.player.maxHp)) {
+            state.player.maxHp = 1000;
+          }
+          if (typeof state.player.attack !== 'number' || Number.isNaN(state.player.attack)) {
+            state.player.attack = 1000;
+          }
+          if (typeof state.player.defense !== 'number' || Number.isNaN(state.player.defense)) {
+            state.player.defense = 1000;
+          }
+          if (typeof state.player.agility !== 'number' || Number.isNaN(state.player.agility)) {
+            state.player.agility = 1000;
+          }
+          if (typeof state.player.luck !== 'number' || Number.isNaN(state.player.luck)) {
+            state.player.luck = 1000;
+          }
+          
+          // Fix equipment
+          if (state.player.equippedWeapon) {
+            const weapon = getEquipmentById(state.player.equippedWeapon.id);
+            if (weapon) {
+              state.player.equippedWeapon = weapon;
+            }
+          }
+          if (state.player.equippedArmor) {
+            const armor = getEquipmentById(state.player.equippedArmor.id);
+            if (armor) {
+              state.player.equippedArmor = armor;
+            }
+          }
+        }
+        
+        return persistedState;
+      },
+      partialize: (state) => ({
+        player: state.player,
+        inventory: state.inventory,
+        skills: state.skills,
+        encounterRate: state.encounterRate,
+        bonus: state.bonus,
+      }),
+    }
+  )
+);

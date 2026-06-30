@@ -1,0 +1,626 @@
+package Class
+{
+   import root.Const;
+   import ttk.tool.Tool_Text;
+   
+   public class GameSaveData
+   {
+      
+      public static const SeigenKyaraLv:int = 30;
+      
+      public static const kyaraExpTable:Vector.<int> = setKyaraExpTable();
+      
+      private var ga:Game;
+      
+      public var gsd_ItemEquipSet:GameSaveData_ItemEquipSet;
+      
+      public var playTimes:int;
+      
+      public var HakkenbossV:Vector.<int>;
+      
+      public var WinbossV:Vector.<int>;
+      
+      public var HakkenmapV:Vector.<int>;
+      
+      public var Highlv:int;
+      
+      public var shp:String;
+      
+      public var satk:String;
+      
+      public var sdef:String;
+      
+      public var sspeed:String;
+      
+      public var sluk:String;
+      
+      public var shpn:String;
+      
+      public var satkn:String;
+      
+      public var sdefn:String;
+      
+      public var sspeedn:String;
+      
+      public var slukn:String;
+      
+      public var sehpn:String;
+      
+      public var seatkn:String;
+      
+      public var sedefn:String;
+      
+      public var sespeedn:String;
+      
+      public var selukn:String;
+      
+      public var gameItemEquip:Vector.<int>;
+      
+      public var gameItemBUKIKazu:Vector.<int>;
+      
+      public var gameItemBOUGUKazu:Vector.<int>;
+      
+      public var gameItemAKUSEKazu:Vector.<int>;
+      
+      public var HighCombo:int;
+      
+      public var HighDamage:Number = 1;
+      
+      public var HighItemEquip:Vector.<int>;
+      
+      public var HighItemKazu:Vector.<int>;
+      
+      public var winbattle:int;
+      
+      public var losebattle:int;
+      
+      public var newgamecount:int;
+      
+      public var gameovercount:int;
+      
+      public var gameovercountV:Vector.<int>;
+      
+      public var kyarakutalv:int;
+      
+      public var kyarakutaKozinExp:Vector.<int>;
+      
+      public var gameBounas1_usecount:int;
+      
+      public var gameBounas1_date:Date;
+      
+      public var gameBounas2_usecount:int;
+      
+      public var gameBounas2_date:Date;
+      
+      public var gameBounas2_sumusecount:int;
+      
+      public var sentousyuuryougoSettei:int;
+      
+      public var apurihyouka:int;
+      
+      public var apurihyouka2:int;
+      
+      public var tweetcount:int;
+      
+      public var linecount:int;
+      
+      public var playerid:Number;
+      
+      public var playername:String;
+      
+      public var hardlefttimes:int;
+      
+      public var hardtime:Number;
+      
+      public var backupID:String = "";
+      
+      public var HighDamage2:int = 0;
+      
+      public var bugCheckVersion:int = 1;
+      
+      public var presetHP:int = 0;
+      
+      public var presetATK:int = 0;
+      
+      public var presetDEF:int = 0;
+      
+      public var presetAGI:int = 0;
+      
+      public var presetLUK:int = 0;
+      
+      public var gameItemSOULKazu:Vector.<int>;
+      
+      public var speedNum:int;
+      
+      public var dropNum:int;
+      
+      public var preset1:Vector.<int>;
+      
+      public var preset2:Vector.<int>;
+      
+      public var preset3:Vector.<int>;
+      
+      public var presetNum:int;
+      
+      public var DropRate:int;
+      
+      public var hardmodeUnlock:int;
+      
+      public var preset4:Vector.<int>;
+      
+      public var preset5:Vector.<int>;
+      
+      public var gameItemMATERIALKazu:Vector.<int>;
+      
+      public var hellmodeUnlock:int;
+      
+      public var hmDragonDefeat:int;
+      
+      public var cheatID:String = "";
+      
+      public function GameSaveData(param1:Game)
+      {
+         var _loc6_:String = null;
+         var _loc5_:int = 0;
+         var _loc7_:int = 0;
+         var _loc3_:String = null;
+         var _loc4_:int = 0;
+         super();
+         this.ga = param1;
+         gsd_ItemEquipSet = new GameSaveData_ItemEquipSet(this);
+         HakkenbossV = new Vector.<int>(200);
+         WinbossV = new Vector.<int>(3000);
+         HakkenmapV = new Vector.<int>(200 + 1);
+         gameItemEquip = new Vector.<int>(ga.itemSlotNum);
+         HighItemEquip = new Vector.<int>(gameItemEquip.length);
+         HighItemKazu = new Vector.<int>(gameItemEquip.length);
+         gameItemBUKIKazu = new Vector.<int>(param1.itemDataMana.ItemuBUKI.length);
+         gameItemBOUGUKazu = new Vector.<int>(param1.itemDataMana.ItemuBOUGU.length);
+         gameItemAKUSEKazu = new Vector.<int>(param1.itemDataMana.ItemuAKUSE.length);
+         gameItemSOULKazu = new Vector.<int>(param1.itemDataMana.ItemuSOUL.length);
+         gameItemMATERIALKazu = new Vector.<int>(param1.itemDataMana.ItemuMATERIAL.length);
+         gameovercountV = new Vector.<int>(50);
+         kyarakutaKozinExp = new Vector.<int>(20);
+         preset1 = new Vector.<int>(5);
+         preset2 = new Vector.<int>(5);
+         preset3 = new Vector.<int>(5);
+         preset4 = new Vector.<int>(5);
+         preset5 = new Vector.<int>(5);
+         sodataPlayerIdSetFunc();
+         sodataFunc(0);
+         var _loc2_:Boolean = false;
+         if(param1.sodata.so.data.mvar == null)
+         {
+            param1.sodata.so.data.mvar = Const.getAppVar();
+         }
+         else
+         {
+            _loc6_ = param1.sodata.so.data.mvar;
+            _loc5_ = int(Tool_Text.xReplace(_loc6_,".",""));
+            _loc7_ = 0;
+            while(_loc7_ < gameItemBUKIKazu.length)
+            {
+               if(gameItemBUKIKazu[_loc7_] >= 11)
+               {
+                  gameItemBUKIKazu[_loc7_] = 10;
+                  _loc2_ = true;
+               }
+               _loc7_++;
+            }
+            _loc7_ = 0;
+            while(_loc7_ < gameItemBOUGUKazu.length)
+            {
+               if(gameItemBOUGUKazu[_loc7_] >= 11)
+               {
+                  gameItemBOUGUKazu[_loc7_] = 10;
+                  _loc2_ = true;
+               }
+               _loc7_++;
+            }
+            _loc7_ = 0;
+            while(_loc7_ < gameItemAKUSEKazu.length)
+            {
+               if(gameItemAKUSEKazu[_loc7_] >= 4)
+               {
+                  _loc2_ = true;
+                  gameItemAKUSEKazu[_loc7_] = 3;
+                  gsd_ItemEquipSet.ResetOne(_loc7_);
+               }
+               _loc7_++;
+            }
+            _loc7_ = 0;
+            while(_loc7_ < gameItemSOULKazu.length)
+            {
+               if(gameItemSOULKazu[_loc7_] >= 3)
+               {
+                  _loc2_ = true;
+                  gameItemSOULKazu[_loc7_] = 2;
+                  gsd_ItemEquipSet.ResetOne(_loc7_);
+               }
+               _loc7_++;
+            }
+            _loc7_ = 0;
+            while(_loc7_ < gameItemMATERIALKazu.length)
+            {
+               if(gameItemMATERIALKazu[_loc7_] >= 11)
+               {
+                  _loc2_ = true;
+                  gameItemMATERIALKazu[_loc7_] = 10;
+               }
+               _loc7_++;
+            }
+            _loc3_ = Const.getAppVar();
+            _loc4_ = int(Tool_Text.xReplace(_loc3_,".",""));
+            if(_loc4_ > _loc5_)
+            {
+               param1.sodata.so.data.mvar = Const.getAppVar();
+               apurihyouka2 = 0;
+            }
+         }
+         if(param1.sodata.so.data.fvar == null)
+         {
+            param1.sodata.so.data.fvar = Const.getAppVar();
+         }
+         if(_loc2_)
+         {
+            sodataFunc(1);
+         }
+      }
+      
+      public static function setKyaraExpTable() : Vector.<int>
+      {
+         var _loc1_:Vector.<int> = new Vector.<int>(31);
+         _loc1_[0] = 10000;
+         _loc1_[1] = 100000;
+         _loc1_[2] = 500000;
+         _loc1_[3] = 1200000;
+         _loc1_[4] = 2500000;
+         _loc1_[5] = 4000000;
+         _loc1_[6] = 6500000;
+         _loc1_[7] = 9000000;
+         _loc1_[8] = 12000000;
+         _loc1_[9] = 15000000;
+         _loc1_[10] = 18000000;
+         _loc1_[11] = 23000000;
+         _loc1_[12] = 30000000;
+         _loc1_[13] = 38000000;
+         _loc1_[14] = 48000000;
+         _loc1_[15] = 60000000;
+         _loc1_[16] = 72000000;
+         _loc1_[17] = 86000000;
+         _loc1_[18] = 100000000;
+         _loc1_[19] = 120000000;
+         _loc1_[20] = 150000000;
+         _loc1_[21] = 200000000;
+         _loc1_[22] = 270000000;
+         _loc1_[23] = 350000000;
+         _loc1_[24] = 450000000;
+         _loc1_[25] = 550000000;
+         _loc1_[26] = 650000000;
+         _loc1_[27] = 760000000;
+         _loc1_[28] = 880000000;
+         _loc1_[29] = 1000000000;
+         _loc1_[30] = 2000000000;
+         return _loc1_;
+      }
+      
+      public function sodataPlayerIdSetFunc() : void
+      {
+         var _loc3_:Date = null;
+         var _loc2_:Number = NaN;
+         var _loc1_:Number = NaN;
+         var _loc4_:Number = NaN;
+         if(ga.sodata.so.data.playerid == null)
+         {
+            _loc3_ = new Date();
+            _loc3_.fullYearUTC = 1970 + _loc3_.fullYearUTC % 3;
+            _loc2_ = _loc3_.time;
+            if(_loc2_ < 0)
+            {
+               _loc3_.fullYearUTC = 1973;
+            }
+            _loc1_ = int(Math.random() * 10000);
+            _loc4_ = _loc2_;
+            _loc4_ = _loc4_ * 10000;
+            _loc4_ = _loc4_ + _loc1_;
+            if(_loc4_ < 0)
+            {
+               _loc4_ *= -1;
+            }
+            playerid = _loc4_;
+            ga.sodata.so.data.playerid = playerid;
+            playername = "";
+            ga.sodata.so.data.playername = playername;
+            ga.sodata.flush();
+         }
+         else
+         {
+            playerid = ga.sodata.so.data.playerid;
+            playername = ga.sodata.so.data.playername;
+         }
+         if(ga.sodata.so.data.backupID == null)
+         {
+            ga.sodata.so.data.backupID = playerid;
+         }
+         else
+         {
+            backupID = ga.sodata.so.data.backupID;
+         }
+      }
+      
+      public function sodataNameHozon(param1:int = 0) : void
+      {
+         ga.sodata.so.data.playerid = playerid;
+         ga.sodata.so.data.playername = playername;
+         if(param1 == 0)
+         {
+            ga.sodata.flush();
+         }
+      }
+      
+      public function sodataFunc(param1:int, param2:Boolean = true) : void
+      {
+         var _loc3_:Object = null;
+         var _loc4_:Object = null;
+         var _loc5_:int = 0;
+         if(param1 == 0)
+         {
+            _loc4_ = this;
+            _loc3_ = ga.sodata.so.data;
+            if(_loc3_.preset1 == null || (_loc3_.preset2 == null || (_loc3_.preset3 == null || _loc3_.preset4 == null)) || _loc3_.preset5 == null)
+            {
+               _loc3_.preset1 = new Vector.<int>(5);
+               _loc3_.preset2 = new Vector.<int>(5);
+               _loc3_.preset3 = new Vector.<int>(5);
+               _loc3_.preset4 = new Vector.<int>(5);
+               _loc3_.preset5 = new Vector.<int>(5);
+            }
+            if(_loc4_.preset1 == null || (_loc4_.preset2 == null || (_loc4_.preset3 == null || _loc4_.preset4 == null)) || _loc4_.preset5 == null)
+            {
+               _loc4_.preset1 = new Vector.<int>(5);
+               _loc4_.preset2 = new Vector.<int>(5);
+               _loc4_.preset3 = new Vector.<int>(5);
+               _loc4_.preset4 = new Vector.<int>(5);
+               _loc4_.preset5 = new Vector.<int>(5);
+            }
+            if(_loc3_.HighDamage == null)
+            {
+               _loc3_.HighDamage = 1;
+               _loc4_.HighDamage = 1;
+            }
+            if(_loc4_.HighDamage == null)
+            {
+               _loc3_.HighDamage = 1;
+               _loc4_.HighDamage = 1;
+            }
+         }
+         else if(param1 == 1)
+         {
+            _loc4_ = ga.sodata.so.data;
+            _loc3_ = this;
+            if(_loc3_.HighDamage == null)
+            {
+               _loc4_.HighDamage = 1;
+               _loc3_.HighDamage = 1;
+            }
+            if(_loc4_.HighDamage == null)
+            {
+               _loc3_.HighDamage = 1;
+               _loc4_.HighDamage = 1;
+            }
+         }
+         _loc4_.hardtime = _loc3_.hardtime;
+         _loc4_.hardlefttimes = _loc3_.hardlefttimes;
+         _loc4_.playTimes = _loc3_.playTimes;
+         _loc4_.Highlv = _loc3_.Highlv;
+         _loc4_.shp = _loc3_.shp;
+         _loc4_.satk = _loc3_.satk;
+         _loc4_.sdef = _loc3_.sdef;
+         _loc4_.sspeed = _loc3_.sspeed;
+         _loc4_.sluk = _loc3_.sluk;
+         _loc4_.shpn = _loc3_.shpn;
+         _loc4_.satkn = _loc3_.satkn;
+         _loc4_.sdefn = _loc3_.sdefn;
+         _loc4_.sspeedn = _loc3_.sspeedn;
+         _loc4_.slukn = _loc3_.slukn;
+         _loc4_.sehpn = _loc3_.sehpn;
+         _loc4_.seatkn = _loc3_.seatkn;
+         _loc4_.sedefn = _loc3_.sedefn;
+         _loc4_.sespeedn = _loc3_.sespeedn;
+         _loc4_.selukn = _loc3_.selukn;
+         _loc4_.HighCombo = _loc3_.HighCombo;
+         _loc4_.HighDamage = _loc3_.HighDamage;
+         _loc4_.winbattle = _loc3_.winbattle;
+         _loc4_.losebattle = _loc3_.losebattle;
+         _loc4_.newgamecount = _loc3_.newgamecount;
+         _loc4_.gameovercount = _loc3_.gameovercount;
+         _loc4_.kyarakutalv = _loc3_.kyarakutalv;
+         _loc4_.gameBounas1_usecount = _loc3_.gameBounas1_usecount;
+         _loc4_.gameBounas2_usecount = _loc3_.gameBounas2_usecount;
+         _loc4_.gameBounas1_date = _loc3_.gameBounas1_date;
+         _loc4_.gameBounas2_date = _loc3_.gameBounas2_date;
+         _loc4_.gameBounas2_sumusecount = _loc3_.gameBounas2_sumusecount;
+         _loc4_.sentousyuuryougoSettei = _loc3_.sentousyuuryougoSettei;
+         _loc4_.apurihyouka = _loc3_.apurihyouka;
+         _loc4_.apurihyouka2 = _loc3_.apurihyouka2;
+         _loc4_.tweetcount = _loc3_.tweetcount;
+         _loc4_.linecount = _loc3_.linecount;
+         _loc4_.backupID = _loc3_.backupID;
+         _loc4_.DropRate = _loc3_.DropRate;
+         _loc4_.speedNum = _loc3_.speedNum;
+         _loc4_.presetNum = _loc3_.presetNum;
+         _loc4_.dropNum = _loc3_.dropNum;
+         _loc4_.hardmodeUnlock = _loc3_.hardmodeUnlock;
+         _loc4_.hellmodeUnlock = _loc3_.hellmodeUnlock;
+         _loc4_.hmDragonDefeat = _loc3_.hmDragonDefeat;
+         if(_loc4_.bugCheckVersion != bugCheckVersion)
+         {
+            _loc3_.HighDamage = 1;
+            _loc4_.HighDamage = 1;
+            _loc4_.bugCheckVersion = bugCheckVersion;
+         }
+         gsd_ItemEquipSet.sodataFunc(param1,_loc4_,_loc3_);
+         if(param1 == 1)
+         {
+            _loc4_.HighItemEquip = HighItemEquip;
+            _loc4_.HighItemKazu = HighItemKazu;
+            _loc4_.gameItemEquip = gameItemEquip;
+            _loc4_.gameItemBUKIKazu = gameItemBUKIKazu;
+            _loc4_.gameItemBOUGUKazu = gameItemBOUGUKazu;
+            _loc4_.gameItemAKUSEKazu = gameItemAKUSEKazu;
+            _loc4_.gameItemSOULKazu = gameItemSOULKazu;
+            _loc4_.gameItemMATERIALKazu = gameItemMATERIALKazu;
+            _loc4_.gameovercountTime = gameovercountV;
+            _loc4_.kyarakutaKozinLv = kyarakutaKozinExp;
+            _loc4_.HakkenbossV = HakkenbossV;
+            _loc4_.WinbossV = _loc3_.WinbossV;
+            _loc4_.HakkenmapV = HakkenmapV;
+            _loc4_.preset1 = preset1;
+            _loc4_.preset2 = preset2;
+            _loc4_.preset3 = preset3;
+            _loc4_.preset4 = preset4;
+            _loc4_.preset5 = preset5;
+         }
+         else if(param1 == 0)
+         {
+            soDataLoad_VecterInt(_loc3_.HighItemEquip,HighItemEquip,-2);
+            soDataLoad_VecterInt(_loc3_.HighItemKazu,HighItemKazu,0);
+            soDataLoad_VecterInt(_loc3_.gameItemEquip,gameItemEquip,-2);
+            soDataLoad_VecterInt(_loc3_.gameItemBUKIKazu,gameItemBUKIKazu);
+            soDataLoad_VecterInt(_loc3_.gameItemBOUGUKazu,gameItemBOUGUKazu);
+            soDataLoad_VecterInt(_loc3_.gameItemAKUSEKazu,gameItemAKUSEKazu);
+            soDataLoad_VecterInt(_loc3_.gameItemSOULKazu,gameItemSOULKazu);
+            soDataLoad_VecterInt(_loc3_.gameItemMATERIALKazu,gameItemMATERIALKazu);
+            soDataLoad_VecterInt(_loc3_.gameovercountTime,gameovercountV);
+            soDataLoad_VecterInt(_loc3_.kyarakutaKozinLv,kyarakutaKozinExp);
+            soDataLoad_VecterInt(_loc3_.HakkenbossV,HakkenbossV);
+            soDataLoad_VecterInt(_loc3_.WinbossV,WinbossV);
+            soDataLoad_VecterInt(_loc3_.HakkenmapV,HakkenmapV);
+            soDataLoad_VecterInt(_loc3_.preset1,preset1);
+            soDataLoad_VecterInt(_loc3_.preset2,preset2);
+            soDataLoad_VecterInt(_loc3_.preset3,preset3);
+            soDataLoad_VecterInt(_loc3_.preset4,preset4);
+            soDataLoad_VecterInt(_loc3_.preset5,preset5);
+         }
+         if(param2)
+         {
+            if(param1 == 1)
+            {
+               ga.sodata.flush();
+            }
+         }
+      }
+      
+      private function soDataLoad_VecterInt(param1:Vector.<int>, param2:Vector.<int>, param3:int = 0) : void
+      {
+         var _loc5_:int = 0;
+         var _loc4_:int = int(param2.length);
+         _loc5_ = 0;
+         while(_loc5_ < _loc4_)
+         {
+            if(param1 == null)
+            {
+               param2[_loc5_] = param3;
+            }
+            else if(_loc5_ < param1.length)
+            {
+               param2[_loc5_] = param1[_loc5_];
+            }
+            else
+            {
+               param2[_loc5_] = param3;
+            }
+            _loc5_++;
+         }
+      }
+      
+      public function soDataLoad_VecterInt2(param1:Vector.<int>, param2:Vector.<int>, param3:Array = null) : void
+      {
+         var _loc6_:int = 0;
+         var _loc4_:int = 0;
+         var _loc5_:int = int(param2.length);
+         _loc6_ = 0;
+         while(_loc6_ < _loc5_)
+         {
+            if(_loc6_ < param3.length)
+            {
+               if(param3[_loc6_] != null)
+               {
+                  _loc4_ = int(param3[_loc6_]);
+               }
+            }
+            if(param1 == null)
+            {
+               param2[_loc6_] = _loc4_;
+            }
+            else if(_loc6_ < param1.length)
+            {
+               param2[_loc6_] = param1[_loc6_];
+            }
+            else
+            {
+               param2[_loc6_] = _loc4_;
+            }
+            _loc6_++;
+         }
+      }
+      
+      public function addExpKyarakutaKozinExp(param1:int) : void
+      {
+         var _loc4_:int = 0;
+         do
+         {
+            if(okKyaraLvUp(_loc4_))
+            {
+               var _loc2_:int = ga.gdata.heronum;
+               if(_loc4_ == _loc2_)
+               {
+                  var _loc3_:Number = kyarakutaKozinExp[_loc4_] + param1;
+               }
+               else
+               {
+                  _loc3_ = kyarakutaKozinExp[_loc4_] + Math.floor(param1 * 0.25);
+               }
+               kyarakutaKozinExp[_loc4_] = _loc3_;
+            }
+         }
+         while(++_loc4_ <= 15);
+      }
+      
+      public function getCurrentKyaraLv() : int
+      {
+         return getkyaraLv(kyarakutaKozinExp[ga.gdata.heronum]);
+      }
+      
+      public function getkyaraLv(param1:int) : int
+      {
+         var _loc3_:int = 0;
+         var _loc2_:int = int(kyaraExpTable.length);
+         _loc3_ = _loc2_ - 1;
+         while(_loc3_ >= 0)
+         {
+            if(param1 >= kyaraExpTable[_loc3_])
+            {
+               return _loc3_ + 1;
+            }
+            _loc3_--;
+         }
+         return 0;
+      }
+      
+      public function okKyaraLvUp(param1:int) : Boolean
+      {
+         if(kyarakutaKozinExp[param1] < kyaraExpTable[30 - 1])
+         {
+            return true;
+         }
+         return false;
+      }
+      
+      public function getkyaraLvMaxExp(param1:int) : int
+      {
+         return kyaraExpTable[param1];
+      }
+   }
+}
+

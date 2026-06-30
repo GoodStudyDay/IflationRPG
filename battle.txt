@@ -1,0 +1,1938 @@
+package
+{
+   import BattlePackage.BarMana;
+   import BattlePackage.BattleLogText;
+   import Class.GDataW;
+   import Class.Item;
+   import Include_GameData.WinBoss_PlusNokoriBattleTimes;
+   import flash.display.Bitmap;
+   import flash.display.BitmapData;
+   import flash.display.Shape;
+   import flash.display.Sprite;
+   import flash.events.Event;
+   import flash.events.MouseEvent;
+   import flash.geom.ColorTransform;
+   import flash.text.TextField;
+   import root.Const;
+   import root.L;
+   import ttk.skin.WindowBackWallSh;
+   import ttk.tool.Tool_Text;
+   
+   public class Battle extends BattleVar
+   {
+      
+      private var mc:battlemc;
+      
+      private var battleresultMc:BattleResultMc;
+      
+      private var BattleResultItemEn:BattleResultItemEnMc = new BattleResultItemEnMc();
+      
+      private var pausesp:pauseSp;
+      
+      private var itemBit:Bitmap = new Bitmap();
+      
+      private var barMana:BarMana;
+      
+      private var battleLogText:BattleLogText = new BattleLogText(this);
+      
+      private var maskSp:Sprite;
+      
+      private var pauseEnd:Boolean;
+      
+      private var kaihukuNextTurnOn:Boolean;
+      
+      private var whichTurn:int;
+      
+      private var TurnEndCount:int;
+      
+      private var myTurnEndCount:int;
+      
+      private var kaihukuCostG:Number;
+      
+      private var eefi:int;
+      
+      private var tdame:Number;
+      
+      private var crih:Boolean;
+      
+      private var dametiming:int;
+      
+      private var mode:int;
+      
+      private var maskshape:Shape;
+      
+      private var getExpNokori:Number;
+      
+      private var mySumG:Number;
+      
+      private var getExp:Number;
+      
+      private var herogNumber:Number;
+      
+      private var gagdatag:Number;
+      
+      private var resultttxt:String;
+      
+      private var itemgettxt:String;
+      
+      private var lvupsitanum:int;
+      
+      public var buffCount:int = 0;
+      
+      public var buffCount2:int = 0;
+      
+      public var eneHP2:Number = 0;
+      
+      public var eneATK2:int = 0;
+      
+      public var patternCount:int = 0;
+      
+      public var turnCount:int = 0;
+      
+      public var eneHPM2:Number = 0;
+      
+      public var teneATK:Number = 1;
+      
+      public var eneDouble:int = 100;
+      
+      public var eneSkill:int = 100;
+      
+      public var eneDamageReduced:Number = 1;
+      
+      public var resSwitch:int = 0;
+      
+      public var mySkillKakuritu:int = 0;
+      
+      public var criticaltxt:TextField;
+      
+      public var renzokutxt:TextField;
+      
+      public var eneCounter:int = 0;
+      
+      public var AdditionalDamage:Number = 0;
+      
+      private var getG:Number;
+      
+      public var dropratetxt:TextField;
+      
+      public var dropnametxt:TextField;
+      
+      private var phase:int;
+      
+      public var hpratetxt:TextField;
+      
+      public function Battle(param1:Game)
+      {
+         super(param1);
+         mc = new battlemc();
+         addChild(mc);
+         barMana = new BarMana(mc);
+         addChild(barMana);
+         addChild(bitMana);
+         var _loc2_:Shape = new WindowBackWallSh(30,774 + Const.Gamen2Get(0,30),580,174);
+         addChild(_loc2_);
+         restart_Lange();
+         maskSp = new Sprite();
+         maskSp.graphics.beginFill(0);
+         maskSp.graphics.drawRect(10,10,155,155);
+         maskshape = new Shape();
+         addChild(maskshape);
+      }
+      
+      public function startFormat() : void
+      {
+         ga.stage.frameRate = 90;
+         criticaltxt = new TextField();
+         renzokutxt = new TextField();
+         dropratetxt = new TextField();
+         hpratetxt = new TextField();
+         criticaltxt = Tool_Text.TFLEFTGet(290,200,L.FontNum(),20,16777215,"CRI : " + 0 + "%");
+         addChild(criticaltxt);
+         renzokutxt = Tool_Text.TFLEFTGet(120,200,L.FontNum(),20,16777215,"Combo : " + 0 + "%");
+         addChild(renzokutxt);
+         hpratetxt = Tool_Text.TFLEFTGet(420,200,L.FontNum(),20,16777215,"HPrate : " + 100 + "%");
+         addChild(hpratetxt);
+         var _loc1_:Number = itemMana.GetDropRate() * 100;
+         var _loc2_:String = itemMana.GetItemName();
+         if(_loc2_ != "null")
+         {
+            dropratetxt = Tool_Text.TFLEFTGet(150,10,L.FontNum(),20,49151,"ItemList:\n" + _loc2_);
+         }
+         addChild(dropratetxt);
+         criticaltxt.text = "CRI : " + 0 + "%";
+         renzokutxt.text = "Combo : " + 0 + "%";
+         hpratetxt.text = "HPrate : " + 100 + "%";
+         criticaltxt.visible = true;
+         renzokutxt.visible = true;
+         dropratetxt.visible = true;
+         hpratetxt.visible = true;
+         eneDamageReduced = 1;
+         eneDouble = 100;
+         eneCounter = 100;
+         eneHP2 = 0;
+         AdditionalDamage = 0;
+         eneSkill = 100;
+         turnCount = 0;
+         patternCount = 0;
+         resSwitch = 0;
+         mySkillKakuritu = 100;
+         ga.addChild(this);
+         pausesp = new pauseSp();
+         battleLogText.BattleReStartInit();
+         bitMana.BattleReStartInit();
+         barMana.BattleReStartInit(EneHPM,bitMana.eneysyokiiti);
+         eefi = 0;
+         addEventListener("enterFrame",battleLogText.textEEF);
+         addEventListener("enterFrame",EEF);
+         stage.addEventListener("mouseUp",gamenMMU);
+         pauseEnd = false;
+      }
+      
+      public function restart_Lange() : void
+      {
+         battleLogText.restart_Lange();
+      }
+      
+      public function start_new() : void
+      {
+         ga.sebgm.bgmstopf();
+         ga.sebgm.bgmstartf(5,BossSyu);
+         trace("BossSyu:",BossSyu);
+         mode = 1000;
+         bitMana.StartNewBattle();
+         kaihukuNextTurnOn = false;
+         whichTurn = 0;
+         TurnEndCount = 0;
+         myTurnEndCount = 0;
+         renzokukaisu = 1;
+         eneHP2 = 0;
+         eneCounter = 100;
+         eneSkill = 100;
+         mySkillKakuritu = 100;
+         turnCount = 0;
+         patternCount = 0;
+         resSwitch = 0;
+         ga.gdata.recovery = true;
+         ga.gdata.exit = true;
+         addChild(ga.efSp);
+         barMana.tmyhp = myhp;
+         barMana.myhpFunc(myhp,myhpm);
+         barMana.enehpFunc(EneHP,EneHPM);
+         var _loc1_:String = L.Get("敵が出現画面をタッチで戦闘を開始自動的に一時停止");
+         if(ga.gdata.PlayHouseki.IsMinusOn())
+         {
+            _loc1_ += "\n" + L.GetRep("[0]が発動しなかっ",L.Get("プレイ宝石")) + L.Get("ステータスが下がっ");
+         }
+         battleLogText.SetTxt(_loc1_);
+         ga.HiddenBossKakuritsu = Math.random() * 100;
+         buffCount = ga.gdata.buffList.length;
+         buffCount2 = ga.gdata.buffList.length;
+      }
+      
+      private function BattleEnd(param1:int) : void
+      {
+         pausesp = null;
+         if(param1 == 0)
+         {
+            dataManaWL.StartBattleEndWin(BossSyu,EneG);
+         }
+         else
+         {
+            dataManaWL.StartBattleEndLose();
+         }
+         stage.removeEventListener("mouseUp",gamenMMU);
+         removeEventListener("enterFrame",EEF);
+         removeEventListener("enterFrame",battleLogText.textEEF);
+         ga.stagemap.RestartToBattleFunc(param1,BossSyu);
+         criticaltxt.visible = false;
+         renzokutxt.visible = false;
+         dropratetxt.visible = false;
+         hpratetxt.visible = false;
+         removeChild(criticaltxt);
+         removeChild(renzokutxt);
+         removeChild(dropratetxt);
+         removeChild(hpratetxt);
+         criticaltxt = null;
+         renzokutxt = null;
+         dropratetxt = null;
+         hpratetxt = null;
+      }
+      
+      public function BattleEnd2() : void
+      {
+         criticaltxt = null;
+         renzokutxt = null;
+         dropratetxt = null;
+         if(contains(itemBit))
+         {
+            removeChild(itemBit);
+            itemBit.bitmapData = null;
+            removeChild(BattleResultItemEn);
+         }
+         if(battleresultMc != null)
+         {
+            if(contains(battleresultMc))
+            {
+               removeChild(battleresultMc);
+               while(battleresultMc.numChildren)
+               {
+                  battleresultMc.removeChildAt(0);
+               }
+               battleresultMc = null;
+            }
+         }
+         ga.efSp.LvUpTextEnd();
+         bitMana.eneDataUnLoad();
+         parent.removeChild(this);
+         ga.backBitDelFunc();
+      }
+      
+      private function gamenMMU(param1:MouseEvent) : void
+      {
+         if(mode >= 1001 && mode <= 1010)
+         {
+            ga.sebgm.okstart();
+            mode = 1;
+            battleLogText.SetTxt("");
+         }
+         else if(mode >= 1 && mode <= 20)
+         {
+            if(!pauseEnd)
+            {
+               if(!pausesp.on)
+               {
+                  if(contains(pausesp) == false)
+                  {
+                     if(kaihukuNextTurnOn == false)
+                     {
+                        ga.sebgm.okstart();
+                        pausesp.on = true;
+                        removeEventListener("enterFrame",EEF);
+                        kaihukuCostG = dataManaWL.GetKaihukuCost(myhpm);
+                        pausesp.start(kaihukuCostG,ga.gdata.g,kaihukuNextTurnOn);
+                        pausesp.kaihukuButton.addEventListener("mouseUp",kaihukuMMU);
+                        pausesp.sentousaikaiButton.addEventListener("mouseUp",sentousaikaiMMU);
+                        pausesp.exitButton.addEventListener("mouseUp",exitMMU);
+                        addChild(pausesp);
+                     }
+                  }
+               }
+            }
+            else
+            {
+               pauseEnd = false;
+            }
+         }
+         else if(mode >= 100 && mode <= 200)
+         {
+            if(mode == 120)
+            {
+               BattleEnd(0);
+            }
+            else if(mode == 170)
+            {
+               BattleEnd(1);
+            }
+         }
+      }
+      
+      private function kaihukuMMU(param1:MouseEvent) : void
+      {
+         ga.sebgm.okstart();
+         kaihukuNextTurnOn = true;
+         pauseEnd = true;
+         pausesp.on = false;
+         dataManaWL.StartKaihukuON(kaihukuCostG);
+         if(pausesp.recvCost)
+         {
+            dataManaWL.StartKaihukuON1();
+            pausesp.recvCost = false;
+         }
+         addEventListener("enterFrame",EEF);
+         pausesp.kaihukuButton.removeEventListener("mouseUp",kaihukuMMU);
+         pausesp.sentousaikaiButton.removeEventListener("mouseUp",sentousaikaiMMU);
+         removeChild(pausesp);
+      }
+      
+      private function sentousaikaiMMU(param1:MouseEvent) : void
+      {
+         ga.sebgm.okstart();
+         pauseEnd = true;
+         pausesp.on = false;
+         addEventListener("enterFrame",EEF);
+         pausesp.kaihukuButton.removeEventListener("mouseUp",kaihukuMMU);
+         pausesp.sentousaikaiButton.removeEventListener("mouseUp",sentousaikaiMMU);
+         removeChild(pausesp);
+      }
+      
+      private function EEF(param1:Event) : void
+      {
+         var _loc2_:Number = NaN;
+         if(mode >= 1000 && mode <= 1010)
+         {
+            if(mode == 1000)
+            {
+               if(eefi <= 12)
+               {
+                  _loc2_ = eefi / 12;
+                  maskshape.graphics.clear();
+                  maskshape.graphics.beginFill(0);
+                  maskshape.graphics.drawRect(0,100,520 - 500 * _loc2_,Const.AppH - 100);
+               }
+               else if(eefi == 13)
+               {
+                  maskshape.graphics.clear();
+               }
+               if(eefi >= 8)
+               {
+                  barMana.PlusEneBarW(10 + eefi * eefi / 3);
+               }
+               if(eefi >= 6)
+               {
+                  if(bitMana.EEF1000eefi6_12(eefi))
+                  {
+                     barMana.SetEneBarW(400);
+                     mode = 1001;
+                  }
+               }
+               eefi = eefi + 1;
+            }
+            else if(mode == 1001)
+            {
+            }
+         }
+         else if(mode == 777)
+         {
+            if(eefi <= 12)
+            {
+               _loc2_ = eefi / 12;
+               maskshape.graphics.clear();
+               maskshape.graphics.beginFill(0);
+               maskshape.graphics.drawRect(0,100,520 - 500 * _loc2_,Const.AppH - 100);
+            }
+            else if(eefi == 13)
+            {
+               maskshape.graphics.clear();
+            }
+            if(eefi >= 8)
+            {
+               barMana.PlusEneBarW(10 + eefi * eefi / 3);
+            }
+            if(eefi >= 6)
+            {
+               if(bitMana.EEF1000eefi6_12(eefi))
+               {
+                  barMana.SetEneBarW(400);
+                  mode = 1;
+               }
+            }
+            eefi = eefi + 1;
+         }
+         else if(mode >= 1 && mode <= 20)
+         {
+            EEFBattleFunc();
+         }
+         else if(mode >= 100 && mode <= 140)
+         {
+            EEFWinResultFunc();
+         }
+         else if(mode >= 150 && mode <= 190)
+         {
+            EEFLoseResultFunc();
+         }
+         efSp.EEFFunc();
+         barMana.myhpFunc(myhp,myhpm);
+         barMana.enehpFunc(EneHP,EneHPM);
+      }
+      
+      private function EEFBattleFunc() : void
+      {
+         var _loc2_:String = null;
+         var _loc10_:Number = null;
+         var _loc7_:int = 0;
+         var _loc8_:* = 0;
+         var _loc9_:int = 0;
+         var _loc6_:int = 0;
+         var _loc4_:Array = null;
+         var _loc5_:Array = null;
+         var _loc1_:Number = NaN;
+         var _loc3_:Number = NaN;
+         mySkillKakuritu = Math.random() * 100;
+         if(!ga.BuffSwitch)
+         {
+            buffCount = 0;
+         }
+         bitMana.EEFBattleFunc();
+         _loc10_ = itemMana.GetItemDropRate() * 100;
+         var _loc11_:Item = null;
+         _loc11_ = ga.itemDataMana.GetItemListNum(itemMana.GetDropSyu(),itemMana.GetDroplistnum());
+         if(_loc11_ != null)
+         {
+            if(_loc10_ > 100)
+            {
+               dropratetxt.text = "Drop : " + _loc11_.name + " (100.00%)";
+            }
+            else if(_loc10_ <= 100 && _loc10_ > 0)
+            {
+               dropratetxt.text = "Drop : " + _loc11_.name + " (" + _loc10_.toFixed(2) + "%)";
+            }
+            else
+            {
+               dropratetxt.text = "Drop : " + _loc11_.name + " (Max)";
+            }
+         }
+         else
+         {
+            dropratetxt.text = "Drop : " + "------ (0.00%)";
+         }
+         if(mode == 1)
+         {
+            ga.gdata.hitCount = 0;
+            ga.gdata.hitCount1 = 0;
+            mode = 3;
+         }
+         else if(mode >= 3 && mode <= 5)
+         {
+            if(mode == 3)
+            {
+               myStatusSet2();
+               if(whichTurn == 0 && buffCount <= 0)
+               {
+                  myGetDameSkNumFunc();
+               }
+               else if(whichTurn == 1)
+               {
+                  eneGetDameSkNumFunc();
+               }
+               else if(whichTurn == 0 && buffCount >= 0 && ga.BuffSwitch)
+               {
+                  bitMana.SkNum = ga.gdata.buffList[buffCount2 - buffCount];
+                  ga.sebgm.myef(bitMana.SkNum);
+               }
+               else
+               {
+                  myGetDameSkNumFunc();
+               }
+               bitMana.EEFBattleFunc3(whichTurn);
+               eefi = 0;
+               dametiming = bitMana.SkMotionM * 0.8 - 4;
+               if(dametiming < 5 && bitMana.SkMotionM > 5)
+               {
+                  dametiming = 5;
+               }
+               mode = 4;
+            }
+            else if(mode == 4)
+            {
+               if(renzokukaisu >= 2 && buffCount <= 0)
+               {
+                  if(int(dametiming / 2) == eefi)
+                  {
+                     renzokuFunc();
+                  }
+               }
+               if(dametiming == eefi && buffCount <= 0)
+               {
+                  if(whichTurn == 0)
+                  {
+                     if(ga.gdata.DamageIncreased != 0)
+                     {
+                        tdame = Math.floor(tdame * ((100 + ga.gdata.DamageIncreased) / 100));
+                     }
+                     if(ga.gdata.renzoDamageUP != 0 && renzokukaisu >= 2)
+                     {
+                        tdame = Math.floor(tdame * ga.gdata.renzoDamageUP);
+                     }
+                     tdame = Math.floor(tdame * eneDamageReduced);
+                     recovery();
+                     if(ga.gdata.myhprecovery)
+                     {
+                        myHpRecovery();
+                     }
+                     trace("MyATK:",myatk);
+                     ClearEnemyHp();
+                     trace("EneHP:",EneHP);
+                     if(Math.random() < ga.gdata.enemissrate && (ga.stagemap.MapNum >= 109 && ga.stagemap.MapNum <= 118))
+                     {
+                        missFunc(false);
+                        _loc2_ = "Enemy is miss your attack！";
+                     }
+                     else
+                     {
+                        DamegeMcFunc(tdame,crih,280,bitMana.eneysyokiiti);
+                        var _temp_23:* = §§findproperty(EneHP);
+                        EneHP = EneHP - tdame - SecretKey(EneHP);
+                        _loc2_ = L.GetNRep("攻撃 [0]ダメージ敵に与！",Math.floor(tdame));
+                     }
+                     ga.gdata.hitCount1++;
+                     if(ga.gdata.doubleAttack)
+                     {
+                        myAttack();
+                     }
+                     if(EneHP < 0)
+                     {
+                        EneHP = 0;
+                     }
+                     if(renzokukaisu >= 2)
+                     {
+                        _loc2_ += L.GetIRep("[0] 連続！",renzokukaisu);
+                     }
+                     if(crih)
+                     {
+                        _loc2_ += L.Get("会心！");
+                     }
+                     if(ga.gdata.costMoney)
+                     {
+                        dataManaWL.battleCostG();
+                     }
+                     if(tdame > ga.gamesavedata.HighDamage)
+                     {
+                        ga.gamesavedata.HighDamage = tdame;
+                     }
+                     hpratetxt.text = "HPrate : " + int(EneHP / EneHPM * 100) + "%";
+                  }
+                  else if(whichTurn == 1)
+                  {
+                     myhpm = Math.floor(myhpm * ga.gdata.turnAddMaxHP);
+                     if(ga.gdata.DamageReduced != 0)
+                     {
+                        tdame = Math.floor(tdame * ((100 - ga.gdata.DamageReduced) / 100));
+                     }
+                     if(Math.random() < ga.gdata.missrate || myTurnEndCount < ga.gdata.missrateOn)
+                     {
+                        trace("missrate:",ga.gdata.missrate);
+                        missFunc(true);
+                        _loc2_ = "You miss the enemy attack";
+                     }
+                     else
+                     {
+                        DamegeMcFunc(tdame,crih,280,600);
+                        _loc7_ = myhp;
+                        myhp -= tdame;
+                        _loc2_ = L.GetNRep("敵の攻撃 [0]ダメ受",Math.floor(tdame));
+                     }
+                     if(myhp < 0)
+                     {
+                        myhp = 0;
+                        if(_loc7_ != 1)
+                        {
+                           if(ga.gdata.SokusiKaihiKakuritu >= 1)
+                           {
+                              _loc8_ = int(ga.gdata.SokusiKaihiKakuritu % 10);
+                              _loc6_ = ga.gdata.SokusiKaihiKakuritu / 10;
+                              _loc4_ = [0,0.3,0.4,0.5,0.51,0.52,0.53];
+                              _loc5_ = [0,0.02,0.03,0.04];
+                              _loc1_ = _loc4_[_loc8_ + _loc6_] + _loc5_[_loc6_];
+                              if(Math.random() < _loc1_)
+                              {
+                                 myhp = 1;
+                              }
+                           }
+                        }
+                     }
+                     ga.gdata.hitCount++;
+                  }
+                  battleLogText.addTextBattleLogNouUpdata(_loc2_);
+                  enePattern(BossSyu);
+                  if(whichTurn == 1 && myhp > 0 && ga.gdata.reflection > 0)
+                  {
+                     _loc8_ = Math.floor(mydef * ga.gdata.reflection);
+                     DamegeMcFunc(_loc8_,false,280,bitMana.eneysyokiiti + 120,true);
+                     EneHP -= _loc8_;
+                     if(ga.gdata.refHealOn)
+                     {
+                        myhp += Math.floor(_loc8_ * 0.02 + 1);
+                        if(myhp > myhpm)
+                        {
+                           myhp = myhpm;
+                        }
+                     }
+                     _loc2_ = L.GetNRep("reflection battle text",_loc8_);
+                     battleLogText.addTextBattleLogNouUpdata(_loc2_);
+                  }
+               }
+               if(bitMana.EEFBattleFunc4(whichTurn))
+               {
+                  mode = 5;
+               }
+            }
+            else if(mode == 5)
+            {
+               if(eefi >= 2)
+               {
+                  TurnEndCount = TurnEndCount + 1;
+                  if(whichTurn == 0 && buffCount <= 0)
+                  {
+                     myTurnEndCount = myTurnEndCount + 1;
+                     if(EneHP > 0)
+                     {
+                        _loc3_ = renzoKukakuritu;
+                        if(barMana.tmyhpbar <= 0.25)
+                        {
+                           if(barMana.tmyhpbar <= 0.5)
+                           {
+                              _loc3_ += 0.13;
+                           }
+                           else if(barMana.tmyhpbar <= 0.1)
+                           {
+                              _loc3_ += 0.11;
+                           }
+                           else if(barMana.tmyhpbar <= 0.25)
+                           {
+                              _loc3_ += 0.08;
+                           }
+                           if(_loc3_ >= 0.8)
+                           {
+                              _loc3_ = 0.8;
+                           }
+                        }
+                        if(BossSyu == 76)
+                        {
+                           _loc3_ *= 0.7;
+                        }
+                        renzokutxt.text = "Combo : " + int(_loc3_ * 100) + "%";
+                        if(Math.random() <= _loc3_)
+                        {
+                           whichTurn = 0;
+                           renzokukaisu = renzokukaisu + 1;
+                           if(renzokukaisu > ga.gamesavedata.HighCombo)
+                           {
+                              ga.gamesavedata.HighCombo = renzokukaisu;
+                           }
+                        }
+                        else
+                        {
+                           eneDouble = Math.random() * 100;
+                           eneSkill = Math.random() * 100;
+                           whichTurn = 1;
+                           renzokukaisu = 1;
+                        }
+                        mode = 3;
+                     }
+                     else if(eneHP2 <= 0)
+                     {
+                        mode = 110;
+                        dataManaWL.StartWin(BossSyu);
+                     }
+                     else
+                     {
+                        mode = 3;
+                     }
+                  }
+                  else if(myhp > 0)
+                  {
+                     whichTurn = 0;
+                     buffCount = buffCount - 1;
+                     if(kaihukuNextTurnOn)
+                     {
+                        mode = 6;
+                        kaihukuNextTurnOn = false;
+                     }
+                     else
+                     {
+                        mode = 3;
+                     }
+                  }
+                  else if(ga.gdata.resCount != 0)
+                  {
+                     mode = 6;
+                     resSwitch = 1;
+                     whichTurn = 0;
+                  }
+                  else
+                  {
+                     mode = 160;
+                     dataManaWL.StartLose();
+                  }
+               }
+            }
+            eefi = eefi + 1;
+         }
+         else if(mode >= 6 && mode <= 8)
+         {
+            mode = bitMana.EEFBattleFunc6_8_AndKaihukuSyori(mode,ga);
+            if(mode == 5)
+            {
+               if(resSwitch == 1)
+               {
+                  myhpm = Math.floor(myhpm * ga.gdata.resStatUP);
+                  myatk = Math.floor(myatk * ga.gdata.resStatUP);
+                  ga.gdata.resCount -= 1;
+                  resSwitch = 0;
+               }
+               myhp = myhpm;
+               battleLogText.addTextBattleLogNouUpdata(L.Get("全回復した"));
+               eefi = 0;
+            }
+         }
+      }
+      
+      private function EEFWinResultFunc() : void
+      {
+         var _loc5_:Number = NaN;
+         var _loc2_:Number = NaN;
+         var _loc13_:Item = null;
+         var _loc17_:Number = NaN;
+         var _loc9_:Number = NaN;
+         var _loc11_:Number = NaN;
+         var _loc3_:Number = NaN;
+         var _loc6_:Number = NaN;
+         var _loc18_:int = 0;
+         var _loc14_:int = 0;
+         var _loc15_:Boolean = false;
+         var _loc16_:Number = NaN;
+         var _loc1_:int = 0;
+         var _loc4_:Number = NaN;
+         var _loc8_:String = null;
+         var _loc7_:int = 0;
+         var _loc10_:int = 0;
+         if(mode >= 105 && mode <= 140)
+         {
+            if(mode == 110)
+            {
+               if(ga.sebgm.battle || BossSyu >= 0)
+               {
+                  ga.sebgm.bgmstopf();
+                  ga.sebgm.bgmstartf(7,BossSyu);
+               }
+               battleresultMc = new BattleResultMc();
+               battleresultMc.gtxt.autoSize = "left";
+               battleresultMc.alpha = 0;
+               battleresultMc.addChild(Tool_Text.TFLEFTGet(100,246,1,44,16777215,L.Get("獲得金額"),0,4 + L.SelNum(0,-5)));
+               battleresultMc.addChild(Tool_Text.TFRIGHTGet(50,300,150,1,28,16777215,L.LD2("所持金",""),0,-2));
+               battleresultMc.addChild(Tool_Text.TFLEFTGet(100,366,1,44,16777215,L.Get("獲得経験値"),0,1 + L.SelNum(0,-2)));
+               battleresultMc.item.addChild(Tool_Text.TFLEFTGet(0,0,L.FontNum(),42,16777215,L.Get("獲得アイテム")));
+               battleresultMc.item.stop();
+               battleresultMc.item.visible = false;
+               addChild(battleresultMc);
+               gagdatag = ga.gdata.g;
+               herogNumber = gagdatag;
+               getG = Math.floor(EneG);
+               getExp = EneExp;
+               mySumG = gagdatag + EneG;
+               if(ga.gdata.costMoney)
+               {
+                  mySumG = gagdatag + EneG - gagdatag * 0.5;
+               }
+               getExpNokori = ga.gdata.exp + EneExp;
+               battleresultMc.gtxt.text = Math.floor(gagdatag) + "G";
+               battleresultMc.gptxt.x = battleresultMc.gtxt.x + battleresultMc.gtxt.width;
+               battleresultMc.gptxt.text = "+" + Math.floor(getG) + "G";
+               battleresultMc.exptxt.text = ga.gdata.exp + "/" + ga.gdata.onenextexp;
+               battleresultMc.expptxt.text = "+" + getExp;
+               _loc5_ = ga.gdata.exp;
+               _loc2_ = ga.gdata.onenextexp;
+               battleresultMc.expbar.b.scaleX = _loc5_ / _loc2_;
+               resultttxt = L.Get("戦闘に勝利した！") + "\n";
+               resultttxt += L.Get("[0]Gと[1]の経験値を獲得し");
+               resultttxt = Tool_Text.xReplace(resultttxt,"[0]",Math.floor(EneG) + "");
+               resultttxt = Tool_Text.xReplace(resultttxt,"[1]",EneExp + "");
+               eefi = bitMana.SBitMotion = 0;
+               lvupsitanum = 0;
+               itemgettxt = "";
+               if(itemMana.IsGetItemFromThisBattle())
+               {
+                  _loc13_ = ga.itemDataMana.GetItemListNum(itemMana.GetItemType(),itemMana.GetItemNum());
+                  if(_loc13_ != null)
+                  {
+                     if(itemMana.GetItemType() != 2)
+                     {
+                        battleresultMc.item.gotoAndStop(1);
+                     }
+                     else
+                     {
+                        battleresultMc.item.gotoAndStop(2);
+                     }
+                     battleresultMc.item.visible = true;
+                     itemBit.alpha = battleresultMc.item.alpha = 0;
+                     itemgettxt = "\n" + L.GetRep("[0]を獲得しました！",_loc13_.name);
+                     battleresultMc.item.itemnametxt.text = _loc13_.name;
+                     battleresultMc.item.itemnametxt.textColor = GetItemTextColor(itemMana.GetItemType());
+                     itemBit.bitmapData = _loc13_.BitD;
+                     itemBit.x = 154;
+                     itemBit.y = 548;
+                     addChild(itemBit);
+                     BattleResultItemEn.x = 100;
+                     BattleResultItemEn.y = 490;
+                     BattleResultItemEn.width = 440;
+                     BattleResultItemEn.height = 106;
+                     BattleResultItemEn.alpha = 0;
+                     addChild(BattleResultItemEn);
+                  }
+               }
+               mode = 112;
+            }
+            else if(mode == 112)
+            {
+               if(eefi <= 24)
+               {
+                  bitMana.EEFWinResultFunc112_eefi24(barMana,eefi);
+               }
+               if(eefi >= 22)
+               {
+                  if(eefi == 24)
+                  {
+                     battleLogText.SetTxt(resultttxt);
+                  }
+                  battleresultMc.alpha += 0.1;
+               }
+               eefi = eefi + 1;
+               if(battleresultMc.alpha >= 1)
+               {
+                  battleresultMc.alpha = 1;
+                  mode = 113;
+                  eefi = 0;
+               }
+            }
+            else if(mode == 113 || mode == 120)
+            {
+               if(ga.gamesavedata.speedNum == 0)
+               {
+                  if(eefi >= 35 && eefi <= 60)
+                  {
+                     if(eefi >= 35)
+                     {
+                        if(BattleResultItemEn.alpha < 1)
+                        {
+                           BattleResultItemEn.alpha += 0.2 + Math.random() * 0.1;
+                           if(eefi % 2 == 0)
+                           {
+                              BattleResultItemEn.width = 240 + int(Math.random() * 200);
+                           }
+                           else
+                           {
+                              BattleResultItemEn.width = 180 + int(Math.random() * 120);
+                           }
+                           if(BattleResultItemEn.alpha > 1)
+                           {
+                              BattleResultItemEn.width = 440;
+                              BattleResultItemEn.alpha = 1;
+                           }
+                        }
+                        _loc17_ = eefi - 40;
+                        if(_loc17_ >= 0)
+                        {
+                           if(_loc17_ <= 15)
+                           {
+                              BattleResultItemEn.height = (1 - _loc17_ / 15 * (_loc17_ / 15) * (_loc17_ / 15)) * 106;
+                              BattleResultItemEn.y = 543 - BattleResultItemEn.height / 2;
+                              if(_loc17_ >= 10)
+                              {
+                                 BattleResultItemEn.alpha -= 0.2;
+                                 if(_loc17_ == 15)
+                                 {
+                                    BattleResultItemEn.alpha = 0;
+                                 }
+                              }
+                           }
+                           itemBit.alpha = battleresultMc.item.alpha = _loc17_ / 20;
+                           if(_loc17_ == 20)
+                           {
+                              itemBit.alpha = battleresultMc.item.alpha = 1;
+                              BattleResultItemEn.alpha = 0;
+                           }
+                        }
+                     }
+                  }
+               }
+               else if(eefi >= 3 && eefi <= 23)
+               {
+                  if(eefi >= 3)
+                  {
+                     if(BattleResultItemEn.alpha < 1)
+                     {
+                        BattleResultItemEn.alpha += 0.2 + Math.random() * 0.1;
+                        if(eefi % 2 == 0)
+                        {
+                           BattleResultItemEn.width = 240 + int(Math.random() * 200);
+                        }
+                        else
+                        {
+                           BattleResultItemEn.width = 180 + int(Math.random() * 120);
+                        }
+                        if(BattleResultItemEn.alpha > 1)
+                        {
+                           BattleResultItemEn.width = 440;
+                           BattleResultItemEn.alpha = 1;
+                        }
+                     }
+                     _loc17_ = eefi - 6;
+                     if(_loc17_ >= 0)
+                     {
+                        if(_loc17_ <= 10)
+                        {
+                           BattleResultItemEn.height = (1 - _loc17_ / 10 * (_loc17_ / 10) * (_loc17_ / 10)) * 106;
+                           BattleResultItemEn.y = 543 - BattleResultItemEn.height / 2;
+                           if(_loc17_ >= 6)
+                           {
+                              BattleResultItemEn.alpha -= 0.2;
+                              if(_loc17_ == 10)
+                              {
+                                 BattleResultItemEn.alpha = 0;
+                              }
+                           }
+                        }
+                        itemBit.alpha = battleresultMc.item.alpha = _loc17_ / 15;
+                        if(_loc17_ == 20)
+                        {
+                           itemBit.alpha = battleresultMc.item.alpha = 1;
+                           BattleResultItemEn.alpha = 0;
+                        }
+                     }
+                  }
+               }
+               _loc9_ = -1;
+               _loc11_ = Math.floor(getExpNokori / ga.gdata.onenextexp);
+               _loc3_ = (lvupsitanum + 1) / (_loc11_ + 1);
+               _loc6_ = _loc3_ < 1 ? _loc3_ : 1;
+               _loc18_ = Math.pow(_loc11_,0.48) * 0.5;
+               if(_loc18_ > 40)
+               {
+                  _loc18_ = 40;
+               }
+               var _loc12_:Number = 1 + Math.floor((_loc11_ * 1.22 + lvupsitanum * 0.3) / (76 + _loc18_));
+               if(_loc12_ > ga.gdata.lv * 100)
+               {
+                  _loc12_ = ga.gdata.lv * 100;
+               }
+               _loc15_ = false;
+               if(getExp != 0)
+               {
+                  _loc14_ = 0;
+                  if(ga.gamesavedata.speedNum == 0)
+                  {
+                     while(_loc14_ < _loc12_)
+                     {
+                        _loc16_ = ga.gdata.onenextexp;
+                        if(getExpNokori < _loc16_)
+                        {
+                           ga.gdata.exp = getExpNokori;
+                           getExpNokori -= getExp;
+                           getExp = 0;
+                           break;
+                        }
+                        getExpNokori -= _loc16_;
+                        getExp -= _loc16_;
+                        if(_loc14_ < 5)
+                        {
+                           efSp.LvUpTextSet(bitMana.SBit.x,bitMana.SBit.y);
+                        }
+                        _loc15_ = true;
+                        ga.gdata.lvupFunc();
+                        lvupsitanum = lvupsitanum + 1;
+                        battleLogText.SetTxtAndTText(resultttxt + "\n" + lvupsitanum + L.Get("レベルアップしました！"));
+                        _loc9_ = Math.random();
+                        _loc14_++;
+                     }
+                  }
+                  else
+                  {
+                     while(true)
+                     {
+                        _loc16_ = Get100LevelAfterExp(ga.gdata.lv - 1);
+                        if(getExpNokori > _loc16_ && ga.gdata.lv >= 125000)
+                        {
+                           getExpNokori -= _loc16_;
+                           getExp -= _loc16_;
+                           if(_loc14_ < 5)
+                           {
+                              efSp.LvUpTextSet(bitMana.SBit.x,bitMana.SBit.y);
+                           }
+                           _loc15_ = true;
+                           ga.gdata.lvupFunc100();
+                           lvupsitanum += 100;
+                        }
+                        else
+                        {
+                           _loc16_ = ga.gdata.onenextexp;
+                           if(getExpNokori < _loc16_)
+                           {
+                              ga.gdata.exp = getExpNokori;
+                              getExpNokori -= getExp;
+                              getExp = 0;
+                              break;
+                           }
+                           getExpNokori -= _loc16_;
+                           getExp -= _loc16_;
+                           if(_loc14_ < 5)
+                           {
+                              efSp.LvUpTextSet(bitMana.SBit.x,bitMana.SBit.y);
+                           }
+                           _loc15_ = true;
+                           ga.gdata.lvupFunc();
+                           lvupsitanum = lvupsitanum + 1;
+                        }
+                        battleLogText.SetTxtAndTText(resultttxt + "\n" + lvupsitanum + L.Get("レベルアップしました！"));
+                        _loc9_ = Math.random();
+                        _loc14_++;
+                     }
+                  }
+               }
+               if(_loc15_)
+               {
+                  ga.sebgm.lvupstart();
+               }
+               if(eefi <= 120 && gagdatag != mySumG)
+               {
+                  if(ga.gamesavedata.speedNum == 0)
+                  {
+                     herogNumber += EneG / (120 - 60 * _loc6_);
+                  }
+                  else
+                  {
+                     herogNumber += EneG;
+                  }
+                  gagdatag = herogNumber;
+                  if(gagdatag > mySumG)
+                  {
+                     gagdatag = mySumG;
+                  }
+                  getG = mySumG - gagdatag;
+               }
+               else if(getExp == 0 && mode != 120)
+               {
+                  _loc1_ = lvupsitanum * (4 + ga.gdata.GetPlusStPt);
+                  _loc4_ = ga.gdata.onenextexp;
+                  _loc8_ = L.Get("[0]Gと[1]の経験値を獲得し") + "\n";
+                  if(ga.gamesavedata.dropNum == 1)
+                  {
+                     _loc8_ = _loc8_;
+                  }
+                  if(ga.gamesavedata.dropNum == 2)
+                  {
+                     _loc8_ = _loc8_;
+                  }
+                  _loc8_ = Tool_Text.xReplace(_loc8_,"[0]",Math.floor(EneG) + "");
+                  _loc8_ = Tool_Text.xReplace(_loc8_,"[1]",EneExp + "");
+                  if(lvupsitanum >= 1)
+                  {
+                     _loc8_ += L.Get("[0]レベルアップして[1]LV[2]のステータスポイント");
+                     _loc8_ = Tool_Text.xReplace(_loc8_,"[0]",lvupsitanum + "");
+                     _loc8_ = Tool_Text.xReplace(_loc8_,"[1]",ga.gdata.lv + "");
+                     _loc8_ = Tool_Text.xReplace(_loc8_,"[2]",_loc1_ + "");
+                  }
+                  else
+                  {
+                     _loc8_ += L.GetNRep("残り[0]経験値でレベルアップします。",_loc4_);
+                  }
+                  if(itemgettxt != "")
+                  {
+                     _loc8_ += itemgettxt;
+                  }
+                  _loc7_ = WinBoss_PlusNokoriBattleTimes.WinBossGetBattlePoint(BossSyu);
+                  _loc10_ = GDataW.GetBattlePoint();
+                  trace("剩余次数:",_loc10_);
+                  if(ga.gdata.hardmode == 0)
+                  {
+                     _loc10_ += 2;
+                  }
+                  else
+                  {
+                     _loc10_ += 4;
+                  }
+                  if(_loc7_ == 0)
+                  {
+                     if(_loc10_ < 0)
+                     {
+                        _loc10_ = 0;
+                     }
+                     _loc8_ += "\n" + L.GetIRep("残り戦闘回数[0]回に",_loc10_);
+                  }
+                  else
+                  {
+                     _loc10_ += _loc7_;
+                     if(_loc10_ < 0)
+                     {
+                        _loc10_ = 0;
+                     }
+                     _loc8_ += "\n" + L.GetIRep01("残り戦闘回数が[0]増え[1]回に",_loc7_,_loc10_);
+                  }
+                  if(_loc10_ > 0)
+                  {
+                     _loc8_ += "\n" + L.Get("画面をタッチマップに戻り");
+                  }
+                  else
+                  {
+                     _loc8_ += "\n" + L.Get("画面をタッチゲームリザルト画面");
+                  }
+                  battleLogText.SetTxt(_loc8_);
+                  mode = 120;
+               }
+               battleresultMc.gtxt.text = Math.floor(gagdatag) + "G";
+               battleresultMc.gptxt.x = battleresultMc.gtxt.x + battleresultMc.gtxt.width;
+               battleresultMc.gptxt.text = "+" + Math.floor(getG) + "G";
+               if(_loc9_ == -1)
+               {
+                  battleresultMc.exptxt.text = ga.gdata.exp + "/" + ga.gdata.onenextexp;
+                  _loc9_ = ga.gdata.exp / ga.gdata.onenextexp;
+               }
+               else
+               {
+                  battleresultMc.exptxt.text = Math.floor(ga.gdata.onenextexp * Math.random()) + "/" + ga.gdata.onenextexp;
+               }
+               battleresultMc.expbar.b.scaleX = _loc9_;
+               battleresultMc.expptxt.text = "+" + getExp;
+               eefi = eefi + 1;
+            }
+            if(mode == 112 && eefi >= 15 || mode != 112)
+            {
+               bitMana.EEFWinResultFunc112();
+            }
+         }
+      }
+      
+      private function EEFLoseResultFunc() : void
+      {
+         var _loc1_:int = 0;
+         var _loc2_:String = null;
+         if(mode >= 155 && mode <= 190)
+         {
+            bitMana.EEFLoseResultFunc155190();
+            if(mode == 160)
+            {
+               ga.sebgm.bgmstopf();
+               eefi = 0;
+               resultttxt = L.Get("戦闘に負けてしまった");
+               battleLogText.SetTxt(resultttxt);
+               mode = 161;
+            }
+            else if(mode == 161)
+            {
+               if(eefi <= 60)
+               {
+                  if(eefi % 15 == 0 && eefi != 0)
+                  {
+                     resultttxt += ".";
+                     battleLogText.SetTxtAndTText(resultttxt);
+                  }
+               }
+               else
+               {
+                  _loc1_ = GDataW.GetBattlePoint();
+                  if(_loc1_ < 0)
+                  {
+                     _loc1_ = 0;
+                  }
+                  _loc2_ = L.GetIRep("戦闘に負けて残り[0]戦に",_loc1_);
+                  if(_loc1_ > 0)
+                  {
+                     _loc2_ += "\n" + L.Get("画面をタッチマップに戻り");
+                  }
+                  else
+                  {
+                     _loc2_ += "\n" + L.Get("画面をタッチゲームリザルト画面");
+                  }
+                  battleLogText.SetTxt(_loc2_);
+                  mode = 170;
+               }
+               eefi = eefi + 1;
+            }
+         }
+      }
+      
+      private function myGetDameSkNumFunc() : void
+      {
+         var _loc2_:Number = NaN;
+         var _loc1_:int = 0;
+         var _loc3_:Number = criKakuritu;
+         if(barMana.tmyhpbar <= 0.25)
+         {
+            if(barMana.tmyhpbar <= 0.5)
+            {
+               _loc3_ += 0.05;
+            }
+            else if(barMana.tmyhpbar <= 0.1)
+            {
+               _loc3_ += 0.045;
+            }
+            else if(barMana.tmyhpbar <= 0.15)
+            {
+               _loc3_ += 0.04;
+            }
+            else if(barMana.tmyhpbar <= 0.25)
+            {
+               _loc3_ += 0.03;
+            }
+            if(_loc3_ >= 0.7)
+            {
+               _loc3_ = 0.7;
+            }
+         }
+         if(BossSyu == 76)
+         {
+            _loc3_ *= 0.7;
+         }
+         if(Math.random() <= _loc3_)
+         {
+            crih = 1;
+         }
+         else
+         {
+            crih = 0;
+         }
+         if(myTurnEndCount < ga.gdata.TimesDamageCrihOn)
+         {
+            crih = 1;
+         }
+         if(crih == 0)
+         {
+            tdame = myatk;
+            bitMana.SkNum = Math.random() * 4;
+         }
+         else
+         {
+            _loc2_ = criKakuritu * 3 + 0.2;
+            _loc1_ = Math.random() * 6 * _loc2_;
+            if(_loc1_ >= 6)
+            {
+               _loc1_ = 5;
+            }
+            bitMana.SkNum = _loc1_ + 5;
+            tdame = (myatk + 1) * (1.75 + _loc1_ / 5) * ga.gdata.crihplusdamage + 4;
+         }
+         var _loc4_:Number = enePoint;
+         if(ga.gdata.hardmode == 0)
+         {
+            _loc4_ *= 1.1;
+         }
+         if(_loc4_ > tdame)
+         {
+            _loc4_ = (_loc4_ * 3 + tdame * 2) / 5;
+         }
+         _loc4_ *= 0.3;
+         if(_loc4_ >= tdame * 0.32)
+         {
+            _loc4_ = (_loc4_ + tdame * 0.32 * 99) / 100;
+         }
+         _loc4_ = _loc4_ + Math.random() * enePoint * 0.02 + enePoint * 0.02;
+         if(_loc4_ >= tdame * 0.44)
+         {
+            _loc4_ = (_loc4_ + tdame * 0.44 * 199) / 200;
+         }
+         tdame -= _loc4_;
+         tdame *= 0.88;
+         tdame = tdame + Math.random() * tdame * 0.2 - tdame * 0.1 + Math.random() * 4 - 2;
+         if(tdame <= 0)
+         {
+            if(EneHPM < 100)
+            {
+               tdame = Math.random() * EneHPM * 0.09 + 1;
+            }
+            else
+            {
+               tdame = Math.random() * 10 + 1;
+            }
+         }
+         tdame = Math.floor(tdame);
+         if(ga.gdata.trueDamageKakuritu > mySkillKakuritu)
+         {
+            bitMana.SkNum = 15;
+         }
+         tdame = ga.gdata.trueDamage + tdame;
+         ga.sebgm.myef(bitMana.SkNum);
+         criticaltxt.text = "CRI : " + int(_loc3_ * 100) + "%";
+      }
+      
+      private function eneGetDameSkNumFunc() : void
+      {
+         crih = 0;
+         bitMana.SkNum = 13;
+         if(eneDouble < 27 && (BossSyu == 75 || (BossSyu == 71 || BossSyu == 87)))
+         {
+            bitMana.SkNum = 5;
+         }
+         if(eneSkill < 12 && (BossSyu == 72 || BossSyu == 86))
+         {
+            bitMana.SkNum = 14;
+            if(BossSyu == 86)
+            {
+               bitMana.SkNum = 18;
+            }
+         }
+         if(BossSyu == 87 && eneSkill < 15)
+         {
+            bitMana.SkNum = 17;
+         }
+         if((BossSyu == 98 || BossSyu == 99) && eneSkill < 20)
+         {
+            bitMana.SkNum = 22;
+         }
+         if(BossSyu == 102 && (eneSkill <= 30 && phase == 1))
+         {
+            bitMana.SkNum = 24;
+         }
+         if(BossSyu == 0)
+         {
+            bitMana.SkNum = 24;
+         }
+         var _loc2_:Number = EneATK;
+         var _loc1_:Number = (_loc2_ * 2 + (_loc2_ - mydef * 0.5) * 12) / 14;
+         _loc2_ = EneATK * 0.5;
+         if(_loc1_ < _loc2_)
+         {
+            _loc1_ = (_loc2_ + _loc1_) / 2;
+         }
+         _loc2_ = EneATK * 0.3;
+         if(_loc1_ < _loc2_)
+         {
+            _loc1_ = (_loc2_ * 3 + _loc1_) / 4;
+         }
+         _loc2_ = EneATK * 0.2;
+         if(_loc1_ < _loc2_)
+         {
+            _loc1_ = (_loc2_ * 5 + _loc1_) / 6;
+         }
+         _loc2_ = EneATK * 0.1;
+         if(_loc1_ < _loc2_)
+         {
+            _loc1_ = (_loc2_ * 7 + _loc1_) / 8;
+         }
+         tdame = _loc1_;
+         tdame = tdame + Math.random() * tdame * 0.2 - tdame * 0.1 + Math.random() * 4 - 2;
+         tdame = tdame + Math.random() * EneATK * 0.0225 + EneATK * 0.0025;
+         if(tdame <= 0)
+         {
+            if(myhpm < 100)
+            {
+               tdame = Math.random() * myhpm * 0.09 + 1;
+            }
+            else
+            {
+               tdame = Math.random() * 10 + 1;
+            }
+         }
+         tdame = Math.floor(tdame);
+         ga.sebgm.eneef(eneSkill[bitMana.SkNum]);
+      }
+      
+      public function enePattern(param1:int) : void
+      {
+         var _loc2_:String = null;
+         var _loc5_:Number = NaN;
+         _loc5_ = 1600000000;
+         var _loc4_:Number = 100000000;
+         if(whichTurn == 0)
+         {
+            if(param1 == 70 || param1 == 74)
+            {
+               suzakuPattern(param1);
+            }
+            if(param1 == 76)
+            {
+               kouryuuPattern(param1);
+            }
+         }
+         if(param1 == 100 || param1 == 101 || param1 == 102)
+         {
+            twilight(param1);
+         }
+         if(whichTurn == 1)
+         {
+            if(param1 == 71 || (param1 == 75 || param1 == 87))
+            {
+               var _loc3_:int = 0;
+               if(eneDouble < 27)
+               {
+                  eneAttack();
+               }
+            }
+            if(param1 == 98 || param1 == 99)
+            {
+               _loc3_ = 0;
+               if(eneSkill < 20)
+               {
+                  AngelPattern();
+               }
+            }
+            if(param1 == 72 || (param1 == 86 || param1 == 87))
+            {
+               if(eneSkill < 12)
+               {
+                  if(myhp >= 1)
+                  {
+                     myhp -= 150000000 - tdame;
+                     if(ga.gdata.hardmode == 1)
+                     {
+                        myhp -= 700000000 - tdame;
+                     }
+                     if(param1 == 86)
+                     {
+                        myhp -= _loc5_ - tdame;
+                     }
+                     _loc2_ = L.Get("感電されて力が抜けた");
+                     battleLogText.addTextBattleLogNouUpdata(_loc2_);
+                  }
+               }
+            }
+         }
+         if(param1 == 73 || param1 == 87)
+         {
+            eneDamageReduced = EneHP / EneHPM;
+            if(eneDamageReduced < 0.4)
+            {
+               EneATK *= 1.004;
+               eneDamageReduced = 0.4;
+            }
+         }
+      }
+      
+      public function enePhase(param1:BitmapData, param2:Number) : void
+      {
+         bitMana.eneDataUnLoad();
+         bitMana.EneLoad(param1,param2);
+         bitMana.BattleReStartInit();
+         barMana.BattleReStartInit(eneHPM2,bitMana.eneysyokiiti);
+         barMana.PlusEneBarW(10 + 26 * 26 / 3);
+         barMana.SetEneBarW(400);
+         mode = 1000;
+      }
+      
+      public function eneAttack() : void
+      {
+         if(ga.gdata.DamageReduced != 0)
+         {
+            tdame = Math.floor(tdame * ((100 - ga.gdata.DamageReduced) / 100));
+         }
+         DamegeMcFunc(tdame,crih,280,600);
+         var _loc7_:Number = myhp;
+         myhp -= tdame;
+         if(myhp < 0)
+         {
+            myhp = 0;
+            if(_loc7_ != 1)
+            {
+               if(ga.gdata.SokusiKaihiKakuritu >= 1)
+               {
+                  var _loc8_:int = ga.gdata.SokusiKaihiKakuritu % 10;
+                  var _loc6_:int = ga.gdata.SokusiKaihiKakuritu / 10;
+                  var _loc4_:Array = [0,0.3,0.4,0.5,0.51,0.52,0.53];
+                  var _loc5_:Array = [0,0.02,0.03,0.04];
+                  var _loc1_:Number = _loc4_[_loc8_ + _loc6_] + _loc5_[_loc6_];
+                  if(Math.random() < _loc1_)
+                  {
+                     myhp = 1;
+                  }
+               }
+            }
+         }
+         var _loc2_:String = L.GetNRep("敵の攻撃 [0]ダメ受",tdame);
+         battleLogText.addTextBattleLogNouUpdata(_loc2_);
+      }
+      
+      public function suzakuPattern(param1:int) : void
+      {
+         if(patternCount == 0)
+         {
+            if(param1 == 70)
+            {
+               eneHP2 = 6000000000;
+               eneHPM2 = 6000000000;
+               eneATK2 = 0;
+            }
+            if(param1 == 74)
+            {
+               eneHP2 = 10000000000;
+               eneHPM2 = 10000000000;
+               eneATK2 = 200000000;
+            }
+         }
+         if(eneHP2 > 0 && (EneHP == 0 || turnCount >= 1))
+         {
+            turnCount += 1;
+            if(1 == turnCount)
+            {
+               patternCount += 1;
+               teneATK = (0.05 * patternCount + 1) * EneATK;
+               EneHPM = (0.05 * patternCount + 1) * EneHPM;
+            }
+            if(turnCount <= 3)
+            {
+               EneHP = eneHP2;
+               eneHP2 -= tdame;
+               EneATK = eneATK2;
+               if(turnCount == 1)
+               {
+                  var _loc2_:String = L.Get("朱雀の力が弱体化された");
+                  battleLogText.addTextBattleLogNouUpdata(_loc2_);
+                  if(param1 == 70)
+                  {
+                     enePhase(new ene9_1b(),1.2);
+                  }
+                  if(param1 == 74)
+                  {
+                     enePhase(new ene7_1_2a(),1.2);
+                  }
+               }
+            }
+            if(turnCount > 3)
+            {
+               EneHP = EneHPM;
+               EneATK = teneATK;
+               _loc2_ = L.Get("朱雀が力を取り戻した");
+               battleLogText.addTextBattleLogNouUpdata(_loc2_);
+               if(param1 == 70)
+               {
+                  enePhase(new ene64_ba(),1.5);
+               }
+               if(param1 == 74)
+               {
+                  enePhase(new ene64_hba(),1.5);
+               }
+               turnCount = 0;
+            }
+         }
+      }
+      
+      public function kouryuuPattern(param1:int) : void
+      {
+         eneCounter = 20;
+         if(whichTurn == 0)
+         {
+            tdame = Math.floor(myhpm * 0.15);
+            eneAttack();
+            if(Math.random() * 100 <= eneCounter && patternCount >= 0)
+            {
+               tdame = Math.floor(tdame * 0.1);
+               eneAttack();
+            }
+         }
+      }
+      
+      private function Get100LevelAfterExp(param1:int) : Number
+      {
+         return Math.floor(0.0022385 * (100 * param1 * param1 + 10100 * param1 + 338350) + 6.35 * (100 * param1 + 5050));
+      }
+      
+      public function AngelPattern() : void
+      {
+         var _loc1_:Number = Math.floor(myhp * 0.3);
+         myhp = myhp - tdame - _loc1_;
+         if(myhp < 0)
+         {
+            myhp = 0;
+         }
+      }
+      
+      public function ClearEnemyHp() : void
+      {
+         if(ga.gdata.hitCount1 >= 52 && EneHP / EneHPM <= 0.4 && ga.gdata.hourgclassOn1 == true)
+         {
+            if(EneHP < 0)
+            {
+               EneHP = 0;
+            }
+            EneHP = 0;
+            bitMana.SkNum = 23;
+            battleLogText.addTextBattleLogNouUpdata("斩杀! ");
+         }
+      }
+      
+      public function SecretKey(param1:Number) : Number
+      {
+         if(ga.gdata.CurrentHpDamage || ga.gdata.secretKeyOn)
+         {
+            if(Math.random() * 100 < 20)
+            {
+               if(ga.gdata.secretKeyOn)
+               {
+                  var _loc2_:Number = Math.floor(param1 * 0.05);
+               }
+               else
+               {
+                  _loc2_ = Math.floor(param1 * 0.03);
+               }
+            }
+            if(_loc2_ > 0)
+            {
+               DamegeMcFunc(_loc2_,false,180,bitMana.eneysyokiiti + 123,false,true);
+               battleLogText.addTextBattleLogNouUpdata(L.GetNRep("额外 [0] Damage!",_loc2_));
+               return _loc2_;
+            }
+         }
+         return 0;
+      }
+      
+      public function twilight(param1:int) : void
+      {
+         tdame = Math.floor(myhpm * 0.1);
+         if(whichTurn == 0 && param1 == 100)
+         {
+            if(EneHP / EneHPM <= 0.4 && Math.random() <= 0.35)
+            {
+               bitMana.EEFBattleFunc5();
+               EneHP += EneHPM * 0.2;
+               battleLogText.addTextBattleLogNouUpdata("EneSkill: Recovery 20% Max HP!");
+            }
+         }
+         if(whichTurn == 1 && param1 == 101)
+         {
+            EneHP += Math.floor(tdame * 0.1 + 1);
+            if(!ga.gdata.recoveryCheck)
+            {
+               myhp = 0;
+            }
+            if(ga.gdata.hitCount % 9 == 1)
+            {
+               battleLogText.addTextBattleLogNouUpdata("EneSkill:10% recovery per attack!");
+            }
+         }
+         if(param1 == 102)
+         {
+            tdame = Math.floor(myhpm * 0.08);
+            patternCheck2();
+            if(EneHP / EneHPM < 0.8 && phase == 1)
+            {
+               if(ga.gdata.hitCount % 9 == 1)
+               {
+                  EneHP += Math.floor(tdame * 0.1 + 1);
+                  battleLogText.addTextBattleLogNouUpdata("EneSkill1:10% recovery per attack!");
+               }
+            }
+            else if(EneHP / EneHPM >= 0.6 && EneHP / EneHPM < 0.8 && eneSkill <= 30 && phase == 2)
+            {
+               bitMana.EEFBattleFunc5();
+               EneHP += EneHPM * 0.05;
+               battleLogText.addTextBattleLogNouUpdata("EneSkill2: Recovery 10% Max HP!");
+            }
+            else if(EneHP / EneHPM < 0.5 && (eneSkill <= 20 && phase == 3))
+            {
+               ga.gdata.recovery = false;
+               if(Math.random() < 0.2)
+               {
+                  battleLogText.addTextBattleLogNouUpdata("EneSkill3: You cant recovery!");
+               }
+            }
+         }
+      }
+      
+      public function myAttack() : void
+      {
+         if(ga.gdata.hitCount1 % 5 == 1)
+         {
+            tdame = Math.floor(myhpm * 0.1);
+            if(ga.gdata.DamageIncreased != 0)
+            {
+               tdame = Math.floor(tdame * ((100 + ga.gdata.DamageIncreased) / 100));
+            }
+            DamegeMcFunc(tdame,crih,280,bitMana.eneysyokiiti);
+            EneHP -= tdame;
+            if(EneHP < 0)
+            {
+               EneHP = 0;
+            }
+         }
+         var _loc2_:String = L.GetNRep("攻撃 [0]ダメージ敵に与！",Math.floor(tdame));
+      }
+      
+      public function recovery() : void
+      {
+         ga.gdata.recoveryCheck = true;
+         if(ga.gdata.recovery)
+         {
+            if(ga.gdata.DamegeKaihukuOn0)
+            {
+               myhp += Math.floor(tdame * 0.02 + 1);
+               ga.gdata.recoveryCheck = false;
+               if(myhp > myhpm)
+               {
+                  myhp = myhpm;
+               }
+            }
+            else if(ga.gdata.DamegeKaihukuOn1)
+            {
+               myhp += Math.floor(tdame * 0.06 + 1);
+               ga.gdata.recoveryCheck = false;
+               if(myhp > myhpm)
+               {
+                  myhp = myhpm;
+               }
+            }
+            else if(ga.gdata.DamegeKaihukuOn2)
+            {
+               myhp += Math.floor(tdame * 0.09 + 1);
+               ga.gdata.recoveryCheck = false;
+               if(myhp > myhpm)
+               {
+                  myhp = myhpm;
+               }
+            }
+            else if(ga.gdata.DamegeKaihukuOn)
+            {
+               myhp += Math.floor(tdame * 0.04 + 1);
+               ga.gdata.recoveryCheck = false;
+               if(myhp > myhpm)
+               {
+                  myhp = myhpm;
+               }
+            }
+         }
+      }
+      
+      private function exitMMU(param1:MouseEvent) : void
+      {
+         phase = 0;
+         addEventListener("enterFrame",EEF);
+         pausesp.kaihukuButton.removeEventListener("mouseUp",kaihukuMMU);
+         pausesp.sentousaikaiButton.removeEventListener("mouseUp",sentousaikaiMMU);
+         pausesp.exitButton.removeEventListener("mouseUp",exitMMU);
+         removeChild(pausesp);
+         if(ga.gdata.hardmode == 0)
+         {
+            GDataW.AddNkoriBattlePoint(-2);
+         }
+         else
+         {
+            GDataW.AddNkoriBattlePoint(-4);
+         }
+         BattleEnd(1);
+         bitMana.eneDataUnLoad();
+      }
+      
+      public function myHpRecovery() : void
+      {
+         if(!ga.gdata.recoveryCheck)
+         {
+            myhp += Math.floor(myhpm * 0.09 + 1);
+         }
+         else
+         {
+            myhp += Math.floor(myhpm * 0.02 + 1);
+         }
+         if(myhp > myhpm)
+         {
+            myhp = myhpm;
+         }
+      }
+      
+      public function GetItemTextColor(param1:int) : int
+      {
+         return Math.random() * 10000000;
+      }
+      
+      public function nextPhase(param1:BitmapData, param2:Number, param3:ColorTransform = null) : void
+      {
+         bitMana.eneDataUnLoad();
+         bitMana.EneLoad(param1,param2,param3);
+         bitMana.BattleReStartInit();
+         barMana.BattleReStartInit(EneHPM,bitMana.eneysyokiiti);
+         eefi = 0;
+         mode = 777;
+      }
+      
+      public function patternCheck2() : void
+      {
+         trace("HPRATE:",EneHP / EneHPM);
+         if(EneHP / EneHPM <= 0.8 && phase == 0)
+         {
+            phase = 1;
+            TurnEndCount = 0;
+         }
+         else if(EneHP / EneHPM > 0.8 && (phase == 1 || phase == 2))
+         {
+            phase = 0;
+            TurnEndCount = 0;
+            ga.gdata.hitCount = 0;
+         }
+         else if(phase == 1 && (EneHP / EneHPM < 0.8 && EneHP / EneHPM > 0.6))
+         {
+            phase = 2;
+            TurnEndCount = 0;
+            ga.gdata.hitCount = 0;
+         }
+         else if(EneHP / EneHPM < 0.6 && (phase == 1 || phase == 2))
+         {
+            phase = 3;
+            TurnEndCount = 0;
+         }
+         else if(phase == 3 && (EneHP / EneHPM < 0.8 && EneHP / EneHPM > 0.6))
+         {
+            phase = 2;
+            TurnEndCount = 0;
+         }
+      }
+      
+      public function clear() : void
+      {
+         battleLogText.addTextBattleLogNouUpdata(" ");
+         battleLogText.addTextBattleLogNouUpdata(" ");
+         battleLogText.addTextBattleLogNouUpdata(" ");
+         battleLogText.addTextBattleLogNouUpdata(" ");
+         battleLogText.addTextBattleLogNouUpdata(" ");
+         battleLogText.addTextBattleLogNouUpdata(" ");
+      }
+   }
+}
+
+import flash.display.Sprite;
+import flash.text.TextField;
+import root.Const;
+import root.L;
+import ttk.skin.BlButton;
+import ttk.tool.Tool_Text;
+
+class pauseSp extends Sprite
+{
+   
+   private var PausetextF:TextField;
+   
+   private var kaihukutextF:TextField;
+   
+   public var sentousaikaiButton:BlButton;
+   
+   public var kaihukuButton:BlButton;
+   
+   private var pauseback:backkuroAmc;
+   
+   public var on:Boolean;
+   
+   public var recvCost:Boolean;
+   
+   public var exitButton:BlButton;
+   
+   public function pauseSp()
+   {
+      super();
+      pauseback = new backkuroAmc();
+      pauseback.width = 640;
+      pauseback.height = Const.AppH;
+      PausetextF = Tool_Text.TFLEFTGet(80,140,1,66,16777215,L.Get("PAUSE"));
+      kaihukuButton = new BlButton(150,330,340,70,Tool_Text.TFBlGet(32 + L.Z(0,0,0,0,0,-11,9),L.Get("HP回復")));
+      kaihukutextF = Tool_Text.TFLEFTGet(140 + L.Z(0,-60,-10,0,-30),400,L.FontNum(),22,16777215);
+      sentousaikaiButton = new BlButton(150,580,250,70,Tool_Text.TFBlGet(32 + L.Z(0,0,0,0,0,-8,-4),L.Get("戦闘再開")));
+      exitButton = new BlButton(410,580,70,70,Tool_Text.TFBlGet(32 + L.Z(0,0,0,0,0,-8,-4),"Exit"));
+      addChild(pauseback);
+      addChild(PausetextF);
+      addChild(kaihukutextF);
+      addChild(kaihukuButton);
+      addChild(sentousaikaiButton);
+      addChild(exitButton);
+   }
+   
+   public function start(param1:Number, param2:Number, param3:Boolean) : void
+   {
+      if(param3)
+      {
+         kaihukutextF.text = L.Get("次自分ターンは全回復し");
+      }
+      else
+      {
+         kaihukutextF.text = L.GetNRep("[0]Gで次自分ターン時に全回復",param1) + "\n" + L.GetNRep("現在の所持金[0]",param2);
+      }
+      if(param3 || param2 < param1)
+      {
+         kaihukuButton.alpha = 0.5;
+         kaihukuButton.mouseChildren = kaihukuButton.mouseEnabled = false;
+         if(param2 / param1 >= 0.6 && param2 < param1 && param2 >= 0)
+         {
+            kaihukuButton.alpha = 0.75;
+            kaihukuButton.mouseChildren = kaihukuButton.mouseEnabled = true;
+            recvCost = true;
+         }
+      }
+      else
+      {
+         kaihukuButton.alpha = 1;
+         kaihukuButton.mouseChildren = kaihukuButton.mouseEnabled = true;
+      }
+   }
+}

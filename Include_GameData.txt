@@ -1,0 +1,204 @@
+package Include_GameData
+{
+   public class BounasuKakurituData
+   {
+      
+      private var HARDGOLD:int = 11;
+      
+      private var SIRO:int = 12;
+      
+      private var KURO:int = 13;
+      
+      public function BounasuKakurituData()
+      {
+         super();
+      }
+      
+      public function getBonasuSyu(param1:Game, param2:int, param3:int, param4:int, param5:int) : int
+      {
+         var _loc6_:int = -1;
+         if(param2 >= 600)
+         {
+            if(Math.random() <= 0.06)
+            {
+               _loc6_ = kakuritu([4,4,20,10,12,14,20,8,30,10,10,5,5,5]);
+            }
+         }
+         if(param2 >= 1000)
+         {
+            if(Math.random() <= 0.07)
+            {
+               _loc6_ = kakuritu([4,4,16,7,12,12,12,4,16,10,10,3,3,3]);
+            }
+         }
+         if(param2 >= 2500)
+         {
+            if(Math.random() <= 0.07)
+            {
+               _loc6_ = kakuritu([4,4,16,5,10,12,12,3,18,12,12,12,8,8]);
+            }
+         }
+         if(param2 >= 10000)
+         {
+            if(Math.random() <= 0.08)
+            {
+               _loc6_ = kakuritu([4,4,16,5,5,12,12,3,18,12,12,12,8,8]);
+            }
+         }
+         if(param2 >= 20000)
+         {
+            if(Math.random() <= 0.1)
+            {
+               _loc6_ = Math.random() * 14;
+            }
+         }
+         if(_loc6_ == -1)
+         {
+            if(param3 == param4)
+            {
+               _loc6_ = kakuritu([8,8,26,15,17,13,8,22,18,5,5,5,4,3]);
+            }
+            else if(param3 <= param4)
+            {
+               _loc6_ = kakuritu([7,4,25,14,20,16,8,16,32,3,3,3,3,3]);
+            }
+            else
+            {
+               _loc6_ = kakuritu([26,26,36,2,16,16,5,22,14,5,5,5,4,4]);
+            }
+         }
+         if(_loc6_ == 9)
+         {
+            if(param2 <= 800)
+            {
+               _loc6_ = 10;
+            }
+         }
+         if(_loc6_ == HARDGOLD)
+         {
+            if(param2 <= 2300)
+            {
+               _loc6_ = 10;
+            }
+         }
+         if(_loc6_ == 10)
+         {
+            if(param2 <= 500 && Math.random() < 0.3 || param2 <= 350)
+            {
+               _loc6_ = kakuritu([20,20,30,2,2,20,12,8,18]);
+            }
+         }
+         if(_loc6_ == 6)
+         {
+            if(param1.gamesavedata.gameovercount <= 5)
+            {
+               _loc6_ = 5;
+            }
+         }
+         if(_loc6_ == 5)
+         {
+            if(param1.gamesavedata.gameovercount <= 3)
+            {
+               _loc6_ = kakuritu([10,10,22,18,10,0,0,15,22,3,3]);
+            }
+            if(_loc6_ == 9)
+            {
+               if(param2 <= 800)
+               {
+                  _loc6_ = kakuritu([10,10,22,18,10,0,0,15,22]);
+               }
+            }
+            if(_loc6_ == HARDGOLD)
+            {
+               if(param2 <= 2300)
+               {
+                  _loc6_ = kakuritu([10,10,22,18,10,0,0,15,22]);
+               }
+            }
+         }
+         if(_loc6_ == HARDGOLD)
+         {
+            if(param2 >= 47000)
+            {
+               _loc6_ = kakuritu([10,10,22,18,10,0,0,10,10]);
+            }
+         }
+         if(param1.gdata.hardmode == 1)
+         {
+            if(param2 < 10000 && _loc6_ == KURO)
+            {
+               _loc6_ = kakuritu([10,10,22,18,10,0,0,10,10]);
+            }
+            if(param2 < 15000 && _loc6_ == SIRO)
+            {
+               _loc6_ = kakuritu([10,10,22,18,10,0,0,10,10]);
+            }
+            if(_loc6_ == -1)
+            {
+               if(Math.random() <= 0.05)
+               {
+                  _loc6_ = kakuritu([2,2,3,0,0,0,0,7,7]);
+               }
+            }
+         }
+         if(param1.gdata.hardmode == 0)
+         {
+            if(param2 >= 1600000 && _loc6_ != -1)
+            {
+               _loc6_ = kakuritu([-1,-1,-1,8,8,8,8,8,-1,-1,-1,-1,-1,-1]);
+            }
+            if(param5 > 108)
+            {
+               _loc6_ = kakuritu([-1,-1,-1,8,8,8,8,8,-1,-1,-1,-1,-1,-1,-1,-1,-1,12]);
+            }
+         }
+         if(param1.gdata.hardmode == 1)
+         {
+            if(param2 >= 820000 && _loc6_ != -1)
+            {
+               _loc6_ = kakuritu([-1,-1,-1,8,8,8,8,8,6,-1,-1,-1,-1,-1]);
+            }
+         }
+         return _loc6_;
+      }
+      
+      private function kakuritu(param1:Array, param2:int = 0) : int
+      {
+         var _loc6_:int = 0;
+         var _loc5_:int = int(param1.length);
+         var _loc4_:* = 0;
+         if(param2 != _loc5_ && param2 != 0)
+         {
+            trace("kakuritu Error:",_loc5_,param2);
+         }
+         _loc6_ = 0;
+         while(_loc6_ < _loc5_)
+         {
+            _loc4_ += param1[_loc6_];
+            if(param1[_loc6_] == -1)
+            {
+               _loc4_ += 1;
+            }
+            _loc6_++;
+         }
+         var _loc3_:int = _loc4_ * Math.random() + 0.5;
+         _loc4_ = 0;
+         _loc6_ = 0;
+         while(_loc6_ < _loc5_)
+         {
+            _loc4_ += param1[_loc6_];
+            if(_loc4_ >= _loc3_)
+            {
+               return _loc6_;
+            }
+            if(param1[_loc6_] == -1)
+            {
+               _loc4_ += 1;
+            }
+            _loc6_++;
+         }
+         return _loc5_ - 1;
+      }
+   }
+}
+

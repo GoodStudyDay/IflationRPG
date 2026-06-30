@@ -1,0 +1,314 @@
+package Include_GameData
+{
+   import Class.GDataItemMana;
+   import Class.Item;
+   
+   public class ItemDataMana
+   {
+      
+      private var ga:Game;
+      
+      private var itemdata:ItemData;
+      
+      public var ItemuBUKI:Vector.<Item>;
+      
+      public var ItemuBOUGU:Vector.<Item>;
+      
+      public var ItemuAKUSE:Vector.<Item>;
+      
+      private var ItemuBUKI_ListNum:Vector.<Item>;
+      
+      private var ItemuBOUGU_ListNum:Vector.<Item>;
+      
+      private var ItemuAKUSE_ListNum:Vector.<Item>;
+      
+      public var ItemuAKUSEZyoui:Vector.<Vector.<int>>;
+      
+      private var ItemuAKUSESikibetuBangoHardCheck:Vector.<int>;
+      
+      public var ItemuSOUL:Vector.<Item>;
+      
+      private var ItemuSOUL_ListNum:Vector.<Item>;
+      
+      public var ItemuSOULZyoui:Vector.<Vector.<int>>;
+      
+      private var ItemuSOULSikibetuBangoHardCheck:Vector.<int>;
+      
+      public var ItemuMATERIAL:Vector.<Item>;
+      
+      private var ItemuMATERIAL_ListNum:Vector.<Item>;
+      
+      public var ItemuRECIPE:Vector.<Vector.<int>>;
+      
+      public function ItemDataMana(param1:Game)
+      {
+         super();
+         this.ga = param1;
+         itemdata = new ItemData(param1,this);
+      }
+      
+      public function ItemDataVar() : void
+      {
+         var _loc3_:int = 0;
+         var _loc2_:int = 0;
+         if(ItemuBUKI != null)
+         {
+            _loc3_ = 0;
+            _loc2_ = int(ItemuBUKI.length);
+            _loc3_ = 0;
+            while(_loc3_ < _loc2_)
+            {
+               ItemuBUKI[_loc3_].BitD.dispose();
+               _loc3_++;
+            }
+            _loc2_ = int(ItemuBOUGU.length);
+            _loc3_ = 0;
+            while(_loc3_ < _loc2_)
+            {
+               ItemuBOUGU[_loc3_].BitD.dispose();
+               _loc3_++;
+            }
+            _loc2_ = int(ItemuAKUSE.length);
+            _loc3_ = 0;
+            while(_loc3_ < _loc2_)
+            {
+               ItemuAKUSE[_loc3_].BitD.dispose();
+               _loc3_++;
+            }
+            _loc2_ = int(ItemuSOUL.length);
+            _loc3_ = 0;
+            while(_loc3_ < _loc2_)
+            {
+               ItemuSOUL[_loc3_].BitD.dispose();
+               _loc3_++;
+            }
+            _loc2_ = int(ItemuMATERIAL.length);
+            _loc3_ = 0;
+            while(_loc3_ < _loc2_)
+            {
+               ItemuMATERIAL[_loc3_].BitD.dispose();
+               _loc3_++;
+            }
+         }
+         ItemuBUKI = new Vector.<Item>();
+         ItemuBOUGU = new Vector.<Item>();
+         ItemuAKUSE = new Vector.<Item>();
+         ItemuSOUL = new Vector.<Item>();
+         ItemuAKUSEZyoui = new Vector.<Vector.<int>>();
+         ItemuSOULZyoui = new Vector.<Vector.<int>>();
+         ItemuRECIPE = new Vector.<Vector.<int>>();
+         ItemuMATERIAL = new Vector.<Item>();
+         itemdata.itemload();
+         InitItemVecListNum();
+         ItemuAKUSESikibetuBangoHardCheck = new Vector.<int>(ItemuAKUSE.length);
+         ItemuSOULSikibetuBangoHardCheck = new Vector.<int>(ItemuSOUL.length);
+         for each(var _loc1_ in ItemuAKUSE)
+         {
+            ItemuAKUSESikibetuBangoHardCheck[_loc1_.listnum] = _loc1_.hardmode;
+         }
+         for each(_loc1_ in ItemuSOUL)
+         {
+            ItemuSOULSikibetuBangoHardCheck[_loc1_.listnum] = _loc1_.hardmode;
+         }
+      }
+      
+      private function InitItemVecListNum() : void
+      {
+         var _loc1_:int = 0;
+         ItemuBUKI_ListNum = new Vector.<Item>(ItemuBUKI.length);
+         _loc1_ = 0;
+         while(_loc1_ < ItemuBUKI.length)
+         {
+            ItemuBUKI_ListNum[ItemuBUKI[_loc1_].listnum] = ItemuBUKI[_loc1_];
+            _loc1_++;
+         }
+         ItemuBOUGU_ListNum = new Vector.<Item>(ItemuBOUGU.length);
+         _loc1_ = 0;
+         while(_loc1_ < ItemuBOUGU.length)
+         {
+            ItemuBOUGU_ListNum[ItemuBOUGU[_loc1_].listnum] = ItemuBOUGU[_loc1_];
+            _loc1_++;
+         }
+         ItemuAKUSE_ListNum = new Vector.<Item>(ItemuAKUSE.length);
+         _loc1_ = 0;
+         while(_loc1_ < ItemuAKUSE.length)
+         {
+            ItemuAKUSE_ListNum[ItemuAKUSE[_loc1_].listnum] = ItemuAKUSE[_loc1_];
+            _loc1_++;
+         }
+         ItemuSOUL_ListNum = new Vector.<Item>(ItemuSOUL.length);
+         _loc1_ = 0;
+         while(_loc1_ < ItemuSOUL.length)
+         {
+            ItemuSOUL_ListNum[ItemuSOUL[_loc1_].listnum] = ItemuSOUL[_loc1_];
+            _loc1_++;
+         }
+         ItemuMATERIAL_ListNum = new Vector.<Item>(ItemuMATERIAL.length);
+         _loc1_ = 0;
+         while(_loc1_ < ItemuMATERIAL.length)
+         {
+            ItemuMATERIAL_ListNum[ItemuMATERIAL[_loc1_].listnum] = ItemuMATERIAL[_loc1_];
+            _loc1_++;
+         }
+      }
+      
+      public function GetItemListNum(param1:int, param2:int) : Item
+      {
+         if(param2 < 0 || param1 < 0)
+         {
+            return null;
+         }
+         if(param1 == 0)
+         {
+            return ItemuBUKI_ListNum[param2];
+         }
+         if(param1 == 1)
+         {
+            return ItemuBOUGU_ListNum[param2];
+         }
+         if(param1 == 2)
+         {
+            return ItemuAKUSE_ListNum[param2];
+         }
+         if(param1 == 3)
+         {
+            return ItemuSOUL_ListNum[param2];
+         }
+         if(param1 == 4)
+         {
+            return ItemuMATERIAL[param2];
+         }
+         trace("エラー:ItemGet",param1,param2);
+         return null;
+      }
+      
+      public function GetItemListI(param1:int, param2:int) : Item
+      {
+         if(param2 < 0 || param1 < 0)
+         {
+            return null;
+         }
+         if(param1 == 0)
+         {
+            return ItemuBUKI[param2];
+         }
+         if(param1 == 1)
+         {
+            return ItemuBOUGU[param2];
+         }
+         if(param1 == 16)
+         {
+            return ItemuMATERIAL[param2];
+         }
+         if(param1 >= 2 && param1 <= 13)
+         {
+            return ItemuAKUSE[param2];
+         }
+         if(param1 >= 14 && param1 <= 15)
+         {
+            trace("エラー:ItemGet",param1,"listi:" + param2);
+            return ItemuSOUL[param2];
+         }
+         return null;
+      }
+      
+      public function GetItemMinMoney() : int
+      {
+         var _loc3_:int = 0;
+         var _loc4_:int = 0;
+         var _loc5_:int = 0;
+         _loc3_ = int(ItemuBUKI.length);
+         var _loc2_:GDataItemMana = ga.gdata.gdataItemMana;
+         var _loc1_:int = 0;
+         _loc5_ = 0;
+         while(_loc5_ < _loc3_)
+         {
+            _loc4_ = ItemuBUKI[_loc5_].kakaku;
+            if(_loc4_ != 0 && _loc2_.GetItemTimes_Item(ItemuBUKI[_loc5_]) == 0)
+            {
+               if(_loc4_ < _loc1_ || _loc1_ == 0)
+               {
+                  _loc1_ = _loc4_;
+               }
+            }
+            _loc5_++;
+         }
+         _loc3_ = int(ItemuBOUGU.length);
+         _loc5_ = 0;
+         while(_loc5_ < _loc3_)
+         {
+            _loc4_ = ItemuBOUGU[_loc5_].kakaku;
+            if(_loc4_ != 0 && _loc2_.GetItemTimes_Item(ItemuBOUGU[_loc5_]) == 0)
+            {
+               if(_loc4_ < _loc1_ || _loc1_ == 0)
+               {
+                  _loc1_ = _loc4_;
+               }
+            }
+            _loc5_++;
+         }
+         _loc3_ = int(ItemuAKUSE.length);
+         _loc5_ = 0;
+         while(_loc5_ < _loc3_)
+         {
+            _loc4_ = ItemuAKUSE[_loc5_].kakaku;
+            if(_loc4_ != 0 && _loc2_.GetItemTimes_Item(ItemuAKUSE[_loc5_]) == 0)
+            {
+               if(_loc4_ < _loc1_ || _loc1_ == 0)
+               {
+                  _loc1_ = _loc4_;
+               }
+            }
+            _loc5_++;
+         }
+         _loc3_ = int(ItemuSOUL.length);
+         _loc5_ = 0;
+         while(_loc5_ < _loc3_)
+         {
+            _loc4_ = ItemuSOUL[_loc5_].kakaku;
+            if(_loc4_ != 0 && _loc2_.GetItemTimes_Item(ItemuSOUL[_loc5_]) == 0)
+            {
+               if(_loc4_ < _loc1_ || _loc1_ == 0)
+               {
+                  _loc1_ = _loc4_;
+               }
+            }
+            _loc5_++;
+         }
+         _loc3_ = int(ItemuMATERIAL.length);
+         _loc5_ = 0;
+         while(_loc5_ < _loc3_)
+         {
+            _loc4_ = ItemuMATERIAL[_loc5_].kakaku;
+            if(_loc4_ != 0 && _loc2_.GetItemTimes_Item(ItemuMATERIAL[_loc5_]) == 0)
+            {
+               if(_loc4_ < _loc1_ || _loc1_ == 0)
+               {
+                  _loc1_ = _loc4_;
+               }
+            }
+            _loc5_++;
+         }
+         return _loc1_;
+      }
+      
+      public function zyoiHardCheck(param1:int) : Boolean
+      {
+         if(ItemuAKUSESikibetuBangoHardCheck[param1] >= 1 || ItemuSOULSikibetuBangoHardCheck[param1] >= 1)
+         {
+            return true;
+         }
+         return false;
+      }
+      
+      public function zyoiHardCheck1(param1:int, param2:int, param3:int) : Boolean
+      {
+         if(ItemuAKUSESikibetuBangoHardCheck[param1] + ItemuAKUSESikibetuBangoHardCheck[param2] + ItemuAKUSESikibetuBangoHardCheck[param3] >= 1)
+         {
+            return true;
+         }
+         return false;
+      }
+   }
+}
+
