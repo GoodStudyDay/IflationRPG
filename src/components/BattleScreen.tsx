@@ -183,7 +183,6 @@ export const BattleScreen = () => {
           }`}>
             <CharacterSprite 
               animation={battle.playerAnimation} 
-              direction="front"
               size={96}
             />
           </div>
