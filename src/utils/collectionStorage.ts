@@ -1,4 +1,5 @@
 import type { InventoryItem } from '@/types';
+import { getEquipmentById } from '@/data/equipment';
 
 const COLLECTION_STORAGE_KEY = 'inflation-rpg-collection';
 
@@ -8,11 +9,13 @@ export const saveCollection = (inventory: InventoryItem[]) => {
     const merged: InventoryItem[] = [...existing];
     
     inventory.forEach(item => {
+      const equipment = getEquipmentById(item.equipmentId);
+      const maxQty = equipment?.maxQuantity ?? 10;
       const existingIndex = merged.findIndex(i => i.equipmentId === item.equipmentId);
       if (existingIndex >= 0) {
-        merged[existingIndex].quantity += item.quantity;
+        merged[existingIndex].quantity = Math.min(merged[existingIndex].quantity + item.quantity, maxQty);
       } else {
-        merged.push({ ...item });
+        merged.push({ ...item, quantity: Math.min(item.quantity, maxQty) });
       }
     });
     

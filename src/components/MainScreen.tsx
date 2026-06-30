@@ -3,20 +3,25 @@ import { useGameStore } from '@/stores/gameStore';
 import { MenuOverlay } from './MenuOverlay';
 import { BonusOverlay } from './BonusOverlay';
 import { BONUS_LIST } from '@/utils/bonusManager';
+import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
+  const [showTeleport, setShowTeleport] = useState(false);
   
-  const expPercent = (player.exp / player.expToNextLevel) * 100;
+  const expPercent = player.expToNextLevel > 0 ? (player.exp / player.expToNextLevel) * 100 : 0;
+  
+  const currentMapData = MAP_LIST.find(m => m.id === currentMap) || MAP_LIST[0];
+  const mapEnemies = getMapEnemies(currentMap);
   
   // 动态获取 bonus 显示文本
   const getBonusText = () => {
-    if (!bonus.currentBonus) return '';
+    if (!bonus.currentBonus) return null;
     const info = BONUS_LIST[bonus.currentBonus.bonusType];
-    if (!info) return '';
+    if (!info) return null;
     return `${info.name}(${bonus.currentBonus.remainingCount})`;
   };
   
@@ -32,26 +37,28 @@ export const MainScreen = () => {
     resetGame();
     setShowResetConfirm(false);
   };
+
+  const bonusText = getBonusText();
   
   return (
     <div className="min-h-screen bg-[#1a0a2e] flex flex-col">
-      <div className="bg-[#3d2b6e]/30 p-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-[#3d2b6e]/30 p-2 sm:p-4">
+        <div className="flex items-center justify-between gap-1">
           <button
             onClick={() => setShowBonus(true)}
-            className="bg-[#5a3c8a] px-5 py-2 rounded-lg text-white font-bold text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
           >
             奖励
           </button>
           <button
-            onClick={() => {}}
-            className="bg-[#5a3c8a] px-5 py-2 rounded-lg text-white font-bold text-sm hover:bg-[#6a4c9a] transition-colors"
+            onClick={() => setShowTeleport(true)}
+            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
           >
             Teleport
           </button>
           <button
             onClick={() => setShowMenu(true)}
-            className="bg-[#5a3c8a] px-5 py-2 rounded-lg text-white font-bold text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
           >
             菜单
           </button>
@@ -60,7 +67,7 @@ export const MainScreen = () => {
         <div className="flex justify-end mt-2">
           <button
             onClick={handleBattleClick}
-            className="bg-[#5a3c8a] px-8 py-2 rounded-lg text-white font-bold text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-6 sm:px-8 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
           >
             战斗
           </button>
@@ -93,10 +100,14 @@ export const MainScreen = () => {
         
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-white font-bold text-lg">适合LV: {player.level}</div>
-            {getBonusText() && (
-              <div className="text-gray-400 text-sm">奖励: {getBonusText()}</div>
+            <div className="text-white font-bold text-lg">{currentMapData.icon} {currentMapData.name}</div>
+            <div className="text-gray-300 text-sm">解锁等级: {currentMapData.unlockLevel}</div>
+            {bonusText && (
+              <div className="text-yellow-400 text-sm mt-1">奖励: {bonusText}</div>
             )}
+            <div className="text-gray-500 text-xs mt-2">
+              {mapEnemies.slice(0, 3).map(e => e.icon).join(' ')} ...
+            </div>
           </div>
         </div>
         
@@ -116,19 +127,22 @@ export const MainScreen = () => {
         <div className="absolute bottom-0 right-0 w-40 h-40 border-r-2 border-b-2 border-red-500/30" />
       </div>
       
-      <div className="bg-[#1a0a2e] border-t-2 border-[#4a2c7a] p-3">
+      <div className="bg-[#1a0a2e] border-t-2 border-[#4a2c7a] p-2 sm:p-3">
         <div className="flex items-start gap-2 mb-2">
           <div className="flex-1">
-            <div className="text-xs text-gray-500 mb-1">现在的地图信息</div>
-            <div className="text-xs text-white">适合LV: {player.level}{getBonusText() ? ` , Bonus: ${getBonusText()}` : ''}</div>
+            <div className="text-[10px] sm:text-xs text-gray-500 mb-1">现在的地图信息</div>
+            <div className="text-[10px] sm:text-xs text-white">
+              {currentMapData.icon} {currentMapData.name}
+              {bonusText ? ` , Bonus: ${bonusText}` : ''}
+            </div>
           </div>
           
-          <div className={`bg-[#3d2b6e] px-4 py-3 rounded-lg border ${
+          <div className={`bg-[#3d2b6e] px-3 sm:px-4 py-2 sm:py-3 rounded-lg border ${
             battlePoints > 10 ? 'border-[#5a3c8a]' : 
             battlePoints > 0 ? 'border-yellow-500' : 'border-red-500'
           }`}>
-            <div className="text-xs text-gray-400 text-center">BATTLE POINT</div>
-            <div className={`text-3xl font-bold text-center ${
+            <div className="text-[10px] sm:text-xs text-gray-400 text-center">BATTLE POINT</div>
+            <div className={`text-xl sm:text-3xl font-bold text-center ${
               battlePoints > 10 ? 'text-yellow-400' : 
               battlePoints > 0 ? 'text-yellow-300' : 'text-red-400'
             }`}>
@@ -138,7 +152,7 @@ export const MainScreen = () => {
         </div>
         
         <div className="mb-2">
-          <div className="text-xs text-yellow-400 mb-1">Encounter Gauge</div>
+          <div className="text-[10px] sm:text-xs text-yellow-400 mb-1">Encounter Gauge</div>
           <div className="h-2 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className={`h-full transition-all duration-300 ${
@@ -149,31 +163,90 @@ export const MainScreen = () => {
               style={{ width: `${encounterRate}%` }}
             />
           </div>
-          <div className="text-xs text-gray-500 mt-0.5">槽越高越容易与敌人相遇</div>
+          <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">槽越高越容易与敌人相遇</div>
         </div>
         
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div>
-            <div className="text-xs text-gray-400">Level</div>
-            <div className="text-lg font-bold text-white">{player.level}LV</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">Level</div>
+            <div className="text-sm sm:text-lg font-bold text-white">{player.level}LV</div>
           </div>
           <div>
-            <div className="text-xs text-gray-400">Money</div>
-            <div className="text-lg font-bold text-yellow-400">{player.gold}G</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">Money</div>
+            <div className="text-sm sm:text-lg font-bold text-yellow-400">{player.gold}G</div>
           </div>
           <div>
-            <div className="text-xs text-gray-400">EXP</div>
-            <div className="text-lg font-bold text-green-400">{player.exp}</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">EXP</div>
+            <div className="text-sm sm:text-lg font-bold text-green-400">{player.exp}</div>
             <div className="h-1.5 bg-[#3d2b6e] rounded overflow-hidden mt-1">
               <div 
                 className="h-full bg-green-500"
                 style={{ width: `${expPercent}%` }}
               />
             </div>
-            <div className="text-xs text-gray-500">Next {player.expToNextLevel}</div>
+            <div className="text-[10px] sm:text-xs text-gray-500">Next {player.expToNextLevel}</div>
           </div>
         </div>
       </div>
+      
+      {/* Teleport 弹窗 */}
+      {showTeleport && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowTeleport(false)}>
+          <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择地图</h3>
+            <div className="space-y-2">
+              {MAP_LIST.map(map => {
+                const isUnlocked = player.level >= map.unlockLevel;
+                const isCurrent = map.id === currentMap;
+                return (
+                  <button
+                    key={map.id}
+                    onClick={() => {
+                      if (isUnlocked) {
+                        teleportToMap(map.id);
+                        setShowTeleport(false);
+                      }
+                    }}
+                    disabled={!isUnlocked}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      isCurrent
+                        ? 'border-yellow-500 bg-[#3d2b6e]'
+                        : isUnlocked
+                        ? 'border-[#5a3c8a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
+                        : 'border-gray-700 bg-gray-900/50 opacity-40 cursor-not-allowed'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg mr-2">{map.icon}</span>
+                        <span className="text-white font-bold">{map.name}</span>
+                      </div>
+                      <div className="text-xs">
+                        {isCurrent ? (
+                          <span className="text-yellow-400">当前</span>
+                        ) : !isUnlocked ? (
+                          <span className="text-red-400">需LV{map.unlockLevel}</span>
+                        ) : (
+                          <span className="text-green-400">传送</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      需LV{map.unlockLevel} · {map.description}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setShowTeleport(false)}
+              className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
       
       {showMenu && <MenuOverlay onClose={() => setShowMenu(false)} />}
       
@@ -181,7 +254,7 @@ export const MainScreen = () => {
       
       {showResetConfirm && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-[#2d1b4e] border-2 border-red-500 rounded-lg p-6 max-w-sm w-full mx-4">
+          <div className="bg-[#2d1b4e] border-2 border-red-500 rounded-lg p-4 sm:p-6 w-[90%] max-w-sm">
             <div className="text-center">
               <div className="text-2xl font-bold text-red-400 mb-4">BATTLE POINT 耗尽!</div>
               <div className="text-gray-300 mb-6">战斗点数已用完，需要重新开始游戏才能继续战斗。</div>

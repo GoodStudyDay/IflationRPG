@@ -55,7 +55,7 @@ export const TitleScreen = () => {
 
         <div className="relative z-10 mb-8">
           <div className="text-center">
-            <h1 className="text-6xl font-black tracking-wider">
+            <h1 className="text-4xl sm:text-6xl font-black tracking-wider">
               <span className="text-red-600 drop-shadow-lg">Iflation</span>
               <span className="text-yellow-500 drop-shadow-lg">RPG</span>
             </h1>
@@ -65,7 +65,7 @@ export const TitleScreen = () => {
         <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs px-4">
           <button
             onClick={handleNewGame}
-            className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-xl py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+            className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
             从新开始
           </button>
@@ -74,7 +74,7 @@ export const TitleScreen = () => {
           {canContinue && (
             <button
               onClick={handleContinue}
-              className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-xl py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+              className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
             >
               继续游戏
             </button>
@@ -82,7 +82,7 @@ export const TitleScreen = () => {
           
           <button
             onClick={handleBack}
-            className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-xl py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+            className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
             返回
           </button>
@@ -121,7 +121,7 @@ export const TitleScreen = () => {
 
       <div className="relative z-10 mb-8">
         <div className="text-center">
-          <h1 className="text-6xl font-black tracking-wider">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-wider">
             <span className="text-red-600 drop-shadow-lg">Iflation</span>
             <span className="text-yellow-500 drop-shadow-lg">RPG</span>
           </h1>
@@ -131,31 +131,31 @@ export const TitleScreen = () => {
       <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs px-4">
         <button
           onClick={handleStartGame}
-          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-xl py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
         >
           游戏开始
         </button>
         
         <button
           onClick={handlePlayerInfo}
-          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
         >
           玩家信息
         </button>
         
         <button
           onClick={handleRanking}
-          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
         >
           排行
         </button>
         
         <button
           onClick={handleSettings}
-          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
+          className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
         >
           设置
-          <span className="block text-sm opacity-70">SETTING</span>
+          <span className="block text-xs sm:text-sm opacity-70">SETTING</span>
         </button>
       </div>
     </div>

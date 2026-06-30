@@ -64,6 +64,8 @@ export interface Player {
   equippedWeapon: Equipment | null;
   equippedArmor: Equipment | null;
   equippedAccessories: Equipment[];
+  /** 已解锁的饰品栏位数 (默认3, 最大12) */
+  maxAccessorySlots: number;
 }
 
 export type GameScene = 'title' | 'world' | 'battle';
@@ -98,6 +100,7 @@ export interface BattleState {
   isDropSuccess: boolean;
   goldMultiplier: number;
   battleResult: BattleResult | null;
+  _ending: boolean;
 }
 
 // 奖励类型
@@ -145,6 +148,8 @@ export interface GameState {
   dropNum: number;
   presetNum: number;
   bonus: BonusState;
+  /** 当前所在地图编号 (1-10) */
+  currentMap: number;
 }
 
 export interface DamageResult {

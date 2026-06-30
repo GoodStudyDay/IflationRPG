@@ -23,9 +23,9 @@ export const BattleResult = () => {
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 cursor-pointer"
       onClick={handleContinue}
     >
-      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-full max-w-md p-6">
-        <div className="text-center mb-6">
-          <h2 className="text-4xl font-black text-white mb-2">
+      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4 sm:p-6">
+        <div className="text-center mb-4 sm:mb-6">
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-2">
             {battleResult.victory ? (
               <span className="text-green-400">胜利!</span>
             ) : (

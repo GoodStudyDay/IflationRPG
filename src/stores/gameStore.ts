@@ -3,14 +3,14 @@ import { persist } from 'zustand/middleware';
 import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment } from '@/types';
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
-import { getRandomEnemy } from '@/data/enemies';
 import { getEquipmentById } from '@/data/equipment';
-import { getExpToNextLevel, getLevelBonus, clamp } from '@/utils/helpers';
+import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
 import { eneDropItemInit, equipmentIdToItemTypeAndIndex, itemTypeAndIndexToEquipmentId } from '@/utils/dropManager';
 import { battleVarInit } from '@/utils/battleVar';
 import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
+import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 
 interface GameStore {
   player: Player;
@@ -39,15 +39,16 @@ interface GameStore {
   dropNum: number;
   presetNum: number;
   bonus: BonusState;
+  currentMap: number;
   setPlayer: (player: Player) => void;
   updatePlayerHp: (amount: number) => void;
   updatePlayerMana: (amount: number) => void;
   addGold: (amount: number) => void;
   addExp: (amount: number) => void;
-  levelUp: () => void;
   addToInventory: (equipmentId: string, quantity: number) => void;
   removeFromInventory: (equipmentId: string, quantity: number) => void;
-  equipItem: (equipment: Equipment) => void;
+  equipItem: (equipment: Equipment, slotIndex?: number) => void;
+  buyEquipment: (equipmentId: string) => boolean;
   useConsumable: (equipmentId: string) => void;
   setCurrentScene: (scene: GameScene) => void;
   goToTitle: () => void;
@@ -76,11 +77,21 @@ interface GameStore {
   addMapBonus: () => void;
   clearMapBonus: () => void;
   getBonusInfo: () => { type: number; name: string; description: string; icon: string; color: string } | null;
+  /** 传送到指定地图 */
+  teleportToMap: (mapId: number) => void;
+  /** 解锁饰品栏位 */
+  unlockAccessorySlot: () => boolean;
+  /** 检查装备饰品数量是否超过库存，超过则清空对应栏位 */
+  checkZeroEquips: () => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
 const BASE_CRIT_RATE = 0.05;
 const BASE_COMBO_RATE = 0.05;
+
+/** game.txt AKUSESlotLockMONEY: 饰品栏位解锁价格 (索引0=第1栏位) */
+const AKUSE_SLOT_LOCK_MONEY = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
+const MAX_ACCESSORY_SLOTS = 12;
 
 const getStoredData = () => {
   try {
@@ -125,6 +136,9 @@ const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
   }
   if (typeof fixedPlayer.luck !== 'number' || Number.isNaN(fixedPlayer.luck)) {
     fixedPlayer.luck = 1000;
+  }
+  if (typeof fixedPlayer.maxAccessorySlots !== 'number' || fixedPlayer.maxAccessorySlots < 1) {
+    fixedPlayer.maxAccessorySlots = 3;
   }
   
   if (fixedPlayer.equippedWeapon) {
@@ -287,6 +301,7 @@ export const useGameStore = create<GameStore>()(
         isDropSuccess: false,
         goldMultiplier: 1,
         battleResult: null,
+        _ending: false,
       },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -312,6 +327,7 @@ export const useGameStore = create<GameStore>()(
         clearUsesLeft: 5,
         currentBonus: null,
       },
+      currentMap: 1,
       setPlayer: (player) => set({ player }),
       updatePlayerHp: (amount) => {
         const { player, battle } = get();
@@ -338,24 +354,68 @@ export const useGameStore = create<GameStore>()(
         set({ player: { ...player, gold: player.gold + amount } });
       },
       addExp: (amount) => {
-        const { player, levelUp } = get();
-        const newExp = player.exp + amount;
-        if (newExp >= player.expToNextLevel) {
-          set({ player: { ...player, exp: newExp } });
-          levelUp();
-        } else {
-          set({ player: { ...player, exp: newExp } });
-        }
-      },
-      levelUp: () => {
-        const { player, battle, updateHighLv } = get();
-        const newLevel = player.level + 1;
-        const bonus = getLevelBonus(newLevel);
-        const expRemaining = player.exp - player.expToNextLevel;
-        const expToNext = getExpToNextLevel(newLevel);
+        const { player, updateHighLv } = get();
         
-        const newMaxHp = player.maxHp + bonus.hp;
-        const newMaxMana = player.maxMana + bonus.mana;
+        // battle.txt 升级公式
+        // getExpNokori = existing exp + gained exp (行 817)
+        let getExpNokori = player.exp + amount;
+        let lvupsitanum = 0;
+        let newLevel = player.level;
+        let expToNext = player.expToNextLevel;
+        
+        // 循环处理升级批次（模拟逐帧升级动画）
+        while (getExpNokori >= expToNext) {
+          // _loc11_ = floor(getExpNokori / onenextexp) (行 985)
+          const _loc11_ = Math.floor(getExpNokori / expToNext);
+          
+          // _loc18_ = pow(_loc11_, 0.48) * 0.5, capped 40 (行 988-992)
+          let _loc18_ = Math.pow(_loc11_, 0.48) * 0.5;
+          if (_loc18_ > 40) _loc18_ = 40;
+          
+          // _loc12_ = levels per batch (行 993)
+          let levelsInBatch = 1 + Math.floor(
+            (_loc11_ * 1.22 + lvupsitanum * 0.3) / (76 + _loc18_)
+          );
+          // cap: _loc12_ <= lv * 100 (行 994-996)
+          if (levelsInBatch > newLevel * 100) levelsInBatch = newLevel * 100;
+          if (levelsInBatch < 1) levelsInBatch = 1;
+          
+          // 处理此批次中的每个等级
+          let processed = 0;
+          while (processed < levelsInBatch && getExpNokori >= expToNext) {
+            // 减去当前等级所需经验
+            getExpNokori -= expToNext;
+            newLevel++;
+            lvupsitanum++;
+            processed++;
+            // lvUpdata 重新计算 onenextexp
+            expToNext = getExpToNextLevel(newLevel);
+          }
+          
+          if (processed === 0) break;
+        }
+        
+        // 计算最终属性加成（包含装备和存货加成）
+        const bonus = getLevelBonus(newLevel);
+        const { inventory } = get();
+        
+        const weaponObj = player.equippedWeapon;
+        const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty) : 0;
+        
+        const armorObj = player.equippedArmor;
+        const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
+        
+        const accessories = player.equippedAccessories || [];
+        const accAtk = accessories.reduce((sum, a) => sum + (a.attackBonus || 0), 0);
+        const accDef = accessories.reduce((sum, a) => sum + (a.defenseBonus || 0), 0);
+        const accHp = accessories.reduce((sum, a) => sum + (a.hpBonus || 0), 0);
+        
+        const hpInc = initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp;
+        const atkInc = initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk;
+        const defInc = initialPlayer.defense + bonus.defense + armorDefContrib + accDef;
         
         updateHighLv(newLevel);
         
@@ -363,31 +423,33 @@ export const useGameStore = create<GameStore>()(
           player: {
             ...player,
             level: newLevel,
-            maxHp: newMaxHp,
-            hp: newMaxHp,
-            attack: player.attack + bonus.attack,
-            defense: player.defense + bonus.defense,
-            maxMana: newMaxMana,
-            mana: newMaxMana,
-            exp: expRemaining,
+            maxHp: hpInc,
+            hp: hpInc,
+            attack: atkInc,
+            defense: defInc,
+            maxMana: initialPlayer.maxMana + bonus.mana,
+            mana: initialPlayer.maxMana + bonus.mana,
+            exp: getExpNokori,
             expToNextLevel: expToNext,
-          },
-          battle: {
-            ...battle,
-            hpRate: 100,
           },
         });
       },
       addToInventory: (equipmentId, quantity) => {
         const { inventory } = get();
-        const newItem: InventoryItem = { equipmentId, quantity };
+        const equipment = getEquipmentById(equipmentId);
+        const maxQty = equipment?.maxQuantity ?? 10;
+        const currentQty = inventory.find(i => i.equipmentId === equipmentId)?.quantity || 0;
+        const canAdd = Math.min(quantity, maxQty - currentQty);
+        if (canAdd <= 0) return;
+        
+        const newItem: InventoryItem = { equipmentId, quantity: canAdd };
         saveCollection([newItem]);
         
         const existingItem = inventory.find(item => item.equipmentId === equipmentId);
         if (existingItem) {
           const newInventory = inventory.map(item =>
             item.equipmentId === equipmentId
-              ? { ...item, quantity: item.quantity + quantity }
+              ? { ...item, quantity: item.quantity + canAdd }
               : item
           );
           set({ inventory: newInventory });
@@ -406,7 +468,7 @@ export const useGameStore = create<GameStore>()(
           .filter(item => item.quantity > 0);
         set({ inventory: newInventory });
       },
-      equipItem: (equipment) => {
+      equipItem: (equipment, slotIndex) => {
         const { player } = get();
         
         let newPlayer = { ...player };
@@ -422,27 +484,65 @@ export const useGameStore = create<GameStore>()(
           }
           newPlayer.equippedArmor = equipment;
         } else if (equipment.type === 'accessory') {
-          if (newPlayer.equippedAccessories.length < 6) {
-            newPlayer.equippedAccessories = [...newPlayer.equippedAccessories, equipment];
+          const accessories = [...(newPlayer.equippedAccessories || [])];
+          if (slotIndex !== undefined && slotIndex < accessories.length) {
+            // 替换指定栏位的饰品
+            if (accessories[slotIndex]?.id === equipment.id) return;
+            accessories[slotIndex] = equipment;
+          } else if (accessories.length < newPlayer.maxAccessorySlots) {
+            // 追加到空栏位
+            accessories.push(equipment);
           } else {
             return;
           }
+          newPlayer.equippedAccessories = accessories;
         }
         
-        const weaponBonus = newPlayer.equippedWeapon?.attackBonus || 0;
-        const armorBonus = newPlayer.equippedArmor?.defenseBonus || 0;
-        const armorHpBonus = newPlayer.equippedArmor?.hpBonus || 0;
+        const { inventory } = get();
+        
+        // 计算武器贡献（含存货加成和倍率）
+        const weaponObj = newPlayer.equippedWeapon;
+        const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty) : 0;
+        
+        // 计算防具贡献（含存货加成和倍率）
+        const armorObj = newPlayer.equippedArmor;
+        const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
         
         const accessories = newPlayer.equippedAccessories || [];
         const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
         const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
         const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
         
-        newPlayer.attack = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponBonus + accessoryAtkBonus;
-        newPlayer.defense = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorBonus + accessoryDefBonus;
-        newPlayer.maxHp = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpBonus + accessoryHpBonus;
+        newPlayer.attack = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus;
+        newPlayer.defense = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus;
+        newPlayer.maxHp = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus;
         
         set({ player: newPlayer });
+        
+        if (equipment.type === 'accessory') {
+          get().checkZeroEquips();
+        }
+      },
+      buyEquipment: (equipmentId) => {
+        const { player, inventory, addToInventory } = get();
+        const equipment = getEquipmentById(equipmentId);
+        if (!equipment) return false;
+        
+        // 检查价格
+        if (equipment.price <= 0) return false;
+        if (player.gold < equipment.price) return false;
+        
+        // 检查是否已达上限
+        const existing = inventory.find(i => i.equipmentId === equipmentId);
+        if (existing && existing.quantity >= equipment.maxQuantity) return false;
+        
+        // 扣钱 & 加入背包
+        set({ player: { ...player, gold: player.gold - equipment.price } });
+        addToInventory(equipmentId, 1);
+        return true;
       },
       useConsumable: (equipmentId) => {
         const { inventory, updatePlayerHp, updatePlayerMana, removeFromInventory } = get();
@@ -501,8 +601,10 @@ export const useGameStore = create<GameStore>()(
             isDropSuccess: false,
             goldMultiplier: 1,
             battleResult: null,
+            _ending: false,
           },
         });
+        get().checkZeroEquips();
       },
       addEncounterRate: (amount) => {
         const { encounterRate } = get();
@@ -520,7 +622,10 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
-        const enemy = getRandomEnemy(player.level);
+        const currentMap = get().currentMap;
+        const mapEnemies = getMapEnemies(currentMap);
+        const randomIndex = Math.floor(Math.random() * mapEnemies.length);
+        const enemy = { ...mapEnemies[randomIndex] };
         
         const dropSlots = enemy.drops.map(drop => {
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
@@ -655,13 +760,14 @@ export const useGameStore = create<GameStore>()(
             isDropSuccess: dropResult.isDropSuccess,
             goldMultiplier: battleVarResult.goldMultiplier,
             battleResult: null,
+            _ending: false,
           },
         });
       },
       endBattle: (victory) => {
         const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, battle: { comboCount, goldMultiplier } } = get();
         
-        if (battle.battleResult || battle.status !== 'fighting') {
+        if (battle.battleResult) {
           return;
         }
         
@@ -765,7 +871,7 @@ export const useGameStore = create<GameStore>()(
           }
           set({ battle: { ...battle, status: 'fighting' } });
           startBattleLoop();
-        } else if (battle.status === 'fighting') {
+        } else if (battle.status === 'fighting' && !battle._ending) {
           stopBattleLoop();
           set({ battle: { ...battle, status: 'paused' } });
         }
@@ -825,7 +931,7 @@ export const useGameStore = create<GameStore>()(
                 return;
               }
               
-              const totalAttack = player.attack + (player.equippedWeapon?.attackBonus || 0);
+              const totalAttack = player.attack;
               const hpPercent = player.hp / player.maxHp;
               const critRate = calculateCritRate(hpPercent);
               const isCrit = Math.random() * 100 < critRate;
@@ -862,7 +968,7 @@ export const useGameStore = create<GameStore>()(
               mode = 4;
               isProcessing = false;
             } else {
-              const totalDefense = player.defense + (player.equippedArmor?.defenseBonus || 0);
+              const totalDefense = player.defense;
               const enemyDamage = calculateEnemyDamage(
                 battle.enemy.attack,
                 totalDefense
@@ -902,6 +1008,7 @@ export const useGameStore = create<GameStore>()(
                 if (newEnemyHp <= 0) {
                   addBattleLog('战斗胜利！');
                   battleEnded = true;
+                  set((s) => ({ battle: { ...s.battle, _ending: true } }));
                   setTimeout(() => {
                     endBattle(true);
                   }, 500);
@@ -923,6 +1030,7 @@ export const useGameStore = create<GameStore>()(
                 if (newPlayer.hp <= 0) {
                   addBattleLog('战斗失败了');
                   battleEnded = true;
+                  set((s) => ({ battle: { ...s.battle, _ending: true } }));
                   setTimeout(() => {
                     endBattle(false);
                   }, 500);
@@ -1015,6 +1123,7 @@ export const useGameStore = create<GameStore>()(
               isDropSuccess: false,
               goldMultiplier: 1,
               battleResult: null,
+              _ending: false,
             },
           });
           }, 1000);
@@ -1049,12 +1158,35 @@ export const useGameStore = create<GameStore>()(
         const savedInventory = collection.length > 0 ? collection : initialInventory;
         const saveData = loadSaveData();
         
+        const equippedWeapon = currentPlayer.equippedWeapon;
+        const equippedArmor = currentPlayer.equippedArmor;
+        const equippedAccessories = [...(currentPlayer.equippedAccessories || [])];
+        
+        // 重新计算带装备加成和存货加成的属性
+        const weaponQty = equippedWeapon ? (savedInventory.find((i: InventoryItem) => i.equipmentId === equippedWeapon.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = equippedWeapon ? getWeaponAtkContribution(equippedWeapon, weaponQty) : 0;
+        
+        const armorQty = equippedArmor ? (savedInventory.find((i: InventoryItem) => i.equipmentId === equippedArmor.id)?.quantity || 1) : 1;
+        const armorDefContrib = equippedArmor ? getArmorDefContribution(equippedArmor, armorQty) : 0;
+        const armorHpContrib = equippedArmor ? getArmorHpContribution(equippedArmor, armorQty) : 0;
+        
+        const accessoryAtkBonus = equippedAccessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
+        const accessoryDefBonus = equippedAccessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
+        const accessoryHpBonus = equippedAccessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
+        
+        const levelBonus = getLevelBonus(initialPlayer.level);
+        
         set({
           player: {
             ...initialPlayer,
-            equippedWeapon: currentPlayer.equippedWeapon,
-            equippedArmor: currentPlayer.equippedArmor,
-            equippedAccessories: [...(currentPlayer.equippedAccessories || [])],
+            attack: initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus,
+            defense: initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus,
+            maxHp: initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus,
+            hp: initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus,
+            equippedWeapon,
+            equippedArmor,
+            equippedAccessories,
+            maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
           },
           inventory: savedInventory,
           skills: initialSkills,
@@ -1087,6 +1219,7 @@ export const useGameStore = create<GameStore>()(
             isDropSuccess: false,
             goldMultiplier: 1,
             battleResult: null,
+            _ending: false,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
@@ -1105,6 +1238,7 @@ export const useGameStore = create<GameStore>()(
           speedNum: saveData.speedNum,
           dropNum: saveData.dropNum,
           presetNum: saveData.presetNum,
+          currentMap: 1,
         });
       },
       incrementWinBattle: () => {
@@ -1203,12 +1337,84 @@ export const useGameStore = create<GameStore>()(
         if (!bonus.currentBonus) return null;
         return BONUS_LIST[bonus.currentBonus.bonusType] || null;
       },
+      teleportToMap: (mapId) => {
+        const { player } = get();
+        const map = MAP_LIST.find(m => m.id === mapId);
+        if (!map) return;
+        if (player.level < map.unlockLevel) return;
+        set({ currentMap: mapId });
+      },
+      unlockAccessorySlot: () => {
+        const { player } = get();
+        const currentSlots = player.maxAccessorySlots;
+        if (currentSlots >= MAX_ACCESSORY_SLOTS) return false;
+        
+        const price = AKUSE_SLOT_LOCK_MONEY[currentSlots]; // currentSlots 作为索引（0-based）
+        if (player.gold < price) return false;
+        
+        set({
+          player: {
+            ...player,
+            gold: player.gold - price,
+            maxAccessorySlots: currentSlots + 1,
+          },
+        });
+        return true;
+      },
+      checkZeroEquips: () => {
+        const { player, inventory } = get();
+        const equippedAccs = player.equippedAccessories || [];
+        if (equippedAccs.length === 0) return;
+        
+        // 统计每个饰品 ID 在装备栏中出现的次数
+        const equippedCountMap: Record<string, number> = {};
+        equippedAccs.forEach(acc => {
+          equippedCountMap[acc.id] = (equippedCountMap[acc.id] || 0) + 1;
+        });
+        
+        // 检查是否有装备数量超过库存的饰品
+        let needClean = false;
+        for (const [accId, equippedCount] of Object.entries(equippedCountMap)) {
+          const invItem = inventory.find(i => i.equipmentId === accId);
+          const invQty = invItem?.quantity || 0;
+          if (equippedCount > invQty) {
+            needClean = true;
+            break;
+          }
+        }
+        
+        if (!needClean) return;
+        
+        // 清理：对每个超出库存的饰品，只保留库存数量的装备
+        const remainingCount: Record<string, number> = {};
+        const newAccessories = equippedAccs.filter(acc => {
+          const maxAllowed = inventory.find(i => i.equipmentId === acc.id)?.quantity || 0;
+          const current = remainingCount[acc.id] || 0;
+          if (current < maxAllowed) {
+            remainingCount[acc.id] = current + 1;
+            return true;
+          }
+          return false;
+        });
+        
+        set({
+          player: {
+            ...player,
+            equippedAccessories: newAccessories,
+          },
+        });
+      },
     }),
     {
       name: STORAGE_KEY,
-      version: 2,
+      version: 3,
       migrate: (persistedState, _version) => {
         const state = persistedState as any;
+        
+        // Fix missing currentMap
+        if (typeof state.currentMap !== 'number') {
+          state.currentMap = 1;
+        }
         
         // Fix player gold if it's NaN
         if (state.player) {
@@ -1234,6 +1440,11 @@ export const useGameStore = create<GameStore>()(
             state.player.luck = 1000;
           }
           
+          // Fix maxAccessorySlots
+          if (typeof state.player.maxAccessorySlots !== 'number' || state.player.maxAccessorySlots < 1) {
+            state.player.maxAccessorySlots = 1;
+          }
+
           // Fix equipment
           if (state.player.equippedWeapon) {
             const weapon = getEquipmentById(state.player.equippedWeapon.id);
@@ -1247,6 +1458,35 @@ export const useGameStore = create<GameStore>()(
               state.player.equippedArmor = armor;
             }
           }
+          if (state.player.equippedAccessories && Array.isArray(state.player.equippedAccessories)) {
+            state.player.equippedAccessories = state.player.equippedAccessories
+              .map((acc: any) => {
+                const found = getEquipmentById(acc?.id);
+                return found || acc;
+              })
+              .filter((acc: any) => getEquipmentById(acc?.id));
+          }
+          
+          // Recalculate player stats with equipment bonuses and stock bonus
+          const weapon = state.player.equippedWeapon;
+          const armor = state.player.equippedArmor;
+          const accessories = (state.player.equippedAccessories || []) as Equipment[];
+          const inventory = (state.inventory || []) as InventoryItem[];
+          
+          const weaponQty = weapon ? (inventory.find((i: InventoryItem) => i.equipmentId === weapon.id)?.quantity || 1) : 1;
+          const weaponAtkContrib = weapon ? getWeaponAtkContribution(weapon, weaponQty) : 0;
+          
+          const armorQty = armor ? (inventory.find((i: InventoryItem) => i.equipmentId === armor.id)?.quantity || 1) : 1;
+          const armorDefContrib = armor ? getArmorDefContribution(armor, armorQty) : 0;
+          const armorHpContrib = armor ? getArmorHpContribution(armor, armorQty) : 0;
+          
+          const accAtk = accessories.reduce((sum: number, a: Equipment) => sum + (a.attackBonus || 0), 0);
+          const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a.defenseBonus || 0), 0);
+          const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a.hpBonus || 0), 0);
+          const lvlBonus = getLevelBonus(state.player.level || 1);
+          state.player.attack = (initialPlayer.attack) + lvlBonus.attack + weaponAtkContrib + accAtk;
+          state.player.defense = (initialPlayer.defense) + lvlBonus.defense + armorDefContrib + accDef;
+          state.player.maxHp = (initialPlayer.maxHp) + lvlBonus.hp + armorHpContrib + accHp;
         }
         
         return persistedState;

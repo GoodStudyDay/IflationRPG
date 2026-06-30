@@ -7,10 +7,12 @@ function App() {
   const { currentScene } = useGameStore();
   
   return (
-    <div className="min-h-screen bg-game-dark">
-      {currentScene === 'title' && <TitleScreen />}
-      {currentScene === 'world' && <MainScreen />}
-      {currentScene === 'battle' && <BattleScreen />}
+    <div className="min-h-screen bg-game-dark flex justify-center">
+      <div className="w-full max-w-2xl">
+        {currentScene === 'title' && <TitleScreen />}
+        {currentScene === 'world' && <MainScreen />}
+        {currentScene === 'battle' && <BattleScreen />}
+      </div>
     </div>
   );
 }

@@ -19,6 +19,7 @@ export const initialPlayer: Player = {
   equippedWeapon: null,
   equippedArmor: null,
   equippedAccessories: [],
+  maxAccessorySlots: 3,
 };
 
 export const initialInventory: InventoryItem[] = [

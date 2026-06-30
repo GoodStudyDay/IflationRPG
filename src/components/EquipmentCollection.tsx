@@ -8,14 +8,27 @@ interface EquipmentCollectionProps {
 }
 
 export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
-  const { inventory } = useGameStore();
+  const { inventory, player, buyEquipment } = useGameStore();
   const [selectedCategory, setSelectedCategory] = useState<EquipmentType | 'all'>('all');
+  const [buySuccessMsg, setBuySuccessMsg] = useState<string | null>(null);
+  const [buyErrorMsg, setBuyErrorMsg] = useState<string | null>(null);
+
+  const handleBuy = (equipmentId: string) => {
+    const success = buyEquipment(equipmentId);
+    if (success) {
+      setBuySuccessMsg('购买成功！');
+      setTimeout(() => setBuySuccessMsg(null), 1500);
+    } else {
+      setBuyErrorMsg('金币不足或已达上限');
+      setTimeout(() => setBuyErrorMsg(null), 1500);
+    }
+  };
 
   const categories: { value: EquipmentType | 'all'; label: string }[] = [
     { value: 'all', label: '全部' },
     { value: 'weapon', label: '武器' },
     { value: 'armor', label: '防具' },
-    { value: 'consumable', label: '消耗品' },
+    { value: 'accessory', label: '饰品' },
   ];
 
   const filteredEquipment = equipmentData.filter(item => {
@@ -33,12 +46,13 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
       case 'weapon': return '武器';
       case 'armor': return '防具';
       case 'consumable': return '消耗品';
+      case 'accessory': return '饰品';
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col">
+      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[95%] max-w-lg max-h-[85vh] flex flex-col">
         <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -78,12 +92,14 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
               const ownedQuantity = getOwnedQuantity(equipment.id);
               const isMaxed = ownedQuantity >= equipment.maxQuantity;
               const isOwned = ownedQuantity > 0;
+              const isPurchaseable = equipment.price > 0;
+              const showInfo = isOwned || isPurchaseable;
 
               return (
                 <div
                   key={equipment.id}
                   className={`bg-[#3d2b6e] rounded-lg p-3 border-2 transition-all ${
-                    isOwned
+                    showInfo
                       ? isMaxed
                         ? 'border-gray-600 opacity-60'
                         : 'border-blue-500/50'
@@ -96,23 +112,23 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                     </div>
                     <div className="flex-shrink-0 w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center">
                       <span className="text-xl">
-                        {isOwned ? equipment.icon : '❓'}
+                        {showInfo ? equipment.icon : '❓'}
                       </span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <span className={`font-bold ${
-                          isOwned
+                          showInfo
                             ? isMaxed ? 'text-gray-400' : 'text-game-secondary'
                             : 'text-gray-500'
                         }`}>
-                          {isOwned ? equipment.name : '？？？'}
+                          {showInfo ? equipment.name : '？？？'}
                         </span>
                         <span className="text-xs text-gray-400">
                           {getTypeLabel(equipment.type)}
                         </span>
                       </div>
-                      {isOwned && (
+                      {showInfo && (
                         <div className="flex items-center gap-2 mt-1">
                           {equipment.attackBonus > 0 && (
                             <span className="bg-red-900/50 text-red-400 px-2 py-0.5 rounded text-xs">
@@ -129,11 +145,28 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                               HP +{equipment.hpBonus}
                             </span>
                           )}
+                          {equipment.effectDescription && (
+                            <span className="text-purple-400 text-xs">
+                              {equipment.effectDescription}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className={`text-lg font-bold ${
+                    <div className="text-right min-w-[70px]">
+                      {equipment.price > 0 && !isMaxed && (
+                        <button
+                          onClick={() => handleBuy(equipment.id)}
+                          className={`text-xs font-bold py-1 px-3 rounded transition-colors ${
+                            player.gold >= equipment.price
+                              ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                              : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {equipment.price.toLocaleString()}G
+                        </button>
+                      )}
+                      <div className={`text-lg font-bold mt-0.5 ${
                         isMaxed ? 'text-gray-400' : 'text-yellow-400'
                       }`}>
                         {ownedQuantity} / {equipment.maxQuantity}
@@ -157,6 +190,23 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
             返回
           </button>
         </div>
+      </div>
+      
+      {/* 购买提示 */}
+      {buySuccessMsg && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
+          {buySuccessMsg}
+        </div>
+      )}
+      {buyErrorMsg && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
+          {buyErrorMsg}
+        </div>
+      )}
+      
+      {/* 金币显示 */}
+      <div className="fixed top-4 right-4 bg-yellow-600/90 text-white px-3 py-1.5 rounded-lg z-50 text-sm font-bold">
+        {player.gold.toLocaleString()} G
       </div>
     </div>
   );

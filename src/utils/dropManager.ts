@@ -75,9 +75,23 @@ const randomDrop = (
   dropRate: number,
   inventory: any[]
 ): { getItemType: number; getItemIndex: number } => {
-  const times = getItemTimes(itemType, itemIndex, inventory);
+  // itemIndex === -1 表示从该类装备中随机选一个（用于武器/防具的通用掉落）
+  let actualIndex = itemIndex;
+  if (itemIndex === -1) {
+    const equipmentIds = equipmentData
+      .filter(e => (itemType === 0 ? e.type === 'weapon' : itemType === 1 ? e.type === 'armor' : false))
+      .map(e => e.id);
+    if (equipmentIds.length === 0) {
+      return { getItemType: -1, getItemIndex: -1 };
+    }
+    const randomId = equipmentIds[Math.floor(Math.random() * equipmentIds.length)];
+    const mapping = equipmentIdToItemTypeAndIndex(randomId);
+    actualIndex = mapping.itemIndex;
+  }
+  
+  const times = getItemTimes(itemType, actualIndex, inventory);
   if (times < maxCount && Math.random() < dropRate) {
-    return { getItemType: itemType, getItemIndex: itemIndex };
+    return { getItemType: itemType, getItemIndex: actualIndex };
   }
   return { getItemType: -1, getItemIndex: -1 };
 };
