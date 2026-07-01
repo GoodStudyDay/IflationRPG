@@ -9,7 +9,8 @@ interface EquipmentCollectionProps {
 
 export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const { inventory, player, buyEquipment } = useGameStore();
-  const [selectedCategory, setSelectedCategory] = useState<EquipmentType | 'all'>('all');
+  type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [buySuccessMsg, setBuySuccessMsg] = useState<string | null>(null);
   const [buyErrorMsg, setBuyErrorMsg] = useState<string | null>(null);
 
@@ -24,15 +25,19 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
     }
   };
 
-  const categories: { value: EquipmentType | 'all'; label: string }[] = [
+  const categories: { value: CategoryType; label: string }[] = [
     { value: 'all', label: '全部' },
     { value: 'weapon', label: '武器' },
     { value: 'armor', label: '防具' },
     { value: 'accessory', label: '饰品' },
+    { value: 'soul', label: '魂' },
+    { value: 'material', label: '材料' },
   ];
 
   const filteredEquipment = equipmentData.filter(item => {
     if (selectedCategory === 'all') return true;
+    if (selectedCategory === 'soul') return item.id.startsWith('soul-');
+    if (selectedCategory === 'material') return false;
     return item.type === selectedCategory;
   });
 

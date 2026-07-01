@@ -45,41 +45,37 @@ export const MainScreen = () => {
   return (
     <div className="min-h-screen bg-[#1a0a2e] flex flex-col">
       <div className="bg-[#3d2b6e]/30 p-2 sm:p-4">
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1">
-            <button
-              onClick={() => setShowBonus(true)}
-              className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
-            >
-              奖励
-            </button>
-            <button
-              onClick={() => setShowTeleport(true)}
-              className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
-            >
-              传送
-            </button>
-            <button
-              onClick={() => setShowBoss(true)}
-              className="bg-[#8a2a4a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#9a3a5a] transition-colors flex-1"
-            >
-              BOSS
-            </button>
-          </div>
-          <div className="flex flex-col gap-2 sm:gap-3 w-[40%] sm:w-[30%]">
-            <button
-              onClick={() => setShowMenu(true)}
-              className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
-            >
-              菜单
-            </button>
-            <button
-              onClick={handleBattleClick}
-              className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
-            >
-              战斗
-            </button>
-          </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setShowMenu(true)}
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
+          >
+            菜单
+          </button>
+          <button
+            onClick={() => setShowBonus(true)}
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
+          >
+            奖励
+          </button>
+          <button
+            onClick={() => setShowTeleport(true)}
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
+          >
+            传送
+          </button>
+          <button
+            onClick={() => setShowBoss(true)}
+            className="bg-[#8a2a4a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#9a3a5a] transition-colors flex-1"
+          >
+            BOSS
+          </button>
+          <button
+            onClick={handleBattleClick}
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
+          >
+            战斗
+          </button>
         </div>
       </div>
       

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,7 +11,7 @@
 }
 
 body {
-  font-family: 'ZCOOL QingKe HuangYou', 'Press Start 2P', cursive;
+  font-family: 'Press Start 2P', cursive;
   background-color: #1a0a2e;
   color: #ffffff;
   overflow: hidden;
@@ -43,20 +43,4 @@ body {
 
 .animate-pulse {
   animation: pulse 0.5s ease-in-out;
-}
-
-button {
-  font-family: 'ZCOOL QingKe HuangYou', 'Press Start 2P', cursive;
-}
-
-input {
-  font-family: 'ZCOOL QingKe HuangYou', 'Press Start 2P', cursive;
-}
-
-select {
-  font-family: 'ZCOOL QingKe HuangYou', 'Press Start 2P', cursive;
-}
-
-textarea {
-  font-family: 'ZCOOL QingKe HuangYou', 'Press Start 2P', cursive;
 }
