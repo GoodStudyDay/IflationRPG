@@ -1048,7 +1048,7 @@ export const useGameStore = create<GameStore>()(
         }
         
         const newBattlePoints = battlePoints + battlePointsChange;
-        const newDefeatedBosses = victory && (battle.enemy as any).bossId 
+        const newDefeatedBosses = victory && (battle.enemy as any).bossId !== undefined 
           ? [...defeatedBosses, (battle.enemy as any).bossId] 
           : defeatedBosses;
         
