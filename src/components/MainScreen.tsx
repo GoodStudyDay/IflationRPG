@@ -4,13 +4,15 @@ import { MenuOverlay } from './MenuOverlay';
 import { BonusOverlay } from './BonusOverlay';
 import { BONUS_LIST } from '@/utils/bonusManager';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
+import { BOSS_DATA } from '@/data/bossData';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
   const [showTeleport, setShowTeleport] = useState(false);
+  const [showBoss, setShowBoss] = useState(false);
   
   const expPercent = player.expToNextLevel > 0 ? (player.exp / player.expToNextLevel) * 100 : 0;
   
@@ -43,33 +45,36 @@ export const MainScreen = () => {
   return (
     <div className="min-h-screen bg-[#1a0a2e] flex flex-col">
       <div className="bg-[#3d2b6e]/30 p-2 sm:p-4">
-        <div className="flex items-center justify-between gap-1">
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
           <button
             onClick={() => setShowBonus(true)}
-            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
             奖励
           </button>
           <button
             onClick={() => setShowTeleport(true)}
-            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            Teleport
+            传送
           </button>
           <button
             onClick={() => setShowMenu(true)}
-            className="bg-[#5a3c8a] px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
             菜单
           </button>
-        </div>
-        
-        <div className="flex justify-end mt-2">
           <button
             onClick={handleBattleClick}
-            className="bg-[#5a3c8a] px-6 sm:px-8 py-1.5 sm:py-2 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors"
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
             战斗
+          </button>
+          <button
+            onClick={() => setShowBoss(true)}
+            className="bg-[#8a2a4a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#9a3a5a] transition-colors flex-1"
+          >
+            BOSS
           </button>
         </div>
       </div>
@@ -251,6 +256,59 @@ export const MainScreen = () => {
       {showMenu && <MenuOverlay onClose={() => setShowMenu(false)} />}
       
       {showBonus && <BonusOverlay onClose={() => setShowBonus(false)} />}
+      
+      {showBoss && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowBoss(false)}>
+          <div className="bg-[#2d1b4e] border-2 border-[#8a2a4a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择BOSS</h3>
+            <div className="space-y-2">
+              {BOSS_DATA.map(boss => {
+                const isAvailable = player.level >= boss.level;
+                return (
+                  <button
+                    key={boss.id}
+                    onClick={() => {
+                      if (isAvailable) {
+                        startBossBattle(boss.bossId);
+                        setShowBoss(false);
+                      }
+                    }}
+                    disabled={!isAvailable}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      isAvailable
+                        ? 'border-[#8a2a4a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
+                        : 'border-gray-700 bg-gray-900/50 opacity-40 cursor-not-allowed'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg mr-2">{boss.icon}</span>
+                        <span className="text-white font-bold">{boss.name}</span>
+                      </div>
+                      <div className="text-xs">
+                        {isAvailable ? (
+                          <span className="text-red-400">挑战</span>
+                        ) : (
+                          <span className="text-red-400">需LV{boss.level}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      HP: {boss.maxHp.toLocaleString()} · ATK: {boss.attack.toLocaleString()} · EXP: {boss.expReward.toLocaleString()}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setShowBoss(false)}
+              className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
       
       {showResetConfirm && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">

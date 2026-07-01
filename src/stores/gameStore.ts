@@ -11,6 +11,7 @@ import { eneDropItemInit, equipmentIdToItemTypeAndIndex, itemTypeAndIndexToEquip
 import { battleVarInit } from '@/utils/battleVar';
 import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
+import { getBossById } from '@/data/bossData';
 
 interface GameStore {
   player: Player;
@@ -55,6 +56,7 @@ interface GameStore {
   addEncounterRate: (amount: number) => void;
   resetEncounterRate: () => void;
   startBattle: () => void;
+  startBossBattle: (bossId: number) => void;
   endBattle: (victory: boolean) => void;
   clearBattleResult: () => void;
   toggleBattle: () => void;
@@ -75,6 +77,8 @@ interface GameStore {
   updateHighDamage: (damage: number) => void;
   updateHighLv: (level: number) => void;
   addMapBonus: () => void;
+  exportSaveData: () => string;
+  importSaveData: (data: string) => void;
   clearMapBonus: () => void;
   getBonusInfo: () => { type: number; name: string; description: string; icon: string; color: string } | null;
   /** 传送到指定地图 */
@@ -785,6 +789,109 @@ export const useGameStore = create<GameStore>()(
           },
         });
       },
+      startBossBattle: (bossId) => {
+        const { player, battlePoints, inventory, Highlv, dropNum } = get();
+        
+        if (battlePoints <= 0) {
+          return;
+        }
+        
+        const boss = getBossById(bossId);
+        if (!boss) {
+          return;
+        }
+        
+        const dropSlots = boss.drops.map(drop => {
+          const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
+          return {
+            itemType,
+            itemIndex,
+            baseRate: drop.dropRate,
+          };
+        });
+        
+        const slot1 = dropSlots[0] || null;
+        const slot2 = dropSlots[1] || null;
+        const slot3 = dropSlots[2] || null;
+        
+        const battleVarResult = battleVarInit(
+          {
+            hp: player.hp,
+            maxHp: player.maxHp,
+            attack: player.attack,
+            defense: player.defense,
+            agility: player.agility,
+            luck: player.luck,
+          },
+          {
+            hp: boss.maxHp,
+            attack: boss.attack,
+            exp: boss.expReward,
+            gold: boss.goldReward,
+            level: boss.level * 100,
+          },
+          dropSlots.length,
+          {
+            hardmode: 0,
+            renzokuPlusKakuritu: 0,
+            crihPlusKakuritu: 0,
+            speedwariai: 0,
+            lukwariai: 0,
+            hourGlassON: false,
+            hourGlassON1: false,
+            expbairitu: 1,
+          }
+        );
+        
+        const settings = {
+          donyokuOn: false,
+          goyokuOn: false,
+          twilightON: false,
+          hardmode: 0,
+          dropBoost: 1,
+        };
+        
+        const saveSettings = {
+          dropNum,
+          Highlv,
+        };
+        
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings);
+        
+        const dropEquipment = dropResult.getItemDropType !== -1 
+          ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
+          : null;
+        
+        set({
+          player: { ...player, hp: player.maxHp },
+          currentScene: 'battle',
+          encounterRate: 0,
+          battlePoints: battlePoints - 1,
+          battle: {
+            enemy: boss,
+            status: 'idle',
+            battleLog: ['BOSS出现了！', `${boss.name}降临！`, '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
+            comboCount: 0,
+            comboRate: battleVarResult.comboRate * 100,
+            critRate: battleVarResult.critRate * 100,
+            hpRate: 100,
+            dropRate: dropResult.getItemDropRate * 100,
+            dropItemName: dropEquipment ? dropEquipment.name : '------',
+            turn: 'player',
+            turnCount: 0,
+            recoverNextTurn: false,
+            recoverUsed: false,
+            playerAnimation: 'idle',
+            enemyAnimation: 'idle',
+            dropType: dropResult.getItemDropType,
+            dropIndex: dropResult.getItemDropIndex,
+            isDropSuccess: dropResult.isDropSuccess,
+            goldMultiplier: battleVarResult.goldMultiplier,
+            battleResult: null,
+            _ending: false,
+          },
+        });
+      },
       endBattle: (victory) => {
         const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, battle: { comboCount, goldMultiplier } } = get();
         
@@ -1126,41 +1233,36 @@ export const useGameStore = create<GameStore>()(
         
         if (battle.status !== 'paused' || !battle.enemy) return;
         
-        if (Math.random() < GAME_CONFIG.ESCAPE_CHANCE) {
-          addBattleLog('成功逃跑了！');
-          setTimeout(() => {
-            resetEncounterRate();
-            setCurrentScene('world');
-            set({
-            battle: {
-              enemy: null,
-              status: 'idle',
-              battleLog: [],
-              comboCount: 0,
-              comboRate: 5,
-              critRate: 5,
-              hpRate: 100,
-              dropRate: 0,
-              dropItemName: '',
-              turn: 'player',
-              turnCount: 0,
-              recoverNextTurn: false,
-              recoverUsed: false,
-              playerAnimation: 'idle',
-              enemyAnimation: 'idle',
-              dropType: -1,
-              dropIndex: -1,
-              isDropSuccess: false,
-              goldMultiplier: 1,
-              battleResult: null,
-              _ending: false,
-            },
-          });
-          }, 1000);
-        } else {
-          addBattleLog('逃跑失败！');
-          get().resumeBattle();
-        }
+        addBattleLog('成功逃跑了！');
+        setTimeout(() => {
+          resetEncounterRate();
+          setCurrentScene('world');
+          set({
+          battle: {
+            enemy: null,
+            status: 'idle',
+            battleLog: [],
+            comboCount: 0,
+            comboRate: 5,
+            critRate: 5,
+            hpRate: 100,
+            dropRate: 0,
+            dropItemName: '',
+            turn: 'player',
+            turnCount: 0,
+            recoverNextTurn: false,
+            recoverUsed: false,
+            playerAnimation: 'idle',
+            enemyAnimation: 'idle',
+            dropType: -1,
+            dropIndex: -1,
+            isDropSuccess: false,
+            goldMultiplier: 1,
+            battleResult: null,
+            _ending: false,
+          },
+        });
+        }, 1000);
       },
       addBattleLog: (message) => {
         const { battle } = get();
@@ -1332,6 +1434,22 @@ export const useGameStore = create<GameStore>()(
           data.Highlv = level;
           saveSaveData(data);
         }
+      },
+      exportSaveData: () => {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (!data) {
+          throw new Error('没有可导出的存档');
+        }
+        return btoa(unescape(encodeURIComponent(data)));
+      },
+      importSaveData: (encodedData) => {
+        const decoded = decodeURIComponent(escape(atob(encodedData)));
+        const data = JSON.parse(decoded);
+        if (!data.state || !data.state.player || !data.state.inventory) {
+          throw new Error('无效的存档数据');
+        }
+        localStorage.setItem(STORAGE_KEY, decoded);
+        window.location.reload();
       },
       // 奖励系统
       addMapBonus: () => {

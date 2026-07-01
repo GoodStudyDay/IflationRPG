@@ -4,6 +4,24 @@ export interface Equipment {
   id: string;
   name: string;
   type: EquipmentType;
+  listnum: number;
+  x: number;
+  y: number;
+  price: number;
+  plus?: number;
+  multi?: number;
+  hardmode: number;
+  bit32?: number;
+  bougu32png?: number;
+  t1?: number;
+  setumei?: string;
+  t2?: number;
+  rank?: number;
+  image?: number;
+  mixbase1?: number;
+  mixbase2?: number;
+  mixbase3?: number;
+  mixbase4?: number;
   attackBonus: number;
   defenseBonus: number;
   hpBonus: number;
@@ -11,7 +29,6 @@ export interface Equipment {
   icon: string;
   maxQuantity: number;
   effectDescription?: string;
-  price: number;
   attributeRate: number;
 }
 

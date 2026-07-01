@@ -1,0 +1,265 @@
+package
+{
+   import Class.Item;
+   import Include_GameData.LocData2;
+   import flash.display.Bitmap;
+   import flash.text.TextField;
+   import root.L;
+   import ttk.skin.BlButton;
+   import ttk.tool.Tool_Text;
+   
+   public class PlayerInfo extends playerinfo2mc
+   {
+      
+      private var ga:Game;
+      
+      public var tweetBl:BlButton;
+      
+      public var lineButton:BlButton;
+      
+      public var tweettxt:String;
+      
+      public var temp:Number = 0;
+      
+      public var collect:Number = 0;
+      
+      public function PlayerInfo(param1:Game)
+      {
+         var _loc25_:int = 0;
+         var _loc26_:int = 0;
+         var _loc27_:* = 0;
+         var _loc22_:int = 0;
+         var _loc12_:int = 0;
+         var _loc8_:int = 0;
+         var _loc11_:int = 0;
+         var _loc6_:int = 0;
+         var _loc14_:int = 0;
+         var _loc20_:Item = null;
+         var _loc10_:Bitmap = null;
+         var _loc17_:Item = null;
+         var _loc19_:Bitmap = null;
+         var _loc13_:int = 0;
+         var _loc2_:Item = null;
+         var _loc7_:TextField = null;
+         var _loc5_:Bitmap = null;
+         var _loc18_:TextField = null;
+         var _loc4_:Bitmap = null;
+         super();
+         this.ga = param1;
+         var _loc9_:Vector.<Item> = param1.itemDataMana.ItemuBUKI;
+         var _loc15_:Vector.<Item> = param1.itemDataMana.ItemuBOUGU;
+         var _loc16_:Vector.<Item> = param1.itemDataMana.ItemuAKUSE;
+         var _loc23_:Vector.<Item> = param1.itemDataMana.ItemuSOUL;
+         var _loc24_:Vector.<Item> = param1.itemDataMana.ItemuMATERIAL;
+         addChild(Tool_Text.TFLEFTGet(10,10,L.FontNum(),48,16777215,L.Get("プレイヤー情報"),0,L.SelNum(0,3)));
+         _loc8_ = count(param1.gamesavedata.HakkenmapV,1);
+         addChild(Tool_Text.TFLEFTGet(12,82,L.FontNum(),24,16777215,L.Get("発見マップ数") + " : " + _loc8_));
+         _loc8_ = count(param1.gamesavedata.HakkenbossV,1,0,32);
+         addChild(Tool_Text.TFLEFTGet(12,118,L.FontNum(),24,16777215,L.Get("発見ボス数") + " : " + _loc8_));
+         addChild(Tool_Text.TFLEFTGet(330,84,L.FontNum(),21,16777215,L.Get("ゲームプレイ回数") + " : " + param1.gamesavedata.gameovercount,0,L.Z(0,0,0,0,0,-1)));
+         addChild(Tool_Text.TFLEFTGet(330,120,L.FontNum(),22,16777215,L.Get("ベース能力") + " : " + param1.gamesavedata.kyarakutalv + LocData2.LV,0,-2 + L.SelNum(0,2)));
+         _loc12_ = int(_loc9_.length);
+         _loc8_ = count(param1.gamesavedata.gameItemBUKIKazu,1,1);
+         _loc22_ = count(param1.gamesavedata.gameItemBUKIKazu,1,2);
+         addChild(Tool_Text.TFLEFTGet(12,161,L.FontNum(),24,16777215,L.Get("所持武器数") + " : " + _loc8_ + " / " + _loc12_ + " [" + _loc22_ + " / " + _loc12_ * 10 + "]"));
+         _loc12_ = int(_loc15_.length);
+         _loc8_ = count(param1.gamesavedata.gameItemBOUGUKazu,1,1);
+         _loc22_ = count(param1.gamesavedata.gameItemBOUGUKazu,1,2);
+         addChild(Tool_Text.TFLEFTGet(12,193,L.FontNum(),24,16777215,L.Get("所持防具数") + " : " + _loc8_ + " / " + _loc12_ + " [" + _loc22_ + " / " + _loc12_ * 10 + "]"));
+         _loc12_ = int(_loc16_.length);
+         _loc8_ = count(param1.gamesavedata.gameItemAKUSEKazu,1,1);
+         _loc22_ = count(param1.gamesavedata.gameItemAKUSEKazu,1,2);
+         addChild(Tool_Text.TFLEFTGet(12,227,L.FontNum(),24,16777215,L.Get("所持アクセサリー数") + " : " + _loc8_ + " / " + _loc12_ + " [" + _loc22_ + " / " + _loc12_ * 3 + "]"));
+         _loc12_ = int(_loc23_.length);
+         _loc8_ = count(param1.gamesavedata.gameItemSOULKazu,1,1);
+         _loc22_ = count(param1.gamesavedata.gameItemSOULKazu,1,2);
+         addChild(Tool_Text.TFLEFTGet(12,262,L.FontNum(),24,16777215,L.Get("魂") + " : " + _loc8_ + " / " + _loc12_ + " [" + _loc22_ + " / " + _loc12_ * 2 + "]"));
+         _loc12_ = int(_loc24_.length);
+         _loc8_ = count(param1.gamesavedata.gameItemMATERIALKazu,1,1);
+         _loc22_ = count(param1.gamesavedata.gameItemMATERIALKazu,1,2);
+         addChild(Tool_Text.TFLEFTGet(12,293,L.FontNum(),24,16777215,L.Get("Materials") + " : " + _loc8_ + " / " + _loc12_ + " [" + _loc22_ + " / " + _loc12_ * 10 + "]"));
+         addChild(Tool_Text.TFLEFTGet(330,325,L.FontNum(),24,16777215,"Enemy Kill" + " : " + param1.gamesavedata.winbattle));
+         _loc25_ = _loc9_.length * 10 + _loc15_.length * 10 + _loc16_.length * 3 + _loc23_.length * 2 + _loc24_.length * 10;
+         _loc26_ = count(param1.gamesavedata.gameItemMATERIALKazu,1,2) + count(param1.gamesavedata.gameItemSOULKazu,1,2) + count(param1.gamesavedata.gameItemAKUSEKazu,1,2) + count(param1.gamesavedata.gameItemBUKIKazu,1,2) + count(param1.gamesavedata.gameItemBOUGUKazu,1,2);
+         _loc27_ = _loc26_ / _loc25_;
+         collect = _loc27_;
+         addChild(Tool_Text.TFLEFTGet(12,325,L.FontNum(),24,16777215,L.Get("Collect") + " : " + (_loc27_ * 100).toFixed(2) + "%"));
+         addChild(Tool_Text.TFLANGet(24 + L.Z(-1,1),430,20,0,2,"HP",1));
+         addChild(Tool_Text.TFLANGet(24 + L.Z(-1,1),459,20,0,-1 + L.SelNum(0,3),LocData2.ATK,1));
+         addChild(Tool_Text.TFLANGet(24 + L.Z(-1,1),489,20,0,-1 + L.SelNum(0,3),LocData2.DEF,1));
+         addChild(Tool_Text.TFLANGet(24 + L.Z(-1,1),519,20,0,-1 + L.SelNum(0,3),LocData2.AGI,1));
+         addChild(Tool_Text.TFLANGet(24 + L.Z(-1,1),549,20,0,0 + L.SelNum(0,2),LocData2.LUC,1));
+         addChild(Tool_Text.TFLANGet(290 + L.Z(0,0,0),360 + L.Z(0,2),15 + L.Z(0,-2,1,0,0,-2),0,2 + L.Z(0,-3,3,0,0,-2),L.Get("武器")));
+         addChild(Tool_Text.TFLANGet(290 + L.Z(0,2,0),472 + L.Z(0,2),15 + L.Z(0,-2,1,0,0,-2),0,2 + L.Z(0,-2,2,0,0,-2),L.Get("防具")));
+         addChild(Tool_Text.TFLANGet(16,579,16,0,2 + L.Z(0,-1,1),L.Get("アクセサリー")));
+         he1.t10.text = LocData2.ATKsp;
+         he1.t20.text = LocData2.ATKspX;
+         he2.t10.text = LocData2.DEFsp;
+         he2.t20.text = LocData2.DEFspX;
+         addChild(Tool_Text.TFLEFTGet(12,403 + L.Z(0,0,0,0,0,2),L.FontNum(),18 + L.Z(0,0,0,0,0,-3),16777215,L.Get("最高レベル達成時のステータス・装備アイテム"),0,L.Z(0,0,0,0,0,-1)));
+         var _loc3_:int = 0;
+         if(param1.gamesavedata.gameovercount >= 1)
+         {
+            _loc3_ = param1.gamesavedata.Highlv;
+         }
+         addChild(Tool_Text.TFLEFTGet(12,366,L.FontNum(),24,16777215,L.Get("最高レベル") + " : " + _loc3_ + LocData2.LV));
+         if(param1.gamesavedata.gameovercount >= 1)
+         {
+            st1.text = param1.gamesavedata.shp;
+            st2.text = param1.gamesavedata.satk;
+            st3.text = param1.gamesavedata.sdef;
+            st4.text = param1.gamesavedata.sspeed;
+            st5.text = param1.gamesavedata.sluk;
+            _loc14_ = param1.gamesavedata.HighItemEquip[0];
+            _loc6_ = param1.gamesavedata.HighItemKazu[0];
+            _loc20_ = param1.itemDataMana.GetItemListNum(0,_loc14_);
+            if(_loc20_ == null)
+            {
+               return;
+            }
+            _loc20_.SetItemTimes(_loc6_);
+            he1.nametxt.text = _loc20_.name;
+            he1.t1.htmlText = _loc20_.plusStr;
+            he1.t2.htmlText = _loc20_.multiStr;
+            _loc10_ = new Bitmap(_loc20_.BitD);
+            _loc10_.x = 8;
+            _loc10_.y = 22;
+            he1.addChild(_loc10_);
+            _loc14_ = param1.gamesavedata.HighItemEquip[1];
+            _loc6_ = param1.gamesavedata.HighItemKazu[1];
+            _loc17_ = param1.itemDataMana.GetItemListNum(1,_loc14_);
+            if(_loc17_ == null)
+            {
+               return;
+            }
+            _loc17_.SetItemTimes(_loc6_);
+            he2.nametxt.text = _loc17_.name;
+            he2.t1.htmlText = _loc17_.plusStr;
+            he2.t2.htmlText = _loc17_.multiStr;
+            _loc19_ = new Bitmap(_loc17_.BitD);
+            _loc19_.x = 8;
+            _loc19_.y = 22;
+            he2.addChild(_loc19_);
+            _loc13_ = 2;
+            while(_loc13_ < param1.itemSlotNum)
+            {
+               _loc14_ = param1.gamesavedata.HighItemEquip[_loc13_];
+               if(_loc14_ >= 0)
+               {
+                  if(_loc13_ >= 14)
+                  {
+                     _loc2_ = param1.itemDataMana.GetItemListNum(3,_loc14_);
+                  }
+                  else
+                  {
+                     _loc2_ = param1.itemDataMana.GetItemListNum(2,_loc14_);
+                  }
+                  if(_loc2_ == null)
+                  {
+                     return;
+                  }
+                  _loc7_ = this["he" + (_loc13_ + 1)];
+                  _loc7_.text = _loc13_ - 1 + " : " + _loc2_.name;
+                  _loc5_ = new Bitmap(_loc2_.BitD);
+                  _loc5_.x = _loc7_.x - 33;
+                  _loc5_.y = _loc7_.y - 2;
+                  _loc5_.scaleX = _loc5_.scaleY = 0.75;
+                  addChild(_loc5_);
+               }
+               else if(_loc14_ == -1)
+               {
+                  this["he" + (_loc13_ + 1)].text = _loc13_ - 1 + " : " + L.Get("装備していません_スペース");
+               }
+               else if(_loc14_ == -2)
+               {
+                  _loc18_ = this["he" + (_loc13_ + 1)];
+                  _loc18_.text = _loc13_ - 1 + " : " + L.Get("スロットをロック中..._スペース");
+                  _loc4_ = new Bitmap(new keyPIPng());
+                  _loc4_.x = _loc18_.x - 33;
+                  _loc4_.y = _loc18_.y - 2;
+                  _loc4_.scaleX = _loc4_.scaleY = 0.75;
+                  addChild(_loc4_);
+               }
+               _loc13_++;
+            }
+         }
+         if(param1.gamesavedata.HighDamage == NaN)
+         {
+            param1.gamesavedata.HighDamage = 0;
+         }
+         addChild(Tool_Text.TFLEFTGet(12,799,L.FontNum(),22,16777215,L.Get("最高コンボ数") + " : " + param1.gamesavedata.HighCombo + "Combo"));
+         addChild(Tool_Text.TFLEFTGet(12,836,L.FontNum(),22,16777215,L.Get("最高ダメージ") + " : " + param1.gamesavedata.HighDamage));
+         tweettxt = L.Get("ニャーRPGクエスト");
+         tweetBl = new BlButton(25,910,80,80,null,new twitterpng());
+         addChild(tweetBl);
+         lineButton = new BlButton(125,910,80,80,null,new linepng());
+         if(L.SelNum(0,1) == 1)
+         {
+            lineButton.y = 9999;
+            lineButton.visible = false;
+         }
+         addChild(lineButton);
+      }
+      
+      public function count(param1:Vector.<int>, param2:int, param3:int = 0, param4:int = 0) : int
+      {
+         var _loc7_:int = 0;
+         var _loc6_:int = int(param1.length);
+         if(_loc6_ > param4 && param4 != 0)
+         {
+            _loc6_ = param4;
+         }
+         var _loc5_:* = 0;
+         if(param3 == 0)
+         {
+            _loc7_ = 0;
+            while(_loc7_ < _loc6_)
+            {
+               if(param1[_loc7_] == param2)
+               {
+                  _loc5_++;
+               }
+               _loc7_++;
+            }
+         }
+         else if(param3 == -1)
+         {
+            _loc7_ = 0;
+            while(_loc7_ < _loc6_)
+            {
+               if(param1[_loc7_] <= param2)
+               {
+                  _loc5_++;
+               }
+               _loc7_++;
+            }
+         }
+         else if(param3 == 1)
+         {
+            _loc7_ = 0;
+            while(_loc7_ < _loc6_)
+            {
+               if(param1[_loc7_] >= param2)
+               {
+                  _loc5_++;
+               }
+               _loc7_++;
+            }
+         }
+         else if(param3 == 2)
+         {
+            _loc7_ = 0;
+            while(_loc7_ < _loc6_)
+            {
+               if(param1[_loc7_] >= param2)
+               {
+                  _loc5_ += param1[_loc7_];
+               }
+               _loc7_++;
+            }
+         }
+         return _loc5_;
+      }
+   }
+}
+

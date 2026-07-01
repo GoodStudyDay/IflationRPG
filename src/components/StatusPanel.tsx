@@ -21,6 +21,11 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   const holdTypeRef = useRef<'hp' | 'atk' | 'def' | 'agi' | 'luc'>('hp');
   const holdFrameRef = useRef(0);
   const holdModeRef = useRef<'normal' | 'half' | 'all'>('normal');
+  const pendingHpRef = useRef(0);
+  const pendingAtkRef = useRef(0);
+  const pendingDefRef = useRef(0);
+  const pendingAgiRef = useRef(0);
+  const pendingLucRef = useRef(0);
   
   const remainingStPt = player.stPt || 0;
   const pendingTotal = pendingHp + pendingAtk + pendingDef + pendingAgi + pendingLuc;
@@ -33,7 +38,7 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   
   const handleAddPoint = (type: 'hp' | 'atk' | 'def' | 'agi' | 'luc', amount: number = 1) => {
     const currentRemaining = player.stPt || 0;
-    const currentPending = pendingHp + pendingAtk + pendingDef + pendingAgi + pendingLuc;
+    const currentPending = pendingHpRef.current + pendingAtkRef.current + pendingDefRef.current + pendingAgiRef.current + pendingLucRef.current;
     const currentAvailable = currentRemaining - currentPending;
     
     if (currentAvailable <= 0) {
@@ -45,19 +50,24 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
     
     switch (type) {
       case 'hp':
-        setPendingHp(prev => prev + actualAmount);
+        pendingHpRef.current += actualAmount;
+        setPendingHp(pendingHpRef.current);
         break;
       case 'atk':
-        setPendingAtk(prev => prev + actualAmount);
+        pendingAtkRef.current += actualAmount;
+        setPendingAtk(pendingAtkRef.current);
         break;
       case 'def':
-        setPendingDef(prev => prev + actualAmount);
+        pendingDefRef.current += actualAmount;
+        setPendingDef(pendingDefRef.current);
         break;
       case 'agi':
-        setPendingAgi(prev => prev + actualAmount);
+        pendingAgiRef.current += actualAmount;
+        setPendingAgi(pendingAgiRef.current);
         break;
       case 'luc':
-        setPendingLuc(prev => prev + actualAmount);
+        pendingLucRef.current += actualAmount;
+        setPendingLuc(pendingLucRef.current);
         break;
     }
     setApplied(false);
@@ -75,6 +85,11 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   };
   
   const handleCancel = () => {
+    pendingHpRef.current = 0;
+    pendingAtkRef.current = 0;
+    pendingDefRef.current = 0;
+    pendingAgiRef.current = 0;
+    pendingLucRef.current = 0;
     setPendingHp(0);
     setPendingAtk(0);
     setPendingDef(0);
@@ -90,6 +105,11 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
     if (pendingAgi > 0) allocateStPt('agi', pendingAgi);
     if (pendingLuc > 0) allocateStPt('luc', pendingLuc);
     
+    pendingHpRef.current = 0;
+    pendingAtkRef.current = 0;
+    pendingDefRef.current = 0;
+    pendingAgiRef.current = 0;
+    pendingLucRef.current = 0;
     setPendingHp(0);
     setPendingAtk(0);
     setPendingDef(0);
@@ -119,8 +139,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
       frameRef.current++;
       holdFrameRef.current++;
       
-      const currentPending = pendingHp + pendingAtk + pendingDef + pendingAgi + pendingLuc;
+      const currentPending = pendingHpRef.current + pendingAtkRef.current + pendingDefRef.current + pendingAgiRef.current + pendingLucRef.current;
       const currentRemaining = player.stPt || 0;
+      const currentAvailable = currentRemaining - currentPending;
+      
+      if (currentAvailable <= 0) {
+        handleMouseUp();
+        return;
+      }
       
       let addAmount = 0;
       
@@ -128,89 +154,89 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
         if (holdFrameRef.current === 0 || holdFrameRef.current === 5 || holdFrameRef.current === 9 || holdFrameRef.current === 11) {
           addAmount = 1;
         }
-      } else if (currentPending + 50000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 50000 && holdFrameRef.current >= 1000) {
         addAmount = 20311;
-      } else if (currentPending + 40000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 40000 && holdFrameRef.current >= 1000) {
         addAmount = 15111;
-      } else if (currentPending + 30000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 30000 && holdFrameRef.current >= 1000) {
         addAmount = 10011;
-      } else if (currentPending + 25000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 25000 && holdFrameRef.current >= 1000) {
         addAmount = 5011;
-      } else if (currentPending + 10000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 10000 && holdFrameRef.current >= 1000) {
         addAmount = 3011;
-      } else if (currentPending + 6000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 6000 && holdFrameRef.current >= 1000) {
         addAmount = 2051;
-      } else if (currentPending + 3000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 3000 && holdFrameRef.current >= 1000) {
         addAmount = 1511;
-      } else if (currentPending + 5000 < currentRemaining && holdFrameRef.current >= 1000) {
+      } else if (currentAvailable >= 5000 && holdFrameRef.current >= 1000) {
         addAmount = 1311;
-      } else if (currentPending + 2000 < currentRemaining && holdFrameRef.current >= 900) {
+      } else if (currentAvailable >= 2000 && holdFrameRef.current >= 900) {
         addAmount = 1111;
-      } else if (currentPending + 1500 < currentRemaining && holdFrameRef.current >= 800) {
+      } else if (currentAvailable >= 1500 && holdFrameRef.current >= 800) {
         addAmount = 901;
-      } else if (currentPending + 800 < currentRemaining && holdFrameRef.current >= 700) {
+      } else if (currentAvailable >= 800 && holdFrameRef.current >= 700) {
         addAmount = 771;
-      } else if (currentPending + 700 < currentRemaining && holdFrameRef.current >= 650) {
+      } else if (currentAvailable >= 700 && holdFrameRef.current >= 650) {
         addAmount = 651;
-      } else if (currentPending + 600 < currentRemaining && holdFrameRef.current >= 600) {
+      } else if (currentAvailable >= 600 && holdFrameRef.current >= 600) {
         addAmount = 531;
-      } else if (currentPending + 500 < currentRemaining && holdFrameRef.current >= 550) {
+      } else if (currentAvailable >= 500 && holdFrameRef.current >= 550) {
         addAmount = 421;
-      } else if (currentPending + 400 < currentRemaining && holdFrameRef.current >= 500) {
+      } else if (currentAvailable >= 400 && holdFrameRef.current >= 500) {
         addAmount = 351;
-      } else if (currentPending + 340 < currentRemaining && holdFrameRef.current >= 460) {
+      } else if (currentAvailable >= 340 && holdFrameRef.current >= 460) {
         addAmount = 291;
-      } else if (currentPending + 340 < currentRemaining && holdFrameRef.current >= 420) {
+      } else if (currentAvailable >= 340 && holdFrameRef.current >= 420) {
         addAmount = 251;
-      } else if (currentPending + 300 < currentRemaining && holdFrameRef.current >= 380) {
+      } else if (currentAvailable >= 300 && holdFrameRef.current >= 380) {
         addAmount = 221;
-      } else if (currentPending + 250 < currentRemaining && holdFrameRef.current >= 340) {
+      } else if (currentAvailable >= 250 && holdFrameRef.current >= 340) {
         addAmount = 191;
-      } else if (currentPending + 200 < currentRemaining && holdFrameRef.current >= 300) {
+      } else if (currentAvailable >= 200 && holdFrameRef.current >= 300) {
         addAmount = 161;
-      } else if (currentPending + 150 < currentRemaining && holdFrameRef.current >= 270) {
+      } else if (currentAvailable >= 150 && holdFrameRef.current >= 270) {
         addAmount = 131;
-      } else if (currentPending + 120 < currentRemaining && holdFrameRef.current >= 240) {
+      } else if (currentAvailable >= 120 && holdFrameRef.current >= 240) {
         addAmount = 101;
-      } else if (currentPending + 90 < currentRemaining && holdFrameRef.current >= 210) {
+      } else if (currentAvailable >= 90 && holdFrameRef.current >= 210) {
         addAmount = 85;
-      } else if (currentPending + 80 < currentRemaining && holdFrameRef.current >= 190) {
+      } else if (currentAvailable >= 80 && holdFrameRef.current >= 190) {
         addAmount = 74;
-      } else if (currentPending + 70 < currentRemaining && holdFrameRef.current >= 170) {
+      } else if (currentAvailable >= 70 && holdFrameRef.current >= 170) {
         addAmount = 63;
-      } else if (currentPending + 60 < currentRemaining && holdFrameRef.current >= 150) {
+      } else if (currentAvailable >= 60 && holdFrameRef.current >= 150) {
         addAmount = 51;
-      } else if (currentPending + 50 < currentRemaining && holdFrameRef.current >= 130) {
+      } else if (currentAvailable >= 50 && holdFrameRef.current >= 130) {
         addAmount = 41;
-      } else if (currentPending + 40 < currentRemaining && holdFrameRef.current >= 120) {
+      } else if (currentAvailable >= 40 && holdFrameRef.current >= 120) {
         addAmount = 35;
-      } else if (currentPending + 30 < currentRemaining && holdFrameRef.current >= 110) {
+      } else if (currentAvailable >= 30 && holdFrameRef.current >= 110) {
         addAmount = 27;
-      } else if (currentPending + 30 < currentRemaining && holdFrameRef.current >= 100) {
+      } else if (currentAvailable >= 30 && holdFrameRef.current >= 100) {
         addAmount = 21;
-      } else if (currentPending + 20 < currentRemaining && holdFrameRef.current >= 90) {
+      } else if (currentAvailable >= 20 && holdFrameRef.current >= 90) {
         addAmount = 17;
-      } else if (currentPending + 20 < currentRemaining && holdFrameRef.current >= 80) {
+      } else if (currentAvailable >= 20 && holdFrameRef.current >= 80) {
         addAmount = 14;
-      } else if (currentPending + 18 < currentRemaining && holdFrameRef.current >= 75) {
+      } else if (currentAvailable >= 18 && holdFrameRef.current >= 75) {
         addAmount = 13;
-      } else if (currentPending + 15 < currentRemaining && holdFrameRef.current >= 70) {
+      } else if (currentAvailable >= 15 && holdFrameRef.current >= 70) {
         addAmount = 11;
-      } else if (currentPending + 15 < currentRemaining && holdFrameRef.current >= 65) {
+      } else if (currentAvailable >= 15 && holdFrameRef.current >= 65) {
         addAmount = 10;
-      } else if (currentPending + 15 < currentRemaining && holdFrameRef.current >= 60) {
+      } else if (currentAvailable >= 15 && holdFrameRef.current >= 60) {
         addAmount = 9;
-      } else if (currentPending + 15 < currentRemaining && holdFrameRef.current >= 55) {
+      } else if (currentAvailable >= 15 && holdFrameRef.current >= 55) {
         addAmount = 7;
-      } else if (currentPending + 10 < currentRemaining && holdFrameRef.current >= 50) {
+      } else if (currentAvailable >= 10 && holdFrameRef.current >= 50) {
         addAmount = 6;
-      } else if (currentPending + 8 < currentRemaining && holdFrameRef.current >= 45) {
+      } else if (currentAvailable >= 8 && holdFrameRef.current >= 45) {
         addAmount = 5;
-      } else if (currentPending + 7 < currentRemaining && holdFrameRef.current >= 40) {
+      } else if (currentAvailable >= 7 && holdFrameRef.current >= 40) {
         addAmount = 4;
-      } else if (currentPending + 5 < currentRemaining && holdFrameRef.current >= 35) {
+      } else if (currentAvailable >= 5 && holdFrameRef.current >= 35) {
         addAmount = 3;
-      } else if (currentPending + 3 < currentRemaining && holdFrameRef.current >= 30) {
+      } else if (currentAvailable >= 3 && holdFrameRef.current >= 30) {
         addAmount = 2;
       } else {
         addAmount = 1;
