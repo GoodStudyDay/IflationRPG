@@ -36,23 +36,28 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
     const currentPending = pendingHp + pendingAtk + pendingDef + pendingAgi + pendingLuc;
     const currentAvailable = currentRemaining - currentPending;
     
-    if (currentAvailable < amount) return;
+    if (currentAvailable <= 0) {
+      handleMouseUp();
+      return;
+    }
+    
+    const actualAmount = Math.min(amount, currentAvailable);
     
     switch (type) {
       case 'hp':
-        setPendingHp(prev => prev + amount);
+        setPendingHp(prev => prev + actualAmount);
         break;
       case 'atk':
-        setPendingAtk(prev => prev + amount);
+        setPendingAtk(prev => prev + actualAmount);
         break;
       case 'def':
-        setPendingDef(prev => prev + amount);
+        setPendingDef(prev => prev + actualAmount);
         break;
       case 'agi':
-        setPendingAgi(prev => prev + amount);
+        setPendingAgi(prev => prev + actualAmount);
         break;
       case 'luc':
-        setPendingLuc(prev => prev + amount);
+        setPendingLuc(prev => prev + actualAmount);
         break;
     }
     setApplied(false);
@@ -403,11 +408,11 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
             </div>
           </div>
           
-          <div className="bg-[#7a9abb] rounded px-4 py-3 mb-4">
-            <div className="text-center text-[#2a4a6a] text-sm mb-1">属性点</div>
-            <div className="text-center text-2xl font-bold text-white">
+          <div className="bg-[#7a9abb] rounded px-3 py-2 mb-4">
+            <div className="text-center text-[#2a4a6a] text-xs mb-1">属性点</div>
+            <div className="text-center text-xl font-bold text-white">
               {availableStPt}
-              {pendingTotal > 0 && <span className="text-lg text-[#ff6666]">(-{pendingTotal})</span>}
+              {pendingTotal > 0 && <span className="text-sm text-[#ff6666]">(-{pendingTotal})</span>}
             </div>
             <div className="text-center text-xs text-[#4a6a8a] mt-1">升级后可获得属性点</div>
           </div>

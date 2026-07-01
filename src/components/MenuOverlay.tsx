@@ -11,7 +11,7 @@ interface MenuOverlayProps {
 const STORAGE_KEY = 'inflation-rpg-storage';
 
 export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
-  const { goToTitle } = useGameStore();
+  const { goToTitle, killPlayer } = useGameStore();
   const [activePanel, setActivePanel] = useState<'main' | 'status' | 'inventory' | 'collection' | 'settings'>('main');
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [pasteInput, setPasteInput] = useState('');
@@ -215,8 +215,12 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
               标题
             </button>
             <button
-              onClick={() => {}}
-              className="flex-1 bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
+              onClick={() => {
+                if (window.confirm('确定要结束游戏吗？这将消耗所有战斗点数。')) {
+                  killPlayer();
+                }
+              }}
+              className="flex-1 bg-[#8a3c5a] text-white font-bold py-3 rounded-lg hover:bg-[#9a4c6a] transition-colors text-lg"
             >
               死亡
             </button>

@@ -87,6 +87,8 @@ interface GameStore {
   allocateStPt: (statType: 'hp' | 'atk' | 'def' | 'agi' | 'luc', amount: number) => void;
   /** 添加属性点 */
   addStPt: (amount: number) => void;
+  /** 杀死玩家（设置战斗点数为0并返回标题） */
+  killPlayer: () => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -577,6 +579,12 @@ export const useGameStore = create<GameStore>()(
       setCurrentScene: (scene) => set({ currentScene: scene }),
       goToTitle: () => {
         set({ currentScene: 'title' });
+      },
+      killPlayer: () => {
+        set({ 
+          battlePoints: 0,
+          currentScene: 'title'
+        });
       },
       startGame: () => {
         const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
