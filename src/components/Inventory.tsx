@@ -52,7 +52,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const nextSlotPrice = totalAccessorySlots < 12
     ? (() => {
         const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
-        return prices[totalAccessorySlots - 1];
+        return prices[totalAccessorySlots];
       })()
     : 0;
 

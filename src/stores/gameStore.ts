@@ -697,7 +697,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       startGame: () => {
-        const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
+        const { player, inventory, skills, battlePoints } = get();
         
         set({
           player: {
@@ -709,7 +709,7 @@ export const useGameStore = create<GameStore>()(
           skills,
           currentScene: 'world',
           encounterRate: 0,
-          battlePoints: battlePoints > 0 ? battlePoints : maxBattlePoints,
+          battlePoints,
           battle: {
             enemy: null,
             status: 'idle',
