@@ -686,12 +686,12 @@ export const useGameStore = create<GameStore>()(
         set({
           player: {
             ...player,
-            maxHp: player.maxHp + hpAdd * 5000,
-            hp: player.hp + hpAdd * 5000,
-            attack: player.attack + atkAdd * 500,
-            defense: player.defense + defAdd * 500,
-            agility: player.agility + agiAdd * 500,
-            luck: player.luck + lucAdd * 500,
+            maxHp: player.maxHp + hpAdd * 5,
+            hp: player.hp + hpAdd * 5,
+            attack: player.attack + atkAdd * 3,
+            defense: player.defense + defAdd * 3,
+            agility: player.agility + agiAdd * 2,
+            luck: player.luck + lucAdd * 1,
             stPt: 0,
           },
         });
@@ -1037,7 +1037,7 @@ export const useGameStore = create<GameStore>()(
           incrementWinBattle();
           updateHighCombo(comboCount);
           
-          if ((battle.enemy as any).bossId) {
+          if ((battle.enemy as any).bossId !== undefined) {
             battlePointsChange = 3;
           }
         } else if (!victory) {

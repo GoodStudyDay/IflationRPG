@@ -1291,7 +1291,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 4000,
     icon: '👑',
     level: 5,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-2', dropRate: 0.5 }, { equipmentId: 'armor-2', dropRate: 0.5 }, { equipmentId: 'soul-0', dropRate: 1 }, { equipmentId: 'weapon-75', dropRate: 0.4 }, { equipmentId: 'soul-10', dropRate: 1 }],
   },
   {
     id: 'boss-1',
@@ -1305,7 +1305,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 10000,
     icon: '💀',
     level: 15,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-1', dropRate: 0.16 }, { equipmentId: 'accessory-5', dropRate: 0.16 }, { equipmentId: 'soul-1', dropRate: 1 }, { equipmentId: 'soul-11', dropRate: 1 }],
   },
   {
     id: 'boss-2',
@@ -1319,7 +1319,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 7000,
     icon: '🦹',
     level: 25,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-11', dropRate: 0.09 }, { equipmentId: 'accessory-2', dropRate: 0.08 }, { equipmentId: 'accessory-6', dropRate: 0.08 }, { equipmentId: 'accessory-66', dropRate: 0.022 }],
   },
   {
     id: 'boss-3',
@@ -1333,7 +1333,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 1000,
     icon: '🐉',
     level: 35,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-21', dropRate: 0.3 }, { equipmentId: 'accessory-22', dropRate: 0.18 }, { equipmentId: 'accessory-23', dropRate: 0.06 }, { equipmentId: 'accessory-64', dropRate: 0.022 }],
   },
   {
     id: 'boss-4',
@@ -1347,7 +1347,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 7000,
     icon: '👹',
     level: 45,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-41', dropRate: 0.14 }, { equipmentId: 'weapon-71', dropRate: 0.075 }, { equipmentId: 'accessory-47', dropRate: 0.013 }, { equipmentId: 'accessory-46', dropRate: 0.01 }],
   },
   {
     id: 'boss-5',
@@ -1361,7 +1361,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 7000,
     icon: '🏰',
     level: 55,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-43', dropRate: 0.14 }, { equipmentId: 'weapon-73', dropRate: 0.06 }, { equipmentId: 'accessory-50', dropRate: 0.013 }, { equipmentId: 'accessory-46', dropRate: 0.01 }],
   },
   {
     id: 'boss-6',
@@ -1375,7 +1375,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 10000,
     icon: '🐲',
     level: 65,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-40', dropRate: 0.14 }, { equipmentId: 'weapon-70', dropRate: 0.07 }, { equipmentId: 'accessory-48', dropRate: 0.013 }, { equipmentId: 'accessory-46', dropRate: 0.01 }],
   },
   {
     id: 'boss-7',
@@ -1389,7 +1389,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 10000,
     icon: '☁️',
     level: 75,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-42', dropRate: 0.14 }, { equipmentId: 'weapon-72', dropRate: 0.07 }, { equipmentId: 'accessory-49', dropRate: 0.013 }, { equipmentId: 'accessory-46', dropRate: 0.01 }],
   },
   {
     id: 'boss-8',
@@ -1403,7 +1403,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 1000,
     icon: '👿',
     level: 85,
-    drops: [],
+    drops: [{ equipmentId: 'soul-2', dropRate: 1 }, { equipmentId: 'accessory-66', dropRate: 0.03 }, { equipmentId: 'soul-12', dropRate: 1 }],
   },
   {
     id: 'boss-9',
@@ -1417,7 +1417,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 1000,
     icon: '💀',
     level: 95,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-38', dropRate: 0.032 }],
   },
   {
     id: 'boss-10',
@@ -1431,7 +1431,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 2000,
     icon: '🌑',
     level: 105,
-    drops: [],
+    drops: [{ equipmentId: 'weapon-48', dropRate: 0.067 }, { equipmentId: 'armor-18', dropRate: 0.066 }, { equipmentId: 'weapon-59', dropRate: 0.04 }, { equipmentId: 'armor-24', dropRate: 0.03 }],
   },
   {
     id: 'boss-11',
@@ -1776,5 +1776,10 @@ export function getBossById(bossId: number): BossData | undefined {
 }
 
 export function getAvailableBosses(): BossData[] {
-  return BOSS_DATA;
+  const seen = new Set<number>();
+  return BOSS_DATA.filter(boss => {
+    if (seen.has(boss.bossId)) return false;
+    seen.add(boss.bossId);
+    return true;
+  });
 }

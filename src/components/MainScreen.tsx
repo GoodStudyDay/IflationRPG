@@ -7,7 +7,7 @@ import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { BOSS_DATA } from '@/data/bossData';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
@@ -255,19 +255,19 @@ export const MainScreen = () => {
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择BOSS</h3>
             <div className="space-y-2">
               {[...BOSS_DATA].sort((a, b) => a.level - b.level).map(boss => {
-                const isAvailable = player.level >= boss.level;
+                const isDefeated = defeatedBosses.includes(boss.bossId);
                 return (
                   <button
                     key={boss.id}
                     onClick={() => {
-                      if (isAvailable) {
+                      if (!isDefeated) {
                         startBossBattle(boss.bossId);
                         setShowBoss(false);
                       }
                     }}
-                    disabled={!isAvailable}
+                    disabled={isDefeated}
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                      isAvailable
+                      !isDefeated
                         ? 'border-[#8a2a4a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
                         : 'border-gray-700 bg-gray-900/50 opacity-40 cursor-not-allowed'
                     }`}
@@ -276,12 +276,13 @@ export const MainScreen = () => {
                       <div>
                         <span className="text-lg mr-2">{boss.icon}</span>
                         <span className="text-white font-bold">{boss.name}</span>
+                        <span className="text-yellow-400 text-xs ml-2">LV{boss.level}</span>
                       </div>
                       <div className="text-xs">
-                        {isAvailable ? (
-                          <span className="text-red-400">挑战</span>
+                        {isDefeated ? (
+                          <span className="text-gray-400">已击败</span>
                         ) : (
-                          <span className="text-red-400">需LV{boss.level}</span>
+                          <span className="text-red-400">挑战</span>
                         )}
                       </div>
                     </div>

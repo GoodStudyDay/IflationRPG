@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
+import { getEquipmentById } from '@/data/equipment';
 
 export const BattleScreen = () => {
   const { 
@@ -115,12 +116,16 @@ export const BattleScreen = () => {
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-2 text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">掉落:</div>
-              {battle.enemy.drops.slice(0, 5).map((drop, index) => (
-                <div key={index} className="flex justify-between">
-                  <span className="truncate">{drop.equipmentId}</span>
-                  <span className="text-yellow-400 ml-2">{(drop.dropRate * 100).toFixed(1)}%</span>
-                </div>
-              ))}
+              {battle.enemy.drops.slice(0, 5).map((drop, index) => {
+                const equipment = getEquipmentById(drop.equipmentId);
+                const itemName = equipment?.name || drop.equipmentId;
+                return (
+                  <div key={index} className="flex justify-between">
+                    <span className="truncate">{itemName}</span>
+                    <span className="text-yellow-400 ml-2">{(drop.dropRate * 100).toFixed(1)}%</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
