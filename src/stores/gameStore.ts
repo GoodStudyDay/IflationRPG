@@ -1783,6 +1783,8 @@ export const useGameStore = create<GameStore>()(
         skills: state.skills,
         encounterRate: state.encounterRate,
         bonus: state.bonus,
+        battlePoints: state.battlePoints,
+        defeatedBosses: state.defeatedBosses,
       }),
     }
   )

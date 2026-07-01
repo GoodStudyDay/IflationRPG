@@ -49,12 +49,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
   const totalAccessorySlots = player.maxAccessorySlots || 3;
 
-  const nextSlotPrice = totalAccessorySlots < 12
-    ? (() => {
-        const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
-        return prices[totalAccessorySlots];
-      })()
-    : 0;
+  
 
   const handleUnlockSlot = () => {
     const success = unlockAccessorySlot();
@@ -942,7 +937,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
             <div className="text-center">
               <div className="text-xl font-bold text-white mb-2">解锁饰孔 {unlockingSlotIndex + 1}？</div>
-              <div className="text-gray-300 mb-4">需要 {nextSlotPrice.toLocaleString()} G</div>
+              <div className="text-gray-300 mb-4">需要 {(() => { const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000]; return prices[unlockingSlotIndex]; })().toLocaleString()} G</div>
               <div className="flex gap-3">
                 <button
                   onClick={handleUnlockSlot}
