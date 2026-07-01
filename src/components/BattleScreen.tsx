@@ -110,6 +110,19 @@ export const BattleScreen = () => {
               <div className="absolute inset-0 bg-red-500/50 animate-pulse rounded-lg" />
             )}
           </div>
+          <div className="text-red-400 font-bold text-sm sm:text-base mt-2">{battle.enemy.name}</div>
+          
+          {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
+            <div className="mt-2 text-xs text-gray-400 max-w-xs mx-auto">
+              <div className="text-gray-500 mb-1">掉落:</div>
+              {battle.enemy.drops.slice(0, 5).map((drop, index) => (
+                <div key={index} className="flex justify-between">
+                  <span className="truncate">{drop.equipmentId}</span>
+                  <span className="text-yellow-400 ml-2">{(drop.dropRate * 100).toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="absolute bottom-28 sm:bottom-36 left-1/2 transform -translate-x-1/2 text-center">

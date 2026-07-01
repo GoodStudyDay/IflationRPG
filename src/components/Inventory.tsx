@@ -14,6 +14,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
   const [, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
   const [confirmEquipment, setConfirmEquipment] = useState<typeof equipmentData[0] | null>(null);
+  const [unlockingSlotIndex, setUnlockingSlotIndex] = useState<number>(0);
   const player = useGameStore(state => state.player);
   const inventory = useGameStore(state => state.inventory);
   const equipItem = useGameStore(state => state.equipItem);
@@ -611,48 +612,44 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold">饰品</div>
 
           <div className="grid grid-cols-2 gap-2">
-            {(player.equippedAccessories || []).slice(0, 6).map((accessory, index) => (
-              <div 
-                key={`big-${index}`}
-                onClick={() => {
-                  setSelectedAccessorySlot(index);
-                  setViewMode('accessory');
-                }}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-xl">{accessory.icon}</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-bold text-xs">{accessory.name}</div>
-                    {accessory.effectDescription && (
-                      <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
-                    )}
-                    {(accessory.hpBonus > 0 || accessory.attackBonus > 0 || accessory.defenseBonus > 0) && (
-                      <div className="flex gap-1 mt-0.5">
-                        {accessory.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
-                        )}
-                        {accessory.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                        )}
-                        {accessory.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {Array.from({ length: Math.max(0, 6 - (player.equippedAccessories || []).slice(0, 6).length) }).map((_, index) => {
-              const slotIndex = (player.equippedAccessories || []).slice(0, 6).length + index;
+            {[0, 1, 2, 3, 4, 5].map(slotIndex => {
+              const accessory = (player.equippedAccessories || [])[slotIndex];
               const isUnlocked = slotIndex < totalAccessorySlots;
+              
               return (
-              <div key={`big-empty-${index}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2">
-                {isUnlocked ? (
+              <div key={`big-${slotIndex}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2">
+                {accessory ? (
+                  <div 
+                    onClick={() => {
+                      setSelectedAccessorySlot(slotIndex);
+                      setViewMode('accessory');
+                    }}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5] rounded"
+                  >
+                    <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <span className="text-xl">{accessory.icon}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-bold text-xs">{accessory.name}</div>
+                      {accessory.effectDescription && (
+                        <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
+                      )}
+                      {(accessory.hpBonus > 0 || accessory.attackBonus > 0 || accessory.defenseBonus > 0) && (
+                        <div className="flex gap-1 mt-0.5">
+                          {accessory.hpBonus > 0 && (
+                            <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
+                          )}
+                          {accessory.attackBonus > 0 && (
+                            <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
+                          )}
+                          {accessory.defenseBonus > 0 && (
+                            <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : isUnlocked ? (
                   <div 
                     onClick={() => {
                       setSelectedAccessorySlot(slotIndex);
@@ -668,7 +665,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 ) : (
                   <div 
                     onClick={() => {
-                      alert(`解锁饰孔${slotIndex + 1}需要 ${nextSlotPrice.toLocaleString()}G`);
+                      setUnlockingSlotIndex(slotIndex);
+                      setShowUnlockConfirm(true);
                     }}
                     className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5]/50 rounded"
                   >
@@ -684,30 +682,26 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
 
           <div className="grid grid-cols-6 gap-1">
-            {(player.equippedAccessories || []).slice(6, 12).map((accessory, index) => (
-              <div 
-                key={`small-${index}`}
-                onClick={() => {
-                  setSelectedAccessorySlot(index + 6);
-                  setViewMode('accessory');
-                }}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
-              >
-                <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-sm">{accessory.icon}</span>
-                  </div>
-                  <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
-                </div>
-              </div>
-            ))}
-
-            {Array.from({ length: Math.max(0, 6 - (player.equippedAccessories || []).slice(6, 12).length) }).map((_, index) => {
-              const slotIndex = (player.equippedAccessories || []).length + index;
+            {[6, 7, 8, 9, 10, 11].map(slotIndex => {
+              const accessory = (player.equippedAccessories || [])[slotIndex];
               const isUnlocked = slotIndex < totalAccessorySlots;
+              
               return (
-              <div key={`small-empty-${index}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1">
-                {isUnlocked ? (
+              <div key={`small-${slotIndex}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1">
+                {accessory ? (
+                  <div 
+                    onClick={() => {
+                      setSelectedAccessorySlot(slotIndex);
+                      setViewMode('accessory');
+                    }}
+                    className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5] rounded"
+                  >
+                    <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <span className="text-sm">{accessory.icon}</span>
+                    </div>
+                    <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
+                  </div>
+                ) : isUnlocked ? (
                   <div 
                     onClick={() => {
                       setSelectedAccessorySlot(slotIndex);
@@ -723,9 +717,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 ) : (
                   <div 
                     onClick={() => {
-                      const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
-                      const price = prices[slotIndex] || 0;
-                      alert(`解锁饰孔${slotIndex + 1}需要 ${price.toLocaleString()}G`);
+                      setUnlockingSlotIndex(slotIndex);
+                      setShowUnlockConfirm(true);
                     }}
                     className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5]/50 rounded"
                   >
@@ -789,23 +782,26 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const renderConfirmDialog = () => {
     if (!confirmEquipment) return null;
     
-    const currentAtk = player.equippedWeapon?.attackBonus || 0;
-    const currentDef = player.equippedArmor?.defenseBonus || 0;
-    const currentHp = player.equippedArmor?.hpBonus || 0;
+    const currentTotalAtk = player.attack + bonuses.atkBonus;
+    const currentTotalDef = player.defense + bonuses.defBonus;
+    const currentTotalHp = player.maxHp + bonuses.hpBonus;
     
-    let newAtk = currentAtk;
-    let newDef = currentDef;
-    let newHp = currentHp;
+    let newTotalAtk = currentTotalAtk;
+    let newTotalDef = currentTotalDef;
+    let newTotalHp = currentTotalHp;
     
     if (confirmEquipment.type === 'weapon') {
-      newAtk = confirmEquipment.attackBonus;
+      const oldWeaponBonus = player.equippedWeapon?.attackBonus || 0;
+      newTotalAtk = currentTotalAtk - oldWeaponBonus + confirmEquipment.attackBonus;
     } else if (confirmEquipment.type === 'armor') {
-      newDef = confirmEquipment.defenseBonus;
-      newHp = confirmEquipment.hpBonus;
+      const oldArmorDefBonus = player.equippedArmor?.defenseBonus || 0;
+      const oldArmorHpBonus = player.equippedArmor?.hpBonus || 0;
+      newTotalDef = currentTotalDef - oldArmorDefBonus + confirmEquipment.defenseBonus;
+      newTotalHp = currentTotalHp - oldArmorHpBonus + confirmEquipment.hpBonus;
     } else if (confirmEquipment.type === 'accessory') {
-      newAtk += confirmEquipment.attackBonus;
-      newDef += confirmEquipment.defenseBonus;
-      newHp += confirmEquipment.hpBonus;
+      newTotalAtk += confirmEquipment.attackBonus;
+      newTotalDef += confirmEquipment.defenseBonus;
+      newTotalHp += confirmEquipment.hpBonus;
     }
     
     return (
@@ -822,12 +818,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">现在的 ATK:</span>
-                      <span className="text-white">{currentAtk}</span>
+                      <span className="text-white">{currentTotalAtk}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">装备后的 ATK:</span>
-                      <span className={`${newAtk > currentAtk ? 'text-green-400' : newAtk < currentAtk ? 'text-red-400' : 'text-white'}`}>
-                        {newAtk}
+                      <span className={`${newTotalAtk > currentTotalAtk ? 'text-green-400' : newTotalAtk < currentTotalAtk ? 'text-red-400' : 'text-white'}`}>
+                        {newTotalAtk}
                       </span>
                     </div>
                   </>
@@ -837,24 +833,24 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">现在的 DEF:</span>
-                      <span className="text-white">{currentDef}</span>
+                      <span className="text-white">{currentTotalDef}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">装备后的 DEF:</span>
-                      <span className={`${newDef > currentDef ? 'text-green-400' : newDef < currentDef ? 'text-red-400' : 'text-white'}`}>
-                        {newDef}
+                      <span className={`${newTotalDef > currentTotalDef ? 'text-green-400' : newTotalDef < currentTotalDef ? 'text-red-400' : 'text-white'}`}>
+                        {newTotalDef}
                       </span>
                     </div>
-                    {currentHp !== 0 || newHp !== 0 ? (
+                    {currentTotalHp !== 0 || newTotalHp !== 0 ? (
                       <>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">现在的 HP:</span>
-                          <span className="text-white">{currentHp}</span>
+                          <span className="text-white">{currentTotalHp}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">装备后的 HP:</span>
-                          <span className={`${newHp > currentHp ? 'text-green-400' : newHp < currentHp ? 'text-red-400' : 'text-white'}`}>
-                            {newHp}
+                          <span className={`${newTotalHp > currentTotalHp ? 'text-green-400' : newTotalHp < currentTotalHp ? 'text-red-400' : 'text-white'}`}>
+                            {newTotalHp}
                           </span>
                         </div>
                       </>
@@ -864,44 +860,44 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 
                 {confirmEquipment.type === 'accessory' && (
                   <>
-                    {(currentAtk !== 0 || newAtk !== currentAtk) && (
+                    {(currentTotalAtk !== 0 || newTotalAtk !== currentTotalAtk) && (
                       <>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">现在的 ATK:</span>
-                          <span className="text-white">{currentAtk}</span>
+                          <span className="text-white">{currentTotalAtk}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">装备后的 ATK:</span>
-                          <span className={`${newAtk > currentAtk ? 'text-green-400' : newAtk < currentAtk ? 'text-red-400' : 'text-white'}`}>
-                            {newAtk}
+                          <span className={`${newTotalAtk > currentTotalAtk ? 'text-green-400' : newTotalAtk < currentTotalAtk ? 'text-red-400' : 'text-white'}`}>
+                            {newTotalAtk}
                           </span>
                         </div>
                       </>
                     )}
-                    {(currentDef !== 0 || newDef !== currentDef) && (
+                    {(currentTotalDef !== 0 || newTotalDef !== currentTotalDef) && (
                       <>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">现在的 DEF:</span>
-                          <span className="text-white">{currentDef}</span>
+                          <span className="text-white">{currentTotalDef}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">装备后的 DEF:</span>
-                          <span className={`${newDef > currentDef ? 'text-green-400' : newDef < currentDef ? 'text-red-400' : 'text-white'}`}>
-                            {newDef}
+                          <span className={`${newTotalDef > currentTotalDef ? 'text-green-400' : newTotalDef < currentTotalDef ? 'text-red-400' : 'text-white'}`}>
+                            {newTotalDef}
                           </span>
                         </div>
                       </>
                     )}
-                    {(currentHp !== 0 || newHp !== currentHp) && (
+                    {(currentTotalHp !== 0 || newTotalHp !== currentTotalHp) && (
                       <>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">现在的 HP:</span>
-                          <span className="text-white">{currentHp}</span>
+                          <span className="text-white">{currentTotalHp}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">装备后的 HP:</span>
-                          <span className={`${newHp > currentHp ? 'text-green-400' : newHp < currentHp ? 'text-red-400' : 'text-white'}`}>
-                            {newHp}
+                          <span className={`${newTotalHp > currentTotalHp ? 'text-green-400' : newTotalHp < currentTotalHp ? 'text-red-400' : 'text-white'}`}>
+                            {newTotalHp}
                           </span>
                         </div>
                       </>
@@ -945,7 +941,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
             <div className="text-center">
-              <div className="text-xl font-bold text-white mb-2">解锁饰孔 {totalAccessorySlots + 1}？</div>
+              <div className="text-xl font-bold text-white mb-2">解锁饰孔 {unlockingSlotIndex + 1}？</div>
               <div className="text-gray-300 mb-4">需要 {nextSlotPrice.toLocaleString()} G</div>
               <div className="flex gap-3">
                 <button

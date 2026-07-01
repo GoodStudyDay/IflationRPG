@@ -66,7 +66,7 @@ export const MainScreen = () => {
           </button>
           <button
             onClick={() => setShowBoss(true)}
-            className="bg-[#8a2a4a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#9a3a5a] transition-colors flex-1"
+            className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
             BOSS
           </button>
