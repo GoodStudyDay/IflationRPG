@@ -1,7 +1,7 @@
 import { useGameStore } from '@/stores/gameStore';
 
 export const BattleResult = () => {
-  const { battle, battlePoints, setCurrentScene, player, clearBattleResult } = useGameStore();
+  const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
   
   const { battleResult } = battle;
   
@@ -12,6 +12,7 @@ export const BattleResult = () => {
   const handleContinue = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isGameOver) {
+      killPlayer();
       return;
     }
     clearBattleResult();

@@ -40,6 +40,8 @@ interface GameStore {
   speedNum: number;
   dropNum: number;
   presetNum: number;
+  presets: number[][];
+  autoAllocateEnabled: boolean;
   bonus: BonusState;
   currentMap: number;
   setPlayer: (player: Player) => void;
@@ -94,6 +96,14 @@ interface GameStore {
   addStPt: (amount: number) => void;
   /** 杀死玩家（设置战斗点数为0并返回标题） */
   killPlayer: () => void;
+  /** 设置属性分配预设 */
+  setPreset: (presetIndex: number, preset: number[]) => void;
+  /** 设置当前使用的预设 */
+  setPresetNum: (num: number) => void;
+  /** 设置自动分配是否开启 */
+  setAutoAllocateEnabled: (enabled: boolean) => void;
+  /** 自动分配属性点 */
+  autoAllocateStPt: () => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -103,6 +113,14 @@ const BASE_COMBO_RATE = 0.05;
 /** game.txt AKUSESlotLockMONEY: 饰品栏位解锁价格 (索引0=第1栏位) */
 const AKUSE_SLOT_LOCK_MONEY = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
 const MAX_ACCESSORY_SLOTS = 12;
+
+const INITIAL_PRESETS: number[][] = [
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+];
 
 const getStoredData = () => {
   try {
@@ -338,6 +356,8 @@ export const useGameStore = create<GameStore>()(
       speedNum: saveData.speedNum,
       dropNum: saveData.dropNum,
       presetNum: saveData.presetNum,
+      presets: saveData.presets || INITIAL_PRESETS,
+      autoAllocateEnabled: saveData.autoAllocateEnabled || false,
       bonus: {
         addUsesLeft: 5,
         clearUsesLeft: 5,
@@ -436,6 +456,30 @@ export const useGameStore = create<GameStore>()(
         updateHighLv(newLevel);
         
         const stPtIncrease = lvupsitanum * 4;
+        const { autoAllocateEnabled, autoAllocateStPt } = get();
+        
+        let finalStPt = (player.stPt || 0) + stPtIncrease;
+        
+        if (autoAllocateEnabled && stPtIncrease > 0) {
+          const afterSet = {
+            player: {
+              ...player,
+              level: newLevel,
+              maxHp: hpInc,
+              hp: hpInc,
+              attack: atkInc,
+              defense: defInc,
+              maxMana: initialPlayer.maxMana + bonus.mana,
+              mana: initialPlayer.maxMana + bonus.mana,
+              stPt: finalStPt,
+              exp: getExpNokori,
+              expToNextLevel: expToNext,
+            },
+          };
+          set(afterSet);
+          autoAllocateStPt();
+          return;
+        }
         
         set({
           player: {
@@ -447,7 +491,7 @@ export const useGameStore = create<GameStore>()(
             defense: defInc,
             maxMana: initialPlayer.maxMana + bonus.mana,
             mana: initialPlayer.maxMana + bonus.mana,
-            stPt: (player.stPt || 0) + stPtIncrease,
+            stPt: finalStPt,
             exp: getExpNokori,
             expToNextLevel: expToNext,
           },
@@ -590,6 +634,66 @@ export const useGameStore = create<GameStore>()(
         set({ 
           battlePoints: 0,
           currentScene: 'title'
+        });
+      },
+      setPreset: (presetIndex, preset) => {
+        const { presets } = get();
+        const newPresets = [...presets];
+        newPresets[presetIndex] = [...preset];
+        set({ presets: newPresets });
+      },
+      setPresetNum: (num) => {
+        set({ presetNum: num });
+      },
+      setAutoAllocateEnabled: (enabled) => {
+        set({ autoAllocateEnabled: enabled });
+      },
+      autoAllocateStPt: () => {
+        const { player, presets, presetNum } = get();
+        const stPt = player.stPt || 0;
+        if (stPt <= 0) return;
+        
+        const preset = presets[presetNum];
+        if (!preset || preset.length !== 5) return;
+        
+        const [hpPct, atkPct, defPct, agiPct, lucPct] = preset;
+        const totalPct = hpPct + atkPct + defPct + agiPct + lucPct;
+        if (totalPct <= 0) return;
+        
+        let remaining = stPt;
+        let hpAdd = 0, atkAdd = 0, defAdd = 0, agiAdd = 0, lucAdd = 0;
+        
+        if (hpPct > 0) {
+          hpAdd = Math.floor((stPt * hpPct) / totalPct);
+          remaining -= hpAdd;
+        }
+        if (atkPct > 0 && remaining > 0) {
+          atkAdd = Math.floor((stPt * atkPct) / totalPct);
+          remaining -= atkAdd;
+        }
+        if (defPct > 0 && remaining > 0) {
+          defAdd = Math.floor((stPt * defPct) / totalPct);
+          remaining -= defAdd;
+        }
+        if (agiPct > 0 && remaining > 0) {
+          agiAdd = Math.floor((stPt * agiPct) / totalPct);
+          remaining -= agiAdd;
+        }
+        if (lucPct > 0 && remaining > 0) {
+          lucAdd = remaining;
+        }
+        
+        set({
+          player: {
+            ...player,
+            maxHp: player.maxHp + hpAdd * 5000,
+            hp: player.hp + hpAdd * 5000,
+            attack: player.attack + atkAdd * 500,
+            defense: player.defense + defAdd * 500,
+            agility: player.agility + agiAdd * 500,
+            luck: player.luck + lucAdd * 500,
+            stPt: 0,
+          },
         });
       },
       startGame: () => {

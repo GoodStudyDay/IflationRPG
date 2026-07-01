@@ -18,6 +18,8 @@ export interface GameSaveData {
   speedNum: number;
   dropNum: number;
   presetNum: number;
+  presets: number[][];
+  autoAllocateEnabled: boolean;
   apurihyouka: number;
   apurihyouka2: number;
   tweetcount: number;
@@ -58,6 +60,14 @@ export const initialGameSaveData: GameSaveData = {
   speedNum: 0,
   dropNum: 0,
   presetNum: 0,
+  presets: [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ],
+  autoAllocateEnabled: false,
   apurihyouka: 0,
   apurihyouka2: 0,
   tweetcount: 0,

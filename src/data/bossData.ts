@@ -17,7 +17,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '👑',
     level: 325,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-25', dropRate: 0.08 }],
   },
   {
     id: 'boss-33',
@@ -31,7 +31,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '💀',
     level: 335,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-30', dropRate: 0.10 }],
   },
   {
     id: 'boss-34',
@@ -45,7 +45,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '🦹',
     level: 345,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-28', dropRate: 0.08 }],
   },
   {
     id: 'boss-35',
@@ -59,7 +59,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '🐉',
     level: 355,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-29', dropRate: 0.10 }],
   },
   {
     id: 'boss-32',
@@ -73,7 +73,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 50000,
     icon: '👑',
     level: 325,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-83', dropRate: 0.03 }, { equipmentId: 'accessory-128', dropRate: 0.005 }],
   },
   {
     id: 'boss-33',
@@ -87,7 +87,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 50000,
     icon: '💀',
     level: 335,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-83', dropRate: 0.03 }, { equipmentId: 'accessory-128', dropRate: 0.005 }],
   },
   {
     id: 'boss-34',
@@ -101,7 +101,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 50000,
     icon: '🦹',
     level: 345,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-83', dropRate: 0.03 }, { equipmentId: 'accessory-128', dropRate: 0.005 }],
   },
   {
     id: 'boss-35',
@@ -115,7 +115,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 50000,
     icon: '🐉',
     level: 355,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-83', dropRate: 0.03 }, { equipmentId: 'accessory-128', dropRate: 0.005 }],
   },
   {
     id: 'boss-32',
@@ -129,7 +129,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '👑',
     level: 325,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-56', dropRate: 0.045 }, { equipmentId: 'accessory-57', dropRate: 0.03 }],
   },
   {
     id: 'boss-33',
@@ -143,7 +143,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '💀',
     level: 335,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-58', dropRate: 0.038 }],
   },
   {
     id: 'boss-34',
@@ -157,7 +157,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '🦹',
     level: 345,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-28', dropRate: 0.08 }],
   },
   {
     id: 'boss-35',
@@ -171,7 +171,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 30000,
     icon: '🐉',
     level: 355,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-29', dropRate: 0.10 }],
   },
   {
     id: 'boss-40',
