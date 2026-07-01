@@ -117,6 +117,7 @@ export const BattleScreen = () => {
             <div className="mt-2 text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">掉落:</div>
               {battle.enemy.drops.slice(0, 5).map((drop, index) => {
+                if (!drop) return null;
                 const equipment = getEquipmentById(drop.equipmentId);
                 const itemName = equipment?.name || drop.equipmentId;
                 return (

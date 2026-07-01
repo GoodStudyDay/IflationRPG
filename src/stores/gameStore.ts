@@ -35,6 +35,7 @@ interface GameStore {
   kyarakutalv: number;
   hardmodeUnlock: number;
   hellmodeUnlock: number;
+  hardmode: number;
   playerid: number;
   DropRate: number;
   speedNum: number;
@@ -351,6 +352,7 @@ export const useGameStore = create<GameStore>()(
       kyarakutalv: saveData.kyarakutalv,
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
+      hardmode: 0,
       playerid: saveData.playerid,
       DropRate: saveData.DropRate,
       speedNum: saveData.speedNum,
@@ -757,14 +759,21 @@ export const useGameStore = create<GameStore>()(
         const randomIndex = Math.floor(Math.random() * mapEnemies.length);
         const enemy = { ...mapEnemies[randomIndex] };
         
-        const dropSlots = enemy.drops.map(drop => {
+        const hardmode = get().hardmode || 0;
+        const normalDrops = enemy.drops.slice(0, 3);
+        const hardDrops = enemy.drops.slice(3, 6);
+        
+        const activeDrops = hardmode > 0 ? hardDrops : normalDrops;
+        
+        const dropSlots = activeDrops.map(drop => {
+          if (!drop) return null;
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
           return {
             itemType,
             itemIndex,
             baseRate: drop.dropRate,
           };
-        });
+        }).filter(Boolean);
         
         const slot1 = dropSlots[0] || null;
         const slot2 = dropSlots[1] || null;
@@ -853,6 +862,7 @@ export const useGameStore = create<GameStore>()(
           }
           // Reduce bonus remaining count
           const newRemaining = bonus.currentBonus.remainingCount - 1;
+          console.log('[Bonus] Remaining after this battle:', newRemaining);
           set((s) => ({
             bonus: {
               ...s.bonus,
@@ -910,14 +920,21 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
-        const dropSlots = boss.drops.map(drop => {
+        const hardmode = get().hardmode || 0;
+        const normalDrops = boss.drops.slice(0, 3);
+        const hardDrops = boss.drops.slice(3, 6);
+        
+        const activeDrops = hardmode > 0 ? hardDrops : normalDrops;
+        
+        const dropSlots = activeDrops.map(drop => {
+          if (!drop) return null;
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
           return {
             itemType,
             itemIndex,
             baseRate: drop.dropRate,
           };
-        });
+        }).filter(Boolean);
         
         const slot1 = dropSlots[0] || null;
         const slot2 = dropSlots[1] || null;
@@ -1073,6 +1090,7 @@ export const useGameStore = create<GameStore>()(
           if (!currentBonus.currentBonus && Math.random() < 0.4) {
             const newBonusType = getRandomBonusType(player.level * 100);
             const bonusCount = Math.floor(Math.random() * 5) + 1; // 1-5 次
+            console.log('[Bonus] Auto-generated after victory: type=', newBonusType, 'count=', bonusCount);
             set((s) => ({
               bonus: {
                 ...s.bonus,

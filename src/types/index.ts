@@ -58,7 +58,7 @@ export interface Enemy {
   defense: number;
   expReward: number;
   goldReward: number;
-  drops: { equipmentId: string; dropRate: number }[];
+  drops: ({ equipmentId: string; dropRate: number } | null)[];
   icon: string;
   imageUrl?: string;
 }

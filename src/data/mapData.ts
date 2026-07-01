@@ -152,12 +152,12 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m3-25', name:'洞穴蜘蛛', hp:71111, maxHp:71111, attack:1222, defense:0, expReward:0, goldReward:3800, icon:'🐲', lv:5, tekiseiLvBai:90, expBonus:0, drops:[] },
     { id:'m3-26', name:'石像鬼', hp:64444, maxHp:64444, attack:1333, defense:0, expReward:1, goldReward:3800, icon:'👑', lv:5, tekiseiLvBai:90, expBonus:1, drops:[{type:0, index:6, rate:0.1}] },
     { id:'m3-27', name:'岩石巨人', hp:66666, maxHp:66666, attack:1480, defense:0, expReward:3, goldReward:4200, icon:'🦅', lv:5, tekiseiLvBai:90, expBonus:3, drops:[] },
-    { id:'m3-28', name:'骷髅兵', hp:64444, maxHp:64444, attack:1580, defense:0, expReward:2, goldReward:3000, icon:'🦕', lv:5, tekiseiLvBai:90, expBonus:2, drops:[{type:0, index:11, rate:0.085},{type:0, index:10, rate:0.1},{type:0, index:58, rate:0.06}] },
+    { id:'m3-28', name:'骷髅兵', hp:64444, maxHp:64444, attack:1580, defense:0, expReward:2, goldReward:3000, icon:'🦕', lv:5, tekiseiLvBai:90, expBonus:2, drops:[{type:0, index:11, rate:0.085},{type:0, index:10, rate:0.1},null,{type:0, index:58, rate:0.06}] },
     { id:'m3-29', name:'剑骷髅', hp:64444, maxHp:64444, attack:1580, defense:0, expReward:2, goldReward:3000, icon:'🦎', lv:5, tekiseiLvBai:90, expBonus:2, drops:[{type:0, index:11, rate:0.1}] },
-    { id:'m3-30', name:'下位巫妖', hp:64444, maxHp:64444, attack:1400, defense:0, expReward:2, goldReward:3000, icon:'⚡', lv:5, tekiseiLvBai:90, expBonus:2, drops:[{type:0, index:10, rate:0.085},{type:0, index:58, rate:0.07}] },
-    { id:'m3-31', name:'黄金骷髅', hp:180000, maxHp:180000, attack:2777, defense:0, expReward:5, goldReward:5000, icon:'❄️', lv:6, tekiseiLvBai:50, expBonus:5, drops:[{type:0, index:13, rate:0.085},{type:2, index:5, rate:0.08},{type:0, index:77, rate:0.03}] },
-    { id:'m3-32', name:'巨型蠕虫', hp:180000, maxHp:180000, attack:2222, defense:0, expReward:0, goldReward:7777, icon:'✨', lv:6, tekiseiLvBai:50, expBonus:0, drops:[{type:1, index:6, rate:0.075},{type:1, index:23, rate:0.035}] },
-    { id:'m3-33', name:'洞穴之眼', hp:180000, maxHp:180000, attack:2222, defense:0, expReward:0, goldReward:7777, icon:'👼', lv:6, tekiseiLvBai:50, expBonus:0, drops:[{type:1, index:6, rate:0.075},{type:1, index:23, rate:0.035}] },
+    { id:'m3-30', name:'下位巫妖', hp:64444, maxHp:64444, attack:1400, defense:0, expReward:2, goldReward:3000, icon:'⚡', lv:5, tekiseiLvBai:90, expBonus:2, drops:[{type:0, index:10, rate:0.085},null,null,{type:0, index:58, rate:0.07}] },
+    { id:'m3-31', name:'黄金骷髅', hp:180000, maxHp:180000, attack:2777, defense:0, expReward:5, goldReward:5000, icon:'❄️', lv:6, tekiseiLvBai:50, expBonus:5, drops:[{type:0, index:13, rate:0.085},{type:2, index:5, rate:0.08},null,{type:0, index:77, rate:0.03}] },
+    { id:'m3-32', name:'巨型蠕虫', hp:180000, maxHp:180000, attack:2222, defense:0, expReward:0, goldReward:7777, icon:'✨', lv:6, tekiseiLvBai:50, expBonus:0, drops:[{type:1, index:6, rate:0.075},null,null,{type:1, index:23, rate:0.035}] },
+    { id:'m3-33', name:'洞穴之眼', hp:180000, maxHp:180000, attack:2222, defense:0, expReward:0, goldReward:7777, icon:'👼', lv:6, tekiseiLvBai:50, expBonus:0, drops:[{type:1, index:6, rate:0.075},null,null,{type:1, index:23, rate:0.035}] },
     { id:'m3-34', name:'暗黑幽灵', hp:200000, maxHp:200000, attack:2444, defense:0, expReward:1, goldReward:2000, icon:'🦁', lv:6, tekiseiLvBai:50, expBonus:1, drops:[{type:2, index:9, rate:0.08}] },
     { id:'m3-35', name:'岩窟之主', hp:200000, maxHp:200000, attack:2333, defense:0, expReward:1, goldReward:6000, icon:'🦄', lv:6, tekiseiLvBai:50, expBonus:1, drops:[{type:2, index:1, rate:0.08}] },
   ],
@@ -178,7 +178,7 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m4-13', name:'沼泽史莱姆', hp:49000, maxHp:49000, attack:1170, defense:0, expReward:5, goldReward:900, icon:'🌸', lv:3, tekiseiLvBai:85, expBonus:5, drops:[{type:1, index:7, rate:0.08}] },
     { id:'m4-14', name:'巨蜥', hp:72000, maxHp:72000, attack:1200, defense:0, expReward:1, goldReward:1200, icon:'🐗', lv:4, tekiseiLvBai:100, expBonus:1, drops:[] },
     { id:'m4-15', name:'沼泽蛇', hp:66000, maxHp:66000, attack:1800, defense:0, expReward:7, goldReward:1200, icon:'🪱', lv:4, tekiseiLvBai:100, expBonus:7, drops:[] },
-    { id:'m4-16', name:'沼泽多头蛇', hp:64000, maxHp:64000, attack:1520, defense:0, expReward:1, goldReward:1200, icon:'🦇', lv:4, tekiseiLvBai:100, expBonus:1, drops:[{type:0, index:7, rate:0.11},{type:0, index:78, rate:0.022}] },
+    { id:'m4-16', name:'沼泽多头蛇', hp:64000, maxHp:64000, attack:1520, defense:0, expReward:1, goldReward:1200, icon:'🦇', lv:4, tekiseiLvBai:100, expBonus:1, drops:[{type:0, index:7, rate:0.11},null,null,{type:0, index:78, rate:0.022}] },
     { id:'m4-17', name:'食人鳄', hp:65000, maxHp:65000, attack:1300, defense:0, expReward:0, goldReward:1200, icon:'🗿', lv:4, tekiseiLvBai:100, expBonus:0, drops:[] },
   ],
   5: [
@@ -200,11 +200,11 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m5-15', name:'灼热石像', hp:63000, maxHp:63000, attack:2700, defense:0, expReward:0, goldReward:1600, icon:'🪱', lv:4, tekiseiLvBai:184, expBonus:0, drops:[] },
     { id:'m5-16', name:'熔岩巨人', hp:60000, maxHp:60000, attack:3200, defense:0, expReward:1, goldReward:1600, icon:'🦇', lv:4, tekiseiLvBai:184, expBonus:1, drops:[] },
     { id:'m5-17', name:'火山蠕虫', hp:88000, maxHp:88000, attack:3600, defense:0, expReward:-5, goldReward:1600, icon:'🗿', lv:5, tekiseiLvBai:130, expBonus:-5, drops:[] },
-    { id:'m5-18', name:'幼年凤凰', hp:78000, maxHp:78000, attack:6000, defense:0, expReward:9, goldReward:1600, icon:'🌿', lv:5, tekiseiLvBai:130, expBonus:9, drops:[{type:0, index:20, rate:0.03},{type:0, index:76, rate:0.03}] },
+    { id:'m5-18', name:'幼年凤凰', hp:78000, maxHp:78000, attack:6000, defense:0, expReward:9, goldReward:1600, icon:'🌿', lv:5, tekiseiLvBai:130, expBonus:9, drops:[{type:0, index:20, rate:0.03},null,null,{type:0, index:76, rate:0.03}] },
     { id:'m5-19', name:'熔岩鸟', hp:88000, maxHp:88000, attack:4500, defense:0, expReward:4, goldReward:1600, icon:'🌺', lv:5, tekiseiLvBai:130, expBonus:4, drops:[] },
     { id:'m5-20', name:'幼龙', hp:88000, maxHp:88000, attack:3750, defense:0, expReward:0, goldReward:1600, icon:'💀', lv:5, tekiseiLvBai:130, expBonus:0, drops:[{type:1, index:7, rate:0.09}] },
     { id:'m5-21', name:'熔岩恶魔', hp:177777, maxHp:177777, attack:3400, defense:0, expReward:2, goldReward:2800, icon:'⚔️', lv:5, tekiseiLvBai:130, expBonus:2, drops:[] },
-    { id:'m5-22', name:'火焰巨龙', hp:92000, maxHp:92000, attack:6800, defense:0, expReward:9, goldReward:2600, icon:'🛡️', lv:6, tekiseiLvBai:130, expBonus:9, drops:[{type:0, index:13, rate:0.12},{type:0, index:77, rate:0.05}] },
+    { id:'m5-22', name:'火焰巨龙', hp:92000, maxHp:92000, attack:6800, defense:0, expReward:9, goldReward:2600, icon:'🛡️', lv:6, tekiseiLvBai:130, expBonus:9, drops:[{type:0, index:13, rate:0.12},null,null,{type:0, index:77, rate:0.05}] },
     { id:'m5-23', name:'火山领主', hp:115000, maxHp:115000, attack:4600, defense:0, expReward:1, goldReward:1800, icon:'😈', lv:6, tekiseiLvBai:130, expBonus:1, drops:[] },
     { id:'m5-24', name:'火焰元素', hp:104000, maxHp:104000, attack:4600, defense:0, expReward:0, goldReward:1800, icon:'🐉', lv:6, tekiseiLvBai:130, expBonus:0, drops:[] },
     { id:'m5-25', name:'熔岩蝙蝠', hp:104000, maxHp:104000, attack:4600, defense:0, expReward:0, goldReward:1800, icon:'🐲', lv:6, tekiseiLvBai:130, expBonus:0, drops:[] },
@@ -285,7 +285,7 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m8-3', name:'圣光骑士', hp:540000, maxHp:540000, attack:13000, defense:0, expReward:0, goldReward:3000, icon:'🐍', lv:1, tekiseiLvBai:240, expBonus:0, drops:[] },
     { id:'m8-4', name:'泰坦之魂', hp:520000, maxHp:520000, attack:13500, defense:0, expReward:2, goldReward:2000, icon:'🐦‍⬛', lv:1, tekiseiLvBai:240, expBonus:2, drops:[] },
     { id:'m8-5', name:'金袍术士', hp:520000, maxHp:520000, attack:14600, defense:0, expReward:5, goldReward:2000, icon:'🦊', lv:1, tekiseiLvBai:240, expBonus:5, drops:[] },
-    { id:'m8-6', name:'狮鹫', hp:550000, maxHp:550000, attack:18000, defense:0, expReward:5, goldReward:3000, icon:'🐻', lv:2, tekiseiLvBai:210, expBonus:5, drops:[{type:0, index:19, rate:0.1},{type:0, index:88, rate:0.04}] },
+    { id:'m8-6', name:'狮鹫', hp:550000, maxHp:550000, attack:18000, defense:0, expReward:5, goldReward:3000, icon:'🐻', lv:2, tekiseiLvBai:210, expBonus:5, drops:[{type:0, index:19, rate:0.1},null,null,{type:0, index:88, rate:0.04}] },
     { id:'m8-7', name:'天马', hp:580000, maxHp:580000, attack:14200, defense:0, expReward:2, goldReward:2000, icon:'🐺', lv:2, tekiseiLvBai:210, expBonus:2, drops:[] },
     { id:'m8-8', name:'大天使', hp:570000, maxHp:570000, attack:13600, defense:0, expReward:0, goldReward:2000, icon:'👹', lv:2, tekiseiLvBai:210, expBonus:0, drops:[{type:1, index:8, rate:0.09}] },
     { id:'m8-9', name:'炽天使', hp:540000, maxHp:540000, attack:19000, defense:0, expReward:5, goldReward:3000, icon:'🧌', lv:3, tekiseiLvBai:210, expBonus:5, drops:[{type:0, index:18, rate:0.1}] },
@@ -294,9 +294,9 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m8-12', name:'圣殿之灵', hp:680000, maxHp:680000, attack:16000, defense:0, expReward:0, goldReward:2500, icon:'🦗', lv:4, tekiseiLvBai:250, expBonus:0, drops:[] },
     { id:'m8-13', name:'神殿守卫', hp:560000, maxHp:560000, attack:19000, defense:0, expReward:2, goldReward:1500, icon:'🌸', lv:4, tekiseiLvBai:250, expBonus:2, drops:[] },
     { id:'m8-14', name:'堕天使', hp:740000, maxHp:740000, attack:17500, defense:0, expReward:0, goldReward:4300, icon:'🐗', lv:5, tekiseiLvBai:185, expBonus:0, drops:[] },
-    { id:'m8-15', name:'圣光骑士', hp:560000, maxHp:560000, attack:23000, defense:0, expReward:9, goldReward:1400, icon:'🪱', lv:5, tekiseiLvBai:185, expBonus:9, drops:[{type:0, index:20, rate:0.12},{type:1, index:9, rate:0.11},{type:0, index:76, rate:0.05},{type:1, index:33, rate:0.05}] },
+    { id:'m8-15', name:'圣光骑士', hp:560000, maxHp:560000, attack:23000, defense:0, expReward:9, goldReward:1400, icon:'🪱', lv:5, tekiseiLvBai:185, expBonus:9, drops:[{type:0, index:20, rate:0.12},{type:1, index:9, rate:0.11},{type:0, index:76, rate:0.05},null,{type:1, index:33, rate:0.05}] },
     { id:'m8-16', name:'泰坦之魂', hp:980000, maxHp:980000, attack:17500, defense:0, expReward:10, goldReward:2500, icon:'🦇', lv:6, tekiseiLvBai:220, expBonus:10, drops:[{type:0, index:26, rate:0.11},{type:0, index:55, rate:0.04},{type:1, index:32, rate:0.025}] },
-    { id:'m8-17', name:'金袍术士', hp:720000, maxHp:720000, attack:25000, defense:0, expReward:20, goldReward:2500, icon:'🗿', lv:6, tekiseiLvBai:220, expBonus:20, drops:[{type:0, index:27, rate:0.11},{type:1, index:32, rate:0.015}] },
+    { id:'m8-17', name:'金袍术士', hp:720000, maxHp:720000, attack:25000, defense:0, expReward:20, goldReward:2500, icon:'🗿', lv:6, tekiseiLvBai:220, expBonus:20, drops:[{type:0, index:27, rate:0.11},null,null,{type:1, index:32, rate:0.015}] },
     { id:'m8-18', name:'狮鹫', hp:750000, maxHp:750000, attack:18000, defense:0, expReward:0, goldReward:2500, icon:'🌿', lv:6, tekiseiLvBai:220, expBonus:0, drops:[] },
   ],
   9: [
@@ -436,10 +436,13 @@ export function getMapEnemies(mapId: number): Enemy[] {
       ? calculateExpReward(mapId, e.lv || 0, e.tekiseiLvBai, e.expBonus || 0)
       : e.expReward;
     
-    const drops = (e.drops || []).map((drop: any) => ({
-      equipmentId: itemTypeAndIndexToEquipmentId(drop.type, drop.index),
-      dropRate: drop.rate,
-    }));
+    const drops = (e.drops || []).map((drop: any) => {
+      if (!drop) return null;
+      return {
+        equipmentId: itemTypeAndIndexToEquipmentId(drop.type, drop.index),
+        dropRate: drop.rate,
+      };
+    });
     
     return {
       ...e,
