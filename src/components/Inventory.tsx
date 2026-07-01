@@ -789,6 +789,25 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const renderConfirmDialog = () => {
     if (!confirmEquipment) return null;
     
+    const currentAtk = player.equippedWeapon?.attackBonus || 0;
+    const currentDef = player.equippedArmor?.defenseBonus || 0;
+    const currentHp = player.equippedArmor?.hpBonus || 0;
+    
+    let newAtk = currentAtk;
+    let newDef = currentDef;
+    let newHp = currentHp;
+    
+    if (confirmEquipment.type === 'weapon') {
+      newAtk = confirmEquipment.attackBonus;
+    } else if (confirmEquipment.type === 'armor') {
+      newDef = confirmEquipment.defenseBonus;
+      newHp = confirmEquipment.hpBonus;
+    } else if (confirmEquipment.type === 'accessory') {
+      newAtk += confirmEquipment.attackBonus;
+      newDef += confirmEquipment.defenseBonus;
+      newHp += confirmEquipment.hpBonus;
+    }
+    
     return (
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
@@ -796,6 +815,102 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="text-xl font-bold text-white mb-4">
               {confirmEquipment.type === 'soul' ? '安装' : '装备'} {confirmEquipment.name} 吗？
             </div>
+            
+            {(confirmEquipment.type === 'weapon' || confirmEquipment.type === 'armor' || confirmEquipment.type === 'accessory') && (
+              <div className="space-y-2 mb-4">
+                {confirmEquipment.type === 'weapon' && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">现在的 ATK:</span>
+                      <span className="text-white">{currentAtk}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">装备后的 ATK:</span>
+                      <span className={`${newAtk > currentAtk ? 'text-green-400' : newAtk < currentAtk ? 'text-red-400' : 'text-white'}`}>
+                        {newAtk}
+                      </span>
+                    </div>
+                  </>
+                )}
+                
+                {confirmEquipment.type === 'armor' && (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">现在的 DEF:</span>
+                      <span className="text-white">{currentDef}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">装备后的 DEF:</span>
+                      <span className={`${newDef > currentDef ? 'text-green-400' : newDef < currentDef ? 'text-red-400' : 'text-white'}`}>
+                        {newDef}
+                      </span>
+                    </div>
+                    {currentHp !== 0 || newHp !== 0 ? (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">现在的 HP:</span>
+                          <span className="text-white">{currentHp}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">装备后的 HP:</span>
+                          <span className={`${newHp > currentHp ? 'text-green-400' : newHp < currentHp ? 'text-red-400' : 'text-white'}`}>
+                            {newHp}
+                          </span>
+                        </div>
+                      </>
+                    ) : null}
+                  </>
+                )}
+                
+                {confirmEquipment.type === 'accessory' && (
+                  <>
+                    {(currentAtk !== 0 || newAtk !== currentAtk) && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">现在的 ATK:</span>
+                          <span className="text-white">{currentAtk}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">装备后的 ATK:</span>
+                          <span className={`${newAtk > currentAtk ? 'text-green-400' : newAtk < currentAtk ? 'text-red-400' : 'text-white'}`}>
+                            {newAtk}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {(currentDef !== 0 || newDef !== currentDef) && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">现在的 DEF:</span>
+                          <span className="text-white">{currentDef}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">装备后的 DEF:</span>
+                          <span className={`${newDef > currentDef ? 'text-green-400' : newDef < currentDef ? 'text-red-400' : 'text-white'}`}>
+                            {newDef}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    {(currentHp !== 0 || newHp !== currentHp) && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">现在的 HP:</span>
+                          <span className="text-white">{currentHp}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">装备后的 HP:</span>
+                          <span className={`${newHp > currentHp ? 'text-green-400' : newHp < currentHp ? 'text-red-400' : 'text-white'}`}>
+                            {newHp}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            
             <div className="flex gap-3">
               <button
                 onClick={handleConfirmEquip}

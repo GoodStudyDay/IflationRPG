@@ -23,6 +23,7 @@ interface GameStore {
   battleInterval: number | null;
   battlePoints: number;
   maxBattlePoints: number;
+  defeatedBosses: number[];
   playTimes: number;
   Highlv: number;
   HighCombo: number;
@@ -320,6 +321,7 @@ export const useGameStore = create<GameStore>()(
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
       maxBattlePoints: 30,
+      defeatedBosses: [] as number[],
       playTimes: saveData.playTimes,
       Highlv: saveData.Highlv,
       HighCombo: saveData.HighCombo,
@@ -790,9 +792,13 @@ export const useGameStore = create<GameStore>()(
         });
       },
       startBossBattle: (bossId) => {
-        const { player, battlePoints, inventory, Highlv, dropNum } = get();
+        const { player, battlePoints, inventory, Highlv, dropNum, defeatedBosses } = get();
         
         if (battlePoints <= 0) {
+          return;
+        }
+        
+        if (defeatedBosses.includes(bossId)) {
           return;
         }
         
@@ -893,7 +899,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       endBattle: (victory) => {
-        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, battle: { comboCount, goldMultiplier } } = get();
+        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, battle: { comboCount, goldMultiplier } } = get();
         
         if (battle.battleResult) {
           return;
@@ -926,6 +932,10 @@ export const useGameStore = create<GameStore>()(
           
           incrementWinBattle();
           updateHighCombo(comboCount);
+          
+          if ((battle.enemy as any).bossId) {
+            battlePointsChange = 3;
+          }
         } else if (!victory) {
           const damage = Math.floor(player.maxHp * 0.3);
           updatePlayerHp(-damage);
@@ -934,27 +944,13 @@ export const useGameStore = create<GameStore>()(
         }
         
         const newBattlePoints = battlePoints + battlePointsChange;
-        
-        if (!victory && newBattlePoints <= 0) {
-          set({
-            battle: {
-              ...battle,
-              status: 'idle',
-              battleResult: {
-                victory,
-                goldReward,
-                expReward,
-                dropItem,
-                battlePointsChange,
-              },
-            },
-          });
-          setTimeout(() => get().resetGame(), 2000);
-          return;
-        }
+        const newDefeatedBosses = victory && (battle.enemy as any).bossId 
+          ? [...defeatedBosses, (battle.enemy as any).bossId] 
+          : defeatedBosses;
         
         set({
           battlePoints: newBattlePoints,
+          defeatedBosses: newDefeatedBosses,
           battle: {
             ...battle,
             status: 'idle',
@@ -1326,6 +1322,7 @@ export const useGameStore = create<GameStore>()(
           encounterRate: 0,
           battlePoints: 30,
           maxBattlePoints: 30,
+          defeatedBosses: [],
           bonus: {
             addUsesLeft: 5,
             clearUsesLeft: 5,
@@ -1487,10 +1484,8 @@ export const useGameStore = create<GameStore>()(
         return BONUS_LIST[bonus.currentBonus.bonusType] || null;
       },
       teleportToMap: (mapId) => {
-        const { player } = get();
         const map = MAP_LIST.find(m => m.id === mapId);
         if (!map) return;
-        if (player.level < map.unlockLevel) return;
         set({ currentMap: mapId });
       },
       unlockAccessorySlot: () => {

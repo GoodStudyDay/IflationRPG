@@ -254,7 +254,7 @@ export const MainScreen = () => {
           <div className="bg-[#2d1b4e] border-2 border-[#8a2a4a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择BOSS</h3>
             <div className="space-y-2">
-              {BOSS_DATA.map(boss => {
+              {[...BOSS_DATA].sort((a, b) => a.level - b.level).map(boss => {
                 const isAvailable = player.level >= boss.level;
                 return (
                   <button

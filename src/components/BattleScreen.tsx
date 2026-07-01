@@ -1,41 +1,7 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
-import type { Enemy } from '@/types';
-
-const HP_BAR_DATA = [
-  [1000, 1500, 2500, 4000, 7500],
-  [15000, 60000, 100000, 200000, 400000],
-  [1000000, 2500000, 4000000, 7500000, 12500000],
-  [40000000, 75000000, 200000000, 400000000, -1],
-];
-
-const getHPBarSegments = (maxHp: number): { y: number; x: number; total: number }[] => {
-  const segments: { y: number; x: number; total: number }[] = [];
-  let currentSum = 0;
-  
-  for (let y = 0; y < 4; y++) {
-    for (let x = 0; x < 5; x++) {
-      const segmentHp = HP_BAR_DATA[y][x];
-      if (segmentHp === -1) break;
-      
-      if (currentSum + segmentHp >= maxHp) {
-        segments.push({ y, x, total: maxHp - currentSum });
-        return segments;
-      }
-      
-      segments.push({ y, x, total: segmentHp });
-      currentSum += segmentHp;
-      
-      if (currentSum >= maxHp) {
-        return segments;
-      }
-    }
-  }
-  
-  return segments;
-};
 
 export const BattleScreen = () => {
   const { 
@@ -73,25 +39,9 @@ export const BattleScreen = () => {
   
   const playerHpPercent = player.maxHp > 0 ? (player.hp / player.maxHp) * 100 : 0;
 
-  const hpSegments = useMemo(() => getHPBarSegments((battle.enemy as Enemy).maxHp), [battle.enemy?.maxHp]);
-  
-  const currentHpSegments = useMemo(() => {
-    let remainingHp = (battle.enemy as Enemy).hp;
-    return hpSegments.map(segment => {
-      const filled = Math.min(remainingHp, segment.total);
-      remainingHp -= filled;
-      return { ...segment, filled };
-    }).filter(s => s.filled > 0);
-  }, [battle.enemy.hp, hpSegments]);
-  
   const handleHeal = () => {
     setRecoverNextTurn(true);
     resumeBattle();
-  };
-  
-  const getBarColor = (y: number) => {
-    const colors = ['bg-red-600', 'bg-orange-500', 'bg-blue-500', 'bg-purple-500'];
-    return colors[y] || 'bg-red-600';
   };
   
   return (
@@ -123,21 +73,16 @@ export const BattleScreen = () => {
         </div>
         
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-full px-8 flex justify-center">
-          <div className="flex flex-col-reverse gap-1 w-full max-w-md">
-            {currentHpSegments.slice(-4).map((segment, index) => {
-              const widthPercent = (segment.filled / segment.total) * 100;
-              return (
-                <div 
-                  key={index} 
-                  className="h-2 bg-gray-800 rounded overflow-hidden border border-gray-700"
-                >
-                  <div 
-                    className={`h-full transition-all duration-300 ${getBarColor(segment.y)}`}
-                    style={{ width: `${widthPercent}%` }}
-                  />
-                </div>
-              );
-            })}
+          <div className="w-full max-w-md">
+            <div className="h-4 bg-gray-800 rounded overflow-hidden border border-gray-700">
+              <div 
+                className="h-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-300"
+                style={{ width: `${((battle.enemy.hp / battle.enemy.maxHp) * 100)}%` }}
+              />
+            </div>
+            <div className="text-center text-white text-xs mt-1">
+              {battle.enemy.hp.toLocaleString()} / {battle.enemy.maxHp.toLocaleString()}
+            </div>
           </div>
         </div>
         
