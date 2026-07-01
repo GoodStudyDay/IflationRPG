@@ -38,7 +38,7 @@ export const getWeaponAtkContribution = (weapon: Equipment, quantity: number): n
   const effectiveAtk = weapon.attackBonus * stockMult;
   const effectiveRate = weapon.attributeRate * stockMult / 100;
   // eatk = epatk + (epatk + baseATK) * ebatk
-  return effectiveAtk + effectiveAtk * effectiveRate;
+  return Math.ceil(effectiveAtk + effectiveAtk * effectiveRate);
 };
 
 /** 获取防具带的防御力贡献（包含存货加成和倍率） */
@@ -48,7 +48,7 @@ export const getArmorDefContribution = (armor: Equipment, quantity: number): num
   const effectiveRate = armor.attributeRate * stockMult / 100;
   // edef = (epdef + def) * (1 + ebdef) - def = epdef * (1 + ebdef) + def * ebdef
   // 简化：effectiveDef * (1 + effectiveRate)
-  return effectiveDef * (1 + effectiveRate);
+  return Math.ceil(effectiveDef * (1 + effectiveRate));
 };
 
 /** 获取防具带的 HP 贡献（包含存货加成和倍率） */
@@ -56,7 +56,7 @@ export const getArmorHpContribution = (armor: Equipment, quantity: number): numb
   const stockMult = getStockBonus(quantity);
   const effectiveHp = armor.hpBonus * stockMult;
   const effectiveRate = armor.attributeRate * stockMult / 100;
-  return effectiveHp * (1 + effectiveRate);
+  return Math.ceil(effectiveHp * (1 + effectiveRate));
 };
 
 export const formatNumber = (num: number): string => {

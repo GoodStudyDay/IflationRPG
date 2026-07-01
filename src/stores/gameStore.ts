@@ -427,9 +427,9 @@ export const useGameStore = create<GameStore>()(
         const accDef = accessories.reduce((sum, a) => sum + (a.defenseBonus || 0), 0);
         const accHp = accessories.reduce((sum, a) => sum + (a.hpBonus || 0), 0);
         
-        const hpInc = initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp;
-        const atkInc = initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk;
-        const defInc = initialPlayer.defense + bonus.defense + armorDefContrib + accDef;
+        const hpInc = Math.ceil(initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp);
+        const atkInc = Math.ceil(initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk);
+        const defInc = Math.ceil(initialPlayer.defense + bonus.defense + armorDefContrib + accDef);
         
         updateHighLv(newLevel);
         
@@ -533,9 +533,9 @@ export const useGameStore = create<GameStore>()(
         const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
         const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
         
-        newPlayer.attack = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus;
-        newPlayer.defense = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus;
-        newPlayer.maxHp = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus;
+        newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
+        newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
+        newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus);
         
         set({ player: newPlayer });
         
@@ -1311,10 +1311,10 @@ export const useGameStore = create<GameStore>()(
         set({
           player: {
             ...initialPlayer,
-            attack: initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus,
-            defense: initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus,
-            maxHp: initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus,
-            hp: initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus,
+            attack: Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus),
+            defense: Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus),
+            maxHp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
+            hp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
             equippedWeapon,
             equippedArmor,
             equippedAccessories,
@@ -1671,9 +1671,9 @@ export const useGameStore = create<GameStore>()(
           const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a.defenseBonus || 0), 0);
           const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a.hpBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
-          state.player.attack = (initialPlayer.attack) + lvlBonus.attack + weaponAtkContrib + accAtk;
-          state.player.defense = (initialPlayer.defense) + lvlBonus.defense + armorDefContrib + accDef;
-          state.player.maxHp = (initialPlayer.maxHp) + lvlBonus.hp + armorHpContrib + accHp;
+          state.player.attack = Math.ceil((initialPlayer.attack) + lvlBonus.attack + weaponAtkContrib + accAtk);
+          state.player.defense = Math.ceil((initialPlayer.defense) + lvlBonus.defense + armorDefContrib + accDef);
+          state.player.maxHp = Math.ceil((initialPlayer.maxHp) + lvlBonus.hp + armorHpContrib + accHp);
         }
         
         return persistedState;
