@@ -83,6 +83,10 @@ interface GameStore {
   unlockAccessorySlot: () => boolean;
   /** 检查装备饰品数量是否超过库存，超过则清空对应栏位 */
   checkZeroEquips: () => void;
+  /** 分配属性点 */
+  allocateStPt: (statType: 'hp' | 'atk' | 'def' | 'agi' | 'luc', amount: number) => void;
+  /** 添加属性点 */
+  addStPt: (amount: number) => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -139,6 +143,9 @@ const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
   }
   if (typeof fixedPlayer.maxAccessorySlots !== 'number' || fixedPlayer.maxAccessorySlots < 1) {
     fixedPlayer.maxAccessorySlots = 3;
+  }
+  if (typeof fixedPlayer.stPt !== 'number' || Number.isNaN(fixedPlayer.stPt)) {
+    fixedPlayer.stPt = 0;
   }
   
   if (fixedPlayer.equippedWeapon) {
@@ -294,6 +301,7 @@ export const useGameStore = create<GameStore>()(
         turn: 'player',
         turnCount: 0,
         recoverNextTurn: false,
+        recoverUsed: false,
         playerAnimation: 'idle',
         enemyAnimation: 'idle',
         dropType: -1,
@@ -419,6 +427,8 @@ export const useGameStore = create<GameStore>()(
         
         updateHighLv(newLevel);
         
+        const stPtIncrease = lvupsitanum * 4;
+        
         set({
           player: {
             ...player,
@@ -429,6 +439,7 @@ export const useGameStore = create<GameStore>()(
             defense: defInc,
             maxMana: initialPlayer.maxMana + bonus.mana,
             mana: initialPlayer.maxMana + bonus.mana,
+            stPt: (player.stPt || 0) + stPtIncrease,
             exp: getExpNokori,
             expToNextLevel: expToNext,
           },
@@ -594,6 +605,7 @@ export const useGameStore = create<GameStore>()(
             turn: 'player',
             turnCount: 0,
             recoverNextTurn: false,
+            recoverUsed: false,
             playerAnimation: 'idle',
             enemyAnimation: 'idle',
             dropType: -1,
@@ -753,6 +765,7 @@ export const useGameStore = create<GameStore>()(
             turn: 'player',
             turnCount: 0,
             recoverNextTurn: false,
+            recoverUsed: false,
             playerAnimation: 'idle',
             enemyAnimation: 'idle',
             dropType: dropResult.getItemDropType,
@@ -890,7 +903,15 @@ export const useGameStore = create<GameStore>()(
         set((state) => ({ battle: { ...state.battle, status: 'paused' } }));
       },
       setRecoverNextTurn: (value) => {
-        set((state) => ({ battle: { ...state.battle, recoverNextTurn: value } }));
+        const { battle } = get();
+        if (value && battle.recoverUsed) return;
+        set((state) => ({ 
+          battle: { 
+            ...state.battle, 
+            recoverNextTurn: value,
+            recoverUsed: value ? true : state.battle.recoverUsed 
+          } 
+        }));
       },
       startBattleLoop: () => {
         const { battleInterval, battle } = get();
@@ -1116,6 +1137,7 @@ export const useGameStore = create<GameStore>()(
               turn: 'player',
               turnCount: 0,
               recoverNextTurn: false,
+              recoverUsed: false,
               playerAnimation: 'idle',
               enemyAnimation: 'idle',
               dropType: -1,
@@ -1212,6 +1234,7 @@ export const useGameStore = create<GameStore>()(
             turn: 'player',
             turnCount: 0,
             recoverNextTurn: false,
+            recoverUsed: false,
             playerAnimation: 'idle',
             enemyAnimation: 'idle',
             dropType: -1,
@@ -1404,6 +1427,39 @@ export const useGameStore = create<GameStore>()(
           },
         });
       },
+      allocateStPt: (statType, amount) => {
+        const { player } = get();
+        const currentStPt = player.stPt || 0;
+        if (amount > currentStPt) return;
+        
+        let newPlayer = { ...player };
+        newPlayer.stPt = currentStPt - amount;
+        
+        switch (statType) {
+          case 'hp':
+            newPlayer.maxHp += amount * 5;
+            newPlayer.hp += amount * 5;
+            break;
+          case 'atk':
+            newPlayer.attack += amount * 3;
+            break;
+          case 'def':
+            newPlayer.defense += amount * 3;
+            break;
+          case 'agi':
+            newPlayer.agility += amount * 2;
+            break;
+          case 'luc':
+            newPlayer.luck += amount * 1;
+            break;
+        }
+        
+        set({ player: newPlayer });
+      },
+      addStPt: (amount) => {
+        const { player } = get();
+        set({ player: { ...player, stPt: (player.stPt || 0) + amount } });
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -1443,6 +1499,11 @@ export const useGameStore = create<GameStore>()(
           // Fix maxAccessorySlots
           if (typeof state.player.maxAccessorySlots !== 'number' || state.player.maxAccessorySlots < 1) {
             state.player.maxAccessorySlots = 1;
+          }
+          
+          // Fix stPt
+          if (typeof state.player.stPt !== 'number' || Number.isNaN(state.player.stPt)) {
+            state.player.stPt = 0;
           }
 
           // Fix equipment

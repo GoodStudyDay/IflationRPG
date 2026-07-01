@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { Inventory } from './Inventory';
-import { StatusBar } from './StatusBar';
+import { StatusPanel } from './StatusPanel';
 import { EquipmentCollection } from './EquipmentCollection';
 
 interface MenuOverlayProps {
@@ -138,24 +138,7 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
   }
 
   if (activePanel === 'status') {
-    return (
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4">
-          <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
-            <div className="text-game-secondary font-bold">属性</div>
-          </div>
-          
-          <StatusBar />
-          
-          <button
-            onClick={() => setActivePanel('main')}
-            className="w-full mt-4 bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors"
-          >
-            返回
-          </button>
-        </div>
-      </div>
-    );
+    return <StatusPanel onClose={() => setActivePanel('main')} />;
   }
   
   if (activePanel === 'inventory') {

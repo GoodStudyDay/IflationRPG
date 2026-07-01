@@ -13,6 +13,8 @@ export const BattleScreen = () => {
     setRecoverNextTurn,
   } = useGameStore();
   
+  const canRecover = !battle.recoverUsed && player.hp < player.maxHp;
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -237,9 +239,14 @@ export const BattleScreen = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleHeal}
-                  className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors text-base sm:text-lg"
+                  disabled={!canRecover}
+                  className={`w-full font-bold py-3 rounded-lg transition-colors text-base sm:text-lg ${
+                    canRecover 
+                      ? 'bg-green-700 hover:bg-green-600 text-white' 
+                      : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  }`}
                 >
-                  恢复
+                  {player.hp >= player.maxHp ? 'HP已满' : '恢复'}
                 </button>
                 <button
                   onClick={tryEscape}

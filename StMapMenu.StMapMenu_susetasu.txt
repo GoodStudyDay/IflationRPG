@@ -1,0 +1,974 @@
+package Class_StMapMenu
+{
+   import Include_GameData.LocData2;
+   import ads.Ad32050_v153;
+   import flash.display.Bitmap;
+   import flash.events.Event;
+   import flash.events.MouseEvent;
+   import flash.text.TextField;
+   import root.L;
+   import root.Scr;
+   import ttk.skin.BlButton;
+   import ttk.skin.Select2YNDialog;
+   import ttk.tool.Tool_Text;
+   
+   public class StMapMenu_sutetasu extends menusutetasumc
+   {
+      
+      private var ga:Game;
+      
+      private var par:StMapMenu;
+      
+      private var SBit:Bitmap;
+      
+      private var SBitMotion:int;
+      
+      private var SBitSyu:int;
+      
+      private var sutetasusBV:Vector.<BlButton>;
+      
+      private var sutetasuTextFV:Vector.<TextField>;
+      
+      private var tstPt:int;
+      
+      private var php:int;
+      
+      private var patk:int;
+      
+      private var pdef:int;
+      
+      private var pspeed:int;
+      
+      private var pluk:int;
+      
+      private var sutetasueefi:int = 0;
+      
+      private var gokuhurion:Boolean = false;
+      
+      private var gokuhurisyu:int;
+      
+      private var hanhurion:Boolean = false;
+      
+      private var hanhurisyu:int;
+      
+      private var hanhuristpt:int;
+      
+      public function StMapMenu_sutetasu(param1:Game, param2:StMapMenu)
+      {
+         super();
+         this.ga = param1;
+         this.par = param2;
+         sutetasuVar();
+      }
+      
+      private function sutetasuVar() : void
+      {
+         var _loc1_:int = 0;
+         addChild(Tool_Text.TFLEFTGet(305,233 + L.Z(0,1),1,26 + L.Z(0,-1),16777215,LocData2.MONEY,0,2 + L.Z(0,-5)));
+         addChild(Tool_Text.TFLEFTGet(48,272,1,29,16777215,"HP",0,3));
+         addChild(Tool_Text.TFLEFTGet(48,330 + L.SelNum(0,-3),1,24 + L.SelNum(0,5),16777215,LocData2.ATK,0,-1 + L.SelNum(0,3)));
+         addChild(Tool_Text.TFLEFTGet(48,387 + L.SelNum(0,-3),1,24 + L.SelNum(0,5),16777215,LocData2.DEF,0,-1 + L.SelNum(0,3)));
+         addChild(Tool_Text.TFLEFTGet(48,439 + L.SelNum(0,-3),1,24 + L.SelNum(0,5),16777215,LocData2.AGI,0,-1 + L.SelNum(0,3)));
+         addChild(Tool_Text.TFLEFTGet(48,504,1,26 + L.SelNum(0,2),16777215,LocData2.LUC,0,2));
+         addChild(Tool_Text.TFLEFTGet(55,150,L.FontNum(),18,16777215,L.Get("ステポを振り分けると強化することが"),-6 + L.Z(0,0,0,0,0,-2),-1 + L.Z(0,0,1)));
+         addChild(Tool_Text.TFLEFTGet(60 + L.Int(0,-8),480 + L.Z(0,0,2,0,-2),L.FontNum(),15 + L.Z(0,0,0,0,0,0),16777215,L.Get("連続クリティカルは素早さ依存しま"),0,L.Z(0,0,0,0,0,-1,1)));
+         addChild(Tool_Text.TFLEFTGet(60 + L.Int(0,-8),546 + L.Z(0,0,2,0,-2),L.FontNum(),15 + L.Z(0,0,0,0,0,0),16777215,L.Get("クリ獲得アイテム金額は運依存しま"),0,L.SelNum(0,-1)));
+         addChild(Tool_Text.TFLEFTGet(56,572,1,24,16777215,L.LD2("残り",""),0,-4));
+         addChild(Tool_Text.TFLEFTGet(71,591 + L.Z(0,0,-2,0,3,1,-1),L.FontNum(),26 + L.Z(0,0,2,0,-3,-1,1),16777215,L.Get("ステータスポイント"),0,-4 + L.Z(0,6,4,1,-8,-1,3)));
+         t6.x += L.Z(0,-40,-25,0,50,0,-50);
+         addChild(Tool_Text.TFLEFTGet(110,619 + L.Z(0,0,5),L.FontNum(),16,16777215,L.Get("ステポレベルアップすると獲得できま")));
+         addChild(Tool_Text.TFLEFTGet(44,651 + L.Z(0,0),L.FontNum(),16 + L.Int(0,-1,0,0,-1),16777215,L.Get("強化するステ選択して長押可能"),0,L.SelNum(0,-1)));
+         sutetasusBV = new Vector.<BlButton>(18);
+         sutetasusBV[0] = new BlButton(48,674,104,56,Tool_Text.TFBlGet(31 + L.Z(0,2),"HP",0,0,false));
+         sutetasusBV[1] = new BlButton(158,674,104,56,Tool_Text.TFBlGet(27 + L.Z(0,6),LocData2.ATK,0,0,false));
+         sutetasusBV[2] = new BlButton(268,674,104,56,Tool_Text.TFBlGet(27 + L.Z(0,6),LocData2.DEF,0,0,false));
+         sutetasusBV[3] = new BlButton(378,674,104,56,Tool_Text.TFBlGet(27 + L.Z(0,6),LocData2.AGI,0,0,false));
+         sutetasusBV[4] = new BlButton(488,674,104,56,Tool_Text.TFBlGet(30 + L.Z(0,2),LocData2.LUC,0,0,false));
+         sutetasusBV[5] = new BlButton(80,766,220,60,Tool_Text.TFBlGet(32,L.Get("キャンセル")));
+         sutetasusBV[6] = new BlButton(340,763,220,66,Tool_Text.TFBlGet(34,L.Get("決定")));
+         sutetasusBV[7] = new BlButton(180,854,280,60,Tool_Text.TFBlGet(32,LocData2.BACK));
+         sutetasusBV[8] = new BlButton(522,274,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("極振"),0,-1 + L.Z(0,1),false),null,1,0,0,12,20);
+         sutetasusBV[9] = new BlButton(522,330,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("極振"),0,-1 + L.Z(0,1),false),null,1,0,0,12,20);
+         sutetasusBV[10] = new BlButton(522,386,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("極振"),0,-1 + L.Z(0,1),false),null,1,0,0,12,20);
+         sutetasusBV[11] = new BlButton(522,442,70,44 + L.Z(0,0,0,0,0,-2),Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("極振"),0,-1 + L.Z(0,1),false),null,1,0,0,12,20);
+         sutetasusBV[12] = new BlButton(522,508,70,44 + L.Z(0,0,0,0,0,-2),Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("極振"),0,-1 + L.Z(0,1),false),null,1,0,0,12,24);
+         sutetasusBV[13] = new BlButton(445,274,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("半振"),0,-1 + L.Z(0,-1),false),null,1,0,0,12,20);
+         sutetasusBV[14] = new BlButton(445,330,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("半振"),0,-1 + L.Z(0,-1),false),null,1,0,0,12,20);
+         sutetasusBV[15] = new BlButton(445,386,70,44,Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("半振"),0,-1 + L.Z(0,-1),false),null,1,0,0,12,20);
+         sutetasusBV[16] = new BlButton(445,442,70,44 + L.Z(0,0,0,0,0,-3),Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("半振"),0,-1 + L.Z(0,-1),false),null,1,0,0,12,20);
+         sutetasusBV[17] = new BlButton(445,508,70,44 + L.Z(0,0,0,0,0,-3),Tool_Text.TFBlGet(25 + L.Z(0,-3),L.Get("半振"),0,-1 + L.Z(0,-1),false),null,1,0,0,12,24);
+         SBit = new Bitmap();
+         SBit.x = 62;
+         SBit.y = 218;
+         SBit.smoothing = false;
+         addChild(SBit);
+         sutetasuTextFV = new Vector.<TextField>(12);
+         sutetasuTextFV[0] = t1;
+         sutetasuTextFV[1] = t2;
+         sutetasuTextFV[2] = t3;
+         sutetasuTextFV[3] = t4;
+         sutetasuTextFV[4] = t5;
+         sutetasuTextFV[5] = t6;
+         sutetasuTextFV[6] = t11;
+         sutetasuTextFV[7] = t22;
+         sutetasuTextFV[8] = t33;
+         sutetasuTextFV[9] = t44;
+         sutetasuTextFV[10] = t55;
+         sutetasuTextFV[11] = t66;
+         _loc1_ = 0;
+         while(_loc1_ < 12)
+         {
+            sutetasuTextFV[_loc1_].autoSize = "left";
+            addChild(sutetasuTextFV[_loc1_]);
+            _loc1_++;
+         }
+         lvstrtf.text = LocData2.LV;
+      }
+      
+      public function start() : void
+      {
+         var _loc3_:int = 0;
+         par.addChild(this);
+         SBitMotion = 0;
+         SBitSyu = 0;
+         SBit.bitmapData = ga.gdata.SBitDV[SBitSyu][int(SBitMotion % 12 * 0.25)];
+         lvtxt.text = String(ga.gdata.lv);
+         gtxt.text = ga.gdata.g + "G";
+         exptxt.text = ga.gdata.exp + "/" + ga.gdata.onenextexp;
+         var _loc2_:int = ga.gdata.exp;
+         var _loc1_:int = ga.gdata.onenextexp;
+         expbar.b.scaleX = _loc2_ / _loc1_;
+         sutetasuTextFVUpdataAndPlusFormat();
+         addEventListener("mouseUp",sutetasuMMU);
+         addEventListener("enterFrame",sutetasuEEF);
+         _loc3_ = 0;
+         while(_loc3_ < 18)
+         {
+            addChild(sutetasusBV[_loc3_]);
+            _loc3_++;
+         }
+         _loc3_ = 0;
+         while(_loc3_ < 5)
+         {
+            if(ga.gdata.stPt == 0)
+            {
+               sutetasusBV[_loc3_].alpha = 0.5;
+               sutetasusBV[_loc3_].mouseEnabled = false;
+            }
+            else
+            {
+               sutetasusBV[_loc3_].alpha = 1;
+               sutetasusBV[_loc3_].mouseEnabled = true;
+            }
+            _loc3_++;
+         }
+         _loc3_ = 8;
+         while(_loc3_ < 18)
+         {
+            if(ga.gdata.stPt == 0)
+            {
+               sutetasusBV[_loc3_].alpha = 0.5;
+               sutetasusBV[_loc3_].mouseEnabled = false;
+            }
+            else
+            {
+               sutetasusBV[_loc3_].alpha = 1;
+               sutetasusBV[_loc3_].mouseEnabled = true;
+            }
+            _loc3_++;
+         }
+         _loc3_ = 5;
+         while(_loc3_ < 7)
+         {
+            sutetasusBV[_loc3_].alpha = 0.5;
+            sutetasusBV[_loc3_].mouseEnabled = false;
+            _loc3_++;
+         }
+      }
+      
+      private function end() : void
+      {
+         var _loc1_:int = 0;
+         par.removeChild(this);
+         removeEventListener("mouseUp",sutetasuMMU);
+         removeEventListener("enterFrame",sutetasuEEF);
+         _loc1_ = 0;
+         while(_loc1_ < 8)
+         {
+            removeChild(sutetasusBV[_loc1_]);
+            _loc1_++;
+         }
+         SBit.bitmapData = null;
+      }
+      
+      private function sutetasuMMU(param1:MouseEvent) : void
+      {
+         var _loc2_:int = 0;
+         if(param1.target == sutetasusBV[5])
+         {
+            ga.sebgm.okstart();
+            tstPt = 0;
+            php = patk = pdef = pspeed = pluk = 0;
+            _loc2_ = 6;
+            while(_loc2_ < 11)
+            {
+               sutetasuTextFV[_loc2_].text = "";
+               _loc2_++;
+            }
+            sutetasuTextFV[11].text = "";
+            _loc2_ = 0;
+            while(_loc2_ < 5)
+            {
+               if(ga.gdata.stPt == 0)
+               {
+                  sutetasusBV[_loc2_].alpha = 0.5;
+                  sutetasusBV[_loc2_].mouseEnabled = false;
+               }
+               else
+               {
+                  sutetasusBV[_loc2_].alpha = 1;
+                  sutetasusBV[_loc2_].mouseEnabled = true;
+               }
+               _loc2_++;
+            }
+            _loc2_ = 8;
+            while(_loc2_ < 18)
+            {
+               if(ga.gdata.stPt == 0)
+               {
+                  sutetasusBV[_loc2_].alpha = 0.5;
+                  sutetasusBV[_loc2_].mouseEnabled = false;
+               }
+               else
+               {
+                  sutetasusBV[_loc2_].alpha = 1;
+                  sutetasusBV[_loc2_].mouseEnabled = true;
+               }
+               _loc2_++;
+            }
+            _loc2_ = 5;
+            while(_loc2_ < 7)
+            {
+               sutetasusBV[_loc2_].alpha = 0.5;
+               sutetasusBV[_loc2_].mouseEnabled = false;
+               _loc2_++;
+            }
+         }
+         else if(param1.target == sutetasusBV[6])
+         {
+            ga.sebgm.okstart();
+            ga.gdata.hp += php;
+            ga.gdata.atk += patk;
+            ga.gdata.def += pdef;
+            ga.gdata.speed += pspeed;
+            ga.gdata.luk += pluk;
+            ga.gdata.stPt -= tstPt;
+            ga.gdata.tukattastpt += tstPt;
+            ga.gdata.EqStUpdate(false);
+            sutetasuTextFVUpdataAndPlusFormat();
+            _loc2_ = 0;
+            while(_loc2_ < 5)
+            {
+               if(ga.gdata.stPt == 0)
+               {
+                  sutetasusBV[_loc2_].alpha = 0.5;
+                  sutetasusBV[_loc2_].mouseEnabled = false;
+               }
+               else
+               {
+                  sutetasusBV[_loc2_].alpha = 1;
+                  sutetasusBV[_loc2_].mouseEnabled = true;
+               }
+               _loc2_++;
+            }
+            _loc2_ = 8;
+            while(_loc2_ < 18)
+            {
+               if(ga.gdata.stPt == 0)
+               {
+                  sutetasusBV[_loc2_].alpha = 0.5;
+                  sutetasusBV[_loc2_].mouseEnabled = false;
+               }
+               else
+               {
+                  sutetasusBV[_loc2_].alpha = 1;
+                  sutetasusBV[_loc2_].mouseEnabled = true;
+               }
+               _loc2_++;
+            }
+            _loc2_ = 5;
+            while(_loc2_ < 7)
+            {
+               sutetasusBV[_loc2_].alpha = 0.5;
+               sutetasusBV[_loc2_].mouseEnabled = false;
+               _loc2_++;
+            }
+            ga.gdata.sodataFunc_Status(1);
+         }
+         else if(param1.target == sutetasusBV[7])
+         {
+            if(tstPt != 0)
+            {
+               ga.sebgm.okstart();
+               ga.addChild(new Select2YNDialog(L.Get("決定ボタンを押さないとステ強化されま戻り"),backBl));
+            }
+            else
+            {
+               if(ga.stagemap != null && ga.gdata.stPt == 0)
+               {
+                  ga.stagemap.tyuEnd();
+               }
+               ga.sebgm.okstart();
+               backBl();
+            }
+         }
+      }
+      
+      private function backBl() : void
+      {
+         end();
+         par.top.startf();
+      }
+      
+      private function sutetasuEEF(param1:Event) : void
+      {
+         var _loc5_:int = 0;
+         var _loc3_:Number = NaN;
+         var _loc4_:int = 0;
+         var _loc2_:int = 0;
+         if(SBitMotion >= 90)
+         {
+            SBitSyu = Math.random() * 10;
+            if(SBitSyu == 3 || SBitSyu == 5 || SBitSyu == 6)
+            {
+               SBitSyu = Math.random() * 10;
+            }
+            if(SBitSyu == 9)
+            {
+               SBitSyu = Math.random() * 10;
+            }
+            if(SBitSyu == 9)
+            {
+               SBitSyu = Math.random() * 10;
+            }
+            SBitMotion = 0;
+         }
+         if(SBitSyu <= 7)
+         {
+            SBit.bitmapData = ga.gdata.SBitDV[SBitSyu][int(SBitMotion % 12 * 0.25)];
+         }
+         else if(SBitSyu == 8)
+         {
+            SBit.bitmapData = ga.gdata.SBitDV[8][int(SBitMotion % 12 * 0.25)];
+         }
+         else
+         {
+            SBit.bitmapData = ga.gdata.SBitDV[9][0];
+         }
+         SBitMotion = SBitMotion + 1;
+         if(!gokuhurion && !hanhurion)
+         {
+            if(ga.mousedown)
+            {
+               if(tstPt < ga.gdata.stPt)
+               {
+                  _loc3_ = Scr.ContentScale;
+                  _loc4_ = mouseX * _loc3_ + ga.co.x;
+                  _loc2_ = mouseY * _loc3_ + ga.co.y;
+                  if(Ad32050_v153.admobSmatBigOn)
+                  {
+                     _loc2_ += 40 * _loc3_;
+                  }
+                  if(sutetasusBV[0].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     php += PtPlusTiming() * 5;
+                  }
+                  else if(sutetasusBV[1].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     patk += PtPlusTiming() * 3;
+                  }
+                  else if(sutetasusBV[2].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     pdef += PtPlusTiming() * 3;
+                  }
+                  else if(sutetasusBV[3].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     pspeed += PtPlusTiming() * 2;
+                  }
+                  else if(sutetasusBV[4].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     pluk += PtPlusTiming() * 1;
+                  }
+                  else if(sutetasusBV[8].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusGokuhuri(0);
+                  }
+                  else if(sutetasusBV[9].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusGokuhuri(1);
+                  }
+                  else if(sutetasusBV[10].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusGokuhuri(2);
+                  }
+                  else if(sutetasusBV[11].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusGokuhuri(3);
+                  }
+                  else if(sutetasusBV[12].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusGokuhuri(4);
+                  }
+                  else if(sutetasusBV[13].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusHanhuri(0);
+                  }
+                  else if(sutetasusBV[14].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusHanhuri(1);
+                  }
+                  else if(sutetasusBV[15].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusHanhuri(2);
+                  }
+                  else if(sutetasusBV[16].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusHanhuri(3);
+                  }
+                  else if(sutetasusBV[17].hitTestPoint(_loc4_,_loc2_))
+                  {
+                     PtPlusHanhuri(4);
+                  }
+                  else
+                  {
+                     sutetasueefi = 0;
+                  }
+                  PtPlusStrSet();
+                  if(tstPt == ga.gdata.stPt)
+                  {
+                     _loc5_ = 0;
+                     while(_loc5_ < 5)
+                     {
+                        sutetasusBV[_loc5_].alpha = 0.5;
+                        sutetasusBV[_loc5_].mouseEnabled = false;
+                        _loc5_++;
+                     }
+                     _loc5_ = 8;
+                     while(_loc5_ < 18)
+                     {
+                        sutetasusBV[_loc5_].alpha = 0.5;
+                        sutetasusBV[_loc5_].mouseEnabled = false;
+                        _loc5_++;
+                     }
+                  }
+                  if(tstPt == 1)
+                  {
+                     _loc5_ = 5;
+                     while(_loc5_ < 7)
+                     {
+                        sutetasusBV[_loc5_].alpha = 1;
+                        sutetasusBV[_loc5_].mouseEnabled = true;
+                        _loc5_++;
+                     }
+                  }
+               }
+            }
+            else
+            {
+               sutetasueefi = 0;
+            }
+         }
+         else if(gokuhurion)
+         {
+            sutetasueefi += 1;
+            _loc5_ = 0;
+            while(_loc5_ < 1 + sutetasueefi / 4)
+            {
+               if(gokuhurisyu == 0)
+               {
+                  php += PtPlusTiming() * 5;
+               }
+               else if(gokuhurisyu == 1)
+               {
+                  patk += PtPlusTiming() * 3;
+               }
+               else if(gokuhurisyu == 2)
+               {
+                  pdef += PtPlusTiming() * 3;
+               }
+               else if(gokuhurisyu == 3)
+               {
+                  pspeed += PtPlusTiming() * 2;
+               }
+               else if(gokuhurisyu == 4)
+               {
+                  pluk += PtPlusTiming() * 1;
+               }
+               PtPlusStrSet();
+               if(tstPt == ga.gdata.stPt)
+               {
+                  sutetasueefi = 0;
+                  gokuhurion = false;
+                  break;
+               }
+               _loc5_++;
+            }
+         }
+         else if(hanhurion)
+         {
+            sutetasueefi += 2 + sutetasueefi;
+            _loc5_ = 0;
+            while(_loc5_ < 1 + sutetasueefi)
+            {
+               if(hanhurisyu == 0)
+               {
+                  php += 5;
+               }
+               else if(hanhurisyu == 1)
+               {
+                  patk += 3;
+               }
+               else if(hanhurisyu == 2)
+               {
+                  pdef += 3;
+               }
+               else if(hanhurisyu == 3)
+               {
+                  pspeed += 2;
+               }
+               else if(hanhurisyu == 4)
+               {
+                  pluk += 1;
+               }
+               tstPt = tstPt + 1;
+               if(tstPt == ga.gdata.stPt)
+               {
+                  _loc5_ = 0;
+                  while(_loc5_ < 5)
+                  {
+                     sutetasusBV[_loc5_].alpha = 0.5;
+                     sutetasusBV[_loc5_].mouseEnabled = false;
+                     _loc5_++;
+                  }
+                  _loc5_ = 8;
+                  while(_loc5_ < 18)
+                  {
+                     sutetasusBV[_loc5_].alpha = 0.5;
+                     sutetasusBV[_loc5_].mouseEnabled = false;
+                     _loc5_++;
+                  }
+                  sutetasueefi = 0;
+                  hanhurion = false;
+                  break;
+               }
+               if(tstPt == hanhuristpt)
+               {
+                  sutetasueefi = 0;
+                  hanhurion = false;
+                  break;
+               }
+               _loc5_++;
+            }
+            PtPlusStrSet();
+            ga.sebgm.ok2start();
+         }
+      }
+      
+      private function PtPlusStrSet() : void
+      {
+         var _loc2_:Number = NaN;
+         var _loc1_:String = "";
+         if(php != 0)
+         {
+            _loc1_ = "+" + php;
+         }
+         _loc2_ = php * ga.gdata.ebhp;
+         var _temp_1:* = ga.gdata.stMult;
+         _loc2_ = (1 - _temp_1 - ga.gdata.Dice) * php + _temp_1 * _loc2_ * ga.gdata.Dice;
+         if(_loc2_ > 0)
+         {
+            _loc1_ += "(+" + Math.floor(_loc2_) + ")";
+         }
+         if(_loc2_ < 0)
+         {
+            _loc1_ += "(" + Math.floor(_loc2_) + ")";
+         }
+         sutetasuTextFV[6].text = _loc1_;
+         if(patk != 0)
+         {
+            sutetasuTextFV[7].text = "+" + patk;
+         }
+         _loc2_ = patk * ga.gdata.ebatk;
+         var _temp_2:* = ga.gdata.stMult;
+         _loc2_ = (1 - _temp_2 - ga.gdata.Dice) * patk + _temp_2 * _loc2_ * ga.gdata.Dice;
+         if(_loc2_ > 0)
+         {
+            sutetasuTextFV[7].appendText("(+" + Math.floor(_loc2_) + ")");
+         }
+         if(_loc2_ < 0)
+         {
+            sutetasuTextFV[7].appendText("(" + Math.floor(_loc2_) + ")");
+         }
+         if(pdef != 0)
+         {
+            sutetasuTextFV[8].text = "+" + pdef;
+         }
+         _loc2_ = pdef * ga.gdata.ebdef;
+         var _temp_3:* = ga.gdata.stMult;
+         _loc2_ = (1 - _temp_3 - ga.gdata.Dice) * pdef + _temp_3 * _loc2_ * ga.gdata.Dice;
+         if(_loc2_ > 0)
+         {
+            sutetasuTextFV[8].appendText("(+" + Math.floor(_loc2_) + ")");
+         }
+         if(_loc2_ < 0)
+         {
+            sutetasuTextFV[8].appendText("(" + Math.floor(_loc2_) + ")");
+         }
+         if(pspeed != 0)
+         {
+            sutetasuTextFV[9].text = "+" + pspeed;
+         }
+         _loc2_ = pspeed * ga.gdata.ebspeed;
+         var _temp_4:* = ga.gdata.stMult;
+         _loc2_ = (1 - _temp_4 - ga.gdata.Dice) * pspeed + _temp_4 * _loc2_ * ga.gdata.Dice;
+         if(_loc2_ > 0)
+         {
+            sutetasuTextFV[9].appendText("(+" + Math.floor(_loc2_) + ")");
+         }
+         if(_loc2_ < 0)
+         {
+            sutetasuTextFV[9].appendText("(" + Math.floor(_loc2_) + ")");
+         }
+         if(pluk != 0)
+         {
+            sutetasuTextFV[10].text = "+" + pluk;
+         }
+         _loc2_ = pluk * ga.gdata.ebluk;
+         var _temp_5:* = ga.gdata.stMult;
+         _loc2_ = (1 - _temp_5 - ga.gdata.Dice) * pluk + _temp_5 * _loc2_ * ga.gdata.Dice;
+         if(_loc2_ > 0)
+         {
+            sutetasuTextFV[10].appendText("(+" + Math.floor(_loc2_) + ")");
+         }
+         if(_loc2_ < 0)
+         {
+            sutetasuTextFV[10].appendText("(" + Math.floor(_loc2_) + ")");
+         }
+         if(tstPt != 0)
+         {
+            sutetasuTextFV[11].text = "-" + tstPt;
+         }
+      }
+      
+      private function PtPlusGokuhuri(param1:int) : void
+      {
+         var _loc2_:int = 0;
+         gokuhurisyu = param1;
+         sutetasueefi = 1;
+         gokuhurion = true;
+         _loc2_ = 0;
+         while(_loc2_ < 5)
+         {
+            sutetasusBV[_loc2_].alpha = 0.5;
+            sutetasusBV[_loc2_].mouseEnabled = false;
+            _loc2_++;
+         }
+         _loc2_ = 8;
+         while(_loc2_ < 18)
+         {
+            sutetasusBV[_loc2_].alpha = 0.5;
+            sutetasusBV[_loc2_].mouseEnabled = false;
+            _loc2_++;
+         }
+         _loc2_ = 5;
+         while(_loc2_ < 7)
+         {
+            sutetasusBV[_loc2_].alpha = 1;
+            sutetasusBV[_loc2_].mouseEnabled = true;
+            _loc2_++;
+         }
+      }
+      
+      private function PtPlusHanhuri(param1:int) : void
+      {
+         var _loc2_:int = 0;
+         hanhurisyu = param1;
+         sutetasueefi = 1;
+         hanhurion = true;
+         hanhuristpt = (ga.gdata.stPt + tstPt) / 2 + 0.5;
+         _loc2_ = 5;
+         while(_loc2_ < 7)
+         {
+            sutetasusBV[_loc2_].alpha = 1;
+            sutetasusBV[_loc2_].mouseEnabled = true;
+            _loc2_++;
+         }
+      }
+      
+      private function PtPlusTiming() : int
+      {
+         var _loc1_:int = 0;
+         var _loc2_:int = ga.gdata.stPt;
+         if(sutetasueefi <= 12)
+         {
+            if(sutetasueefi == 0)
+            {
+               _loc1_ = 1;
+            }
+            else if(sutetasueefi == 5)
+            {
+               _loc1_ = 1;
+            }
+            else if(sutetasueefi == 9)
+            {
+               _loc1_ = 1;
+            }
+            else if(sutetasueefi == 11)
+            {
+               _loc1_ = 1;
+            }
+         }
+         else if(tstPt + 50000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 20311;
+         }
+         else if(tstPt + 40000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 15111;
+         }
+         else if(tstPt + 30000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 10011;
+         }
+         else if(tstPt + 25000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 5011;
+         }
+         else if(tstPt + 10000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 3011;
+         }
+         else if(tstPt + 6000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 2051;
+         }
+         else if(tstPt + 3000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 1511;
+         }
+         else if(tstPt + 5000 < _loc2_ && sutetasueefi >= 1000)
+         {
+            _loc1_ = 1311;
+         }
+         else if(tstPt + 2000 < _loc2_ && sutetasueefi >= 900)
+         {
+            _loc1_ = 1111;
+         }
+         else if(tstPt + 1500 < _loc2_ && sutetasueefi >= 800)
+         {
+            _loc1_ = 901;
+         }
+         else if(tstPt + 800 < _loc2_ && sutetasueefi >= 700)
+         {
+            _loc1_ = 771;
+         }
+         else if(tstPt + 700 < _loc2_ && sutetasueefi >= 650)
+         {
+            _loc1_ = 651;
+         }
+         else if(tstPt + 600 < _loc2_ && sutetasueefi >= 600)
+         {
+            _loc1_ = 531;
+         }
+         else if(tstPt + 500 < _loc2_ && sutetasueefi >= 550)
+         {
+            _loc1_ = 421;
+         }
+         else if(tstPt + 400 < _loc2_ && sutetasueefi >= 500)
+         {
+            _loc1_ = 351;
+         }
+         else if(tstPt + 340 < _loc2_ && sutetasueefi >= 460)
+         {
+            _loc1_ = 291;
+         }
+         else if(tstPt + 340 < _loc2_ && sutetasueefi >= 420)
+         {
+            _loc1_ = 251;
+         }
+         else if(tstPt + 300 < _loc2_ && sutetasueefi >= 380)
+         {
+            _loc1_ = 221;
+         }
+         else if(tstPt + 250 < _loc2_ && sutetasueefi >= 340)
+         {
+            _loc1_ = 191;
+         }
+         else if(tstPt + 200 < _loc2_ && sutetasueefi >= 300)
+         {
+            _loc1_ = 161;
+         }
+         else if(tstPt + 150 < _loc2_ && sutetasueefi >= 270)
+         {
+            _loc1_ = 131;
+         }
+         else if(tstPt + 120 < _loc2_ && sutetasueefi >= 240)
+         {
+            _loc1_ = 101;
+         }
+         else if(tstPt + 90 < _loc2_ && sutetasueefi >= 210)
+         {
+            _loc1_ = 85;
+         }
+         else if(tstPt + 80 < _loc2_ && sutetasueefi >= 190)
+         {
+            _loc1_ = 74;
+         }
+         else if(tstPt + 70 < _loc2_ && sutetasueefi >= 170)
+         {
+            _loc1_ = 63;
+         }
+         else if(tstPt + 60 < _loc2_ && sutetasueefi >= 150)
+         {
+            _loc1_ = 51;
+         }
+         else if(tstPt + 50 < _loc2_ && sutetasueefi >= 130)
+         {
+            _loc1_ = 41;
+         }
+         else if(tstPt + 40 < _loc2_ && sutetasueefi >= 120)
+         {
+            _loc1_ = 35;
+         }
+         else if(tstPt + 30 < _loc2_ && sutetasueefi >= 110)
+         {
+            _loc1_ = 27;
+         }
+         else if(tstPt + 30 < _loc2_ && sutetasueefi >= 100)
+         {
+            _loc1_ = 21;
+         }
+         else if(tstPt + 20 < _loc2_ && sutetasueefi >= 90)
+         {
+            _loc1_ = 17;
+         }
+         else if(tstPt + 20 < _loc2_ && sutetasueefi >= 80)
+         {
+            _loc1_ = 14;
+         }
+         else if(tstPt + 18 < _loc2_ && sutetasueefi >= 75)
+         {
+            _loc1_ = 13;
+         }
+         else if(tstPt + 15 < _loc2_ && sutetasueefi >= 70)
+         {
+            _loc1_ = 11;
+         }
+         else if(tstPt + 15 < _loc2_ && sutetasueefi >= 65)
+         {
+            _loc1_ = 10;
+         }
+         else if(tstPt + 15 < _loc2_ && sutetasueefi >= 60)
+         {
+            _loc1_ = 9;
+         }
+         else if(tstPt + 15 < _loc2_ && sutetasueefi >= 55)
+         {
+            _loc1_ = 7;
+         }
+         else if(tstPt + 10 < _loc2_ && sutetasueefi >= 50)
+         {
+            _loc1_ = 6;
+         }
+         else if(tstPt + 8 < _loc2_ && sutetasueefi >= 45)
+         {
+            _loc1_ = 5;
+         }
+         else if(tstPt + 7 < _loc2_ && sutetasueefi >= 40)
+         {
+            _loc1_ = 4;
+         }
+         else if(tstPt + 5 < _loc2_ && sutetasueefi >= 35)
+         {
+            _loc1_ = 3;
+         }
+         else if(tstPt + 3 < _loc2_ && sutetasueefi >= 30)
+         {
+            _loc1_ = 2;
+         }
+         else
+         {
+            _loc1_ = 1;
+         }
+         if(_loc1_ != 0)
+         {
+            ga.sebgm.ok2start();
+         }
+         tstPt += _loc1_;
+         sutetasueefi = sutetasueefi + 1;
+         return _loc1_;
+      }
+      
+      private function sutetasuTextFVUpdataAndPlusFormat() : void
+      {
+         var _loc1_:int = 0;
+         tstPt = 0;
+         php = patk = pdef = pspeed = pluk = 0;
+         sutetasuTextFV[0].text = String(ga.gdata.hp);
+         if(ga.gdata.ehp > 0)
+         {
+            sutetasuTextFV[0].appendText("(+" + Math.floor(ga.gdata.ehp) + ")");
+         }
+         if(ga.gdata.ehp < 0)
+         {
+            sutetasuTextFV[0].appendText("(" + Math.floor(ga.gdata.ehp) + ")");
+         }
+         sutetasuTextFV[1].text = String(ga.gdata.atk);
+         if(ga.gdata.eatk > 0)
+         {
+            sutetasuTextFV[1].appendText("(+" + Math.floor(ga.gdata.eatk) + ")");
+         }
+         if(ga.gdata.eatk < 0)
+         {
+            sutetasuTextFV[1].appendText("(" + Math.floor(ga.gdata.eatk) + ")");
+         }
+         sutetasuTextFV[2].text = String(ga.gdata.def);
+         if(ga.gdata.edef > 0)
+         {
+            sutetasuTextFV[2].appendText("(+" + Math.floor(ga.gdata.edef) + ")");
+         }
+         if(ga.gdata.edef < 0)
+         {
+            sutetasuTextFV[2].appendText("(" + Math.floor(ga.gdata.edef) + ")");
+         }
+         sutetasuTextFV[3].text = String(ga.gdata.speed);
+         if(ga.gdata.espeed > 0)
+         {
+            sutetasuTextFV[3].appendText("(+" + Math.floor(ga.gdata.espeed) + ")");
+         }
+         if(ga.gdata.espeed < 0)
+         {
+            sutetasuTextFV[3].appendText("(" + Math.floor(ga.gdata.espeed) + ")");
+         }
+         sutetasuTextFV[4].text = String(ga.gdata.luk);
+         if(ga.gdata.eluk > 0)
+         {
+            sutetasuTextFV[4].appendText("(+" + Math.floor(ga.gdata.eluk) + ")");
+         }
+         if(ga.gdata.eluk < 0)
+         {
+            sutetasuTextFV[4].appendText("(" + Math.floor(ga.gdata.eluk) + ")");
+         }
+         sutetasuTextFV[5].text = String(ga.gdata.stPt);
+         _loc1_ = 6;
+         while(_loc1_ < 11)
+         {
+            sutetasuTextFV[_loc1_].text = "";
+            _loc1_++;
+         }
+         sutetasuTextFV[11].text = "";
+         sutetasuTextFV[11].x = sutetasuTextFV[5].x + sutetasuTextFV[5].width - 2;
+      }
+   }
+}
+

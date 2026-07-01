@@ -1,0 +1,1233 @@
+package
+{
+   import Class.GData;
+   import Class.GameSaveData;
+   import Include_GameData.ItemDataMana;
+   import TTKGameServices.Hikitugi;
+   import flash.display.Bitmap;
+   import flash.display.BitmapData;
+   import flash.display.MovieClip;
+   import flash.display.Sprite;
+   import flash.events.Event;
+   import flash.events.MouseEvent;
+   import flash.text.TextField;
+   import flash.utils.getTimer;
+   import game.effect.EfSp;
+   import root.L;
+   import root.ranking.DelayFunc;
+   import root.ranking.Ranking;
+   import ttk.skin.MouseDwonHitExt;
+   
+   public class Game extends GameVar
+   {
+      
+      public var co:Content;
+      
+      public var hikitugi:Hikitugi;
+      
+      public var backBit:Bitmap;
+      
+      public var sebgm:SeBgm;
+      
+      public var ranking:Ranking;
+      
+      public var sns:Sns;
+      
+      public var disqApplicationRater:Distriqt_ApplicationRater;
+      
+      public var appRaterMana:AppRaterMana;
+      
+      public var tyu:Tyutoriaru;
+      
+      public var netInfo:NetInfo;
+      
+      public var netRealTimeRanking:NetRealTimeRanking;
+      
+      public var sodata:SoData = new SoData();
+      
+      public var sodata2e:SoData2E = new SoData2E();
+      
+      public var lan:L = new L(sodata);
+      
+      public var title:Title;
+      
+      public var gameover:GameOver;
+      
+      public var stagemap:StageMap;
+      
+      public var battle:Battle;
+      
+      public var stmapmenu:StMapMenu;
+      
+      public var stageMap_title_tran:StageMap_Title_Transitions;
+      
+      public var efSp:EfSp;
+      
+      public var option:Option;
+      
+      public var bugReport:BugReport;
+      
+      private var loadtime:Number = 0;
+      
+      private var isNetLoadInit:Boolean = false;
+      
+      private var loadEEFi:int = 0;
+      
+      public var backVsibleSp:Sprite;
+      
+      public var itemDataMana:ItemDataMana = new ItemDataMana(this);
+      
+      public var gdata:GData;
+      
+      public var gamesavedata:GameSaveData;
+      
+      private var OneExpTable:Vector.<Number>;
+      
+      public var AKUSESlotLockMONEY:Vector.<int>;
+      
+      public var mousedown:Boolean;
+      
+      public var mousedownX:int;
+      
+      public var mousedownY:int;
+      
+      public var HiddenBossKakuritsu:int;
+      
+      public var HiddenBossSwitch:int = 0;
+      
+      public var BuffSwitch:Boolean = false;
+      
+      public var itemSlotNum:int = 16;
+      
+      public var DropSwitch:Boolean = false;
+      
+      public var LowSwitch:Boolean = false;
+      
+      public var battleStart:Boolean;
+      
+      public var teleportCount:int = 12;
+      
+      public var hardmode:int = 1;
+      
+      public var normalmode:int = 0;
+      
+      public var hellmode:int = 2;
+      
+      public function Game(param1:InhureRPG, param2:Content)
+      {
+         super(param1);
+         this.co = param2;
+         loadtimef(0);
+         addEventListener("enterFrame",loadEEF);
+         param1.loadingSaizenmen();
+         battleStart = false;
+      }
+      
+      private function loadtimef(param1:int) : void
+      {
+         var _loc2_:Number = getTimer();
+         loadtime = _loc2_;
+      }
+      
+      private function load1() : void
+      {
+         loadtimef(1);
+         sns = new Sns(main,this);
+         efSp = new EfSp();
+         disqApplicationRater = new Distriqt_ApplicationRater();
+         appRaterMana = new AppRaterMana(this);
+         main.loadingSaizenmen();
+      }
+      
+      private function load2() : void
+      {
+         loadtimef(2);
+         backBit = new Bitmap();
+         addChild(backBit);
+         main.loadingSaizenmen();
+         loadtimef(2);
+         GameDataVar();
+         loadtimef(2);
+         ItemDataVar();
+         loadtimef(2);
+      }
+      
+      private function load3() : void
+      {
+         loadtimef(3);
+         gamesavedata = new GameSaveData(this);
+         loadtimef(3);
+         gdata = new GData(this);
+         loadtimef(3);
+         ranking = new Ranking(this);
+         loadtimef(3);
+         sebgm = new SeBgm(this);
+         tyu = new Tyutoriaru(this);
+         netInfo = new NetInfo(this);
+         netRealTimeRanking = new NetRealTimeRanking(this);
+         bugReport = new BugReport(this);
+         loadtimef(3);
+      }
+      
+      private function load4() : void
+      {
+         loadtimef(4);
+         stagemap = new StageMap(this);
+      }
+      
+      private function load5() : void
+      {
+         loadtimef(5);
+         battle = new Battle(this);
+      }
+      
+      private function load6() : void
+      {
+         loadtimef(6);
+         stmapmenu = new StMapMenu(this);
+      }
+      
+      private function loadEND() : void
+      {
+         var appOff:* = function(param1:Event):void
+         {
+            stage.frameRate = 0;
+            sebgm.appOff();
+         };
+         var appOn:* = function(param1:Event):void
+         {
+            if(battleStart)
+            {
+               if(gamesavedata.speedNum == 0)
+               {
+                  stage.frameRate = 30;
+               }
+               else if(gamesavedata.speedNum == 1)
+               {
+                  stage.frameRate = 45;
+               }
+               else if(gamesavedata.speedNum == 2)
+               {
+                  stage.frameRate = 60;
+               }
+               else if(gamesavedata.speedNum == 3)
+               {
+                  stage.frameRate = 90;
+               }
+               else if(gamesavedata.speedNum == 4)
+               {
+                  stage.frameRate = 120;
+               }
+            }
+            else
+            {
+               stage.frameRate = 60;
+            }
+            sebgm.sebgmFunc();
+         };
+         loadtimef(7);
+         stage.addEventListener("mouseDown",MMD);
+         stage.addEventListener("mouseUp",MMU);
+         stageMap_title_tran = new StageMap_Title_Transitions(this);
+         title = new Title(this);
+         title.start();
+         gamesavedata.playTimes++;
+         gamesavedata.sodataFunc(1);
+         stage.addEventListener("deactivate",appOff);
+         stage.addEventListener("activate",appOn);
+         hikitugi = new Hikitugi(this);
+         main.contentLoadComp();
+      }
+      
+      public function NetLoadEnd() : void
+      {
+         if(!isNetLoadInit)
+         {
+            isNetLoadInit = true;
+            new DelayFunc(3,main.admob.init);
+            disqApplicationRater.Init();
+         }
+      }
+      
+      private function loadEEF(param1:Event) : void
+      {
+         if(loadEEFi == 3)
+         {
+            load1();
+         }
+         else if(loadEEFi == 6)
+         {
+            load2();
+         }
+         else if(loadEEFi == 9)
+         {
+            load3();
+         }
+         else if(loadEEFi == 12)
+         {
+            load4();
+         }
+         else if(loadEEFi == 15)
+         {
+            load5();
+         }
+         else if(loadEEFi == 18)
+         {
+            load6();
+         }
+         else if(loadEEFi == 27)
+         {
+            removeEventListener("enterFrame",loadEEF);
+            loadEND();
+         }
+         loadEEFi = loadEEFi + 1;
+      }
+      
+      public function backBitSetFunc(param1:Sprite, param2:BitmapData, param3:int) : void
+      {
+         backVsibleSp = param1;
+         backVsibleSp.visible = false;
+         backBit.y = param3;
+         backBit.bitmapData = param2;
+      }
+      
+      public function backBitDelFunc() : void
+      {
+         if(backVsibleSp != null)
+         {
+            backVsibleSp.visible = true;
+            backVsibleSp = null;
+         }
+         if(backBit.bitmapData != null)
+         {
+            backBit.bitmapData.dispose();
+            backBit.bitmapData = null;
+         }
+      }
+      
+      public function restart_Lange() : void
+      {
+         ItemDataVar();
+      }
+      
+      private function ItemDataVar() : void
+      {
+         itemDataMana.ItemDataVar();
+      }
+      
+      public function OneExpTableFunc(param1:Number) : Number
+      {
+         if(param1 < 125000)
+         {
+            return OneExpTable[param1];
+         }
+         return Math.floor(param1 * (param1 * 0.0022385 + 6.35));
+      }
+      
+      private function GameDataVar() : void
+      {
+         var _loc4_:int = 0;
+         var _loc2_:Number = NaN;
+         var _loc1_:int = 125000;
+         OneExpTable = new Vector.<Number>(_loc1_);
+         OneExpTable[0] = 3;
+         OneExpTable[1] = 3;
+         OneExpTable[2] = 4;
+         OneExpTable[3] = 4;
+         OneExpTable[4] = 6;
+         OneExpTable[5] = 6;
+         OneExpTable[6] = 6;
+         OneExpTable[7] = 8;
+         OneExpTable[8] = 8;
+         OneExpTable[9] = 8;
+         var _loc3_:int = 0;
+         _loc4_ = 10;
+         while(_loc4_ < 120000)
+         {
+            _loc2_ = OneExpTable[_loc4_ - 1];
+            if(_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            if(++_loc4_ % 121 == 0)
+            {
+               _loc2_ += 30;
+            }
+            else if(_loc4_ % 103 == 0)
+            {
+               _loc2_ += 26;
+            }
+            else if(_loc4_ % 97 == 0)
+            {
+               _loc2_ += 23;
+            }
+            else if(_loc4_ % 83 == 0)
+            {
+               _loc2_ += 17;
+            }
+            else if(_loc4_ % 79 == 0)
+            {
+               _loc2_ += 16;
+            }
+            else if(_loc4_ % 67 == 0)
+            {
+               _loc2_ += 15;
+            }
+            else if(_loc4_ % 43 == 0)
+            {
+               _loc2_ += 13;
+            }
+            else if(_loc4_ % 37 == 0)
+            {
+               _loc2_ += 11;
+            }
+            else if(_loc4_ % 23 == 0)
+            {
+               _loc2_ += 8;
+            }
+            else if(_loc4_ % 21 == 0)
+            {
+               _loc2_ += 6;
+            }
+            else if(_loc4_ % 13 == 0)
+            {
+               _loc2_ += 4;
+            }
+            else if(_loc4_ % 7 == 0)
+            {
+               _loc2_ += 2;
+            }
+            else if(_loc4_ % 3 == 0)
+            {
+               _loc2_ += int(_loc4_ * 0.02);
+            }
+            if(_loc4_ % 3000 == 0)
+            {
+               _loc2_ += 400;
+            }
+            else if(_loc4_ % 1000 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 500 == 0)
+            {
+               _loc2_ += 200;
+            }
+            if(_loc4_ % 50 == 0)
+            {
+               _loc2_ += 20;
+            }
+            if(_loc4_ % 200 == 0)
+            {
+               _loc2_ += 300;
+            }
+            else if(_loc4_ % 100 == 0)
+            {
+               _loc2_ += 150;
+            }
+            if(_loc4_ % 15 == 0)
+            {
+               _loc2_ += 1;
+            }
+            OneExpTable[_loc4_] = _loc2_;
+            _loc4_++;
+         }
+         _loc4_ = 120000;
+         while(_loc4_ < 120500)
+         {
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            if(OneExpTable[_loc4_ - 1] > OneExpTable[_loc4_])
+            {
+               OneExpTable[_loc4_] = OneExpTable[_loc4_ - 1];
+            }
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            if(OneExpTable[_loc4_ - 1] > OneExpTable[_loc4_])
+            {
+               OneExpTable[_loc4_] = OneExpTable[_loc4_ - 1];
+            }
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            if(OneExpTable[_loc4_ - 1] > OneExpTable[_loc4_])
+            {
+               OneExpTable[_loc4_] = OneExpTable[_loc4_ - 1];
+            }
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            if(OneExpTable[_loc4_ - 1] > OneExpTable[_loc4_])
+            {
+               OneExpTable[_loc4_] = OneExpTable[_loc4_ - 1];
+            }
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            if(OneExpTable[_loc4_ - 1] > OneExpTable[_loc4_])
+            {
+               OneExpTable[_loc4_] = OneExpTable[_loc4_ - 1];
+            }
+            _loc4_++;
+         }
+         _loc4_ = 120500;
+         while(_loc4_ < 125000)
+         {
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            _loc4_++;
+            OneExpTable[_loc4_] = Math.floor(_loc4_ * (_loc4_ * 0.0022385 + 6.35));
+            _loc4_++;
+         }
+         AKUSESlotLockMONEY = new <int>[0,5000,30000,250000,500000,750000,70000000,70000000,5000000,5000000,3500000,3500000,0,0];
+      }
+      
+      private function MMD(param1:MouseEvent) : void
+      {
+         if(mouseY >= 100)
+         {
+            if(param1.target is MouseDwonHitExt == false && param1.target is MovieClip == false && param1.target is TextField == false)
+            {
+               mouseChildren = mouseEnabled = false;
+            }
+            mousedown = true;
+            mousedownX = mouseX;
+            mousedownY = mouseY;
+         }
+      }
+      
+      private function MMU(param1:MouseEvent) : void
+      {
+         mouseChildren = mouseEnabled = true;
+         mousedown = false;
+         mousedownX = mousedownY = -1;
+      }
+   }
+}
+

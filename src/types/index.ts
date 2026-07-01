@@ -66,6 +66,8 @@ export interface Player {
   equippedAccessories: Equipment[];
   /** 已解锁的饰品栏位数 (默认3, 最大12) */
   maxAccessorySlots: number;
+  /** 属性点 */
+  stPt: number;
 }
 
 export type GameScene = 'title' | 'world' | 'battle';
@@ -93,6 +95,7 @@ export interface BattleState {
   turn: 'player' | 'enemy';
   turnCount: number;
   recoverNextTurn: boolean;
+  recoverUsed: boolean;
   playerAnimation: 'idle' | 'attack' | 'hurt';
   enemyAnimation: 'idle' | 'attack' | 'hurt';
   dropType: number;

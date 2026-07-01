@@ -1,0 +1,87 @@
+package
+{
+   import flash.display.Bitmap;
+   import flash.display.Sprite;
+   import root.Const;
+   
+   public class TitleVar extends Sprite
+   {
+      
+      protected var ga:Game;
+      
+      protected var backBit:Bitmap;
+      
+      private var backIphoneXTopBackBlack:Sprite = null;
+      
+      protected var lodingSP:TitleLoadingSp;
+      
+      public function TitleVar(param1:Game)
+      {
+         super();
+         this.ga = param1;
+         backBit = new Bitmap(new titlebackpng());
+         addChild(backBit);
+         lodingSP = new TitleLoadingSp(this);
+         if(Const.isIPhoneX)
+         {
+            backBit.y = -Const.ConstH2SA;
+            backIphoneXTopBackBlack = new Sprite();
+            backIphoneXTopBackBlack.graphics.beginFill(0);
+            backIphoneXTopBackBlack.graphics.drawRect(0,-Const.ConstH2SA,640,Const.ConstH2SA);
+            backIphoneXTopBackBlack.visible = false;
+            addChild(backIphoneXTopBackBlack);
+         }
+      }
+      
+      protected function SetBack_iphoneXTopBackBlack_on() : void
+      {
+         if(backIphoneXTopBackBlack != null)
+         {
+            backIphoneXTopBackBlack.visible = true;
+            setChildIndex(backIphoneXTopBackBlack,numChildren - 1);
+         }
+      }
+      
+      protected function SetBack_iphoneXTopBackBlack_off() : void
+      {
+         if(backIphoneXTopBackBlack != null)
+         {
+            backIphoneXTopBackBlack.visible = false;
+         }
+      }
+      
+      protected function gamestart_new(param1:int, param2:int) : void
+      {
+         ga.HiddenBossSwitch = 0;
+         ga.gdata.NewGame(param2);
+         ga.gdata.sodataFunc_Status(1);
+         ga.gdata.heronum = param1;
+         ga.gdata.SBitLoad_KrakutaPower();
+         ga.gdata.EqStUpdate(false);
+         ga.stagemap.startf_newmapdata();
+         ga.stagemap.sodataFunc_MapMove(1);
+      }
+      
+      protected function gamestart_continue() : void
+      {
+         ga.HiddenBossSwitch = 1;
+         ga.gdata.sodataFunc_Status(0);
+         ga.gdata.SBitLoad_KrakutaPower();
+         ga.gdata.EqStUpdate(false);
+         ga.stagemap.startf_continuemapdata();
+         if(ga.gdata.exp > ga.OneExpTableFunc(ga.gdata.lv + 5))
+         {
+            ga.gdata.exp = ga.OneExpTableFunc(ga.gdata.lv - 1) + 1;
+         }
+      }
+      
+      protected function DelTitleVar() : void
+      {
+         backBit.bitmapData.dispose();
+         backBit.bitmapData = null;
+         backBit = null;
+         backIphoneXTopBackBlack = null;
+      }
+   }
+}
+

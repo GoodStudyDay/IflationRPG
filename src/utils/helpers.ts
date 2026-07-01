@@ -1,4 +1,5 @@
 import type { DamageResult, Equipment } from '@/types';
+import { oneExpTableFunc } from './expTable';
 
 export const calculateDamage = (attackerAttack: number, defenderDefense: number): DamageResult => {
   const baseDamage = Math.max(1, attackerAttack - defenderDefense * 0.5);
@@ -14,7 +15,7 @@ export const calculateHealAmount = (maxHp: number, healPercent: number): number 
 };
 
 export const getExpToNextLevel = (currentLevel: number): number => {
-  return Math.floor(100 * Math.pow(1.5, currentLevel - 1));
+  return oneExpTableFunc(currentLevel);
 };
 
 export const getLevelBonus = (level: number): { hp: number; attack: number; defense: number; mana: number } => {
