@@ -853,7 +853,6 @@ export const useGameStore = create<GameStore>()(
           }
           // Reduce bonus remaining count
           const newRemaining = bonus.currentBonus.remainingCount - 1;
-          console.log('[Bonus] Remaining after this battle:', newRemaining);
           set((s) => ({
             bonus: {
               ...s.bonus,
@@ -1074,7 +1073,6 @@ export const useGameStore = create<GameStore>()(
           if (!currentBonus.currentBonus && Math.random() < 0.4) {
             const newBonusType = getRandomBonusType(player.level * 100);
             const bonusCount = Math.floor(Math.random() * 5) + 1; // 1-5 次
-            console.log('[Bonus] Auto-generated after victory: type=', newBonusType, 'count=', bonusCount);
             set((s) => ({
               bonus: {
                 ...s.bonus,

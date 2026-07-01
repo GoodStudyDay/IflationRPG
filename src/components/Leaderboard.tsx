@@ -102,7 +102,6 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
         body: JSON.stringify(newEntry),
       });
     } catch {
-      console.log('Skipping remote leaderboard sync');
     }
   };
 
