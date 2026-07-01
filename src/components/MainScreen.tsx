@@ -201,24 +201,18 @@ export const MainScreen = () => {
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择地图</h3>
             <div className="space-y-2">
               {MAP_LIST.map(map => {
-                const isUnlocked = player.level >= map.unlockLevel;
                 const isCurrent = map.id === currentMap;
                 return (
                   <button
                     key={map.id}
                     onClick={() => {
-                      if (isUnlocked) {
-                        teleportToMap(map.id);
-                        setShowTeleport(false);
-                      }
+                      teleportToMap(map.id);
+                      setShowTeleport(false);
                     }}
-                    disabled={!isUnlocked}
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
                       isCurrent
                         ? 'border-yellow-500 bg-[#3d2b6e]'
-                        : isUnlocked
-                        ? 'border-[#5a3c8a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
-                        : 'border-gray-700 bg-gray-900/50 opacity-40 cursor-not-allowed'
+                        : 'border-[#5a3c8a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -229,15 +223,13 @@ export const MainScreen = () => {
                       <div className="text-xs">
                         {isCurrent ? (
                           <span className="text-yellow-400">当前</span>
-                        ) : !isUnlocked ? (
-                          <span className="text-red-400">需LV{map.unlockLevel}</span>
                         ) : (
                           <span className="text-green-400">传送</span>
                         )}
                       </div>
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
-                      需LV{map.unlockLevel} · {map.description}
+                      {map.description}
                     </div>
                   </button>
                 );

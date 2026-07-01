@@ -71,12 +71,7 @@ export const BattleScreen = () => {
   
   if (!battle.enemy) return null;
   
-  const enemyHpPercent = battle.enemy.maxHp > 0 ? (battle.enemy.hp / battle.enemy.maxHp) * 100 : 0;
   const playerHpPercent = player.maxHp > 0 ? (player.hp / player.maxHp) * 100 : 0;
-  const expPercent = player.expToNextLevel > 0 ? (player.exp / player.expToNextLevel) * 100 : 0;
-  
-  const totalAttack = player.attack;
-  const totalDefense = player.defense;
 
   const hpSegments = useMemo(() => getHPBarSegments((battle.enemy as Enemy).maxHp), [battle.enemy?.maxHp]);
   
@@ -127,84 +122,9 @@ export const BattleScreen = () => {
           <span className="text-green-400">HPrate : {Math.round(battle.hpRate)}%</span>
         </div>
         
-        <div className="absolute top-8 left-2 sm:left-4 w-28 sm:w-32 bg-[#1a0a2e]/90 rounded-lg border border-[#4a2c7a] p-1.5 sm:p-2">
-          <div className="text-center text-white font-bold text-[10px] sm:text-xs mb-0.5 sm:mb-1">{player.name}</div>
-          <div className="text-center text-blue-400 text-[10px] sm:text-xs">LV.{player.level}</div>
-          <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">HP</span>
-              <span className="text-red-400">{player.hp}/{player.maxHp}</span>
-            </div>
-            <div className="h-1 sm:h-1.5 bg-[#3d2b6e] rounded overflow-hidden">
-              <div 
-                className="h-full bg-red-500 transition-all duration-300"
-                style={{ width: `${playerHpPercent}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">EXP</span>
-              <span className="text-yellow-400">{player.exp}/{player.expToNextLevel}</span>
-            </div>
-            <div className="h-1 sm:h-1.5 bg-[#3d2b6e] rounded overflow-hidden">
-              <div 
-                className="h-full bg-yellow-500 transition-all duration-300"
-                style={{ width: `${expPercent}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">ATK</span>
-              <span className="text-orange-400">{totalAttack}</span>
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">DEF</span>
-              <span className="text-blue-400">{totalDefense}</span>
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">G</span>
-              <span className="text-green-400">{player.gold}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute top-10 right-2 sm:right-4 w-28 sm:w-32 bg-[#1a0a2e]/90 rounded-lg border border-[#4a2c7a] p-1.5 sm:p-2">
-          <div className="text-center text-red-400 font-bold text-[10px] sm:text-xs mb-0.5 sm:mb-1">{battle.enemy.name}</div>
-          <div className="text-center text-gray-400 text-[10px] sm:text-xs">LV.{battle.enemy.level}</div>
-          <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">HP</span>
-              <span className="text-red-400">{battle.enemy.hp}/{battle.enemy.maxHp}</span>
-            </div>
-            <div className="h-1.5 sm:h-2 bg-[#3d2b6e] rounded overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-300"
-                style={{ width: `${enemyHpPercent}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">ATK</span>
-              <span className="text-orange-400">{battle.enemy.attack}</span>
-            </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
-              <span className="text-gray-400">DEF</span>
-              <span className="text-blue-400">{battle.enemy.defense}</span>
-            </div>
-          </div>
-          {battle.dropItemName && (
-            <div className="mt-2 pt-2 border-t border-[#4a2c7a]/50">
-              <span className="text-green-400 text-[10px] sm:text-xs font-bold">
-                {battle.dropRate > 100
-                  ? `Drop : ${battle.dropItemName} (100.00%)`
-                  : battle.dropRate > 0
-                  ? `Drop : ${battle.dropItemName} (${battle.dropRate.toFixed(2)}%)`
-                  : `Drop : ${battle.dropItemName} (Max)`}
-              </span>
-            </div>
-          )}
-        </div>
-        
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 w-full px-8 flex justify-center">
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-full px-8 flex justify-center">
           <div className="flex flex-col-reverse gap-1 w-full max-w-md">
-            {currentHpSegments.map((segment, index) => {
+            {currentHpSegments.slice(-4).map((segment, index) => {
               const widthPercent = (segment.filled / segment.total) * 100;
               return (
                 <div 
@@ -221,7 +141,7 @@ export const BattleScreen = () => {
           </div>
         </div>
         
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 text-center mt-10">
+        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 text-center">
           <div className={`relative transition-transform duration-100 ${
             battle.enemyAnimation === 'attack' ? 'scale-110' : 
             battle.enemyAnimation === 'hurt' ? 'scale-95 opacity-70' : ''

@@ -101,7 +101,7 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
               </button>
               <button
                 onClick={() => killPlayer()}
-                className="flex-1 bg-[#8a3c5a] text-white font-bold py-3 rounded-lg hover:bg-[#9a4c6a] transition-colors text-lg"
+                className="flex-1 bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
               >
                 死亡
               </button>

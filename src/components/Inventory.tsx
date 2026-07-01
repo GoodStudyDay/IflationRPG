@@ -7,7 +7,7 @@ interface InventoryProps {
   onClose: () => void;
 }
 
-type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul';
+type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
 
 export const Inventory = ({ onClose }: InventoryProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('main');
@@ -97,6 +97,16 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const getInventorySouls = () => {
     return inventory
       .filter(item => item.equipmentId.startsWith('soul-'))
+      .map(item => ({
+        ...equipmentData.find(e => e.id === item.equipmentId)!,
+        quantity: item.quantity
+      }))
+      .filter(e => e.name);
+  };
+
+  const getInventoryMaterials = () => {
+    return inventory
+      .filter(item => item.equipmentId.startsWith('material-'))
       .map(item => ({
         ...equipmentData.find(e => e.id === item.equipmentId)!,
         quantity: item.quantity
@@ -469,6 +479,59 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     );
   };
 
+  const renderMaterialList = () => {
+    const materials = getInventoryMaterials();
+    
+    return (
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
+          <span className="text-white font-bold text-lg">材料列表</span>
+          <button 
+            onClick={() => setViewMode('main')}
+            className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
+          >
+            返回
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {materials.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">暂无材料</div>
+          ) : (
+            materials.map(material => (
+              <div 
+                key={material.id}
+                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-2xl">{material.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-white font-bold">{material.name}</div>
+                    {material.setumei && (
+                      <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
+                    )}
+                    <div className="text-gray-300 text-xs mt-0.5">数量: {material.quantity}</div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
+          <button
+            onClick={() => setViewMode('main')}
+            className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
+          >
+            返回
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderMainView = () => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
@@ -482,25 +545,14 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="flex items-start gap-2">
             <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">武器</div>
             <div className="flex gap-2 flex-1">
-              <div className="flex flex-col gap-1 w-12 flex-shrink-0">
-                <div 
-                  onClick={() => {
-                    setSelectedSoulSlot({ type: 'weapon', slot: 0 });
-                    setViewMode('soul');
-                  }}
-                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
-                >
-                  <span className="text-lg">👻</span>
-                </div>
-                <div 
-                  onClick={() => {
-                    setSelectedSoulSlot({ type: 'weapon', slot: 1 });
-                    setViewMode('soul');
-                  }}
-                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
-                >
-                  <span className="text-lg">👻</span>
-                </div>
+              <div 
+                onClick={() => {
+                  setSelectedSoulSlot({ type: 'weapon', slot: 0 });
+                  setViewMode('soul');
+                }}
+                className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
+              >
+                <span className="text-lg">👻</span>
               </div>
               <div 
                 onClick={() => setViewMode('weapon')}
@@ -518,7 +570,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       </div>
                     )}
                   </div>
-                  <div className="text-gray-400 text-xs">点击更换</div>
                 </div>
               </div>
             </div>
@@ -527,25 +578,14 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="flex items-start gap-2">
             <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">防具</div>
             <div className="flex gap-2 flex-1">
-              <div className="flex flex-col gap-1 w-12 flex-shrink-0">
-                <div 
-                  onClick={() => {
-                    setSelectedSoulSlot({ type: 'armor', slot: 0 });
-                    setViewMode('soul');
-                  }}
-                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
-                >
-                  <span className="text-lg">👻</span>
-                </div>
-                <div 
-                  onClick={() => {
-                    setSelectedSoulSlot({ type: 'armor', slot: 1 });
-                    setViewMode('soul');
-                  }}
-                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
-                >
-                  <span className="text-lg">👻</span>
-                </div>
+              <div 
+                onClick={() => {
+                  setSelectedSoulSlot({ type: 'armor', slot: 0 });
+                  setViewMode('soul');
+                }}
+                className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
+              >
+                <span className="text-lg">👻</span>
               </div>
               <div 
                 onClick={() => setViewMode('armor')}
@@ -563,7 +603,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       </div>
                     )}
                   </div>
-                  <div className="text-gray-400 text-xs">点击更换</div>
                 </div>
               </div>
             </div>
@@ -604,7 +643,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       </div>
                     )}
                   </div>
-                  <div className="text-gray-300 text-xs">点击更换</div>
                 </div>
               </div>
             ))}
@@ -620,37 +658,24 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       setSelectedAccessorySlot(slotIndex);
                       setViewMode('accessory');
                     }}
-                    className="flex items-center justify-between cursor-pointer hover:bg-[#5a7ab5] rounded"
+                    className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5] rounded"
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                        <span className="text-lg">🔒</span>
-                      </div>
-                      <div className="text-gray-300 text-xs font-bold">空栏位 {slotIndex + 1}</div>
+                    <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <span className="text-lg">🔒</span>
                     </div>
-                    <div className="text-gray-400 text-xs">点击装备</div>
-                  </div>
-                ) : slotIndex === totalAccessorySlots && totalAccessorySlots < 12 ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 bg-[#3a4a55] rounded flex items-center justify-center">
-                        <span className="text-lg">🔒</span>
-                      </div>
-                      <div className="text-gray-400 text-xs">未解锁 饰孔{slotIndex + 1}</div>
-                    </div>
-                    <button
-                      onClick={() => setShowUnlockConfirm(true)}
-                      className="bg-yellow-600 hover:bg-yellow-500 text-white text-xs px-2 py-1 rounded"
-                    >
-                      {nextSlotPrice.toLocaleString()}G 解锁
-                    </button>
+                    <div className="text-gray-300 text-xs font-bold">空栏位 {slotIndex + 1}</div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div 
+                    onClick={() => {
+                      alert(`解锁饰孔${slotIndex + 1}需要 ${nextSlotPrice.toLocaleString()}G`);
+                    }}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5]/50 rounded"
+                  >
                     <div className="w-10 h-10 bg-[#3a4a55] rounded flex items-center justify-center">
                       <span className="text-lg">🔒</span>
                     </div>
-                    <div className="text-gray-500 text-xs">未解锁 饰孔{slotIndex + 1}</div>
+                    <div className="text-gray-400 text-xs">未解锁 饰孔{slotIndex + 1}</div>
                   </div>
                 )}
               </div>
@@ -696,7 +721,14 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="text-gray-400 text-xs mt-0.5">{slotIndex + 1}</div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center">
+                  <div 
+                    onClick={() => {
+                      const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
+                      const price = prices[slotIndex] || 0;
+                      alert(`解锁饰孔${slotIndex + 1}需要 ${price.toLocaleString()}G`);
+                    }}
+                    className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5]/50 rounded"
+                  >
                     <div className="w-8 h-8 bg-[#3a4a55] rounded flex items-center justify-center">
                       <span className="text-sm">🔒</span>
                     </div>
@@ -710,7 +742,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold flex items-center justify-between">
             <span>属性</span>
             <div className="flex gap-1">
-              <button className="w-6 h-6 bg-[#4a6fa5] rounded flex items-center justify-center text-xs">M</button>
+              <button 
+                onClick={() => setViewMode('material')}
+                className="w-6 h-6 bg-[#4a6fa5] rounded flex items-center justify-center text-xs hover:bg-[#3a5a95] cursor-pointer"
+              >M</button>
               <button className="w-6 h-6 bg-[#4a6fa5] rounded flex items-center justify-center text-xs">?</button>
             </div>
           </div>
@@ -787,6 +822,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       {viewMode === 'armor' && renderArmorList()}
       {viewMode === 'accessory' && renderAccessoryList()}
       {viewMode === 'soul' && renderSoulList()}
+      {viewMode === 'material' && renderMaterialList()}
       {viewMode === 'main' && renderMainView()}
       {renderConfirmDialog()}
       
