@@ -7,11 +7,12 @@ interface InventoryProps {
   onClose: () => void;
 }
 
-type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory';
+type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul';
 
 export const Inventory = ({ onClose }: InventoryProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
+  const [, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
   const [confirmEquipment, setConfirmEquipment] = useState<typeof equipmentData[0] | null>(null);
   const player = useGameStore(state => state.player);
   const inventory = useGameStore(state => state.inventory);
@@ -46,15 +47,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const totalDefense = player.defense + bonuses.defBonus;
 
   const totalAccessorySlots = player.maxAccessorySlots || 3;
-  const equippedCount = (player.equippedAccessories || []).length;
-  const lockedSlotCount = totalAccessorySlots - equippedCount;
 
-  // 下一栏位解锁价格
   const nextSlotPrice = totalAccessorySlots < 12
     ? (() => {
-        // AKUSESlotLockMONEY 索引 = 新栏位编号 - 1
         const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
-        return prices[totalAccessorySlots]; // totalAccessorySlots is 1-based offset into prices
+        return prices[totalAccessorySlots];
       })()
     : 0;
 
@@ -97,6 +94,16 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       .filter(e => e.name);
   };
 
+  const getInventorySouls = () => {
+    return inventory
+      .filter(item => item.equipmentId.startsWith('soul-'))
+      .map(item => ({
+        ...equipmentData.find(e => e.id === item.equipmentId)!,
+        quantity: item.quantity
+      }))
+      .filter(e => e.name);
+  };
+
   const handleEquip = (equipment: typeof equipmentData[0]) => {
     setConfirmEquipment(equipment);
   };
@@ -106,6 +113,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       equipItem(confirmEquipment, selectedAccessorySlot ?? undefined);
       setConfirmEquipment(null);
       setSelectedAccessorySlot(null);
+      setSelectedSoulSlot(null);
       setViewMode('main');
     }
   };
@@ -113,6 +121,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const handleCancelEquip = () => {
     setConfirmEquipment(null);
     setSelectedAccessorySlot(null);
+    setSelectedSoulSlot(null);
   };
 
   const renderWeaponList = () => {
@@ -145,15 +154,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="text-white font-bold">
                     {player.equippedWeapon.name}
                   </div>
-                  <div className="text-green-300 text-sm mt-1">
-                    当前装备
-                  </div>
+                  <div className="text-green-300 text-sm mt-1">当前装备</div>
                   <div className="text-red-300 text-xs mt-1">
                     ATK +{Math.floor(player.equippedWeapon.attackBonus * stockMult)}（x{qty}件）
                   </div>
-                  <div className="text-gray-300 text-xs">
-                    倍率: {Math.floor(player.equippedWeapon.attributeRate * stockMult)}%
-                  </div>
+                  <div className="text-gray-300 text-xs">倍率: {Math.floor(player.equippedWeapon.attributeRate * stockMult)}%</div>
                 </div>
               </div>
             </div>
@@ -161,9 +166,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           })()}
 
           {weapons.filter(w => w.id !== player.equippedWeapon?.id).length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              暂无其他武器
-            </div>
+            <div className="text-center text-gray-400 py-8">暂无其他武器</div>
           ) : (
             weapons.filter(w => w.id !== player.equippedWeapon?.id).map(weapon => {
               const stockMult = getStockBonus(weapon.quantity);
@@ -177,21 +180,15 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <span className="text-2xl">{weapon.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">
-                      {weapon.name}
-                    </div>
-                    <div className="text-red-300 text-sm mt-1">
-                      ATK +{Math.floor(weapon.attackBonus * stockMult)}
-                    </div>
+                    <div className="text-white font-bold">{weapon.name}</div>
+                    <div className="text-red-300 text-sm mt-1">ATK +{Math.floor(weapon.attackBonus * stockMult)}</div>
                     <div className="text-gray-300 text-xs mt-0.5">
                       数量: {weapon.quantity}
                       {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">
-                      倍率: {Math.floor(weapon.attributeRate * stockMult)}%
-                    </div>
+                    <div className="text-xs text-gray-400">倍率: {Math.floor(weapon.attributeRate * stockMult)}%</div>
                     <button
                       onClick={() => handleEquip(weapon)}
                       className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
@@ -245,23 +242,15 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <span className="text-2xl">{player.equippedArmor.icon}</span>
                 </div>
                 <div className="flex-1">
-                  <div className="text-white font-bold">
-                    {player.equippedArmor.name}
-                  </div>
-                  <div className="text-green-300 text-sm mt-1">
-                    当前装备
-                  </div>
+                  <div className="text-white font-bold">{player.equippedArmor.name}</div>
+                  <div className="text-green-300 text-sm mt-1">当前装备</div>
                   <div className="text-blue-300 text-xs mt-1">
                     DEF +{Math.floor(player.equippedArmor.defenseBonus * stockMult)}（x{qty}件）
                   </div>
                   {player.equippedArmor.hpBonus > 0 && (
-                    <div className="text-green-300 text-xs">
-                      HP +{Math.floor(player.equippedArmor.hpBonus * stockMult)}
-                    </div>
+                    <div className="text-green-300 text-xs">HP +{Math.floor(player.equippedArmor.hpBonus * stockMult)}</div>
                   )}
-                  <div className="text-gray-300 text-xs">
-                    倍率: {Math.floor(player.equippedArmor.attributeRate * stockMult)}%
-                  </div>
+                  <div className="text-gray-300 text-xs">倍率: {Math.floor(player.equippedArmor.attributeRate * stockMult)}%</div>
                 </div>
               </div>
             </div>
@@ -269,9 +258,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           })()}
 
           {armors.filter(a => a.id !== player.equippedArmor?.id).length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              暂无其他防具
-            </div>
+            <div className="text-center text-gray-400 py-8">暂无其他防具</div>
           ) : (
             armors.filter(a => a.id !== player.equippedArmor?.id).map(armor => {
               const stockMult = getStockBonus(armor.quantity);
@@ -285,16 +272,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <span className="text-2xl">{armor.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">
-                      {armor.name}
-                    </div>
-                    <div className="text-blue-300 text-sm mt-1">
-                      DEF +{Math.floor(armor.defenseBonus * stockMult)}
-                    </div>
+                    <div className="text-white font-bold">{armor.name}</div>
+                    <div className="text-blue-300 text-sm mt-1">DEF +{Math.floor(armor.defenseBonus * stockMult)}</div>
                     {armor.hpBonus > 0 && (
-                      <div className="text-green-300 text-xs">
-                        HP +{Math.floor(armor.hpBonus * stockMult)}
-                      </div>
+                      <div className="text-green-300 text-xs">HP +{Math.floor(armor.hpBonus * stockMult)}</div>
                     )}
                     <div className="text-gray-300 text-xs mt-0.5">
                       数量: {armor.quantity}
@@ -302,9 +283,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">
-                      倍率: {Math.floor(armor.attributeRate * stockMult)}%
-                    </div>
+                    <div className="text-xs text-gray-400">倍率: {Math.floor(armor.attributeRate * stockMult)}%</div>
                     <button
                       onClick={() => handleEquip(armor)}
                       className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
@@ -335,12 +314,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const accessories = getInventoryAccessories();
     const equippedAccs = player.equippedAccessories || [];
     
-    // 计算每个饰品的实际可用数量（库存 - 已在其他栏位装备的数量）
     const getAvailableQuantity = (accessoryId: string, inventoryQty: number): number => {
       let equippedCount = 0;
       equippedAccs.forEach((acc, idx) => {
         if (acc.id === accessoryId) {
-          // 如果当前选中的栏位已装备此饰品，替换时会释放，不计入占用
           if (idx !== selectedAccessorySlot) {
             equippedCount++;
           }
@@ -370,9 +347,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {availableAccessories.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
-              暂无可装备的饰品
-            </div>
+            <div className="text-center text-gray-400 py-8">暂无可装备的饰品</div>
           ) : (
             availableAccessories.map(accessory => (
               <div 
@@ -384,44 +359,96 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <span className="text-2xl">{accessory.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">
-                      {accessory.name}
-                    </div>
+                    <div className="text-white font-bold">{accessory.name}</div>
                     {accessory.effectDescription && (
-                      <div className="text-purple-300 text-sm mt-1">
-                        {accessory.effectDescription}
-                      </div>
+                      <div className="text-purple-300 text-sm mt-1">{accessory.effectDescription}</div>
                     )}
                     <div className="flex gap-1 mt-1">
                       {accessory.hpBonus > 0 && (
-                        <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">
-                          HP +{accessory.hpBonus}
-                        </span>
+                        <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
                       )}
                       {accessory.attackBonus > 0 && (
-                        <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">
-                          ATK +{accessory.attackBonus}
-                        </span>
+                        <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
                       )}
                       {accessory.defenseBonus > 0 && (
-                        <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">
-                          DEF +{accessory.defenseBonus}
-                        </span>
+                        <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
                       )}
                     </div>
-                    <div className="text-gray-300 text-xs mt-0.5">
-                      可用: {accessory.availableQty} / {accessory.quantity}
-                    </div>
+                    <div className="text-gray-300 text-xs mt-0.5">可用: {accessory.availableQty} / {accessory.quantity}</div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">
-                      属性倍率: {accessory.attributeRate}%
-                    </div>
+                    <div className="text-xs text-gray-400">属性倍率: {accessory.attributeRate}%</div>
                     <button
                       onClick={() => handleEquip(accessory)}
                       className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                     >
                       装备
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
+          <button
+            onClick={() => setViewMode('main')}
+            className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
+          >
+            返回
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSoulList = () => {
+    const souls = getInventorySouls();
+    
+    return (
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
+          <span className="text-white font-bold text-lg">魂列表</span>
+          <button 
+            onClick={() => setViewMode('main')}
+            className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
+          >
+            返回
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {souls.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">暂无魂</div>
+          ) : (
+            souls.map(soul => (
+              <div 
+                key={soul.id}
+                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-2xl">{soul.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-white font-bold">{soul.name}</div>
+                    {soul.setumei && (
+                      <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
+                    )}
+                    <div className="flex gap-1 mt-1">
+                      <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
+                      <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
+                    </div>
+                    <div className="text-gray-300 text-xs mt-0.5">数量: {soul.quantity}</div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="text-xs text-gray-400">属性倍率: {soul.attributeRate}%</div>
+                    <button
+                      onClick={() => handleEquip(soul)}
+                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                    >
+                      安装
                     </button>
                   </div>
                 </div>
@@ -453,105 +480,126 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">
-              武器
-            </div>
-            <div 
-              onClick={() => setViewMode('weapon')}
-              className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <span className="text-xl">
-                    {player.equippedWeapon?.icon || '❓'}
-                  </span>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">武器</div>
+            <div className="flex gap-2 flex-1">
+              <div className="flex flex-col gap-1 w-12 flex-shrink-0">
+                <div 
+                  onClick={() => {
+                    setSelectedSoulSlot({ type: 'weapon', slot: 0 });
+                    setViewMode('soul');
+                  }}
+                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
+                >
+                  <span className="text-lg">👻</span>
                 </div>
-                <div className="flex-1">
-                  <div className="text-white font-bold text-sm">
-                    {player.equippedWeapon?.name || '未装备'}
+                <div 
+                  onClick={() => {
+                    setSelectedSoulSlot({ type: 'weapon', slot: 1 });
+                    setViewMode('soul');
+                  }}
+                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
+                >
+                  <span className="text-lg">👻</span>
+                </div>
+              </div>
+              <div 
+                onClick={() => setViewMode('weapon')}
+                className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-xl">{player.equippedWeapon?.icon || '❓'}</span>
                   </div>
-                  {player.equippedWeapon && (
-                    <div className="text-red-300 text-xs mt-1">
-                      ATK {totalAttack} (+{bonuses.atkBonus})
-                    </div>
-                  )}
+                  <div className="flex-1">
+                    <div className="text-white font-bold text-sm">{player.equippedWeapon?.name || '未装备'}</div>
+                    {player.equippedWeapon && (
+                      <div className="text-red-300 text-xs mt-1">
+                        ATK {totalAttack} (+{bonuses.atkBonus})
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-gray-400 text-xs">点击更换</div>
                 </div>
-                <div className="text-gray-400 text-xs">点击更换</div>
               </div>
             </div>
           </div>
 
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">
-              防具
-            </div>
-            <div 
-              onClick={() => setViewMode('armor')}
-              className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <span className="text-xl">
-                    {player.equippedArmor?.icon || '❓'}
-                  </span>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">防具</div>
+            <div className="flex gap-2 flex-1">
+              <div className="flex flex-col gap-1 w-12 flex-shrink-0">
+                <div 
+                  onClick={() => {
+                    setSelectedSoulSlot({ type: 'armor', slot: 0 });
+                    setViewMode('soul');
+                  }}
+                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
+                >
+                  <span className="text-lg">👻</span>
                 </div>
-                <div className="flex-1">
-                  <div className="text-white font-bold text-sm">
-                    {player.equippedArmor?.name || '未装备'}
+                <div 
+                  onClick={() => {
+                    setSelectedSoulSlot({ type: 'armor', slot: 1 });
+                    setViewMode('soul');
+                  }}
+                  className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors"
+                >
+                  <span className="text-lg">👻</span>
+                </div>
+              </div>
+              <div 
+                onClick={() => setViewMode('armor')}
+                className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-xl">{player.equippedArmor?.icon || '❓'}</span>
                   </div>
-                  {player.equippedArmor && (
-                    <div className="text-blue-300 text-xs mt-1">
-                      DEF {totalDefense} (+{bonuses.defBonus})
-                    </div>
-                  )}
+                  <div className="flex-1">
+                    <div className="text-white font-bold text-sm">{player.equippedArmor?.name || '未装备'}</div>
+                    {player.equippedArmor && (
+                      <div className="text-blue-300 text-xs mt-1">
+                        DEF {totalDefense} (+{bonuses.defBonus})
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-gray-400 text-xs">点击更换</div>
                 </div>
-                <div className="text-gray-400 text-xs">点击更换</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold">
-            饰品
-          </div>
+          <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold">饰品</div>
 
-          {(player.equippedAccessories || []).map((accessory, index) => (
-            <div key={index} className="flex items-start gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            {(player.equippedAccessories || []).slice(0, 6).map((accessory, index) => (
               <div 
+                key={`big-${index}`}
                 onClick={() => {
                   setSelectedAccessorySlot(index);
                   setViewMode('accessory');
                 }}
-                className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
+                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-lg">{accessory.icon}</span>
+                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-xl">{accessory.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold text-xs">
-                      {accessory.name}
-                    </div>
+                    <div className="text-white font-bold text-xs">{accessory.name}</div>
                     {accessory.effectDescription && (
-                      <div className="text-gray-200 text-xs mt-0.5">
-                        {accessory.effectDescription}
-                      </div>
+                      <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
                     )}
                     {(accessory.hpBonus > 0 || accessory.attackBonus > 0 || accessory.defenseBonus > 0) && (
                       <div className="flex gap-1 mt-0.5">
                         {accessory.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">
-                            HP +{accessory.hpBonus}
-                          </span>
+                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
                         )}
                         {accessory.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">
-                            ATK +{accessory.attackBonus}
-                          </span>
+                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
                         )}
                         {accessory.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">
-                            DEF +{accessory.defenseBonus}
-                          </span>
+                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
                         )}
                       </div>
                     )}
@@ -559,47 +607,36 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="text-gray-300 text-xs">点击更换</div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {Array.from({ length: lockedSlotCount > 0 ? lockedSlotCount : 0 }).map((_, index) => {
-            const slotIndex = equippedCount + index;
-            return (
-            <div key={`locked-${index}`} className="flex items-center gap-2">
-              <div 
-                onClick={() => {
-                  setSelectedAccessorySlot(slotIndex);
-                  setViewMode('accessory');
-                }}
-                className="flex-1 bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <span className="text-lg">🔒</span>
-                    </div>
-                    <div className="text-gray-300 text-xs font-bold">空栏位 {slotIndex + 1}</div>
-                  </div>
-                  <div className="text-gray-400 text-xs">点击装备</div>
-                </div>
-              </div>
-            </div>
-          )})}
-          
-          {/* 未解锁栏位 */}
-          {totalAccessorySlots < 12 && Array.from({ length: 12 - totalAccessorySlots }).map((_, index) => (
-            <div key={`unlock-${index}`} className="flex items-center gap-2">
-              <div className="flex-1 bg-[#4a5a65] border-2 border-dashed border-[#5a7a85] rounded-lg p-2">
-                {index === 0 ? (
-                  // 第一个未解锁栏位显示解锁按钮
-                  <div className="flex items-center justify-between">
+            {Array.from({ length: Math.max(0, 6 - (player.equippedAccessories || []).slice(0, 6).length) }).map((_, index) => {
+              const slotIndex = (player.equippedAccessories || []).slice(0, 6).length + index;
+              const isUnlocked = slotIndex < totalAccessorySlots;
+              return (
+              <div key={`big-empty-${index}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2">
+                {isUnlocked ? (
+                  <div 
+                    onClick={() => {
+                      setSelectedAccessorySlot(slotIndex);
+                      setViewMode('accessory');
+                    }}
+                    className="flex items-center justify-between cursor-pointer hover:bg-[#5a7ab5] rounded"
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[#3a4a55] rounded flex items-center justify-center">
+                      <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                         <span className="text-lg">🔒</span>
                       </div>
-                      <div className="text-gray-400 text-xs">
-                        未解锁 饰孔{totalAccessorySlots + 1}
+                      <div className="text-gray-300 text-xs font-bold">空栏位 {slotIndex + 1}</div>
+                    </div>
+                    <div className="text-gray-400 text-xs">点击装备</div>
+                  </div>
+                ) : slotIndex === totalAccessorySlots && totalAccessorySlots < 12 ? (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-[#3a4a55] rounded flex items-center justify-center">
+                        <span className="text-lg">🔒</span>
                       </div>
+                      <div className="text-gray-400 text-xs">未解锁 饰孔{slotIndex + 1}</div>
                     </div>
                     <button
                       onClick={() => setShowUnlockConfirm(true)}
@@ -609,17 +646,66 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     </button>
                   </div>
                 ) : (
-                  // 其余未解锁栏位
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#3a4a55] rounded flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#3a4a55] rounded flex items-center justify-center">
                       <span className="text-lg">🔒</span>
                     </div>
-                    <div className="text-gray-500 text-xs">未解锁 饰孔{totalAccessorySlots + index + 1}</div>
+                    <div className="text-gray-500 text-xs">未解锁 饰孔{slotIndex + 1}</div>
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-6 gap-1">
+            {(player.equippedAccessories || []).slice(6, 12).map((accessory, index) => (
+              <div 
+                key={`small-${index}`}
+                onClick={() => {
+                  setSelectedAccessorySlot(index + 6);
+                  setViewMode('accessory');
+                }}
+                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1 cursor-pointer hover:bg-[#5a7ab5] transition-colors"
+              >
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <span className="text-sm">{accessory.icon}</span>
+                  </div>
+                  <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
+                </div>
+              </div>
+            ))}
+
+            {Array.from({ length: Math.max(0, 6 - (player.equippedAccessories || []).slice(6, 12).length) }).map((_, index) => {
+              const slotIndex = (player.equippedAccessories || []).length + index;
+              const isUnlocked = slotIndex < totalAccessorySlots;
+              return (
+              <div key={`small-empty-${index}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1">
+                {isUnlocked ? (
+                  <div 
+                    onClick={() => {
+                      setSelectedAccessorySlot(slotIndex);
+                      setViewMode('accessory');
+                    }}
+                    className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5] rounded"
+                  >
+                    <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <span className="text-sm">🔒</span>
+                    </div>
+                    <div className="text-gray-400 text-xs mt-0.5">{slotIndex + 1}</div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 bg-[#3a4a55] rounded flex items-center justify-center">
+                      <span className="text-sm">🔒</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              );
+            })}
+          </div>
 
           <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold flex items-center justify-between">
             <span>属性</span>
@@ -632,21 +718,15 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-white">HP</span>
-              <span className="text-green-300">
-                {player.hp}(+{bonuses.hpBonus})
-              </span>
+              <span className="text-green-300">{player.maxHp}(+{bonuses.hpBonus})</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">ATK</span>
-              <span className="text-red-300">
-                {totalAttack}(+{bonuses.atkBonus})
-              </span>
+              <span className="text-red-300">{totalAttack}(+{bonuses.atkBonus})</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">DEF</span>
-              <span className="text-blue-300">
-                {totalDefense}(+{bonuses.defBonus})
-              </span>
+              <span className="text-blue-300">{totalDefense}(+{bonuses.defBonus})</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">AGI</span>
@@ -679,7 +759,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
           <div className="text-center">
             <div className="text-xl font-bold text-white mb-4">
-              装备 {confirmEquipment.name} 吗？
+              {confirmEquipment.type === 'soul' ? '安装' : '装备'} {confirmEquipment.name} 吗？
             </div>
             <div className="flex gap-3">
               <button
@@ -706,20 +786,16 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       {viewMode === 'weapon' && renderWeaponList()}
       {viewMode === 'armor' && renderArmorList()}
       {viewMode === 'accessory' && renderAccessoryList()}
+      {viewMode === 'soul' && renderSoulList()}
       {viewMode === 'main' && renderMainView()}
       {renderConfirmDialog()}
       
-      {/* 解锁饰孔确认弹窗 */}
       {showUnlockConfirm && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
             <div className="text-center">
-              <div className="text-xl font-bold text-white mb-2">
-                解锁饰孔 {totalAccessorySlots + 1}？
-              </div>
-              <div className="text-gray-300 mb-4">
-                需要 {nextSlotPrice.toLocaleString()} G
-              </div>
+              <div className="text-xl font-bold text-white mb-2">解锁饰孔 {totalAccessorySlots + 1}？</div>
+              <div className="text-gray-300 mb-4">需要 {nextSlotPrice.toLocaleString()} G</div>
               <div className="flex gap-3">
                 <button
                   onClick={handleUnlockSlot}
@@ -739,7 +815,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
       )}
       
-      {/* 金币不足提示 */}
       {showGoldError && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
           金币不足！

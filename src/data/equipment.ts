@@ -5,6 +5,7 @@ interface ItemDataMana {
   ItemuBOUGU: Equipment[];
   ItemuAKUSE: Equipment[];
   ItemuSOUL: Equipment[];
+  ItemuMATERIAL: Equipment[];
   ItemuAKUSEZyoui: number[][];
   ItemuSOULZyoui: number[][];
   ItemuRECIPE: number[][];
@@ -20,6 +21,7 @@ const itemDataMana: ItemDataMana = {
   ItemuBOUGU: [],
   ItemuAKUSE: [],
   ItemuSOUL: [],
+  ItemuMATERIAL: [],
   ItemuAKUSEZyoui: [],
   ItemuSOULZyoui: [],
   ItemuRECIPE: [],
@@ -152,7 +154,7 @@ function ItemAkusesaripush(
     hpBonus: t1 === 30 ? t2 : 0,
     description: '',
     icon: '💎',
-    maxQuantity: 99,
+    maxQuantity: 3,
     attributeRate: 100,
   };
   itemDataMana.ItemuAKUSE[index] = equipment;
@@ -179,7 +181,7 @@ export function ItemSoulpush(
   const equipment: Equipment = {
     id: `soul-${listnum}`,
     name,
-    type: 'accessory',
+    type: 'soul',
     listnum,
     x,
     y,
@@ -199,10 +201,48 @@ export function ItemSoulpush(
     hpBonus: 0,
     description: '',
     icon: '👻',
-    maxQuantity: 99,
+    maxQuantity: 2,
     attributeRate: t2 + 100,
   };
   itemDataMana.ItemuSOUL[index] = equipment;
+}
+
+export function ItemMaterialpush(
+  listnum: number,
+  name: string,
+  x: number,
+  y: number,
+  price: number,
+  baset1: number,
+  setumei: string,
+  baset2: number = 0,
+  rank: number = -1,
+  _param10: boolean = false,
+  _param11: number = 0
+): void {
+  const index = itemDataMana.ItemuMATERIAL.length;
+  const equipment: Equipment = {
+    id: `material-${listnum}`,
+    name,
+    type: 'material',
+    listnum,
+    x,
+    y,
+    price,
+    t1: baset1,
+    setumei,
+    t2: baset2,
+    rank: rank === -1 ? undefined : rank,
+    hardmode: 0,
+    attackBonus: 0,
+    defenseBonus: 0,
+    hpBonus: 0,
+    description: '',
+    icon: '💠',
+    maxQuantity: 10,
+    attributeRate: 100,
+  };
+  itemDataMana.ItemuMATERIAL[index] = equipment;
 }
 
 function ItemZyouiGokan(param1: number[]): void {
@@ -578,6 +618,32 @@ function itemload(): void {
   ItemSoulpush(26, '飞龙王', 5, 9, 1, 1600000, '装备属性值增加[0]，装备百分比增加[1]%，提升10%闪避', 160, R1, 1, 2);
 
   ItemZyouiGokan2([0, 10, 1, 11, 2, 12, 3, 13, 4, 14, 5, 15, 6, 16, 7, 17, 8, 9, 18, 19, 20, 21, 22, 23, 24, 25, 26]);
+
+  ItemMaterialpush(0, '冰川碎片', 0, 0, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(1, '青炎', 2, 0, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(2, '神圣卷轴', 3, 0, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(3, '龙之心', 2, 1, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(4, '神圣卷轴1', 3, 1, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(5, '暗黑之炎', 2, 2, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(6, '普通法杖', 5, 2, 0, 1999, '来自异世界的奇异材料', 0, R4, false, 1);
+  ItemMaterialpush(7, '普通法杖1', 6, 2, 0, 1999, '来自异世界的奇异材料', 0, R4, false, 1);
+  ItemMaterialpush(8, '普通法杖2', 7, 2, 0, 1999, '来自异世界的奇异材料', 0, R4, false, 1);
+  ItemMaterialpush(9, '冰川碎片', 0, 6, 0, 1999, '来自异世界的奇异材料', 0, R4, false, 1);
+  ItemMaterialpush(10, '凤凰之羽', 1, 2, 0, 1999, '天界BOSS掉落', 0, R4);
+  ItemMaterialpush(11, '白牙', 1, 3, 0, 1999, '天界BOSS掉落', 0, R4);
+  ItemMaterialpush(12, '蓝皮革', 1, 4, 0, 1999, '天界BOSS掉落', 0, R4);
+  ItemMaterialpush(13, '暗黑荆棘', 1, 5, 0, 1999, '天界BOSS掉落', 0, R4);
+  ItemMaterialpush(14, '燃烧的黑魂', 1, 6, 0, 1999, '天界BOSS v2掉落', 0, R4);
+  ItemMaterialpush(15, '堕落神之核', 1, 7, 0, 1999, '最终BOSS掉落', 0, R4);
+  ItemMaterialpush(16, '神圣材料', 1, 1, 0, 1999, '最终BOSS掉落', 0, R4, false, 2);
+  ItemMaterialpush(17, '妖精之羽', 1, 5, 0, 1999, '据说这是凤凰的羽毛？', 0, R4, false, 2);
+  ItemMaterialpush(18, '奇异水晶', 2, 1, 0, 1999, '据说这是凤凰的羽毛？', 0, R4, false, 2);
+  ItemMaterialpush(19, '封印·不灭之枪', 9, 6, 0, 1999, '天界BOSS掉落', 0, R4, false, 3);
+  ItemMaterialpush(20, '封印·暗黑铠', 7, 3, 0, 1999, '天界BOSS掉落', 0, R4, false, 4);
+  ItemMaterialpush(21, '封印·暗黑铠', 7, 4, 0, 1999, '天界BOSS掉落', 0, R4, false, 4);
+  ItemMaterialpush(22, '四叶草', 0, 1, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(23, '紫水晶', 0, 6, 0, 1999, '来自异世界的奇异材料', 0, R4);
+  ItemMaterialpush(24, '灰色水晶', 0, 5, 0, 1999, '来自异世界的奇异材料', 0, R4);
 }
 
 itemload();
@@ -587,6 +653,7 @@ export const equipmentData: Equipment[] = [
   ...itemDataMana.ItemuBOUGU,
   ...itemDataMana.ItemuAKUSE,
   ...itemDataMana.ItemuSOUL,
+  ...itemDataMana.ItemuMATERIAL,
 ];
 
 export const getEquipmentById = (equipmentId: string): Equipment | undefined => {
