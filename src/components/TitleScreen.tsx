@@ -3,6 +3,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { SettingsModal } from './SettingsModal';
 import { Leaderboard } from './Leaderboard';
 import { PlayerInfo } from './PlayerInfo';
+import { VERSION } from '@/data/version';
 
 type ScreenMode = 'top' | 'gamestart';
 
@@ -90,6 +91,12 @@ export const TitleScreen = () => {
               返回
             </button>
           </div>
+
+          <div className="absolute bottom-4 right-4 z-10">
+            <div className="text-gray-600 font-bold text-xs sm:text-sm opacity-80">
+              {VERSION}
+            </div>
+          </div>
         </div>
       );
     }
@@ -160,6 +167,12 @@ export const TitleScreen = () => {
             设置
             <span className="block text-xs sm:text-sm opacity-70">SETTING</span>
           </button>
+        </div>
+
+        <div className="absolute bottom-4 right-4 z-10">
+          <div className="text-gray-600 font-bold text-xs sm:text-sm opacity-80">
+            {VERSION}
+          </div>
         </div>
       </div>
     );
