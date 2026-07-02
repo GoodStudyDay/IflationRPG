@@ -1,4 +1,5 @@
 import { useGameStore } from '@/stores/gameStore';
+import { SpriteIcon } from './SpriteIcon';
 
 export const BattleResult = () => {
   const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
@@ -66,8 +67,19 @@ export const BattleResult = () => {
               <div className="bg-[#1a0a2e] rounded-lg p-4">
                 <div className="text-gray-400 text-sm mb-2">装备</div>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#3a2a5e] rounded-lg flex items-center justify-center text-2xl">
-                    {battleResult.dropItem.icon}
+                  <div className="w-12 h-12 bg-[#3a2a5e] rounded-lg flex items-center justify-center">
+                    {battleResult.dropItem.x !== undefined && battleResult.dropItem.y !== undefined ? (
+                      <SpriteIcon 
+                        type={battleResult.dropItem.type === 'weapon' ? 'weapon' : 
+                               battleResult.dropItem.type === 'armor' ? 'armor' : 
+                               battleResult.dropItem.type === 'soul' ? 'soul' : 'accessory'}
+                        x={battleResult.dropItem.x} 
+                        y={battleResult.dropItem.y} 
+                        size="large" 
+                      />
+                    ) : (
+                      <span className="text-2xl">{battleResult.dropItem.icon}</span>
+                    )}
                   </div>
                   <div>
                     <div className="text-xl font-bold text-purple-400">
