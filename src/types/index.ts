@@ -91,7 +91,7 @@ export interface Player {
   heroId: number;
 }
 
-export type GameScene = 'title' | 'world' | 'battle';
+export type GameScene = 'title' | 'world' | 'battle' | 'gameover';
 
 export type BattleStatus = 'idle' | 'fighting' | 'paused';
 

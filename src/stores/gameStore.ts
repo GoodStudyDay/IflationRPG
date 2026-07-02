@@ -457,10 +457,69 @@ export const useGameStore = create<GameStore>()(
         const accAtk = accessories.reduce((sum, a) => sum + (a.attackBonus || 0), 0);
         const accDef = accessories.reduce((sum, a) => sum + (a.defenseBonus || 0), 0);
         const accHp = accessories.reduce((sum, a) => sum + (a.hpBonus || 0), 0);
+        const accAgi = accessories.reduce((sum, a) => sum + (a.agilityBonus || 0), 0);
+        const accLuc = accessories.reduce((sum, a) => sum + (a.luckBonus || 0), 0);
         
-        const hpInc = Math.ceil(initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp);
-        const atkInc = Math.ceil(initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk);
-        const defInc = Math.ceil(initialPlayer.defense + bonus.defense + armorDefContrib + accDef);
+        let hpInc = Math.ceil(initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp);
+        let atkInc = Math.ceil(initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk);
+        let defInc = Math.ceil(initialPlayer.defense + bonus.defense + armorDefContrib + accDef);
+        let agiInc = Math.ceil(initialPlayer.agility + bonus.agility + accAgi);
+        let lucInc = Math.ceil(initialPlayer.luck + bonus.luck + accLuc);
+        
+        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        for (const gem of playerGems) {
+          const gemLevel = gem.y || 0;
+          const _loc2_ = gemLevel + 1;
+          
+          let itemCount1 = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && eq.y >= 1 && eq.y <= 2) {
+              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
+                itemCount1 += item.quantity;
+              }
+            }
+          }
+          
+          let itemCount2 = 0;
+          if (itemCount1 > 1000) {
+            itemCount2 = itemCount1 - 1000;
+            itemCount1 = 1000;
+          }
+          
+          hpInc += itemCount1 * _loc2_;
+          atkInc += itemCount1 * _loc2_;
+          defInc += itemCount1 * _loc2_;
+          agiInc += itemCount1 * _loc2_;
+          lucInc += itemCount2 * (_loc2_ * 4);
+        }
+        
+        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        for (const gem of braveGems) {
+          const _loc2_ = gem.t2 || 0;
+          hpInc += _loc2_;
+          atkInc += _loc2_;
+          defInc += _loc2_;
+          agiInc += _loc2_;
+          lucInc += _loc2_;
+        }
+        
+        const warGems = accessories.filter(acc => acc.t1 === 41);
+        for (const gem of warGems) {
+          const _loc2_ = gem.t2 || 0;
+          atkInc += _loc2_;
+          defInc += _loc2_;
+          agiInc += _loc2_;
+        }
+        
+        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const _loc2_ = gem.t2 || 0;
+          hpInc += _loc2_;
+          atkInc += _loc2_;
+          defInc += _loc2_;
+          agiInc += _loc2_;
+        }
         
         updateHighLv(newLevel);
         
@@ -478,6 +537,8 @@ export const useGameStore = create<GameStore>()(
               hp: hpInc,
               attack: atkInc,
               defense: defInc,
+              agility: agiInc,
+              luck: lucInc,
               maxMana: initialPlayer.maxMana + bonus.mana,
               mana: initialPlayer.maxMana + bonus.mana,
               stPt: finalStPt,
@@ -498,6 +559,8 @@ export const useGameStore = create<GameStore>()(
             hp: hpInc,
             attack: atkInc,
             defense: defInc,
+            agility: agiInc,
+            luck: lucInc,
             maxMana: initialPlayer.maxMana + bonus.mana,
             mana: initialPlayer.maxMana + bonus.mana,
             stPt: finalStPt,
@@ -1280,6 +1343,26 @@ export const useGameStore = create<GameStore>()(
           ? [...defeatedBosses, (battle.enemy as any).bossId] 
           : defeatedBosses;
         
+        if (newBattlePoints <= 0) {
+          set({
+            battlePoints: 0,
+            defeatedBosses: newDefeatedBosses,
+            currentScene: 'gameover',
+            battle: {
+              ...battle,
+              status: 'idle',
+              battleResult: {
+                victory,
+                goldReward,
+                expReward,
+                dropItem,
+                battlePointsChange,
+              },
+            },
+          });
+          return;
+        }
+        
         set({
           battlePoints: newBattlePoints,
           defeatedBosses: newDefeatedBosses,
@@ -1798,6 +1881,8 @@ export const useGameStore = create<GameStore>()(
           speedNum: saveData.speedNum,
           dropNum: saveData.dropNum,
           presetNum: saveData.presetNum,
+          presets: saveData.presets || INITIAL_PRESETS,
+          autoAllocateEnabled: saveData.autoAllocateEnabled || false,
           currentMap: 1,
         });
       },
