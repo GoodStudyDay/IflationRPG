@@ -25,10 +25,40 @@ export const BattleScreen = () => {
   }, [battle.battleLog]);
   
   
-  
+
   if (!battle.enemy) return null;
   
   const playerHpPercent = player.maxHp > 0 ? (player.hp / player.maxHp) * 100 : 0;
+
+  const renderDamageDisplay = () => {
+    if (battle.damageDisplay === null) return null;
+    
+    const isPlayerTarget = battle.lastAttacker === 'player';
+    const topPosition = isPlayerTarget ? 'top-1/3 sm:top-1/2' : 'bottom-28 sm:bottom-36 md:bottom-44';
+    
+    return (
+      <div 
+        className={`absolute ${topPosition} left-1/2 transform -translate-x-1/2 -translate-y-full text-center pointer-events-none z-20 animate-damage-float`}
+      >
+        <div className={`font-black text-xl sm:text-3xl md:text-4xl ${
+          battle.isCrit ? 'text-yellow-300 drop-shadow-[0_0_10px_rgba(255,255,0,0.8)]' : 
+          isPlayerTarget ? 'text-red-400' : 'text-blue-400'
+        }`}>
+          {battle.damageDisplay.toLocaleString()}
+        </div>
+        {battle.isCrit && (
+          <div className="text-yellow-200 text-sm sm:text-base font-bold animate-pulse">
+            CRI!
+          </div>
+        )}
+        {battle.isCombo && (
+          <div className="text-orange-400 text-xs sm:text-sm font-bold">
+            {battle.comboCount} COMBO!
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const handleHeal = () => {
     setRecoverNextTurn(true);
@@ -101,6 +131,8 @@ export const BattleScreen = () => {
           </div>
           <div className="text-red-400 font-bold text-xs sm:text-sm md:text-base mt-1">{battle.enemy.name}</div>
           
+          {battle.lastAttacker === 'player' && renderDamageDisplay()}
+          
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto hidden sm:block">
               <div className="text-gray-500 mb-1">掉落:</div>
@@ -144,6 +176,8 @@ export const BattleScreen = () => {
             />
           </div>
           <div className="text-white font-bold text-[10px] sm:text-xs md:text-sm mt-1">{player.name}</div>
+          
+          {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
         </div>
         
         <div className="absolute bottom-12 sm:bottom-18 md:bottom-24 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">

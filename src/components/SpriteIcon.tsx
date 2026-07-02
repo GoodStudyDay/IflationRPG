@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { cacheImage } from '@/utils/imageCache';
+
 interface SpriteIconProps {
   type: 'weapon' | 'armor' | 'accessory' | 'soul';
   x: number;
@@ -22,6 +25,8 @@ const SIZE_MAP = {
 };
 
 export const SpriteIcon = ({ type, x, y, size = 'medium', className = '' }: SpriteIconProps) => {
+  const [imageUrl, setImageUrl] = useState<string>(SPRITE_CONFIG[type].path);
+  
   const config = SPRITE_CONFIG[type];
   const displaySize = SIZE_MAP[size];
   
@@ -33,13 +38,21 @@ export const SpriteIcon = ({ type, x, y, size = 'medium', className = '' }: Spri
   const bgPosX = -x * displaySize;
   const bgPosY = -y * displaySize;
   
+  useEffect(() => {
+    const loadImage = async () => {
+      const cachedUrl = await cacheImage(config.path);
+      setImageUrl(cachedUrl);
+    };
+    loadImage();
+  }, [config.path]);
+  
   return (
     <div
       className={`${className}`}
       style={{
         width: `${displaySize}px`,
         height: `${displaySize}px`,
-        backgroundImage: `url(${config.path})`,
+        backgroundImage: `url(${imageUrl})`,
         backgroundPosition: `${bgPosX}px ${bgPosY}px`,
         backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
         backgroundRepeat: 'no-repeat',

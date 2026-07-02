@@ -318,28 +318,32 @@ export const useGameStore = create<GameStore>()(
       currentScene: 'title',
       encounterRate: storedData?.encounterRate || 0,
       battle: {
-        enemy: null,
-        status: 'idle',
-        battleLog: [],
-        comboCount: 0,
-        comboRate: 5,
-        critRate: 5,
-        hpRate: 100,
-        dropRate: 0,
-        dropItemName: '',
-        turn: 'player',
-        turnCount: 0,
-        recoverNextTurn: false,
-        recoverUsed: false,
-        playerAnimation: 'idle',
-        enemyAnimation: 'idle',
-        dropType: -1,
-        dropIndex: -1,
-        isDropSuccess: false,
-        goldMultiplier: 1,
-        battleResult: null,
-        _ending: false,
-      },
+          enemy: null,
+          status: 'idle',
+          battleLog: [],
+          comboCount: 0,
+          comboRate: 5,
+          critRate: 5,
+          hpRate: 100,
+          dropRate: 0,
+          dropItemName: '',
+          turn: 'player',
+          turnCount: 0,
+          recoverNextTurn: false,
+          recoverUsed: false,
+          playerAnimation: 'idle',
+          enemyAnimation: 'idle',
+          dropType: -1,
+          dropIndex: -1,
+          isDropSuccess: false,
+          goldMultiplier: 1,
+          battleResult: null,
+          _ending: false,
+          damageDisplay: null,
+          isCrit: false,
+          isCombo: false,
+          lastAttacker: null,
+        },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
       maxBattlePoints: 30,
@@ -923,6 +927,10 @@ export const useGameStore = create<GameStore>()(
             goldMultiplier: 1,
             battleResult: null,
             _ending: false,
+            damageDisplay: null,
+            isCrit: false,
+            isCombo: false,
+            lastAttacker: null,
           },
         });
         get().checkZeroEquips();
@@ -1090,6 +1098,10 @@ export const useGameStore = create<GameStore>()(
             goldMultiplier: battleVarResult.goldMultiplier,
             battleResult: null,
             _ending: false,
+            damageDisplay: null,
+            isCrit: false,
+            isCombo: false,
+            lastAttacker: null,
           },
         });
       },
@@ -1204,6 +1216,10 @@ export const useGameStore = create<GameStore>()(
             goldMultiplier: battleVarResult.goldMultiplier,
             battleResult: null,
             _ending: false,
+            damageDisplay: null,
+            isCrit: false,
+            isCombo: false,
+            lastAttacker: null,
           },
         });
       },
@@ -1409,8 +1425,18 @@ export const useGameStore = create<GameStore>()(
                   ...s.battle,
                   playerAnimation: 'attack',
                   enemyAnimation: 'hurt',
+                  damageDisplay: damage,
+                  isCrit: isCrit,
+                  isCombo: currentComboCount >= 2,
+                  lastAttacker: 'player',
                 },
               }));
+              
+              setTimeout(() => {
+                set((s) => ({
+                  battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
+                }));
+              }, 800);
               
               eefi = 0;
               mode = 4;
@@ -1428,8 +1454,18 @@ export const useGameStore = create<GameStore>()(
                   ...s.battle,
                   playerAnimation: 'hurt',
                   enemyAnimation: 'attack',
+                  damageDisplay: enemyDamage,
+                  isCrit: false,
+                  isCombo: false,
+                  lastAttacker: 'enemy',
                 },
               }));
+              
+              setTimeout(() => {
+                set((s) => ({
+                  battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
+                }));
+              }, 800);
               
               eefi = 0;
               mode = 4;
@@ -1587,6 +1623,10 @@ export const useGameStore = create<GameStore>()(
             goldMultiplier: 1,
             battleResult: null,
             _ending: false,
+            damageDisplay: null,
+            isCrit: false,
+            isCombo: false,
+            lastAttacker: null,
           },
         });
         }, 1000);
@@ -1743,6 +1783,10 @@ export const useGameStore = create<GameStore>()(
             goldMultiplier: 1,
             battleResult: null,
             _ending: false,
+            damageDisplay: null,
+            isCrit: false,
+            isCombo: false,
+            lastAttacker: null,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,

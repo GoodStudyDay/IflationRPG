@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { getHeroById, getHeroSpritePath } from '@/data/heroData';
+import { cacheImage } from '@/utils/imageCache';
 
 const BASE_URL = import.meta.env.BASE_URL || '/';
 
@@ -25,6 +26,7 @@ export const CharacterSprite = ({
   const { player } = useGameStore();
   const [frame, setFrame] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const intervalRef = useRef<number | null>(null);
 
   const hero = getHeroById(player.heroId);
@@ -146,6 +148,14 @@ export const CharacterSprite = ({
 
   const spriteConfig = getSpriteConfig();
 
+  useEffect(() => {
+    const loadImage = async () => {
+      const cachedUrl = await cacheImage(spriteConfig.imagePath);
+      setImageUrl(cachedUrl);
+    };
+    loadImage();
+  }, [spriteConfig.imagePath]);
+
   const getTransform = () => {
     switch (animation) {
       case 'attack':
@@ -171,7 +181,7 @@ export const CharacterSprite = ({
         style={{
           width: size,
           height: size,
-          backgroundImage: `url(${spriteConfig.imagePath})`,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : `url(${spriteConfig.imagePath})`,
           backgroundPosition: `${spriteConfig.bgPosX}px ${spriteConfig.bgPosY}px`,
           backgroundSize: `${COLS * size}px ${ROWS * size}px`,
           backgroundRepeat: 'no-repeat',

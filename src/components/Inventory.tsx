@@ -158,8 +158,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             return (
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
+                <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="large" />
                   </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">
@@ -187,8 +187,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="medium" />
+                  <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{weapon.name}</div>
@@ -249,8 +249,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             return (
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
+                <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="large" />
                   </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">{player.equippedArmor.name}</div>
@@ -279,8 +279,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="medium" />
+                  <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{armor.name}</div>
@@ -363,8 +363,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               return (
                 <div key={equippedAcc.id} className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="medium" />
+                    <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="large" />
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-bold">{equippedAcc.name}</div>
@@ -405,8 +405,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" />
+                    <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-bold">{accessory.name}</div>

@@ -125,6 +125,10 @@ export interface BattleState {
   goldMultiplier: number;
   battleResult: BattleResult | null;
   _ending: boolean;
+  damageDisplay: number | null;
+  isCrit: boolean;
+  isCombo: boolean;
+  lastAttacker: 'player' | 'enemy' | null;
 }
 
 // 奖励类型
