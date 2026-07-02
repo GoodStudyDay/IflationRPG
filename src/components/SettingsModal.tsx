@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
+import { getCacheSize, formatCacheSize, clearCache } from '@/utils/imageCache';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,6 +13,22 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [showPresetPanel, setShowPresetPanel] = useState(false);
   const [editingPreset, setEditingPreset] = useState<number>(0);
+  const [cacheSize, setCacheSize] = useState<string>('0 B');
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
+  
+  useEffect(() => {
+    if (isOpen) {
+      setCacheSize(formatCacheSize(getCacheSize()));
+    }
+  }, [isOpen]);
+  
+  const handleClearCache = () => {
+    clearCache();
+    setCacheSize(formatCacheSize(getCacheSize()));
+    setShowConfirmClear(false);
+    setImportMsg('缓存已清除！');
+    setTimeout(() => setImportMsg(null), 2000);
+  };
 
   const { 
     exportSaveData, 
@@ -252,6 +269,43 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 属性自动分配预设
               </button>
               <div className="text-xs text-gray-400 px-2 mb-2">设置战斗结算后属性点自动分配比例</div>
+            </div>
+            
+            <div className="border-t border-[#4a2c7a] pt-3 mt-3">
+              <div className="text-gray-300 text-sm mb-2">缓存管理</div>
+              
+              <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
+                <div className="text-xs text-gray-400">当前缓存大小</div>
+                <div className="text-white font-bold text-lg mt-1">{cacheSize}</div>
+              </div>
+              
+              {!showConfirmClear ? (
+                <button
+                  onClick={() => setShowConfirmClear(true)}
+                  className="w-full bg-red-700 text-white font-bold py-3 rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  清除缓存
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="text-xs text-red-400 px-2">确定要清除图片缓存吗？存档数据不会受影响。</div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleClearCache}
+                      className="flex-1 bg-red-700 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-colors text-sm"
+                    >
+                      确认清除
+                    </button>
+                    <button
+                      onClick={() => setShowConfirmClear(false)}
+                      className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="text-xs text-gray-400 px-2 mt-2">清除后下次加载图片会重新下载</div>
             </div>
 
             <button

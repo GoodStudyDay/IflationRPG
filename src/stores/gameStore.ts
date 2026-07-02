@@ -1383,6 +1383,10 @@ export const useGameStore = create<GameStore>()(
             if (isProcessing) return;
             isProcessing = true;
             
+            set((s) => ({
+              battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
+            }));
+            
             if (whichTurn === 0) {
               if (battle.recoverNextTurn) {
                 updatePlayerHp(player.maxHp);
@@ -1428,15 +1432,10 @@ export const useGameStore = create<GameStore>()(
                   damageDisplay: damage,
                   isCrit: isCrit,
                   isCombo: currentComboCount >= 2,
+                  comboCount: currentComboCount,
                   lastAttacker: 'player',
                 },
               }));
-              
-              setTimeout(() => {
-                set((s) => ({
-                  battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
-                }));
-              }, 800);
               
               eefi = 0;
               mode = 4;
@@ -1452,7 +1451,7 @@ export const useGameStore = create<GameStore>()(
               set((s) => ({
                 battle: {
                   ...s.battle,
-                  playerAnimation: 'hurt',
+                  playerAnimation: 'idle',
                   enemyAnimation: 'attack',
                   damageDisplay: enemyDamage,
                   isCrit: false,
@@ -1460,12 +1459,6 @@ export const useGameStore = create<GameStore>()(
                   lastAttacker: 'enemy',
                 },
               }));
-              
-              setTimeout(() => {
-                set((s) => ({
-                  battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
-                }));
-              }, 800);
               
               eefi = 0;
               mode = 4;

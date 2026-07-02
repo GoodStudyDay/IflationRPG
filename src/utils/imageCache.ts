@@ -90,3 +90,34 @@ const cleanOldCache = () => {
 export const preloadImages = async (urls: string[]): Promise<void> => {
   await Promise.all(urls.map(url => cacheImage(url)));
 };
+
+export const getCacheSize = (): number => {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_KEY_PREFIX));
+  let totalSize = 0;
+  
+  for (const key of keys) {
+    const value = localStorage.getItem(key);
+    if (value) {
+      totalSize += value.length * 2;
+    }
+  }
+  
+  return totalSize;
+};
+
+export const formatCacheSize = (bytes: number): string => {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  } else if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  } else {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+};
+
+export const clearCache = (): void => {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_KEY_PREFIX));
+  for (const key of keys) {
+    localStorage.removeItem(key);
+  }
+};

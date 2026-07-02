@@ -40,22 +40,24 @@ export const BattleScreen = () => {
       <div 
         className={`absolute ${topPosition} left-1/2 transform -translate-x-1/2 -translate-y-full text-center pointer-events-none z-20 animate-damage-float`}
       >
-        <div className={`font-black text-xl sm:text-3xl md:text-4xl ${
-          battle.isCrit ? 'text-yellow-300 drop-shadow-[0_0_10px_rgba(255,255,0,0.8)]' : 
-          isPlayerTarget ? 'text-red-400' : 'text-blue-400'
-        }`}>
-          {battle.damageDisplay.toLocaleString()}
+        <div className="flex flex-col gap-1">
+          {battle.isCrit && (
+            <div className="text-yellow-300 text-sm sm:text-base font-bold animate-pulse drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]">
+              暴击
+            </div>
+          )}
+          {battle.isCombo && (
+            <div className="text-orange-400 text-xs sm:text-sm font-bold">
+              {battle.comboCount}连击
+            </div>
+          )}
+          <div className={`font-black text-xl sm:text-3xl md:text-4xl ${
+            battle.isCrit ? 'text-yellow-300 drop-shadow-[0_0_10px_rgba(255,255,0,0.8)]' : 
+            isPlayerTarget ? 'text-red-400' : 'text-blue-400'
+          }`}>
+            {battle.damageDisplay.toLocaleString()}
+          </div>
         </div>
-        {battle.isCrit && (
-          <div className="text-yellow-200 text-sm sm:text-base font-bold animate-pulse">
-            CRI!
-          </div>
-        )}
-        {battle.isCombo && (
-          <div className="text-orange-400 text-xs sm:text-sm font-bold">
-            {battle.comboCount} COMBO!
-          </div>
-        )}
       </div>
     );
   };
