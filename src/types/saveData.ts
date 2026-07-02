@@ -8,6 +8,7 @@ export interface GameSaveData {
   newgamecount: number;
   gameovercount: number;
   kyarakutalv: number;
+  kyarakutaKozinExp: number[];
   hardmodeUnlock: number;
   hellmodeUnlock: number;
   hmDragonDefeat: number;
@@ -50,6 +51,7 @@ export const initialGameSaveData: GameSaveData = {
   newgamecount: 0,
   gameovercount: 0,
   kyarakutalv: 0,
+  kyarakutaKozinExp: new Array(20).fill(0),
   hardmodeUnlock: 0,
   hellmodeUnlock: 0,
   hmDragonDefeat: 0,

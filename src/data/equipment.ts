@@ -527,12 +527,6 @@ function itemload(): void {
   ItemAkusesaripush(25, '会心几率戒指', 4, 4, 0, 200, '暴击率提高', 0, R2);
   ItemZyouiGokan([25]);
 
-  ItemAkusesaripush(118, '迷你回复项链', 0, 5, 0, 800, '攻击时回复造成伤害的[0]%', 2, R1);
-  ItemAkusesaripush(119, '回复项链', 0, 6, 0, 800, '攻击时回复造成伤害的[0]%', 4, R1, 1);
-  ItemAkusesaripush(120, '回复项链+1', 0, 7, 0, 800, '攻击时回复造成伤害的[0]%', 6, R2, 1);
-  ItemAkusesaripush(121, '回复项链+2', 0, 8, 0, 800, '攻击时回复造成伤害的[0]%', 9, R2, 1);
-  ItemZyouiGokan([118, 119, 120, 121]);
-
   ItemAkusesaripush(26, '会心威力戒指', 7, 4, 170000, 210, '暴击伤害提高', 0, R3);
   ItemZyouiGokan([26]);
 

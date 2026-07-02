@@ -13,6 +13,7 @@ import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { getBossById } from '@/data/bossData';
 import { getHeroById } from '@/data/heroData';
+import { getCurrentKyaraLv, addExpKyarakutaKozinExp } from '@/utils/kyaraLevel';
 
 interface GameStore {
   player: Player;
@@ -34,6 +35,7 @@ interface GameStore {
   newgamecount: number;
   gameovercount: number;
   kyarakutalv: number;
+  kyarakutaKozinExp: number[];
   hardmodeUnlock: number;
   hellmodeUnlock: number;
   hardmode: number;
@@ -357,6 +359,7 @@ export const useGameStore = create<GameStore>()(
       newgamecount: saveData.newgamecount,
       gameovercount: saveData.gameovercount,
       kyarakutalv: saveData.kyarakutalv,
+      kyarakutaKozinExp: saveData.kyarakutaKozinExp || new Array(20).fill(0),
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
       hardmode: 0,
@@ -840,7 +843,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       selectHero: (heroId) => {
-        const { player } = get();
+        const { player, playerid } = get();
         const hero = getHeroById(heroId);
         if (!hero) return;
         
@@ -852,8 +855,9 @@ export const useGameStore = create<GameStore>()(
         const baseAgi = 1000 + levelBonus.agility;
         const baseLuc = 1000 + levelBonus.luck;
         
-        const kyarakutalv = get().kyarakutalv || 0;
-        const kyaraLv = (kyarakutalv + 0.75) * 0.25;
+        const { kyarakutalv, kyarakutaKozinExp } = get();
+        const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, playerid);
+        const kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75);
         
         const hpBonus = hero.hpBonus * kyaraLv * 0.06;
         const atkBonus = hero.atkBonus * kyaraLv * 0.07;
@@ -1301,7 +1305,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       endBattle: (victory) => {
-        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, battle: { comboCount, goldMultiplier } } = get();
+        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, kyarakutalv, kyarakutaKozinExp, playerid, battle: { comboCount, goldMultiplier } } = get();
         
         if (battle.battleResult) {
           return;
@@ -1358,10 +1362,25 @@ export const useGameStore = create<GameStore>()(
           : defeatedBosses;
         
         if (newBattlePoints <= 0) {
+          let newKyarakutaKozinExp = [...kyarakutaKozinExp];
+          let newKyarakutalv = kyarakutalv;
+          
+          if (newKyarakutalv > 0) {
+            newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, playerid, player.level);
+            const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, playerid);
+            if (currentKyaraLv > newKyarakutalv) {
+              newKyarakutalv = currentKyaraLv;
+            }
+          } else {
+            newKyarakutalv = 1;
+          }
+          
           set({
             battlePoints: 0,
             defeatedBosses: newDefeatedBosses,
             currentScene: 'gameover',
+            kyarakutalv: newKyarakutalv,
+            kyarakutaKozinExp: newKyarakutaKozinExp,
             battle: {
               ...battle,
               status: 'idle',
@@ -2251,6 +2270,8 @@ export const useGameStore = create<GameStore>()(
         presets: state.presets,
         presetNum: state.presetNum,
         autoAllocateEnabled: state.autoAllocateEnabled,
+        kyarakutalv: state.kyarakutalv,
+        kyarakutaKozinExp: state.kyarakutaKozinExp,
       }),
     }
   )
