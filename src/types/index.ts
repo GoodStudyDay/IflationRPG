@@ -25,6 +25,8 @@ export interface Equipment {
   attackBonus: number;
   defenseBonus: number;
   hpBonus: number;
+  agilityBonus: number;
+  luckBonus: number;
   description: string;
   icon: string;
   maxQuantity: number;

@@ -18,12 +18,14 @@ export const getExpToNextLevel = (currentLevel: number): number => {
   return oneExpTableFunc(currentLevel);
 };
 
-export const getLevelBonus = (level: number): { hp: number; attack: number; defense: number; mana: number } => {
+export const getLevelBonus = (level: number): { hp: number; attack: number; defense: number; mana: number; agility: number; luck: number } => {
   return {
     hp: (level - 1) * 20,
     attack: (level - 1) * 3,
     defense: (level - 1) * 2,
     mana: (level - 1) * 10,
+    agility: 0,
+    luck: 0,
   };
 };
 

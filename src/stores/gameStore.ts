@@ -580,10 +580,69 @@ export const useGameStore = create<GameStore>()(
         const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
         const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
         const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
         
         newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
         newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
         newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus);
+        newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus);
+        newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus);
+        
+        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        for (const gem of playerGems) {
+          const gemLevel = gem.y || 0;
+          const _loc2_ = gemLevel + 1;
+          
+          let itemCount1 = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && eq.y >= 1 && eq.y <= 2) {
+              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
+                itemCount1 += item.quantity;
+              }
+            }
+          }
+          
+          let itemCount2 = 0;
+          if (itemCount1 > 1000) {
+            itemCount2 = itemCount1 - 1000;
+            itemCount1 = 1000;
+          }
+          
+          newPlayer.maxHp += itemCount1 * _loc2_;
+          newPlayer.attack += itemCount1 * _loc2_;
+          newPlayer.defense += itemCount1 * _loc2_;
+          newPlayer.agility += itemCount1 * _loc2_;
+          newPlayer.luck += itemCount2 * (_loc2_ * 4);
+        }
+        
+        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        for (const gem of braveGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+          newPlayer.luck += _loc2_;
+        }
+        
+        const warGems = accessories.filter(acc => acc.t1 === 41);
+        for (const gem of warGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
         
         set({ player: newPlayer });
         
@@ -1039,6 +1098,13 @@ export const useGameStore = create<GameStore>()(
         if (victory && battle.enemy) {
           goldReward = Math.floor(battle.enemy.goldReward * goldMultiplier);
           expReward = battle.enemy.expReward;
+          
+          const expGems = player.equippedAccessories?.filter(acc => acc.t1 === 60) || [];
+          for (const gem of expGems) {
+            const expBonus = (gem.t2 || 0) / 100;
+            expReward = Math.floor(expReward * (1 + expBonus));
+          }
+          
           addGold(goldReward);
           addExp(expReward);
           
@@ -1421,21 +1487,83 @@ export const useGameStore = create<GameStore>()(
         const accessoryAtkBonus = equippedAccessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
         const accessoryDefBonus = equippedAccessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
         const accessoryHpBonus = equippedAccessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
+        const accessoryAgiBonus = equippedAccessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
+        const accessoryLucBonus = equippedAccessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
         
         const levelBonus = getLevelBonus(initialPlayer.level);
         
+        const newPlayer = {
+          ...initialPlayer,
+          attack: Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus),
+          defense: Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus),
+          maxHp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
+          agility: Math.ceil(initialPlayer.agility + levelBonus.agility + accessoryAgiBonus),
+          luck: Math.ceil(initialPlayer.luck + levelBonus.luck + accessoryLucBonus),
+          equippedWeapon,
+          equippedArmor,
+          equippedAccessories,
+          maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
+        };
+        
+        const playerGems = equippedAccessories.filter(acc => acc.t1 === 35);
+        for (const gem of playerGems) {
+          const gemLevel = gem.y || 0;
+          const _loc2_ = gemLevel + 1;
+          
+          let itemCount1 = 0;
+          for (const item of savedInventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && eq.y >= 1 && eq.y <= 2) {
+              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
+                itemCount1 += item.quantity;
+              }
+            }
+          }
+          
+          let itemCount2 = 0;
+          if (itemCount1 > 1000) {
+            itemCount2 = itemCount1 - 1000;
+            itemCount1 = 1000;
+          }
+          
+          newPlayer.maxHp += itemCount1 * _loc2_;
+          newPlayer.attack += itemCount1 * _loc2_;
+          newPlayer.defense += itemCount1 * _loc2_;
+          newPlayer.agility += itemCount1 * _loc2_;
+          newPlayer.luck += itemCount2 * (_loc2_ * 4);
+        }
+        
+        const braveGems = equippedAccessories.filter(acc => acc.t1 === 40);
+        for (const gem of braveGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+          newPlayer.luck += _loc2_;
+        }
+        
+        const warGems = equippedAccessories.filter(acc => acc.t1 === 41);
+        for (const gem of warGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        const fourGodGems = equippedAccessories.filter(acc => acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        newPlayer.hp = newPlayer.maxHp;
+        
         set({
-          player: {
-            ...initialPlayer,
-            attack: Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus),
-            defense: Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus),
-            maxHp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
-            hp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
-            equippedWeapon,
-            equippedArmor,
-            equippedAccessories,
-            maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
-          },
+          player: newPlayer,
           inventory: savedInventory,
           skills: initialSkills,
           currentScene: 'title',
@@ -1785,10 +1913,41 @@ export const useGameStore = create<GameStore>()(
           const accAtk = accessories.reduce((sum: number, a: Equipment) => sum + (a.attackBonus || 0), 0);
           const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a.defenseBonus || 0), 0);
           const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a.hpBonus || 0), 0);
+          const accAgi = accessories.reduce((sum: number, a: Equipment) => sum + (a.agilityBonus || 0), 0);
+          const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a.luckBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
           state.player.attack = Math.ceil((initialPlayer.attack) + lvlBonus.attack + weaponAtkContrib + accAtk);
           state.player.defense = Math.ceil((initialPlayer.defense) + lvlBonus.defense + armorDefContrib + accDef);
           state.player.maxHp = Math.ceil((initialPlayer.maxHp) + lvlBonus.hp + armorHpContrib + accHp);
+          state.player.agility = Math.ceil((initialPlayer.agility) + lvlBonus.agility + accAgi);
+          state.player.luck = Math.ceil((initialPlayer.luck) + lvlBonus.luck + accLuc);
+          
+          const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
+          for (const gem of braveGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            state.player.maxHp += _loc2_;
+            state.player.attack += _loc2_;
+            state.player.defense += _loc2_;
+            state.player.agility += _loc2_;
+            state.player.luck += _loc2_;
+          }
+          
+          const warGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 41);
+          for (const gem of warGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            state.player.attack += _loc2_;
+            state.player.defense += _loc2_;
+            state.player.agility += _loc2_;
+          }
+          
+          const fourGodGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 42);
+          for (const gem of fourGodGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            state.player.maxHp += _loc2_;
+            state.player.attack += _loc2_;
+            state.player.defense += _loc2_;
+            state.player.agility += _loc2_;
+          }
         }
         
         return persistedState;

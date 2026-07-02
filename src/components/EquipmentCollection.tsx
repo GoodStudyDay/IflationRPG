@@ -13,6 +13,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [buySuccessMsg, setBuySuccessMsg] = useState<string | null>(null);
   const [buyErrorMsg, setBuyErrorMsg] = useState<string | null>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
   const handleBuy = (equipmentId: string) => {
     const success = buyEquipment(equipmentId);
@@ -37,7 +38,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const filteredEquipment = equipmentData.filter(item => {
     if (selectedCategory === 'all') return true;
     if (selectedCategory === 'soul') return item.id.startsWith('soul-');
-    if (selectedCategory === 'material') return false;
+    if (selectedCategory === 'material') return item.type === 'material';
     return item.type === selectedCategory;
   });
 
@@ -103,7 +104,8 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
               return (
                 <div
                   key={equipment.id}
-                  className={`bg-[#3d2b6e] rounded-lg p-3 border-2 transition-all ${
+                  onClick={() => setSelectedEquipment(equipment)}
+                  className={`bg-[#3d2b6e] rounded-lg p-3 border-2 transition-all cursor-pointer hover:border-blue-400 ${
                     showInfo
                       ? isMaxed
                         ? 'border-gray-600 opacity-60'
@@ -134,7 +136,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                         </span>
                       </div>
                       {showInfo && (
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           {equipment.attackBonus > 0 && (
                             <span className="bg-red-900/50 text-red-400 px-2 py-0.5 rounded text-xs">
                               ATK +{equipment.attackBonus}
@@ -150,9 +152,19 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                               HP +{equipment.hpBonus}
                             </span>
                           )}
-                          {equipment.effectDescription && (
+                          {equipment.agilityBonus > 0 && (
+                            <span className="bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded text-xs">
+                              AGI +{equipment.agilityBonus}
+                            </span>
+                          )}
+                          {equipment.luckBonus > 0 && (
+                            <span className="bg-yellow-900/50 text-yellow-400 px-2 py-0.5 rounded text-xs">
+                              LUC +{equipment.luckBonus}
+                            </span>
+                          )}
+                          {equipment.description && (
                             <span className="text-purple-400 text-xs">
-                              {equipment.effectDescription}
+                              {equipment.description}
                             </span>
                           )}
                         </div>
@@ -196,6 +208,71 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
           </button>
         </div>
       </div>
+
+      {/* 物品详情弹窗 */}
+      {selectedEquipment && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50" onClick={() => setSelectedEquipment(null)}>
+          <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-sm p-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-16 h-16 bg-[#1a0a2e] rounded-lg flex items-center justify-center">
+                <span className="text-3xl">{selectedEquipment.icon}</span>
+              </div>
+              <div>
+                <div className="text-game-secondary font-bold text-lg">{selectedEquipment.name}</div>
+                <div className="text-gray-400 text-sm">{getTypeLabel(selectedEquipment.type)}</div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {selectedEquipment.attackBonus > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-red-400">攻击力</span>
+                  <span className="text-red-400">+{selectedEquipment.attackBonus}</span>
+                </div>
+              )}
+              {selectedEquipment.defenseBonus > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-blue-400">防御力</span>
+                  <span className="text-blue-400">+{selectedEquipment.defenseBonus}</span>
+                </div>
+              )}
+              {selectedEquipment.hpBonus > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-400">生命值</span>
+                  <span className="text-green-400">+{selectedEquipment.hpBonus}</span>
+                </div>
+              )}
+              {selectedEquipment.agilityBonus > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-cyan-400">敏捷度</span>
+                  <span className="text-cyan-400">+{selectedEquipment.agilityBonus}</span>
+                </div>
+              )}
+              {selectedEquipment.luckBonus > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-yellow-400">幸运值</span>
+                  <span className="text-yellow-400">+{selectedEquipment.luckBonus}</span>
+                </div>
+              )}
+              {selectedEquipment.description && (
+                <div className="text-gray-300 text-sm mt-3 p-2 bg-[#1a0a2e] rounded">
+                  {selectedEquipment.description}
+                </div>
+              )}
+              {selectedEquipment.setumei && !selectedEquipment.description && (
+                <div className="text-gray-300 text-sm mt-3 p-2 bg-[#1a0a2e] rounded">
+                  {selectedEquipment.setumei.replace('[0]', String(selectedEquipment.t2 || 0))}
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => setSelectedEquipment(null)}
+              className="w-full mt-4 bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors text-sm"
+            >
+              关闭
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* 购买提示 */}
       {buySuccessMsg && (
