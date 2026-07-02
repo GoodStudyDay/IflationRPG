@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
+import { SpriteIcon } from './SpriteIcon';
 
 interface InventoryProps {
   onClose: () => void;
@@ -154,7 +155,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <span className="text-2xl">{player.equippedWeapon.icon}</span>
+                  <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="large" />
                 </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">
@@ -183,7 +184,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-2xl">{weapon.icon}</span>
+                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{weapon.name}</div>
@@ -245,7 +246,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <span className="text-2xl">{player.equippedArmor.icon}</span>
+                  <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="large" />
                 </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">{player.equippedArmor.name}</div>
@@ -275,7 +276,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-2xl">{armor.icon}</span>
+                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{armor.name}</div>
@@ -362,7 +363,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-2xl">{accessory.icon}</span>
+                    <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{accessory.name}</div>
@@ -435,7 +436,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-2xl">{soul.icon}</span>
+                    <SpriteIcon type="soul" x={soul.x} y={soul.y} size="large" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{soul.name}</div>
@@ -501,7 +502,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-2xl">{material.icon}</span>
+                    {material.x !== undefined && material.y !== undefined ? (
+                      <SpriteIcon type="accessory" x={material.x} y={material.y} size="large" />
+                    ) : (
+                      <span className="text-2xl">{material.icon}</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{material.name}</div>
@@ -556,7 +561,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-xl">{player.equippedWeapon?.icon || '❓'}</span>
+                    {player.equippedWeapon?.x !== undefined ? (
+                      <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
+                    ) : (
+                      <span className="text-xl">❓</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold text-sm">{player.equippedWeapon?.name || '未装备'}</div>
@@ -589,7 +598,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <span className="text-xl">{player.equippedArmor?.icon || '❓'}</span>
+                    {player.equippedArmor?.x !== undefined ? (
+                      <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
+                    ) : (
+                      <span className="text-xl">❓</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold text-sm">{player.equippedArmor?.name || '未装备'}</div>
@@ -622,7 +635,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5] rounded"
                   >
                     <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <span className="text-xl">{accessory.icon}</span>
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" />
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-bold text-xs">{accessory.name}</div>
@@ -692,7 +705,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5] rounded"
                   >
                     <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <span className="text-sm">{accessory.icon}</span>
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="small" />
                     </div>
                     <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
                   </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import type { EquipmentType } from '@/types';
+import { SpriteIcon } from './SpriteIcon';
 
 interface EquipmentCollectionProps {
   onClose: () => void;
@@ -117,10 +118,14 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                     <div className="text-gray-400 text-sm font-bold w-6">
                       {index + 1}
                     </div>
-                    <div className="flex-shrink-0 w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center">
-                      <span className="text-xl">
-                        {showInfo ? equipment.icon : '❓'}
-                      </span>
+                    <div className="flex-shrink-0 w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center overflow-hidden">
+                      {showInfo && equipment.x !== undefined && equipment.y !== undefined ? (
+                        <SpriteIcon type={equipment.type === 'weapon' ? 'weapon' : equipment.type === 'armor' ? 'armor' : equipment.type === 'accessory' ? 'accessory' : 'soul'} x={equipment.x} y={equipment.y} size="medium" />
+                      ) : (
+                        <span className="text-xl">
+                          {showInfo ? equipment.icon : '❓'}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
@@ -214,8 +219,12 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50" onClick={() => setSelectedEquipment(null)}>
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-sm p-4" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-[#1a0a2e] rounded-lg flex items-center justify-center">
-                <span className="text-3xl">{selectedEquipment.icon}</span>
+              <div className="w-16 h-16 bg-[#1a0a2e] rounded-lg flex items-center justify-center overflow-hidden">
+                {selectedEquipment.x !== undefined && selectedEquipment.y !== undefined ? (
+                  <SpriteIcon type={selectedEquipment.type === 'weapon' ? 'weapon' : selectedEquipment.type === 'armor' ? 'armor' : selectedEquipment.type === 'accessory' ? 'accessory' : 'soul'} x={selectedEquipment.x} y={selectedEquipment.y} size="large" />
+                ) : (
+                  <span className="text-3xl">{selectedEquipment.icon}</span>
+                )}
               </div>
               <div>
                 <div className="text-game-secondary font-bold text-lg">{selectedEquipment.name}</div>

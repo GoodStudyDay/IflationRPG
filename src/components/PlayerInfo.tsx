@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getCollection } from '@/utils/collectionStorage';
+import { SpriteIcon } from './SpriteIcon';
 
 interface PlayerInfoProps {
   isOpen: boolean;
@@ -91,21 +92,41 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
             <div className="text-gray-300 text-sm font-bold mb-2">当前装备</div>
             <div className="grid grid-cols-4 gap-2">
               <div className="text-center">
-                <div className="text-lg mb-1">{player.equippedWeapon?.icon || '📦'}</div>
+                <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                  {player.equippedWeapon?.x !== undefined ? (
+                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
+                  ) : (
+                    <span className="text-lg">📦</span>
+                  )}
+                </div>
                 <div className="text-xs text-gray-400 truncate">{player.equippedWeapon?.name || '无'}</div>
               </div>
               <div className="text-center">
-                <div className="text-lg mb-1">{player.equippedArmor?.icon || '📦'}</div>
+                <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                  {player.equippedArmor?.x !== undefined ? (
+                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
+                  ) : (
+                    <span className="text-lg">📦</span>
+                  )}
+                </div>
                 <div className="text-xs text-gray-400 truncate">{player.equippedArmor?.name || '无'}</div>
               </div>
               {player.equippedAccessories?.map((acc, idx) => (
                 <div key={idx} className="text-center">
-                  <div className="text-lg mb-1">{acc?.icon || '📦'}</div>
+                  <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                    {acc?.x !== undefined ? (
+                      <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" />
+                    ) : (
+                      <span className="text-lg">📦</span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400 truncate">{acc?.name || '无'}</div>
                 </div>
               )) || Array(2).fill(null).map((_, idx) => (
                 <div key={idx} className="text-center">
-                  <div className="text-lg mb-1">📦</div>
+                  <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                    <span className="text-lg">📦</span>
+                  </div>
                   <div className="text-xs text-gray-400">无</div>
                 </div>
               ))}

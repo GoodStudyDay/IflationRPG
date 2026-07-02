@@ -111,6 +111,7 @@ function ItemBOUGUpush(
     luckBonus: 0,
     description: '',
     icon: '🛡️',
+
     maxQuantity: 10,
     attributeRate: multi + 100,
   };
@@ -160,6 +161,7 @@ function ItemAkusesaripush(
     luckBonus: t1 === 34 ? t2 : 0,
     description: setumei.replace('[0]', String(t2)),
     icon: '💎',
+
     maxQuantity: 3,
     attributeRate: 100,
   };
@@ -209,6 +211,7 @@ export function ItemSoulpush(
     luckBonus: 0,
     description: '',
     icon: '👻',
+
     maxQuantity: 2,
     attributeRate: t2 + 100,
   };
