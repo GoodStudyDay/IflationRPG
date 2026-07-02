@@ -16,11 +16,11 @@ const myStatusSet = (
   luck: number,
   bossType: number
 ): { hp: number; maxHp: number; attack: number; defense: number; speed: number; luck: number } => {
-  let myhp = hp;
-  let myatk = attack;
-  let mydef = defense;
-  let myspeed = agility;
-  let myluk = luck;
+  let myhp = isNaN(hp) ? 1000 : hp;
+  let myatk = isNaN(attack) ? 1000 : attack;
+  let mydef = isNaN(defense) ? 1000 : defense;
+  let myspeed = isNaN(agility) ? 1000 : agility;
+  let myluk = isNaN(luck) ? 1000 : luck;
 
   if (bossType === 76) {
     myhp = Math.floor(myhp - myhp * 0.15);

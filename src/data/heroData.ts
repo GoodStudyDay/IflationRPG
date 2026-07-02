@@ -180,26 +180,28 @@ export const getHeroSpritePath = (heroId: number, type: 'idle' | 'battle' | 'vic
   const hero = getHeroById(heroId);
   if (!hero) return '/images/player/963_heropng83_0.png';
   
+  const typeOffset = type === 'idle' ? 0 : type === 'battle' ? 1 : 2;
   const typeSuffix = type === 'idle' ? '_0' : type === 'battle' ? '_2' : '_5';
-  const fileIdMap: Record<string, string> = {
-    'heropng83': '963',
-    'heropng55': '945',
-    'heropng31': '936',
-    'heropng11': '23',
-    'heropng103': '957',
-    'heropng19': '972',
-    'heropng8': '966',
-    'heropng64': '954',
-    'heropng69': '978',
-    'heropng33': '951',
-    'heropng110': '939',
-    'heropng7': '960',
-    'heropng30': '975',
-    'heropng63': '969',
-    'heropng61': '948',
-    'heropng4': '942',
+  const fileIdMap: Record<string, number> = {
+    'heropng83': 963,
+    'heropng55': 945,
+    'heropng31': 936,
+    'heropng11': 23,
+    'heropng103': 957,
+    'heropng19': 972,
+    'heropng8': 966,
+    'heropng64': 954,
+    'heropng69': 978,
+    'heropng33': 951,
+    'heropng110': 939,
+    'heropng7': 960,
+    'heropng30': 975,
+    'heropng63': 969,
+    'heropng61': 948,
+    'heropng4': 942,
   };
   
-  const fileId = fileIdMap[hero.spriteBase] || '963';
+  const baseFileId = fileIdMap[hero.spriteBase] || 963;
+  const fileId = baseFileId + typeOffset;
   return `/images/player/${fileId}_${hero.spriteBase}${typeSuffix}.png`;
 };

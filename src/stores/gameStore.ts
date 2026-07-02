@@ -817,17 +817,17 @@ export const useGameStore = create<GameStore>()(
         const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
         
         const accessories = player.equippedAccessories || [];
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc.attackBonus || 0), 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc.defenseBonus || 0), 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc.hpBonus || 0), 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc.agilityBonus || 0), 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc.luckBonus || 0), 0);
         
-        let newMaxHp = Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus);
-        let newAtk = Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus);
-        let newDef = Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus);
-        let newAgi = Math.ceil(initialPlayer.agility + levelBonus.agility + accessoryAgiBonus);
-        let newLuc = Math.ceil(initialPlayer.luck + levelBonus.luck + accessoryLucBonus);
+        let newMaxHp = Math.ceil((initialPlayer.maxHp || 1000) + (levelBonus.hp || 0) + (armorHpContrib || 0) + (accessoryHpBonus || 0));
+        let newAtk = Math.ceil((initialPlayer.attack || 1000) + (levelBonus.attack || 0) + (weaponAtkContrib || 0) + (accessoryAtkBonus || 0));
+        let newDef = Math.ceil((initialPlayer.defense || 1000) + (levelBonus.defense || 0) + (armorDefContrib || 0) + (accessoryDefBonus || 0));
+        let newAgi = Math.ceil((initialPlayer.agility || 1000) + (levelBonus.agility || 0) + (accessoryAgiBonus || 0));
+        let newLuc = Math.ceil((initialPlayer.luck || 1000) + (levelBonus.luck || 0) + (accessoryLucBonus || 0));
         
         const warGems = accessories.filter(acc => acc.t1 === 41);
         for (const gem of warGems) {
