@@ -27,6 +27,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     let atkBonus = 0;
     let defBonus = 0;
     let hpBonus = 0;
+    let agiBonus = 0;
+    let lucBonus = 0;
     
     if (player.equippedWeapon) {
       atkBonus += player.equippedWeapon.attackBonus;
@@ -39,9 +41,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       atkBonus += acc.attackBonus;
       defBonus += acc.defenseBonus;
       hpBonus += acc.hpBonus;
+      agiBonus += acc.agilityBonus;
+      lucBonus += acc.luckBonus;
     });
     
-    return { atkBonus, defBonus, hpBonus };
+    return { atkBonus, defBonus, hpBonus, agiBonus, lucBonus };
   };
 
   const bonuses = getTotalBonus();
@@ -155,8 +159,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="large" />
-                </div>
+                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
+                  </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">
                     {player.equippedWeapon.name}
@@ -184,7 +188,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" />
+                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="medium" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{weapon.name}</div>
@@ -246,8 +250,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                  <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="large" />
-                </div>
+                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
+                  </div>
                 <div className="flex-1">
                   <div className="text-white font-bold">{player.equippedArmor.name}</div>
                   <div className="text-green-300 text-sm mt-1">当前装备</div>
@@ -276,7 +280,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" />
+                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="medium" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{armor.name}</div>
@@ -356,36 +360,32 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           {equippedAccs.length > 0 && (() => {
             const uniqueEquipped = [...new Map(equippedAccs.map(acc => [acc.id, acc])).values()];
             return uniqueEquipped.map(equippedAcc => {
-              const eqAcc = accessories.find(a => a.id === equippedAcc.id);
-              const qty = eqAcc?.quantity || 1;
-              const stockMult = getStockBonus(qty);
               return (
                 <div key={equippedAcc.id} className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="large" />
+                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="medium" />
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-bold">{equippedAcc.name}</div>
                       <div className="text-green-300 text-sm mt-1">当前装备</div>
                       <div className="flex gap-1 mt-1">
                         {equippedAcc.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{Math.floor(equippedAcc.hpBonus * stockMult)}</span>
+                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{equippedAcc.hpBonus}</span>
                         )}
                         {equippedAcc.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{Math.floor(equippedAcc.attackBonus * stockMult)}</span>
+                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{equippedAcc.attackBonus}</span>
                         )}
                         {equippedAcc.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{Math.floor(equippedAcc.defenseBonus * stockMult)}</span>
+                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{equippedAcc.defenseBonus}</span>
                         )}
                         {equippedAcc.agilityBonus > 0 && (
-                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{Math.floor(equippedAcc.agilityBonus * stockMult)}</span>
+                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{equippedAcc.agilityBonus}</span>
                         )}
                         {equippedAcc.luckBonus > 0 && (
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{Math.floor(equippedAcc.luckBonus * stockMult)}</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{equippedAcc.luckBonus}</span>
                         )}
                       </div>
-                      <div className="text-gray-300 text-xs">倍率: {Math.floor(equippedAcc.attributeRate * stockMult)}%</div>
                     </div>
                   </div>
                 </div>
@@ -399,7 +399,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="text-center text-gray-400 py-4">暂无其他饰品</div>
           ) : (
             availableAccessories.map(accessory => {
-              const stockMult = getStockBonus(accessory.quantity);
               return (
                 <div 
                   key={accessory.id}
@@ -407,7 +406,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" />
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-bold">{accessory.name}</div>
@@ -416,35 +415,28 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       )}
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {accessory.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{Math.floor(accessory.hpBonus * stockMult)}</span>
+                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
                         )}
                         {accessory.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{Math.floor(accessory.attackBonus * stockMult)}</span>
+                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
                         )}
                         {accessory.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{Math.floor(accessory.defenseBonus * stockMult)}</span>
+                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
                         )}
                         {accessory.agilityBonus > 0 && (
-                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{Math.floor(accessory.agilityBonus * stockMult)}</span>
+                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{accessory.agilityBonus}</span>
                         )}
                         {accessory.luckBonus > 0 && (
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{Math.floor(accessory.luckBonus * stockMult)}</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
                         )}
                       </div>
-                      <div className="text-gray-300 text-xs mt-0.5">
-                        数量: {accessory.quantity}
-                        {accessory.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(accessory.quantity - 1) * 10}%)</span>}
-                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="text-xs text-gray-400">倍率: {Math.floor(accessory.attributeRate * stockMult)}%</div>
-                      <button
-                        onClick={() => handleEquip(accessory)}
-                        className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
-                      >
-                        装备
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleEquip(accessory)}
+                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                    >
+                      装备
+                    </button>
                   </div>
                 </div>
               );
@@ -847,23 +839,57 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const currentTotalAtk = player.attack + bonuses.atkBonus;
     const currentTotalDef = player.defense + bonuses.defBonus;
     const currentTotalHp = player.maxHp + bonuses.hpBonus;
+    const currentTotalAgi = player.agility + bonuses.agiBonus;
+    const currentTotalLuc = player.luck + bonuses.lucBonus;
     
     let newTotalAtk = currentTotalAtk;
     let newTotalDef = currentTotalDef;
     let newTotalHp = currentTotalHp;
+    let newTotalAgi = currentTotalAgi;
+    let newTotalLuc = currentTotalLuc;
+    
+    const changedStats: { name: string; old: number; new: number }[] = [];
     
     if (confirmEquipment.type === 'weapon') {
       const oldWeaponBonus = player.equippedWeapon?.attackBonus || 0;
       newTotalAtk = currentTotalAtk - oldWeaponBonus + confirmEquipment.attackBonus;
+      if (newTotalAtk !== currentTotalAtk) {
+        changedStats.push({ name: 'ATK', old: currentTotalAtk, new: newTotalAtk });
+      }
     } else if (confirmEquipment.type === 'armor') {
       const oldArmorDefBonus = player.equippedArmor?.defenseBonus || 0;
       const oldArmorHpBonus = player.equippedArmor?.hpBonus || 0;
       newTotalDef = currentTotalDef - oldArmorDefBonus + confirmEquipment.defenseBonus;
       newTotalHp = currentTotalHp - oldArmorHpBonus + confirmEquipment.hpBonus;
+      if (newTotalDef !== currentTotalDef) {
+        changedStats.push({ name: 'DEF', old: currentTotalDef, new: newTotalDef });
+      }
     } else if (confirmEquipment.type === 'accessory') {
       newTotalAtk += confirmEquipment.attackBonus;
       newTotalDef += confirmEquipment.defenseBonus;
       newTotalHp += confirmEquipment.hpBonus;
+      newTotalAgi += confirmEquipment.agilityBonus;
+      newTotalLuc += confirmEquipment.luckBonus;
+      if (newTotalAtk !== currentTotalAtk) {
+        changedStats.push({ name: 'ATK', old: currentTotalAtk, new: newTotalAtk });
+      }
+      if (newTotalDef !== currentTotalDef) {
+        changedStats.push({ name: 'DEF', old: currentTotalDef, new: newTotalDef });
+      }
+      if (newTotalHp !== currentTotalHp) {
+        changedStats.push({ name: 'HP', old: currentTotalHp, new: newTotalHp });
+      }
+      if (newTotalAgi !== currentTotalAgi) {
+        changedStats.push({ name: 'AGI', old: currentTotalAgi, new: newTotalAgi });
+      }
+      if (newTotalLuc !== currentTotalLuc) {
+        changedStats.push({ name: 'LUC', old: currentTotalLuc, new: newTotalLuc });
+      }
+    }
+    
+    if ((confirmEquipment.type === 'weapon' || confirmEquipment.type === 'armor' || confirmEquipment.type === 'accessory') && changedStats.length === 0) {
+      handleConfirmEquip();
+      return null;
     }
     
     return (
@@ -874,98 +900,22 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               {confirmEquipment.type === 'soul' ? '安装' : '装备'} {confirmEquipment.name} 吗？
             </div>
             
-            {(confirmEquipment.type === 'weapon' || confirmEquipment.type === 'armor' || confirmEquipment.type === 'accessory') && (
+            {changedStats.length > 0 && (
               <div className="space-y-2 mb-4">
-                {confirmEquipment.type === 'weapon' && (
-                  <>
+                {changedStats.map(stat => (
+                  <div key={stat.name}>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">现在的 ATK:</span>
-                      <span className="text-white">{currentTotalAtk}</span>
+                      <span className="text-gray-400">现在的 {stat.name}:</span>
+                      <span className="text-white">{stat.old}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">装备后的 ATK:</span>
-                      <span className={`${newTotalAtk > currentTotalAtk ? 'text-green-400' : newTotalAtk < currentTotalAtk ? 'text-red-400' : 'text-white'}`}>
-                        {newTotalAtk}
+                      <span className="text-gray-400">装备后的 {stat.name}:</span>
+                      <span className={`${stat.new > stat.old ? 'text-green-400' : stat.new < stat.old ? 'text-red-400' : 'text-white'}`}>
+                        {stat.new}
                       </span>
                     </div>
-                  </>
-                )}
-                
-                {confirmEquipment.type === 'armor' && (
-                  <>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">现在的 DEF:</span>
-                      <span className="text-white">{currentTotalDef}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">装备后的 DEF:</span>
-                      <span className={`${newTotalDef > currentTotalDef ? 'text-green-400' : newTotalDef < currentTotalDef ? 'text-red-400' : 'text-white'}`}>
-                        {newTotalDef}
-                      </span>
-                    </div>
-                    {currentTotalHp !== 0 || newTotalHp !== 0 ? (
-                      <>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">现在的 HP:</span>
-                          <span className="text-white">{currentTotalHp}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">装备后的 HP:</span>
-                          <span className={`${newTotalHp > currentTotalHp ? 'text-green-400' : newTotalHp < currentTotalHp ? 'text-red-400' : 'text-white'}`}>
-                            {newTotalHp}
-                          </span>
-                        </div>
-                      </>
-                    ) : null}
-                  </>
-                )}
-                
-                {confirmEquipment.type === 'accessory' && (
-                  <>
-                    {(currentTotalAtk !== 0 || newTotalAtk !== currentTotalAtk) && (
-                      <>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">现在的 ATK:</span>
-                          <span className="text-white">{currentTotalAtk}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">装备后的 ATK:</span>
-                          <span className={`${newTotalAtk > currentTotalAtk ? 'text-green-400' : newTotalAtk < currentTotalAtk ? 'text-red-400' : 'text-white'}`}>
-                            {newTotalAtk}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    {(currentTotalDef !== 0 || newTotalDef !== currentTotalDef) && (
-                      <>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">现在的 DEF:</span>
-                          <span className="text-white">{currentTotalDef}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">装备后的 DEF:</span>
-                          <span className={`${newTotalDef > currentTotalDef ? 'text-green-400' : newTotalDef < currentTotalDef ? 'text-red-400' : 'text-white'}`}>
-                            {newTotalDef}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    {(currentTotalHp !== 0 || newTotalHp !== currentTotalHp) && (
-                      <>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">现在的 HP:</span>
-                          <span className="text-white">{currentTotalHp}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">装备后的 HP:</span>
-                          <span className={`${newTotalHp > currentTotalHp ? 'text-green-400' : newTotalHp < currentTotalHp ? 'text-red-400' : 'text-white'}`}>
-                            {newTotalHp}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
+                  </div>
+                ))}
               </div>
             )}
             

@@ -113,7 +113,7 @@ export const CharacterSprite = ({
         };
       case 'attack':
         return {
-          imagePath: getPath('battle'),
+          imagePath: getPath('idle'),
           bgPosX: -(frame % COLS) * size,
           bgPosY: -row * size,
         };
