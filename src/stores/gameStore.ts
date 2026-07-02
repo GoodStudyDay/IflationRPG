@@ -1453,6 +1453,21 @@ export const useGameStore = create<GameStore>()(
                   },
                 }));
                 
+                const healAccessories = player.equippedAccessories?.filter(acc => acc.t1 === 800) || [];
+                if (healAccessories.length > 0) {
+                  const maxHealRate = Math.max(...healAccessories.map(acc => acc.t2 || 0));
+                  const healAmount = Math.floor(tdame * (maxHealRate / 100));
+                  if (healAmount > 0) {
+                    set((s) => ({
+                      player: {
+                        ...s.player,
+                        hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
+                      },
+                    }));
+                    addBattleLog(`回复项链效果：回复 ${healAmount} HP！`);
+                  }
+                }
+                
                 if (newEnemyHp <= 0) {
                   addBattleLog('战斗胜利！');
                   battleEnded = true;

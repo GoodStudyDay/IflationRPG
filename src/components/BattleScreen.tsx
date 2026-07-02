@@ -52,32 +52,32 @@ export const BattleScreen = () => {
           </div>
         </div>
         
-        <div className="absolute top-0 left-0 w-8 h-full border-l-2 border-blue-500/50" />
-        <div className="absolute top-0 right-0 w-8 h-full border-r-2 border-blue-500/50" />
-        <div className="absolute top-0 left-0 h-8 w-full border-t-2 border-blue-500/50" />
-        <div className="absolute bottom-0 left-0 h-8 w-full border-b-2 border-blue-500/50" />
+        <div className="hidden sm:block absolute top-0 left-0 w-8 h-full border-l-2 border-blue-500/50" />
+        <div className="hidden sm:block absolute top-0 right-0 w-8 h-full border-r-2 border-blue-500/50" />
+        <div className="absolute top-0 left-0 h-6 sm:h-8 w-full border-t-2 border-blue-500/50" />
+        <div className="absolute bottom-0 left-0 h-6 sm:h-8 w-full border-b-2 border-blue-500/50" />
         
-        <div className="absolute top-2 left-0 right-0 flex justify-around px-4 sm:px-8 text-xs sm:text-sm font-bold">
+        <div className="absolute top-2 left-0 right-0 flex justify-around px-2 sm:px-4 text-[10px] sm:text-xs font-bold">
           <span className="text-yellow-400">Combo : {Math.round(battle.comboRate)}%</span>
           <span className="text-red-400">CRI : {Math.round(battle.critRate)}%</span>
           <span className="text-green-400">HPrate : {Math.round(battle.hpRate)}%</span>
         </div>
         
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-full px-8 flex justify-center">
+        <div className="absolute top-10 sm:top-16 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8 flex justify-center">
           <div className="w-full max-w-md">
-            <div className="h-4 bg-gray-800 rounded overflow-hidden border border-gray-700">
+            <div className="h-3 sm:h-4 bg-gray-800 rounded overflow-hidden border border-gray-700">
               <div 
                 className="h-full bg-gradient-to-r from-red-700 to-red-500 transition-all duration-300"
                 style={{ width: `${((battle.enemy.hp / battle.enemy.maxHp) * 100)}%` }}
               />
             </div>
-            <div className="text-center text-white text-xs mt-1">
+            <div className="text-center text-white text-[10px] sm:text-xs mt-1">
               {battle.enemy.hp.toLocaleString()} / {battle.enemy.maxHp.toLocaleString()}
             </div>
           </div>
         </div>
         
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="absolute top-1/4 sm:top-1/3 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
           <div className={`relative transition-transform duration-100 ${
             battle.enemyAnimation === 'attack' ? 'scale-110' : 
             battle.enemyAnimation === 'hurt' ? 'scale-95 opacity-70' : ''
@@ -86,7 +86,7 @@ export const BattleScreen = () => {
               <img 
                 src={battle.enemy.imageUrl} 
                 alt={battle.enemy.name}
-                className="w-20 h-20 sm:w-32 sm:h-32 object-contain rounded-lg border-2 border-red-500/50"
+                className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 object-contain rounded-lg border-2 border-red-500/50 mx-auto"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   img.style.display = 'none';
@@ -94,15 +94,15 @@ export const BattleScreen = () => {
                 }}
               />
             ) : null}
-            <div className={`w-20 h-20 sm:w-32 sm:h-32 bg-[#3d2b6e] rounded-lg border-2 border-red-500 flex items-center justify-center ${battle.enemy.imageUrl ? 'hidden' : ''}`}>
-              <span className="text-4xl sm:text-6xl">{battle.enemy.icon}</span>
+            <div className={`w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-[#3d2b6e] rounded-lg border-2 border-red-500 flex items-center justify-center mx-auto ${battle.enemy.imageUrl ? 'hidden' : ''}`}>
+              <span className="text-3xl sm:text-5xl md:text-6xl">{battle.enemy.icon}</span>
             </div>
             
           </div>
-          <div className="text-red-400 font-bold text-sm sm:text-base mt-2">{battle.enemy.name}</div>
+          <div className="text-red-400 font-bold text-xs sm:text-sm md:text-base mt-1">{battle.enemy.name}</div>
           
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
-            <div className="mt-2 text-xs text-gray-400 max-w-xs mx-auto">
+            <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto hidden sm:block">
               <div className="text-gray-500 mb-1">掉落:</div>
               {battle.enemy.drops.slice(0, 5).map((drop, index) => {
                 if (!drop) return null;
@@ -119,30 +119,34 @@ export const BattleScreen = () => {
           )}
         </div>
         
-        <div className="absolute bottom-28 sm:bottom-36 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="absolute bottom-20 sm:bottom-28 md:bottom-36 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
           <div className={`relative transition-transform duration-100 ${
             battle.playerAnimation === 'attack' ? 'scale-110 translate-x-4' : 
             battle.playerAnimation === 'hurt' ? 'scale-95 opacity-70 -translate-x-2' : ''
           }`}>
-            <div className="sm:hidden">
-              <CharacterSprite 
-                animation={battle.playerAnimation} 
-                size={64}
-                useBackView={true}
-              />
-            </div>
-            <div className="hidden sm:block">
-              <CharacterSprite 
-                animation={battle.playerAnimation} 
-                size={96}
-                useBackView={true}
-              />
-            </div>
+            <CharacterSprite 
+              animation={battle.playerAnimation} 
+              size={56}
+              className="sm:hidden mx-auto"
+              useBackView={true}
+            />
+            <CharacterSprite 
+              animation={battle.playerAnimation} 
+              size={80}
+              className="hidden sm:block md:hidden mx-auto"
+              useBackView={true}
+            />
+            <CharacterSprite 
+              animation={battle.playerAnimation} 
+              size={96}
+              className="hidden md:block mx-auto"
+              useBackView={true}
+            />
           </div>
-          <div className="text-white font-bold text-xs sm:text-sm mt-1">{player.name}</div>
+          <div className="text-white font-bold text-[10px] sm:text-xs md:text-sm mt-1">{player.name}</div>
         </div>
         
-        <div className="absolute bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 w-36 sm:w-48">
+        <div className="absolute bottom-12 sm:bottom-18 md:bottom-24 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
           <div className="h-2 sm:h-3 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className="h-full bg-gradient-to-r from-blue-700 to-blue-500 transition-all duration-300"
@@ -156,7 +160,7 @@ export const BattleScreen = () => {
         
         <div 
           ref={scrollRef}
-          className="absolute bottom-0 left-2 right-2 sm:left-4 sm:right-4 h-20 sm:h-24 bg-[#1a0a2e]/80 rounded-lg border border-[#4a2c7a] p-2 sm:p-3 overflow-y-auto"
+          className="absolute bottom-0 left-2 right-2 sm:left-4 sm:right-4 h-16 sm:h-20 md:h-24 bg-[#1a0a2e]/80 rounded-lg border border-[#4a2c7a] p-2 sm:p-3 overflow-y-auto"
         >
           {battle.battleLog.map((log, index) => (
             <div 

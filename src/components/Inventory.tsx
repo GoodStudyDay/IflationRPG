@@ -353,48 +353,102 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {availableAccessories.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无可装备的饰品</div>
-          ) : (
-            availableAccessories.map(accessory => (
-              <div 
-                key={accessory.id}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-white font-bold">{accessory.name}</div>
-                    {accessory.effectDescription && (
-                      <div className="text-purple-300 text-sm mt-1">{accessory.effectDescription}</div>
-                    )}
-                    <div className="flex gap-1 mt-1">
-                      {accessory.hpBonus > 0 && (
-                        <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
-                      )}
-                      {accessory.attackBonus > 0 && (
-                        <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                      )}
-                      {accessory.defenseBonus > 0 && (
-                        <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                      )}
+          {equippedAccs.length > 0 && (() => {
+            const uniqueEquipped = [...new Map(equippedAccs.map(acc => [acc.id, acc])).values()];
+            return uniqueEquipped.map(equippedAcc => {
+              const eqAcc = accessories.find(a => a.id === equippedAcc.id);
+              const qty = eqAcc?.quantity || 1;
+              const stockMult = getStockBonus(qty);
+              return (
+                <div key={equippedAcc.id} className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="large" />
                     </div>
-                    <div className="text-gray-300 text-xs mt-0.5">可用: {accessory.availableQty} / {accessory.quantity}</div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">属性倍率: {accessory.attributeRate}%</div>
-                    <button
-                      onClick={() => handleEquip(accessory)}
-                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
-                    >
-                      装备
-                    </button>
+                    <div className="flex-1">
+                      <div className="text-white font-bold">{equippedAcc.name}</div>
+                      <div className="text-green-300 text-sm mt-1">当前装备</div>
+                      <div className="flex gap-1 mt-1">
+                        {equippedAcc.hpBonus > 0 && (
+                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{Math.floor(equippedAcc.hpBonus * stockMult)}</span>
+                        )}
+                        {equippedAcc.attackBonus > 0 && (
+                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{Math.floor(equippedAcc.attackBonus * stockMult)}</span>
+                        )}
+                        {equippedAcc.defenseBonus > 0 && (
+                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{Math.floor(equippedAcc.defenseBonus * stockMult)}</span>
+                        )}
+                        {equippedAcc.agilityBonus > 0 && (
+                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{Math.floor(equippedAcc.agilityBonus * stockMult)}</span>
+                        )}
+                        {equippedAcc.luckBonus > 0 && (
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{Math.floor(equippedAcc.luckBonus * stockMult)}</span>
+                        )}
+                      </div>
+                      <div className="text-gray-300 text-xs">倍率: {Math.floor(equippedAcc.attributeRate * stockMult)}%</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            });
+          })()}
+
+          {availableAccessories.length === 0 && equippedAccs.length === 0 ? (
+            <div className="text-center text-gray-400 py-8">暂无可装备的饰品</div>
+          ) : availableAccessories.length === 0 ? (
+            <div className="text-center text-gray-400 py-4">暂无其他饰品</div>
+          ) : (
+            availableAccessories.map(accessory => {
+              const stockMult = getStockBonus(accessory.quantity);
+              return (
+                <div 
+                  key={accessory.id}
+                  className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-bold">{accessory.name}</div>
+                      {accessory.description && (
+                        <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
+                      )}
+                      <div className="flex gap-1 mt-1 flex-wrap">
+                        {accessory.hpBonus > 0 && (
+                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{Math.floor(accessory.hpBonus * stockMult)}</span>
+                        )}
+                        {accessory.attackBonus > 0 && (
+                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{Math.floor(accessory.attackBonus * stockMult)}</span>
+                        )}
+                        {accessory.defenseBonus > 0 && (
+                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{Math.floor(accessory.defenseBonus * stockMult)}</span>
+                        )}
+                        {accessory.agilityBonus > 0 && (
+                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{Math.floor(accessory.agilityBonus * stockMult)}</span>
+                        )}
+                        {accessory.luckBonus > 0 && (
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{Math.floor(accessory.luckBonus * stockMult)}</span>
+                        )}
+                      </div>
+                      <div className="text-gray-300 text-xs mt-0.5">
+                        数量: {accessory.quantity}
+                        {accessory.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(accessory.quantity - 1) * 10}%)</span>}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="text-xs text-gray-400">倍率: {Math.floor(accessory.attributeRate * stockMult)}%</div>
+                      <button
+                        onClick={() => handleEquip(accessory)}
+                        className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                      >
+                        装备
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
 

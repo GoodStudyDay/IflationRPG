@@ -10,6 +10,7 @@ interface CharacterSpriteProps {
   animation: CharacterAnimation;
   size?: number;
   useBackView?: boolean;
+  className?: string;
 }
 
 const COLS = 3;
@@ -18,7 +19,8 @@ const ROWS = 4;
 export const CharacterSprite = ({ 
   animation = 'idle', 
   size = 96,
-  useBackView = false
+  useBackView = false,
+  className = ''
 }: CharacterSpriteProps) => {
   const { player } = useGameStore();
   const [frame, setFrame] = useState(0);
@@ -159,7 +161,7 @@ export const CharacterSprite = ({
 
   return (
     <div 
-      className={`relative flex items-center justify-center ${getTransform()}`}
+      className={`relative flex items-center justify-center ${getTransform()} ${className}`}
       style={{ 
         width: size, 
         height: size,
