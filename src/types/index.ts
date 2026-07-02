@@ -39,6 +39,15 @@ export interface InventoryItem {
   quantity: number;
 }
 
+export interface EquipSet {
+  id: string;
+  name: string;
+  weaponId: string | null;
+  armorId: string | null;
+  accessoryIds: (string | null)[];
+  createdAt: number;
+}
+
 export interface Skill {
   id: string;
   name: string;

@@ -1,3 +1,5 @@
+import type { EquipSet } from './index';
+
 export interface GameSaveData {
   playTimes: number;
   Highlv: number;
@@ -9,6 +11,7 @@ export interface GameSaveData {
   gameovercount: number;
   kyarakutalv: number;
   kyarakutaKozinExp: number[];
+  equipSets: EquipSet[];
   hardmodeUnlock: number;
   hellmodeUnlock: number;
   hmDragonDefeat: number;
@@ -52,6 +55,7 @@ export const initialGameSaveData: GameSaveData = {
   gameovercount: 0,
   kyarakutalv: 0,
   kyarakutaKozinExp: new Array(20).fill(0),
+  equipSets: [],
   hardmodeUnlock: 0,
   hellmodeUnlock: 0,
   hmDragonDefeat: 0,

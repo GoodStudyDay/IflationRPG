@@ -3,6 +3,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
 import { SpriteIcon } from './SpriteIcon';
+import { EquipmentSetManager } from './EquipmentSetManager';
 
 interface InventoryProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const unlockAccessorySlot = useGameStore(state => state.unlockAccessorySlot);
   const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [showGoldError, setShowGoldError] = useState(false);
+  const [showSetManager, setShowSetManager] = useState(false);
 
   const getTotalBonus = () => {
     let atkBonus = 0;
@@ -583,8 +585,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-center">
-          <button className="bg-[#4a6fa5] text-white font-bold py-2 px-6 rounded hover:bg-[#3a5a95] transition-colors">
-            装备组合切换
+          <button 
+            onClick={() => setShowSetManager(true)}
+            className="bg-[#4a6fa5] text-white font-bold py-2 px-6 rounded hover:bg-[#3a5a95] transition-colors"
+          >
+            装备套装管理
           </button>
         </div>
 
@@ -980,6 +985,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
           金币不足！
         </div>
+      )}
+
+      {showSetManager && (
+        <EquipmentSetManager onClose={() => setShowSetManager(false)} />
       )}
     </>
   );

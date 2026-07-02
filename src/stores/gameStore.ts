@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment } from '@/types';
+import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, EquipSet } from '@/types';
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
-import { getEquipmentById } from '@/data/equipment';
+import { getEquipmentById, equipmentData } from '@/data/equipment';
 import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
@@ -36,6 +36,7 @@ interface GameStore {
   gameovercount: number;
   kyarakutalv: number;
   kyarakutaKozinExp: number[];
+  equipSets: EquipSet[];
   hardmodeUnlock: number;
   hellmodeUnlock: number;
   hardmode: number;
@@ -106,6 +107,14 @@ interface GameStore {
   setPresetNum: (num: number) => void;
   /** 设置自动分配是否开启 */
   setAutoAllocateEnabled: (enabled: boolean) => void;
+  /** 保存当前装备为套装 */
+  saveEquipSet: (name: string) => void;
+  /** 加载装备套装 */
+  loadEquipSet: (setId: string) => void;
+  /** 删除装备套装 */
+  deleteEquipSet: (setId: string) => void;
+  /** 更新装备套装名称 */
+  renameEquipSet: (setId: string, name: string) => void;
   /** 自动分配属性点 */
   autoAllocateStPt: () => void;
   /** 选择角色 */
@@ -360,6 +369,7 @@ export const useGameStore = create<GameStore>()(
       gameovercount: saveData.gameovercount,
       kyarakutalv: saveData.kyarakutalv,
       kyarakutaKozinExp: saveData.kyarakutaKozinExp || new Array(20).fill(0),
+      equipSets: saveData.equipSets || [],
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
       hardmode: 0,
@@ -792,6 +802,61 @@ export const useGameStore = create<GameStore>()(
         
         const data = loadSaveData();
         data.autoAllocateEnabled = enabled;
+        saveSaveData(data);
+      },
+      saveEquipSet: (name) => {
+        const { player, equipSets } = get();
+        const newSet: EquipSet = {
+          id: `set-${Date.now()}`,
+          name,
+          weaponId: player.equippedWeapon?.id || null,
+          armorId: player.equippedArmor?.id || null,
+          accessoryIds: player.equippedAccessories.map(acc => acc?.id || null),
+          createdAt: Date.now(),
+        };
+        const updatedSets = [...equipSets, newSet];
+        set({ equipSets: updatedSets });
+        
+        const data = loadSaveData();
+        data.equipSets = updatedSets;
+        saveSaveData(data);
+      },
+      loadEquipSet: (setId) => {
+        const { equipSets } = get();
+        const equipSet = equipSets.find(set => set.id === setId);
+        if (!equipSet) return;
+        
+        const weapon = equipSet.weaponId ? equipmentData.find(e => e.id === equipSet.weaponId) || null : null;
+        const armor = equipSet.armorId ? equipmentData.find(e => e.id === equipSet.armorId) || null : null;
+        const accessories = equipSet.accessoryIds.map(id => id ? equipmentData.find(e => e.id === id) || null : null).filter(Boolean) as Equipment[];
+        
+        set(state => ({
+          player: {
+            ...state.player,
+            equippedWeapon: weapon,
+            equippedArmor: armor,
+            equippedAccessories: accessories,
+          },
+        }));
+      },
+      deleteEquipSet: (setId) => {
+        const { equipSets } = get();
+        const updatedSets = equipSets.filter(set => set.id !== setId);
+        set({ equipSets: updatedSets });
+        
+        const data = loadSaveData();
+        data.equipSets = updatedSets;
+        saveSaveData(data);
+      },
+      renameEquipSet: (setId, name) => {
+        const { equipSets } = get();
+        const updatedSets = equipSets.map(set => 
+          set.id === setId ? { ...set, name } : set
+        );
+        set({ equipSets: updatedSets });
+        
+        const data = loadSaveData();
+        data.equipSets = updatedSets;
         saveSaveData(data);
       },
       autoAllocateStPt: () => {
