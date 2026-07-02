@@ -1,17 +1,14 @@
+import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { loadSaveData } from '@/utils/saveDataStorage';
+import { EquipmentCollection } from './EquipmentCollection';
+import { Leaderboard } from './Leaderboard';
 
 export const GameoverScreen = () => {
-  const { player, goToTitle, setCurrentScene } = useGameStore();
+  const { player, goToTitle } = useGameStore();
+  const [showCollection, setShowCollection] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const saveData = loadSaveData();
-
-  const handleMenuEquipment = () => {
-    setCurrentScene('world');
-  };
-
-  const handleRanking = () => {
-    setCurrentScene('title');
-  };
 
   return (
     <div className="min-h-screen bg-black/80 flex flex-col items-center justify-center relative">
@@ -70,14 +67,14 @@ export const GameoverScreen = () => {
 
         <div className="mt-8 flex flex-col gap-3 w-full max-w-xs mx-auto">
           <button
-            onClick={handleMenuEquipment}
+            onClick={() => setShowCollection(true)}
             className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg"
           >
             菜单 / 装备
           </button>
           
           <button
-            onClick={handleRanking}
+            onClick={() => setShowLeaderboard(true)}
             className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg"
           >
             排行
@@ -91,6 +88,16 @@ export const GameoverScreen = () => {
           </button>
         </div>
       </div>
+
+      {showCollection && (
+        <EquipmentCollection onClose={() => setShowCollection(false)} />
+      )}
+      
+      {showLeaderboard && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setShowLeaderboard(false)}>
+          <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
+        </div>
+      )}
     </div>
   );
 };

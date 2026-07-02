@@ -764,7 +764,7 @@ export const useGameStore = create<GameStore>()(
       killPlayer: () => {
         set({ 
           battlePoints: 0,
-          currentScene: 'title'
+          currentScene: 'gameover'
         });
       },
       setPreset: (presetIndex, preset) => {
@@ -772,12 +772,24 @@ export const useGameStore = create<GameStore>()(
         const newPresets = [...presets];
         newPresets[presetIndex] = [...preset];
         set({ presets: newPresets });
+        
+        const data = loadSaveData();
+        data.presets = newPresets;
+        saveSaveData(data);
       },
       setPresetNum: (num) => {
         set({ presetNum: num });
+        
+        const data = loadSaveData();
+        data.presetNum = num;
+        saveSaveData(data);
       },
       setAutoAllocateEnabled: (enabled) => {
         set({ autoAllocateEnabled: enabled });
+        
+        const data = loadSaveData();
+        data.autoAllocateEnabled = enabled;
+        saveSaveData(data);
       },
       autoAllocateStPt: () => {
         const { player, presets, presetNum } = get();
@@ -870,7 +882,9 @@ export const useGameStore = create<GameStore>()(
         });
       },
       startGame: () => {
-        const { player, inventory, skills, battlePoints } = get();
+        const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
+        
+        const newBattlePoints = battlePoints <= 0 ? maxBattlePoints : battlePoints;
         
         const levelBonus = getLevelBonus(player.level);
         
@@ -967,7 +981,7 @@ export const useGameStore = create<GameStore>()(
           skills,
           currentScene: 'world',
           encounterRate: 0,
-          battlePoints,
+          battlePoints: newBattlePoints,
           battle: {
             enemy: null,
             status: 'idle',
@@ -1565,7 +1579,9 @@ export const useGameStore = create<GameStore>()(
                   },
                 }));
                 
-                const healAccessories = player.equippedAccessories?.filter(acc => acc.t1 === 800) || [];
+                const healAccessories = player.equippedAccessories?.filter(acc => 
+                  acc.t1 === 1200 || acc.t1 === 1201 || acc.t1 === 1202 || acc.t1 === 1203
+                ) || [];
                 if (healAccessories.length > 0) {
                   const maxHealRate = Math.max(...healAccessories.map(acc => acc.t2 || 0));
                   const healAmount = Math.floor(tdame * (maxHealRate / 100));
@@ -2232,6 +2248,9 @@ export const useGameStore = create<GameStore>()(
         bonus: state.bonus,
         battlePoints: state.battlePoints,
         defeatedBosses: state.defeatedBosses,
+        presets: state.presets,
+        presetNum: state.presetNum,
+        autoAllocateEnabled: state.autoAllocateEnabled,
       }),
     }
   )
