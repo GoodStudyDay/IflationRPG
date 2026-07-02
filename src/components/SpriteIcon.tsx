@@ -6,23 +6,13 @@ interface SpriteIconProps {
   className?: string;
 }
 
-const BASE_URL = (() => {
-  const script = document.querySelector('script[type="module"]');
-  if (script) {
-    const src = script.getAttribute('src') || '';
-    const match = src.match(/^(\/.+?)\/assets\//);
-    if (match) {
-      return match[1];
-    }
-  }
-  return '/';
-})();
+const BASE_URL = import.meta.env.BASE_URL || '/';
 
 const SPRITE_CONFIG = {
-  weapon: { path: `${BASE_URL}/images/item/244_item0png.png`, tileSize: 24, width: 384, height: 240 },
-  armor: { path: `${BASE_URL}/images/item/245_item1png.png`, tileSize: 24, width: 384, height: 120 },
-  accessory: { path: `${BASE_URL}/images/item/246_item2png.png`, tileSize: 24, width: 336, height: 240 },
-  soul: { path: `${BASE_URL}/images/item/935_SoulPng2.png`, tileSize: 48, width: 384, height: 576 },
+  weapon: { path: `${BASE_URL}images/item/244_item0png.png`, tileSize: 24, width: 384, height: 240 },
+  armor: { path: `${BASE_URL}images/item/245_item1png.png`, tileSize: 24, width: 384, height: 120 },
+  accessory: { path: `${BASE_URL}images/item/246_item2png.png`, tileSize: 24, width: 336, height: 240 },
+  soul: { path: `${BASE_URL}images/item/935_SoulPng2.png`, tileSize: 48, width: 384, height: 576 },
 };
 
 const SIZE_MAP = {

@@ -3,12 +3,13 @@ import { useGameStore } from '@/stores/gameStore';
 import { SettingsModal } from './SettingsModal';
 import { Leaderboard } from './Leaderboard';
 import { PlayerInfo } from './PlayerInfo';
+import { CharacterSelect } from './CharacterSelect';
 import { VERSION } from '@/data/version';
 
-type ScreenMode = 'top' | 'gamestart';
+type ScreenMode = 'top' | 'gamestart' | 'charselect';
 
 export const TitleScreen = () => {
-  const { startGame, resetGame, player, battlePoints } = useGameStore();
+  const { startGame, resetGame, selectHero, player, battlePoints } = useGameStore();
   const [screenMode, setScreenMode] = useState<ScreenMode>('top');
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -21,13 +22,13 @@ export const TitleScreen = () => {
     if (hasSavedGame) {
       setScreenMode('gamestart');
     } else {
-      startGame();
+      setScreenMode('charselect');
     }
   };
 
   const handleNewGame = () => {
     resetGame();
-    startGame();
+    setScreenMode('charselect');
   };
 
   const handleContinue = () => {
@@ -46,7 +47,25 @@ export const TitleScreen = () => {
     setShowLeaderboard(true);
   };
 
+  const handleHeroSelect = (heroId: number) => {
+    selectHero(heroId);
+    startGame();
+  };
+
+  const handleCharSelectBack = () => {
+    setScreenMode('top');
+  };
+
   const renderContent = () => {
+    if (screenMode === 'charselect') {
+      return (
+        <CharacterSelect 
+          onSelect={handleHeroSelect} 
+          onBack={handleCharSelectBack} 
+        />
+      );
+    }
+
     if (screenMode === 'gamestart') {
       return (
         <div className="min-h-screen bg-gradient-to-b from-[#87CEEB] to-[#90EE90] flex flex-col items-center justify-center relative overflow-hidden">

@@ -26,25 +26,7 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
   }
   
   if (activePanel === 'inventory') {
-    return (
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md">
-          <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
-            <div className="flex items-center justify-between">
-              <div className="text-game-secondary font-bold">装备</div>
-              <button
-                onClick={() => setActivePanel('main')}
-                className="text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-          
-          <Inventory onClose={() => setActivePanel('main')} />
-        </div>
-      </div>
-    );
+    return <Inventory onClose={() => setActivePanel('main')} />;
   }
   
   if (activePanel === 'collection') {

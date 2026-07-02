@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
+import { CharacterSprite } from './CharacterSprite';
 
 interface StatusPanelProps {
   onClose: () => void;
@@ -278,8 +279,8 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
           </div>
           
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-[#4a6a8a] rounded flex items-center justify-center text-2xl">
-              🧙
+            <div className="w-16 h-16 bg-[#4a6a8a] rounded flex items-center justify-center">
+              <CharacterSprite animation="idle" size={56} />
             </div>
             <div className="flex-1">
               <div className="text-xl font-bold text-[#1a3a5a]">

@@ -937,12 +937,14 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
   return (
     <>
-      {viewMode === 'weapon' && renderWeaponList()}
-      {viewMode === 'armor' && renderArmorList()}
-      {viewMode === 'accessory' && renderAccessoryList()}
-      {viewMode === 'soul' && renderSoulList()}
-      {viewMode === 'material' && renderMaterialList()}
-      {viewMode === 'main' && renderMainView()}
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        {viewMode === 'weapon' && renderWeaponList()}
+        {viewMode === 'armor' && renderArmorList()}
+        {viewMode === 'accessory' && renderAccessoryList()}
+        {viewMode === 'soul' && renderSoulList()}
+        {viewMode === 'material' && renderMaterialList()}
+        {viewMode === 'main' && renderMainView()}
+      </div>
       {renderConfirmDialog()}
       
       {showUnlockConfirm && (

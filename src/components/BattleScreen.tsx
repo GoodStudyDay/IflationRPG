@@ -24,17 +24,7 @@ export const BattleScreen = () => {
     }
   }, [battle.battleLog]);
   
-  useEffect(() => {
-    const handleKeyDown = () => {
-      toggleBattle();
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [toggleBattle]);
+  
   
   if (!battle.enemy) return null;
   
@@ -107,9 +97,7 @@ export const BattleScreen = () => {
             <div className={`w-20 h-20 sm:w-32 sm:h-32 bg-[#3d2b6e] rounded-lg border-2 border-red-500 flex items-center justify-center ${battle.enemy.imageUrl ? 'hidden' : ''}`}>
               <span className="text-4xl sm:text-6xl">{battle.enemy.icon}</span>
             </div>
-            {battle.enemyAnimation === 'hurt' && (
-              <div className="absolute inset-0 bg-red-500/50 animate-pulse rounded-lg" />
-            )}
+            
           </div>
           <div className="text-red-400 font-bold text-sm sm:text-base mt-2">{battle.enemy.name}</div>
           
@@ -140,12 +128,14 @@ export const BattleScreen = () => {
               <CharacterSprite 
                 animation={battle.playerAnimation} 
                 size={64}
+                useBackView={true}
               />
             </div>
             <div className="hidden sm:block">
               <CharacterSprite 
                 animation={battle.playerAnimation} 
                 size={96}
+                useBackView={true}
               />
             </div>
           </div>

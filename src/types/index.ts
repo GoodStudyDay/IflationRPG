@@ -87,6 +87,8 @@ export interface Player {
   maxAccessorySlots: number;
   /** 属性点 */
   stPt: number;
+  /** 角色ID (0-15) */
+  heroId: number;
 }
 
 export type GameScene = 'title' | 'world' | 'battle';

@@ -12,6 +12,7 @@ import { battleVarInit } from '@/utils/battleVar';
 import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { getBossById } from '@/data/bossData';
+import { getHeroById } from '@/data/heroData';
 
 interface GameStore {
   player: Player;
@@ -105,6 +106,8 @@ interface GameStore {
   setAutoAllocateEnabled: (enabled: boolean) => void;
   /** 自动分配属性点 */
   autoAllocateStPt: () => void;
+  /** 选择角色 */
+  selectHero: (heroId: number) => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -757,14 +760,141 @@ export const useGameStore = create<GameStore>()(
           },
         });
       },
-      startGame: () => {
-        const { player, inventory, skills, battlePoints } = get();
+      selectHero: (heroId) => {
+        const { player } = get();
+        const hero = getHeroById(heroId);
+        if (!hero) return;
+        
+        const levelBonus = getLevelBonus(player.level);
+        
+        const baseHp = 1000 + levelBonus.hp;
+        const baseAtk = 1000 + levelBonus.attack;
+        const baseDef = 1000 + levelBonus.defense;
+        const baseAgi = 1000 + levelBonus.agility;
+        const baseLuc = 1000 + levelBonus.luck;
+        
+        const kyarakutalv = get().kyarakutalv || 0;
+        const kyaraLv = (kyarakutalv + 0.75) * 0.25;
+        
+        const hpBonus = hero.hpBonus * kyaraLv * 0.06;
+        const atkBonus = hero.atkBonus * kyaraLv * 0.07;
+        const defBonus = hero.defBonus * kyaraLv * 0.07;
+        const agiBonus = hero.agiBonus * kyaraLv * 0.075;
+        const lucBonus = hero.lucBonus * kyaraLv * 0.08;
+        
+        const newMaxHp = Math.floor(baseHp * (1 + hpBonus));
+        const newAtk = Math.floor(baseAtk * (1 + atkBonus));
+        const newDef = Math.floor(baseDef * (1 + defBonus));
+        const newAgi = Math.floor(baseAgi * (1 + agiBonus));
+        const newLuc = Math.floor(baseLuc * (1 + lucBonus));
         
         set({
           player: {
             ...player,
-            hp: player.maxHp,
-            mana: player.maxMana,
+            heroId,
+            name: hero.name,
+            maxHp: newMaxHp,
+            hp: Math.min(player.hp, newMaxHp),
+            attack: newAtk,
+            defense: newDef,
+            agility: newAgi,
+            luck: newLuc,
+          },
+        });
+      },
+      startGame: () => {
+        const { player, inventory, skills, battlePoints } = get();
+        
+        const levelBonus = getLevelBonus(player.level);
+        
+        const weaponObj = player.equippedWeapon;
+        const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty) : 0;
+        
+        const armorObj = player.equippedArmor;
+        const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
+        
+        const accessories = player.equippedAccessories || [];
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
+        
+        let newMaxHp = Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus);
+        let newAtk = Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus);
+        let newDef = Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus);
+        let newAgi = Math.ceil(initialPlayer.agility + levelBonus.agility + accessoryAgiBonus);
+        let newLuc = Math.ceil(initialPlayer.luck + levelBonus.luck + accessoryLucBonus);
+        
+        const warGems = accessories.filter(acc => acc.t1 === 41);
+        for (const gem of warGems) {
+          const _loc2_ = gem.t2 || 0;
+          newAtk += _loc2_;
+          newDef += _loc2_;
+          newAgi += _loc2_;
+        }
+        
+        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const _loc2_ = gem.t2 || 0;
+          newMaxHp += _loc2_;
+          newAtk += _loc2_;
+          newDef += _loc2_;
+          newAgi += _loc2_;
+        }
+        
+        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        for (const gem of braveGems) {
+          const _loc2_ = gem.t2 || 0;
+          newMaxHp += _loc2_;
+          newAtk += _loc2_;
+          newDef += _loc2_;
+          newAgi += _loc2_;
+          newLuc += _loc2_;
+        }
+        
+        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        for (const gem of playerGems) {
+          const gemLevel = gem.y || 0;
+          const _loc2_ = gemLevel + 1;
+          
+          let itemCount1 = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && eq.y >= 1 && eq.y <= 2) {
+              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
+                itemCount1 += item.quantity;
+              }
+            }
+          }
+          
+          let itemCount2 = 0;
+          if (itemCount1 > 1000) {
+            itemCount2 = itemCount1 - 1000;
+            itemCount1 = 1000;
+          }
+          
+          newMaxHp += itemCount1 * _loc2_;
+          newAtk += itemCount1 * _loc2_;
+          newDef += itemCount1 * _loc2_;
+          newAgi += itemCount1 * _loc2_;
+          newLuc += itemCount2 * (_loc2_ * 4);
+        }
+        
+        set({
+          player: {
+            ...player,
+            maxHp: newMaxHp,
+            hp: newMaxHp,
+            attack: newAtk,
+            defense: newDef,
+            agility: newAgi,
+            luck: newLuc,
+            maxMana: initialPlayer.maxMana + levelBonus.mana,
+            mana: initialPlayer.maxMana + levelBonus.mana,
           },
           inventory,
           skills,
@@ -1873,6 +2003,11 @@ export const useGameStore = create<GameStore>()(
           // Fix stPt
           if (typeof state.player.stPt !== 'number' || Number.isNaN(state.player.stPt)) {
             state.player.stPt = 0;
+          }
+
+          // Fix heroId
+          if (typeof state.player.heroId !== 'number') {
+            state.player.heroId = 0;
           }
 
           // Fix equipment

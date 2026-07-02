@@ -1,5 +1,6 @@
 import { useGameStore } from '@/stores/gameStore';
 import { SpriteIcon } from './SpriteIcon';
+import { CharacterSprite } from './CharacterSprite';
 
 export const BattleResult = () => {
   const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
@@ -26,7 +27,7 @@ export const BattleResult = () => {
       onClick={handleContinue}
     >
       <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4 sm:p-6">
-        <div className="text-center mb-4 sm:mb-6">
+        <div className="text-center mb-3 sm:mb-4">
           <h2 className="text-3xl sm:text-4xl font-black text-white mb-2">
             {battleResult.victory ? (
               <span className="text-green-400">胜利!</span>
@@ -34,18 +35,25 @@ export const BattleResult = () => {
               <span className="text-red-400">失败!</span>
             )}
           </h2>
+          <div className="flex justify-center">
+            {battleResult.victory ? (
+              <CharacterSprite animation="victory" size={80} />
+            ) : (
+              <CharacterSprite animation="dead" size={80} />
+            )}
+          </div>
         </div>
         
         {battleResult.victory ? (
-          <div className="space-y-4">
-            <div className="bg-[#1a0a2e] rounded-lg p-4">
+          <div className="space-y-3">
+            <div className="bg-[#1a0a2e] rounded-lg p-3">
               <div className="text-gray-400 text-sm mb-1">Money</div>
               <div className="text-2xl font-bold text-yellow-400">
                 {player.gold}G +{battleResult.goldReward}G
               </div>
             </div>
             
-            <div className="bg-[#1a0a2e] rounded-lg p-4">
+            <div className="bg-[#1a0a2e] rounded-lg p-3">
               <div className="text-gray-400 text-sm mb-1">EXP</div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-700 rounded-full h-4">
@@ -64,10 +72,10 @@ export const BattleResult = () => {
             </div>
             
             {battleResult.dropItem && (
-              <div className="bg-[#1a0a2e] rounded-lg p-4">
+              <div className="bg-[#1a0a2e] rounded-lg p-3">
                 <div className="text-gray-400 text-sm mb-2">装备</div>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#3a2a5e] rounded-lg flex items-center justify-center">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 bg-[#3a2a5e] rounded-lg flex items-center justify-center">
                     {battleResult.dropItem.x !== undefined && battleResult.dropItem.y !== undefined ? (
                       <SpriteIcon 
                         type={battleResult.dropItem.type === 'weapon' ? 'weapon' : 
@@ -75,14 +83,14 @@ export const BattleResult = () => {
                                battleResult.dropItem.type === 'soul' ? 'soul' : 'accessory'}
                         x={battleResult.dropItem.x} 
                         y={battleResult.dropItem.y} 
-                        size="large" 
+                        size="medium" 
                       />
                     ) : (
-                      <span className="text-2xl">{battleResult.dropItem.icon}</span>
+                      <span className="text-xl">{battleResult.dropItem.icon}</span>
                     )}
                   </div>
-                  <div>
-                    <div className="text-xl font-bold text-purple-400">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-400">
                       {battleResult.dropItem.name}
                     </div>
                     <div className="text-xs text-gray-400">
@@ -94,8 +102,8 @@ export const BattleResult = () => {
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="bg-[#1a0a2e] rounded-lg p-4">
+          <div className="space-y-3">
+            <div className="bg-[#1a0a2e] rounded-lg p-3">
               <div className="text-gray-400 text-sm mb-1">惩罚</div>
               <div className="text-2xl font-bold text-red-400">
                 BATTLE POINT -{Math.abs(battleResult.battlePointsChange || 0)}
@@ -106,15 +114,20 @@ export const BattleResult = () => {
             </div>
             
             {isGameOver && (
-              <div className="bg-red-900/50 rounded-lg p-4 border border-red-500">
+              <div className="bg-red-900/50 rounded-lg p-3 border border-red-500">
                 <div className="text-red-400 font-bold text-lg">游戏结束!</div>
                 <div className="text-gray-400 text-sm mt-1">即将返回标题页面...</div>
               </div>
             )}
+            
+            <div className="bg-[#1a0a2e]/50 rounded-lg p-3 text-center">
+              <div className="text-gray-400 text-sm">再接再厉!</div>
+              <div className="text-gray-500 text-xs mt-1">提升属性后再战吧</div>
+            </div>
           </div>
         )}
         
-        <div className="text-center text-gray-500 text-sm mt-6">
+        <div className="text-center text-gray-500 text-sm mt-4">
           点击画面打开回到地图
         </div>
       </div>
