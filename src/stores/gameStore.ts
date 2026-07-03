@@ -49,6 +49,7 @@ interface GameStore {
   autoAllocateEnabled: boolean;
   bonus: BonusState;
   currentMap: number;
+  purchaseCounts: Record<string, number>;
   setPlayer: (player: Player) => void;
   updatePlayerHp: (amount: number) => void;
   updatePlayerMana: (amount: number) => void;
@@ -386,6 +387,7 @@ export const useGameStore = create<GameStore>()(
         currentBonus: null,
       },
       currentMap: 1,
+      purchaseCounts: storedData?.purchaseCounts || {},
       setPlayer: (player) => set({ player }),
       updatePlayerHp: (amount) => {
         const { player, battle } = get();
@@ -803,20 +805,28 @@ export const useGameStore = create<GameStore>()(
         }
       },
       buyEquipment: (equipmentId) => {
-        const { player, inventory, addToInventory } = get();
+        const { player, inventory, addToInventory, purchaseCounts } = get();
         const equipment = getEquipmentById(equipmentId);
         if (!equipment) return false;
         
         // 检查价格
         if (equipment.price <= 0) return false;
-        if (player.gold < equipment.price) return false;
+        
+        // 计算当前价格（每次购买+10%）
+        const purchasedTimes = purchaseCounts[equipmentId] || 0;
+        const currentPrice = Math.ceil(equipment.price * (1 + purchasedTimes * 0.1));
+        
+        if (player.gold < currentPrice) return false;
         
         // 检查是否已达上限
         const existing = inventory.find(i => i.equipmentId === equipmentId);
         if (existing && existing.quantity >= equipment.maxQuantity) return false;
         
-        // 扣钱 & 加入背包
-        set({ player: { ...player, gold: player.gold - equipment.price } });
+        // 扣钱 & 加入背包 & 增加购买次数
+        set({ 
+          player: { ...player, gold: player.gold - currentPrice },
+          purchaseCounts: { ...purchaseCounts, [equipmentId]: purchasedTimes + 1 },
+        });
         addToInventory(equipmentId, 1);
         return true;
       },
@@ -2457,6 +2467,7 @@ export const useGameStore = create<GameStore>()(
         autoAllocateEnabled: state.autoAllocateEnabled,
         kyarakutalv: state.kyarakutalv,
         kyarakutaKozinExp: state.kyarakutaKozinExp,
+        purchaseCounts: state.purchaseCounts,
       }),
     }
   )

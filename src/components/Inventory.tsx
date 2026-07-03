@@ -21,6 +21,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const inventory = useGameStore(state => state.inventory);
   const equipItem = useGameStore(state => state.equipItem);
   const buyEquipment = useGameStore(state => state.buyEquipment);
+  const purchaseCounts = useGameStore(state => state.purchaseCounts);
   const unlockAccessorySlot = useGameStore(state => state.unlockAccessorySlot);
   const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [showGoldError, setShowGoldError] = useState(false);
@@ -112,6 +113,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       setShowGoldError(true);
       setTimeout(() => setShowGoldError(false), 2000);
     }
+  };
+
+  const getCurrentPrice = (equipment: typeof equipmentData[0]) => {
+    const count = purchaseCounts[equipment.id] || 0;
+    return Math.ceil(equipment.price * (1 + count * 0.1));
   };
 
   const getFullWeaponList = () => {
@@ -263,7 +269,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={() => handleBuy(weapon.id)}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {weapon.price.toLocaleString()}G
+                        购买 {getCurrentPrice(weapon).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -362,7 +368,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={() => handleBuy(armor.id)}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {armor.price.toLocaleString()}G
+                        购买 {getCurrentPrice(armor).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -505,7 +511,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={() => handleBuy(accessory.id)}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {accessory.price.toLocaleString()}G
+                        购买 {getCurrentPrice(accessory).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -602,7 +608,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={() => handleBuy(soul.id)}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {soul.price.toLocaleString()}G
+                        购买 {getCurrentPrice(soul).toLocaleString()}G
                       </button>
                     ) : (
                       <div className="text-xs text-gray-400">无法购买</div>
@@ -686,7 +692,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       onClick={() => handleBuy(material.id)}
                       className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                     >
-                      购买 {material.price.toLocaleString()}G
+                      购买 {getCurrentPrice(material).toLocaleString()}G
                     </button>
                   )}
                   {!isOwned && material.price <= 0 && (
