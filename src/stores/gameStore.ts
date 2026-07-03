@@ -92,7 +92,7 @@ interface GameStore {
   /** 传送到指定地图 */
   teleportToMap: (mapId: number) => void;
   /** 解锁饰品栏位 */
-  unlockAccessorySlot: () => boolean;
+  unlockAccessorySlot: (slotIndex?: number) => boolean;
   /** 检查装备饰品数量是否超过库存，超过则清空对应栏位 */
   checkZeroEquips: () => void;
   /** 分配属性点 */

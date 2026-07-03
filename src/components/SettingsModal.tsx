@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { getCacheSize, formatCacheSize, clearCache } from '@/utils/imageCache';
+import { ChangelogModal } from './ChangelogModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [editingPreset, setEditingPreset] = useState<number>(0);
   const [cacheSize, setCacheSize] = useState<string>('0 B');
   const [showConfirmClear, setShowConfirmClear] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
@@ -308,6 +310,18 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <div className="text-xs text-gray-400 px-2 mt-2">清除后下次加载图片会重新下载</div>
             </div>
 
+            <div className="border-t border-[#4a2c7a] pt-3 mt-3">
+              <div className="text-gray-300 text-sm mb-2">关于游戏</div>
+              
+              <button
+                onClick={() => setShowChangelog(true)}
+                className="w-full bg-[#4a3c7a] text-white font-bold py-3 rounded-lg hover:bg-[#5a4c8a] transition-colors"
+              >
+                更新日志
+              </button>
+              <div className="text-xs text-gray-400 px-2 mb-2">查看游戏版本更新记录</div>
+            </div>
+
             <button
               onClick={onClose}
               className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
@@ -322,6 +336,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
           {importMsg}
         </div>
+      )}
+
+      {showChangelog && (
+        <ChangelogModal onClose={() => setShowChangelog(false)} />
       )}
     </div>
   );
