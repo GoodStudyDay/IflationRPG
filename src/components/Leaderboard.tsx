@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '@/stores/gameStore';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 interface LeaderboardRow {
   id: string;
@@ -51,6 +51,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from('leaderboard')
         .select('*')
@@ -98,6 +99,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
     
     setLoading(true);
     try {
+      const supabase = getSupabase();
       const { data: existing, error: fetchError } = await supabase
         .from('leaderboard')
         .select('*')
