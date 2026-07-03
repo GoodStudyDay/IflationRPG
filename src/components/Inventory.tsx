@@ -105,54 +105,49 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     setShowUnlockConfirm(false);
   };
 
-  const getInventoryWeapons = () => {
-    return inventory
-      .filter(item => item.equipmentId.startsWith('weapon-'))
-      .map(item => ({
-        ...equipmentData.find(e => e.id === item.equipmentId)!,
-        quantity: item.quantity
-      }))
-      .filter(e => e.name);
+  const getFullWeaponList = () => {
+    return equipmentData
+      .filter(e => e.type === 'weapon')
+      .map(e => {
+        const invItem = inventory.find(item => item.equipmentId === e.id);
+        return { ...e, quantity: invItem?.quantity || 0 };
+      });
   };
 
-  const getInventoryAccessories = () => {
-    return inventory
-      .filter(item => item.equipmentId.startsWith('accessory-'))
-      .map(item => ({
-        ...equipmentData.find(e => e.id === item.equipmentId)!,
-        quantity: item.quantity
-      }))
-      .filter(e => e.name);
+  const getFullArmorList = () => {
+    return equipmentData
+      .filter(e => e.type === 'armor')
+      .map(e => {
+        const invItem = inventory.find(item => item.equipmentId === e.id);
+        return { ...e, quantity: invItem?.quantity || 0 };
+      });
   };
 
-  const getInventoryArmors = () => {
-    return inventory
-      .filter(item => item.equipmentId.startsWith('armor-'))
-      .map(item => ({
-        ...equipmentData.find(e => e.id === item.equipmentId)!,
-        quantity: item.quantity
-      }))
-      .filter(e => e.name);
+  const getFullAccessoryList = () => {
+    return equipmentData
+      .filter(e => e.type === 'accessory')
+      .map(e => {
+        const invItem = inventory.find(item => item.equipmentId === e.id);
+        return { ...e, quantity: invItem?.quantity || 0 };
+      });
   };
 
-  const getInventorySouls = () => {
-    return inventory
-      .filter(item => item.equipmentId.startsWith('soul-'))
-      .map(item => ({
-        ...equipmentData.find(e => e.id === item.equipmentId)!,
-        quantity: item.quantity
-      }))
-      .filter(e => e.name);
+  const getFullSoulList = () => {
+    return equipmentData
+      .filter(e => e.type === 'soul')
+      .map(e => {
+        const invItem = inventory.find(item => item.equipmentId === e.id);
+        return { ...e, quantity: invItem?.quantity || 0 };
+      });
   };
 
-  const getInventoryMaterials = () => {
-    return inventory
-      .filter(item => item.equipmentId.startsWith('material-'))
-      .map(item => ({
-        ...equipmentData.find(e => e.id === item.equipmentId)!,
-        quantity: item.quantity
-      }))
-      .filter(e => e.name);
+  const getFullMaterialList = () => {
+    return equipmentData
+      .filter(e => e.type === 'material')
+      .map(e => {
+        const invItem = inventory.find(item => item.equipmentId === e.id);
+        return { ...e, quantity: invItem?.quantity || 0 };
+      });
   };
 
   const handleEquip = (equipment: typeof equipmentData[0]) => {
@@ -176,7 +171,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   };
 
   const renderWeaponList = () => {
-    const weapons = getInventoryWeapons();
+    const weapons = getFullWeaponList();
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
@@ -191,40 +186,21 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {player.equippedWeapon && (() => {
-            const eqWpn = weapons.find(w => w.id === player.equippedWeapon?.id);
-            const qty = eqWpn?.quantity || 1;
-            const stockMult = getStockBonus(qty);
+          {weapons.map(weapon => {
+            const isEquipped = player.equippedWeapon?.id === weapon.id;
+            const isOwned = weapon.quantity > 0;
+            const stockMult = getStockBonus(weapon.quantity);
+            
             return (
-            <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="large" />
-                  </div>
-                <div className="flex-1">
-                  <div className="text-white font-bold">
-                    {player.equippedWeapon.name}
-                  </div>
-                  <div className="text-green-300 text-sm mt-1">当前装备</div>
-                  <div className="text-red-300 text-xs mt-1">
-                    ATK +{Math.floor(player.equippedWeapon.attackBonus * stockMult)}（x{qty}件）
-                  </div>
-                  <div className="text-gray-300 text-xs">倍率: {Math.floor(player.equippedWeapon.attributeRate * stockMult)}%</div>
-                </div>
-              </div>
-            </div>
-            );
-          })()}
-
-          {weapons.filter(w => w.id !== player.equippedWeapon?.id).length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无其他武器</div>
-          ) : (
-            weapons.filter(w => w.id !== player.equippedWeapon?.id).map(weapon => {
-              const stockMult = getStockBonus(weapon.quantity);
-              return (
               <div 
                 key={weapon.id}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+                className={`rounded-lg p-3 ${
+                  isEquipped 
+                    ? 'bg-[#7a9ac7] border-2 border-[#4a6fa5]' 
+                    : isOwned 
+                      ? 'bg-[#6a8ac5] border-2 border-[#4a6fa5]'
+                      : 'bg-[#4a5a75] border-2 border-[#3a4a65] opacity-60'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
@@ -232,26 +208,37 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{weapon.name}</div>
-                    <div className="text-red-300 text-sm mt-1">ATK +{Math.floor(weapon.attackBonus * stockMult)}</div>
-                    <div className="text-gray-300 text-xs mt-0.5">
-                      数量: {weapon.quantity}
-                      {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
-                    </div>
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
+                    {!isOwned && <div className="text-gray-400 text-sm mt-1">未拥有</div>}
+                    {isOwned && (
+                      <>
+                        <div className="text-red-300 text-sm mt-1">ATK +{Math.floor(weapon.attackBonus * stockMult)}</div>
+                        <div className="text-gray-300 text-xs mt-0.5">
+                          数量: {weapon.quantity}
+                          {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">倍率: {Math.floor(weapon.attributeRate * stockMult)}%</div>
-                    <button
-                      onClick={() => handleEquip(weapon)}
-                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
-                    >
-                      装备
-                    </button>
+                    {isOwned && (
+                      <>
+                        <div className="text-xs text-gray-400">倍率: {Math.floor(weapon.attributeRate * stockMult)}%</div>
+                        {!isEquipped && (
+                          <button
+                            onClick={() => handleEquip(weapon)}
+                            className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                          >
+                            装备
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-              );
-            }))
-          }
+            );
+          })}
         </div>
 
         <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
@@ -267,7 +254,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   };
 
   const renderArmorList = () => {
-    const armors = getInventoryArmors();
+    const armors = getFullArmorList();
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
@@ -282,41 +269,21 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {player.equippedArmor && (() => {
-            const eqArm = armors.find(a => a.id === player.equippedArmor?.id);
-            const qty = eqArm?.quantity || 1;
-            const stockMult = getStockBonus(qty);
+          {armors.map(armor => {
+            const isEquipped = player.equippedArmor?.id === armor.id;
+            const isOwned = armor.quantity > 0;
+            const stockMult = getStockBonus(armor.quantity);
+            
             return (
-            <div className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="large" />
-                  </div>
-                <div className="flex-1">
-                  <div className="text-white font-bold">{player.equippedArmor.name}</div>
-                  <div className="text-green-300 text-sm mt-1">当前装备</div>
-                  <div className="text-blue-300 text-xs mt-1">
-                    DEF +{Math.floor(player.equippedArmor.defenseBonus * stockMult)}（x{qty}件）
-                  </div>
-                  {player.equippedArmor.hpBonus > 0 && (
-                    <div className="text-green-300 text-xs">HP +{Math.floor(player.equippedArmor.hpBonus * stockMult)}</div>
-                  )}
-                  <div className="text-gray-300 text-xs">倍率: {Math.floor(player.equippedArmor.attributeRate * stockMult)}%</div>
-                </div>
-              </div>
-            </div>
-            );
-          })()}
-
-          {armors.filter(a => a.id !== player.equippedArmor?.id).length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无其他防具</div>
-          ) : (
-            armors.filter(a => a.id !== player.equippedArmor?.id).map(armor => {
-              const stockMult = getStockBonus(armor.quantity);
-              return (
               <div 
                 key={armor.id}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+                className={`rounded-lg p-3 ${
+                  isEquipped 
+                    ? 'bg-[#7a9ac7] border-2 border-[#4a6fa5]' 
+                    : isOwned 
+                      ? 'bg-[#6a8ac5] border-2 border-[#4a6fa5]'
+                      : 'bg-[#4a5a75] border-2 border-[#3a4a65] opacity-60'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
@@ -324,29 +291,40 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{armor.name}</div>
-                    <div className="text-blue-300 text-sm mt-1">DEF +{Math.floor(armor.defenseBonus * stockMult)}</div>
-                    {armor.hpBonus > 0 && (
-                      <div className="text-green-300 text-xs">HP +{Math.floor(armor.hpBonus * stockMult)}</div>
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
+                    {!isOwned && <div className="text-gray-400 text-sm mt-1">未拥有</div>}
+                    {isOwned && (
+                      <>
+                        <div className="text-blue-300 text-sm mt-1">DEF +{Math.floor(armor.defenseBonus * stockMult)}</div>
+                        {armor.hpBonus > 0 && (
+                          <div className="text-green-300 text-xs">HP +{Math.floor(armor.hpBonus * stockMult)}</div>
+                        )}
+                        <div className="text-gray-300 text-xs mt-0.5">
+                          数量: {armor.quantity}
+                          {armor.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(armor.quantity - 1) * 10}%)</span>}
+                        </div>
+                      </>
                     )}
-                    <div className="text-gray-300 text-xs mt-0.5">
-                      数量: {armor.quantity}
-                      {armor.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(armor.quantity - 1) * 10}%)</span>}
-                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">倍率: {Math.floor(armor.attributeRate * stockMult)}%</div>
-                    <button
-                      onClick={() => handleEquip(armor)}
-                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
-                    >
-                      装备
-                    </button>
+                    {isOwned && (
+                      <>
+                        <div className="text-xs text-gray-400">倍率: {Math.floor(armor.attributeRate * stockMult)}%</div>
+                        {!isEquipped && (
+                          <button
+                            onClick={() => handleEquip(armor)}
+                            className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                          >
+                            装备
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-              );
-            }))
-          }
+            );
+          })}
         </div>
 
         <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
@@ -362,7 +340,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   };
 
   const renderAccessoryList = () => {
-    const accessories = getInventoryAccessories();
+    const accessories = getFullAccessoryList();
     const equippedAccs = player.equippedAccessories || [];
     
     const getAvailableQuantity = (accessoryId: string, inventoryQty: number): number => {
@@ -377,13 +355,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       return inventoryQty - equippedCount;
     };
     
-    const availableAccessories = accessories
-      .map(acc => ({
-        ...acc,
-        availableQty: getAvailableQuantity(acc.id, acc.quantity)
-      }))
-      .filter(acc => acc.availableQty > 0);
-    
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
@@ -397,91 +368,68 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {equippedAccs.length > 0 && (() => {
-            const uniqueEquipped = [...new Map(equippedAccs.map(acc => [acc.id, acc])).values()];
-            return uniqueEquipped.map(equippedAcc => {
-              return (
-                <div key={equippedAcc.id} className="bg-[#7a9ac7] border-2 border-[#4a6fa5] rounded-lg p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={equippedAcc.x} y={equippedAcc.y} size="large" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-bold">{equippedAcc.name}</div>
-                      <div className="text-green-300 text-sm mt-1">当前装备</div>
-                      <div className="flex gap-1 mt-1">
-                        {equippedAcc.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{equippedAcc.hpBonus}</span>
-                        )}
-                        {equippedAcc.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{equippedAcc.attackBonus}</span>
-                        )}
-                        {equippedAcc.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{equippedAcc.defenseBonus}</span>
-                        )}
-                        {equippedAcc.agilityBonus > 0 && (
-                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{equippedAcc.agilityBonus}</span>
-                        )}
-                        {equippedAcc.luckBonus > 0 && (
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{equippedAcc.luckBonus}</span>
-                        )}
-                      </div>
-                    </div>
+          {accessories.map(accessory => {
+            const isEquipped = equippedAccs.some(acc => acc.id === accessory.id);
+            const isOwned = accessory.quantity > 0;
+            const availableQty = getAvailableQuantity(accessory.id, accessory.quantity);
+            
+            return (
+              <div 
+                key={accessory.id}
+                className={`rounded-lg p-3 ${
+                  isEquipped 
+                    ? 'bg-[#7a9ac7] border-2 border-[#4a6fa5]' 
+                    : isOwned 
+                      ? 'bg-[#6a8ac5] border-2 border-[#4a6fa5]'
+                      : 'bg-[#4a5a75] border-2 border-[#3a4a65] opacity-60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
                   </div>
-                </div>
-              );
-            });
-          })()}
-
-          {availableAccessories.length === 0 && equippedAccs.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无可装备的饰品</div>
-          ) : availableAccessories.length === 0 ? (
-            <div className="text-center text-gray-400 py-4">暂无其他饰品</div>
-          ) : (
-            availableAccessories.map(accessory => {
-              return (
-                <div 
-                  key={accessory.id}
-                  className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-bold">{accessory.name}</div>
-                      {accessory.description && (
-                        <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
-                      )}
-                      <div className="flex gap-1 mt-1 flex-wrap">
-                        {accessory.hpBonus > 0 && (
-                          <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
+                  <div className="flex-1">
+                    <div className="text-white font-bold">{accessory.name}</div>
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
+                    {!isOwned && <div className="text-gray-400 text-sm mt-1">未拥有</div>}
+                    {isOwned && (
+                      <>
+                        {accessory.description && (
+                          <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
                         )}
-                        {accessory.attackBonus > 0 && (
-                          <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                        )}
-                        {accessory.defenseBonus > 0 && (
-                          <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                        )}
-                        {accessory.agilityBonus > 0 && (
-                          <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{accessory.agilityBonus}</span>
-                        )}
-                        {accessory.luckBonus > 0 && (
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
-                        )}
-                      </div>
-                    </div>
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          {accessory.hpBonus > 0 && (
+                            <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
+                          )}
+                          {accessory.attackBonus > 0 && (
+                            <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
+                          )}
+                          {accessory.defenseBonus > 0 && (
+                            <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
+                          )}
+                          {accessory.agilityBonus > 0 && (
+                            <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{accessory.agilityBonus}</span>
+                          )}
+                          {accessory.luckBonus > 0 && (
+                            <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
+                          )}
+                        </div>
+                        <div className="text-gray-300 text-xs mt-0.5">数量: {accessory.quantity}</div>
+                      </>
+                    )}
+                  </div>
+                  {isOwned && availableQty > 0 && !isEquipped && (
                     <button
                       onClick={() => handleEquip(accessory)}
                       className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                     >
                       装备
                     </button>
-                  </div>
+                  )}
                 </div>
-              );
-            })
-          )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
@@ -497,7 +445,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   };
 
   const renderSoulList = () => {
-    const souls = getInventorySouls();
+    const souls = getFullSoulList();
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
@@ -512,13 +460,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {souls.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无魂</div>
-          ) : (
-            souls.map(soul => (
+          {souls.map(soul => {
+            const isOwned = soul.quantity > 0;
+            
+            return (
               <div 
                 key={soul.id}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+                className={`rounded-lg p-3 ${
+                  isOwned 
+                    ? 'bg-[#6a8ac5] border-2 border-[#4a6fa5]'
+                    : 'bg-[#4a5a75] border-2 border-[#3a4a65] opacity-60'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
@@ -526,28 +478,35 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{soul.name}</div>
-                    {soul.setumei && (
-                      <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
+                    {!isOwned && <div className="text-gray-400 text-sm mt-1">未拥有</div>}
+                    {isOwned && (
+                      <>
+                        {soul.setumei && (
+                          <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
+                        )}
+                        <div className="flex gap-1 mt-1">
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
+                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
+                        </div>
+                        <div className="text-gray-300 text-xs mt-0.5">数量: {soul.quantity}</div>
+                      </>
                     )}
-                    <div className="flex gap-1 mt-1">
-                      <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
-                      <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
+                  </div>
+                  {isOwned && (
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="text-xs text-gray-400">属性倍率: {soul.attributeRate}%</div>
+                      <button
+                        onClick={() => handleEquip(soul)}
+                        className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
+                      >
+                        安装
+                      </button>
                     </div>
-                    <div className="text-gray-300 text-xs mt-0.5">数量: {soul.quantity}</div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="text-xs text-gray-400">属性倍率: {soul.attributeRate}%</div>
-                    <button
-                      onClick={() => handleEquip(soul)}
-                      className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
-                    >
-                      安装
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
         <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
@@ -563,7 +522,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   };
 
   const renderMaterialList = () => {
-    const materials = getInventoryMaterials();
+    const materials = getFullMaterialList();
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
@@ -578,13 +537,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {materials.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">暂无材料</div>
-          ) : (
-            materials.map(material => (
+          {materials.map(material => {
+            const isOwned = material.quantity > 0;
+            
+            return (
               <div 
                 key={material.id}
-                className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3"
+                className={`rounded-lg p-3 ${
+                  isOwned 
+                    ? 'bg-[#6a8ac5] border-2 border-[#4a6fa5]'
+                    : 'bg-[#4a5a75] border-2 border-[#3a4a65] opacity-60'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
@@ -596,15 +559,20 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{material.name}</div>
-                    {material.setumei && (
-                      <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
+                    {!isOwned && <div className="text-gray-400 text-sm mt-1">未拥有</div>}
+                    {isOwned && (
+                      <>
+                        {material.setumei && (
+                          <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
+                        )}
+                        <div className="text-gray-300 text-xs mt-0.5">数量: {material.quantity}</div>
+                      </>
                     )}
-                    <div className="text-gray-300 text-xs mt-0.5">数量: {material.quantity}</div>
                   </div>
                 </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
         <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
