@@ -1,29 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '@/stores/gameStore';
+import { supabase } from '@/lib/supabase';
 
-interface LeaderboardEntry {
+interface LeaderboardRow {
+  id: string;
+  user_id: string;
+  display_name: string;
+  score: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LeaderboardDisplayEntry {
   rank: number;
   playerName: string;
-  maxLevel: number;
-  maxAttack: number;
-  maxCombo: number;
+  score: number;
   date: string;
 }
 
-const LEADERBOARD_KEY = 'inflation-rpg-leaderboard';
+const STORAGE_KEY = 'inflation-rpg-user-id';
 
-const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, playerName: '勇者王', maxLevel: 9999, maxAttack: 99999999, maxCombo: 9999, date: '2024-01-15' },
-  { rank: 2, playerName: '传说战士', maxLevel: 8888, maxAttack: 88888888, maxCombo: 8888, date: '2024-01-14' },
-  { rank: 3, playerName: '暗黑骑士', maxLevel: 7777, maxAttack: 77777777, maxCombo: 7777, date: '2024-01-13' },
-  { rank: 4, playerName: '圣光法师', maxLevel: 6666, maxAttack: 66666666, maxCombo: 6666, date: '2024-01-12' },
-  { rank: 5, playerName: '暗影刺客', maxLevel: 5555, maxAttack: 55555555, maxCombo: 5555, date: '2024-01-11' },
-  { rank: 6, playerName: '元素大师', maxLevel: 4444, maxAttack: 44444444, maxCombo: 4444, date: '2024-01-10' },
-  { rank: 7, playerName: '战神', maxLevel: 3333, maxAttack: 33333333, maxCombo: 3333, date: '2024-01-09' },
-  { rank: 8, playerName: '守护者', maxLevel: 2222, maxAttack: 22222222, maxCombo: 2222, date: '2024-01-08' },
-  { rank: 9, playerName: '冒险者', maxLevel: 1111, maxAttack: 11111111, maxCombo: 1111, date: '2024-01-07' },
-  { rank: 10, playerName: '新手村村民', maxLevel: 100, maxAttack: 100000, maxCombo: 100, date: '2024-01-06' },
-];
+function getUserOrCreateName(): string | null {
+  const stored = localStorage.getItem('inflation-rpg-player-name');
+  return stored || null;
+}
+
+function getOrCreateUserId(): string {
+  let userId = localStorage.getItem(STORAGE_KEY);
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem(STORAGE_KEY, userId);
+  }
+  return userId;
+}
 
 interface LeaderboardProps {
   isOpen: boolean;
@@ -31,78 +40,106 @@ interface LeaderboardProps {
 }
 
 export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
-  const { player, Highlv, HighCombo } = useGameStore();
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const { Highlv } = useGameStore();
+  const [leaderboard, setLeaderboard] = useState<LeaderboardDisplayEntry[]>([]);
   const [playerName, setPlayerName] = useState('');
   const [showNameInput, setShowNameInput] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [playerRank, setPlayerRank] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadLeaderboard = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('leaderboard')
+        .select('*')
+        .order('score', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      const entries: LeaderboardDisplayEntry[] = (data || []).map((row: LeaderboardRow, index: number) => ({
+        rank: index + 1,
+        playerName: row.display_name,
+        score: row.score,
+        date: row.updated_at ? new Date(row.updated_at).toISOString().split('T')[0] : '',
+      }));
+
+      setLeaderboard(entries);
+
+      const existingName = getUserOrCreateName();
+      if (existingName) {
+        const rank = entries.findIndex(e => e.playerName === existingName);
+        setPlayerRank(rank >= 0 ? rank + 1 : null);
+      }
+    } catch (err) {
+      console.error('Failed to load leaderboard:', err);
+      setLeaderboard([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       loadLeaderboard();
     }
-  }, [isOpen]);
+  }, [isOpen, loadLeaderboard]);
 
-  const loadLeaderboard = () => {
-    try {
-      const stored = localStorage.getItem(LEADERBOARD_KEY);
-      if (stored) {
-        setLeaderboard(JSON.parse(stored));
-      } else {
-        setLeaderboard(MOCK_LEADERBOARD);
-        localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(MOCK_LEADERBOARD));
-      }
-    } catch {
-      setLeaderboard(MOCK_LEADERBOARD);
-    }
-    checkPlayerRank();
-  };
-
-  const checkPlayerRank = () => {
-    const existingEntry = leaderboard.find(e => e.playerName === playerName || e.playerName === '匿名玩家');
-    if (existingEntry) {
-      setPlayerRank(existingEntry.rank);
-    } else {
-      const rank = leaderboard.findIndex(e => Highlv > e.maxLevel) + 1 || leaderboard.length + 1;
-      setPlayerRank(rank);
-    }
-  };
-
-  const submitScore = () => {
+  const submitScore = async () => {
     if (!playerName.trim()) {
       alert('请输入玩家名称');
       return;
     }
 
-    const newEntry: LeaderboardEntry = {
-      rank: 0,
-      playerName: playerName.trim(),
-      maxLevel: Highlv,
-      maxAttack: player.attack,
-      maxCombo: HighCombo,
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    const newLeaderboard = [...leaderboard, newEntry]
-      .sort((a, b) => b.maxLevel - a.maxLevel)
-      .slice(0, 50)
-      .map((e, i) => ({ ...e, rank: i + 1 }));
-
-    setLeaderboard(newLeaderboard);
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(newLeaderboard));
-    setShowNameInput(false);
-    setSubmitted(true);
-    checkPlayerRank();
-
+    const userId = getOrCreateUserId();
+    const name = playerName.trim();
+    
+    setLoading(true);
     try {
-      fetch('https://api.example.com/leaderboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry),
-      });
-    } catch {
-      console.log('Skipping remote leaderboard sync');
+      const { data: existing, error: fetchError } = await supabase
+        .from('leaderboard')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existing) {
+        if (Highlv > existing.score) {
+          const { error: updateError } = await supabase
+            .from('leaderboard')
+            .update({
+              display_name: name,
+              score: Highlv,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId);
+
+          if (updateError) throw updateError;
+        }
+      } else {
+        const { error: insertError } = await supabase
+          .from('leaderboard')
+          .insert({
+            user_id: userId,
+            display_name: name,
+            score: Highlv,
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      localStorage.setItem('inflation-rpg-player-name', name);
+      setShowNameInput(false);
+      setSubmitted(true);
+      await loadLeaderboard();
+    } catch (err) {
+      console.error('Failed to submit score:', err);
+      alert('提交失败，请稍后再试');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,7 +152,13 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
           <div className="text-game-secondary font-bold text-lg text-center">🏆 排行榜</div>
         </div>
 
-        {showNameInput ? (
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-400 text-sm">加载中...</div>
+          </div>
+        )}
+
+        {!loading && showNameInput ? (
           <div className="p-4">
             <div className="text-white text-sm mb-3 text-center">输入你的玩家名称</div>
             <input
@@ -142,7 +185,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
               </button>
             </div>
           </div>
-        ) : (
+        ) : !loading ? (
           <div className="p-4 overflow-y-auto max-h-[60vh]">
             <div className="flex items-center justify-between mb-3">
               <div className="text-gray-300 text-sm">
@@ -167,49 +210,45 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
               </div>
             )}
 
-            <div className="space-y-1">
-              {leaderboard.map((entry, index) => (
-                <div
-                  key={entry.rank}
-                  className={`flex items-center justify-between p-2 rounded-lg ${
-                    index < 3
-                      ? entry.rank === 1
-                        ? 'bg-[#4a3c2a]'
-                        : entry.rank === 2
-                        ? 'bg-[#4a4a4a]'
-                        : 'bg-[#4a3a2a]'
-                      : 'bg-[#1a0a2e]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      entry.rank === 1 ? 'bg-yellow-500 text-black' :
-                      entry.rank === 2 ? 'bg-gray-400 text-black' :
-                      entry.rank === 3 ? 'bg-amber-600 text-white' :
-                      'bg-[#3d2b6e] text-white'
-                    }`}>
-                      {entry.rank}
+            {leaderboard.length === 0 ? (
+              <div className="text-center text-gray-400 py-8">暂无排行数据</div>
+            ) : (
+              <div className="space-y-1">
+                {leaderboard.map((entry, index) => (
+                  <div
+                    key={entry.rank}
+                    className={`flex items-center justify-between p-2 rounded-lg ${
+                      index < 3
+                        ? entry.rank === 1
+                          ? 'bg-[#4a3c2a]'
+                          : entry.rank === 2
+                          ? 'bg-[#4a4a4a]'
+                          : 'bg-[#4a3a2a]'
+                        : 'bg-[#1a0a2e]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        entry.rank === 1 ? 'bg-yellow-500 text-black' :
+                        entry.rank === 2 ? 'bg-gray-400 text-black' :
+                        entry.rank === 3 ? 'bg-amber-600 text-white' :
+                        'bg-[#3d2b6e] text-white'
+                      }`}>
+                        {entry.rank}
+                      </div>
+                      <div className="text-white text-sm font-medium truncate max-w-[120px]">
+                        {entry.playerName}
+                      </div>
                     </div>
-                    <div className="text-white text-sm font-medium truncate max-w-[120px]">
-                      {entry.playerName}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs">
-                    <div className="text-green-400">
-                      LV.{entry.maxLevel.toLocaleString()}
-                    </div>
-                    <div className="text-red-400">
-                      ATK.{entry.maxAttack.toLocaleString()}
-                    </div>
-                    <div className="text-blue-400">
-                      {entry.maxCombo}连击
+                    <div className="text-green-400 text-xs">
+                      LV.{entry.score.toLocaleString()}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        ) : null}
 
         <div className="bg-[#1a0a2e] border-t-2 border-[#5a3c8a] px-4 py-3">
           <button
