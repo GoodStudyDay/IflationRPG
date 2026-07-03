@@ -411,6 +411,10 @@ export const useGameStore = create<GameStore>()(
           isCrit: false,
           isCombo: false,
           lastAttacker: null,
+          _loopTurn: 0,
+          _loopMode: 3,
+          _loopTick: 0,
+          _loopComboCount: 1,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -1214,7 +1218,7 @@ export const useGameStore = create<GameStore>()(
           battle: {
             enemy: null,
             status: 'idle',
-            battleLog: [],
+            battleLog: [] as string[],
             comboCount: 0,
             comboRate: 5,
             critRate: 5,
@@ -1237,6 +1241,10 @@ export const useGameStore = create<GameStore>()(
             isCrit: false,
             isCombo: false,
             lastAttacker: null,
+            _loopTurn: 0,
+            _loopMode: 3,
+            _loopTick: 0,
+            _loopComboCount: 1,
           },
         });
         get().checkZeroEquips();
@@ -1408,10 +1416,14 @@ export const useGameStore = create<GameStore>()(
             isCrit: false,
             isCombo: false,
             lastAttacker: null,
+            _loopTurn: 0,
+            _loopMode: 3,
+            _loopTick: 0,
+            _loopComboCount: 1,
           },
         });
       },
-      startBossBattle: (bossId) => {
+      startBossBattle: (bossId: number) => {
         const { player, battlePoints, inventory, Highlv, dropNum, defeatedBosses } = get();
         
         if (battlePoints <= 0) {
@@ -1526,6 +1538,10 @@ export const useGameStore = create<GameStore>()(
             isCrit: false,
             isCombo: false,
             lastAttacker: null,
+            _loopTurn: 0,
+            _loopMode: 3,
+            _loopTick: 0,
+            _loopComboCount: 1,
           },
         });
       },
@@ -1704,12 +1720,13 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
-        let mode = 3;
-        let eefi = 0;
+        // Restore loop state from persisted store (survives pause/resume)
+        let mode = battle._loopMode;
+        let eefi = battle._loopTick;
+        let renzokukaisu = battle._loopComboCount;
+        let whichTurn = battle._loopTurn;
         let isProcessing = false;
         let tdame = 0;
-        let renzokukaisu = 1;
-        let whichTurn = 0;
         let battleEnded = false;
         
         const interval = window.setInterval(() => {
@@ -1926,6 +1943,17 @@ export const useGameStore = create<GameStore>()(
               mode = 3;
             }
           }
+          
+          // Persist loop state so it survives pause/resume
+          set((s) => ({
+            battle: {
+              ...s.battle,
+              _loopTurn: whichTurn,
+              _loopMode: mode,
+              _loopTick: eefi,
+              _loopComboCount: renzokukaisu,
+            },
+          }));
         }, 33);
         
         set({ battleInterval: interval });
@@ -1973,6 +2001,10 @@ export const useGameStore = create<GameStore>()(
             isCrit: false,
             isCombo: false,
             lastAttacker: null,
+            _loopTurn: 0,
+            _loopMode: 3,
+            _loopTick: 0,
+            _loopComboCount: 1,
           },
         });
         }, 1000);
@@ -2133,6 +2165,10 @@ export const useGameStore = create<GameStore>()(
             isCrit: false,
             isCombo: false,
             lastAttacker: null,
+            _loopTurn: 0,
+            _loopMode: 3,
+            _loopTick: 0,
+            _loopComboCount: 1,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,

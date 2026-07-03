@@ -138,6 +138,11 @@ export interface BattleState {
   isCrit: boolean;
   isCombo: boolean;
   lastAttacker: 'player' | 'enemy' | null;
+  // Internal loop state (persisted across pause/resume)
+  _loopTurn: number;
+  _loopMode: number;
+  _loopTick: number;
+  _loopComboCount: number;
 }
 
 // 奖励类型
