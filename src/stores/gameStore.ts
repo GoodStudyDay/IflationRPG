@@ -786,6 +786,23 @@ export const useGameStore = create<GameStore>()(
         const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
         const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
         
+        // 保存 stPt 已经分配的属性加成（旧装备下的 stPt 贡献）
+        const oldAccs = player.equippedAccessories || [];
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1)) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1)) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1)) : 0;
+        const oldAccAtk = oldAccs.reduce((sum, a) => sum + a.attackBonus, 0);
+        const oldAccDef = oldAccs.reduce((sum, a) => sum + a.defenseBonus, 0);
+        const oldAccHp = oldAccs.reduce((sum, a) => sum + a.hpBonus, 0);
+        const oldAccAgi = oldAccs.reduce((sum, a) => sum + a.agilityBonus, 0);
+        const oldAccLuc = oldAccs.reduce((sum, a) => sum + a.luckBonus, 0);
+        const lvlBonus = getLevelBonus(player.level);
+        const stPtHp = Math.max(0, player.maxHp - (initialPlayer.maxHp + lvlBonus.hp + oldArmorHp + oldAccHp));
+        const stPtAtk = Math.max(0, player.attack - (initialPlayer.attack + lvlBonus.attack + oldWeaponAtk + oldAccAtk));
+        const stPtDef = Math.max(0, player.defense - (initialPlayer.defense + lvlBonus.defense + oldArmorDef + oldAccDef));
+        const stPtAgi = Math.max(0, player.agility - (initialPlayer.agility + lvlBonus.agility + oldAccAgi));
+        const stPtLuc = Math.max(0, player.luck - (initialPlayer.luck + lvlBonus.luck + oldAccLuc));
+        
         newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
         newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
         newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus);
@@ -846,6 +863,13 @@ export const useGameStore = create<GameStore>()(
           newPlayer.defense += _loc2_;
           newPlayer.agility += _loc2_;
         }
+        
+        // 加回 stPt 分配的属性加成
+        newPlayer.maxHp += stPtHp;
+        newPlayer.attack += stPtAtk;
+        newPlayer.defense += stPtDef;
+        newPlayer.agility += stPtAgi;
+        newPlayer.luck += stPtLuc;
         
         let battlePointsChange = 0;
         if (equipment.type === 'accessory' && equipment.t1 === 500) {

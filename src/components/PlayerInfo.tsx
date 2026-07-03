@@ -5,6 +5,7 @@ import { getCollection } from '@/utils/collectionStorage';
 import { SpriteIcon } from './SpriteIcon';
 
 const UUID_KEY = 'inflation-rpg-user-id';
+const UUID_MODIFIED_KEY = 'inflation-rpg-uuid-modified';
 
 function getUUID(): string {
   let uuid = localStorage.getItem(UUID_KEY);
@@ -17,6 +18,11 @@ function getUUID(): string {
 
 function setUUID(uuid: string) {
   localStorage.setItem(UUID_KEY, uuid);
+  localStorage.setItem(UUID_MODIFIED_KEY, '1');
+}
+
+function hasModifiedUuid(): boolean {
+  return localStorage.getItem(UUID_MODIFIED_KEY) === '1';
 }
 
 interface PlayerInfoProps {
@@ -28,8 +34,10 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
   const { player, Highlv, HighCombo, HighDamage, winbattle, losebattle, newgamecount, peakSnapshot } = useGameStore();
 
   const [uuid, setUuid] = useState(getUUID);
+  const [uuidModified, setUuidModified] = useState(hasModifiedUuid);
   const [isEditingUuid, setIsEditingUuid] = useState(false);
   const [editUuidValue, setEditUuidValue] = useState(uuid);
+  const [copied, setCopied] = useState(false);
 
   const collection = useMemo(() => getCollection(), []);
 
@@ -38,6 +46,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
     if (trimmed && trimmed.length >= 8) {
       setUUID(trimmed);
       setUuid(trimmed);
+      setUuidModified(true);
     }
     setIsEditingUuid(false);
   };
@@ -94,12 +103,22 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
             <div className="text-gray-300 text-sm font-bold mb-2 flex items-center justify-between">
               <span>玩家 UUID</span>
               {!isEditingUuid && (
-                <button
-                  onClick={() => { setIsEditingUuid(true); setEditUuidValue(uuid); }}
-                  className="text-xs text-yellow-400 hover:text-yellow-300 underline"
-                >
-                  修改
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(uuid); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+                    className={`text-xs underline ${copied ? 'text-green-400 hover:text-green-300' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    {copied ? '✓' : '复制'}
+                  </button>
+                  {!uuidModified && (
+                    <button
+                      onClick={() => { setIsEditingUuid(true); setEditUuidValue(uuid); }}
+                      className="text-xs text-yellow-400 hover:text-yellow-300 underline"
+                    >
+                      修改
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             {isEditingUuid ? (
