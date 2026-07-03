@@ -95,6 +95,14 @@ export const BattleScreen = () => {
           <span className="text-green-400">HPrate : {Math.round(battle.hpRate)}%</span>
         </div>
         
+        <div className="absolute top-6 sm:top-10 left-0 right-0 flex justify-center px-2 sm:px-4 text-[10px] sm:text-xs">
+          <div className="bg-black/50 px-2 py-1 rounded">
+            <span className="text-purple-400">掉落率: {Math.round(battle.dropRate)}%</span>
+            <span className="text-gray-400 mx-1">|</span>
+            <span className="text-blue-400">目标: {battle.dropItemName}</span>
+          </div>
+        </div>
+        
         <div className="absolute top-10 sm:top-16 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8 flex justify-center">
           <div className="w-full max-w-md">
             <div className="h-3 sm:h-4 bg-gray-800 rounded overflow-hidden border border-gray-700">

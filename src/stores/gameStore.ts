@@ -479,6 +479,20 @@ export const useGameStore = create<GameStore>()(
         let agiInc = Math.ceil(initialPlayer.agility + bonus.agility + accAgi);
         let lucInc = Math.ceil(initialPlayer.luck + bonus.luck + accLuc);
         
+        const prevBonus = getLevelBonus(player.level);
+        
+        let prevHpFromBase = Math.ceil(initialPlayer.maxHp + prevBonus.hp);
+        let prevAtkFromBase = Math.ceil(initialPlayer.attack + prevBonus.attack);
+        let prevDefFromBase = Math.ceil(initialPlayer.defense + prevBonus.defense);
+        let prevAgiFromBase = Math.ceil(initialPlayer.agility + prevBonus.agility);
+        let prevLucFromBase = Math.ceil(initialPlayer.luck + prevBonus.luck);
+        
+        const hpStPtBonus = player.maxHp - prevHpFromBase - armorHpContrib - accHp;
+        const atkStPtBonus = player.attack - prevAtkFromBase - weaponAtkContrib - accAtk;
+        const defStPtBonus = player.defense - prevDefFromBase - armorDefContrib - accDef;
+        const agiStPtBonus = player.agility - prevAgiFromBase - accAgi;
+        const lucStPtBonus = player.luck - prevLucFromBase - accLuc;
+        
         const playerGems = accessories.filter(acc => acc.t1 === 35);
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
@@ -546,12 +560,12 @@ export const useGameStore = create<GameStore>()(
             player: {
               ...player,
               level: newLevel,
-              maxHp: hpInc,
-              hp: hpInc,
-              attack: atkInc,
-              defense: defInc,
-              agility: agiInc,
-              luck: lucInc,
+              maxHp: hpInc + hpStPtBonus,
+              hp: hpInc + hpStPtBonus,
+              attack: atkInc + atkStPtBonus,
+              defense: defInc + defStPtBonus,
+              agility: agiInc + agiStPtBonus,
+              luck: lucInc + lucStPtBonus,
               maxMana: initialPlayer.maxMana + bonus.mana,
               mana: initialPlayer.maxMana + bonus.mana,
               stPt: finalStPt,
@@ -568,12 +582,12 @@ export const useGameStore = create<GameStore>()(
           player: {
             ...player,
             level: newLevel,
-            maxHp: hpInc,
-            hp: hpInc,
-            attack: atkInc,
-            defense: defInc,
-            agility: agiInc,
-            luck: lucInc,
+            maxHp: hpInc + hpStPtBonus,
+            hp: hpInc + hpStPtBonus,
+            attack: atkInc + atkStPtBonus,
+            defense: defInc + defStPtBonus,
+            agility: agiInc + agiStPtBonus,
+            luck: lucInc + lucStPtBonus,
             maxMana: initialPlayer.maxMana + bonus.mana,
             mana: initialPlayer.maxMana + bonus.mana,
             stPt: finalStPt,
@@ -2048,19 +2062,43 @@ export const useGameStore = create<GameStore>()(
         }
       },
       exportSaveData: () => {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (!data) {
+        const stateData = localStorage.getItem(STORAGE_KEY);
+        const saveData = localStorage.getItem('inflation-rpg-savedata');
+        const itemCountData = localStorage.getItem('inflation-rpg-itemcounts');
+        const collectionData = localStorage.getItem('inflation-rpg-collection');
+        
+        if (!stateData) {
           throw new Error('没有可导出的存档');
         }
-        return btoa(unescape(encodeURIComponent(data)));
+        
+        const exportData = {
+          stateData,
+          saveData,
+          itemCountData,
+          collectionData,
+        };
+        
+        return btoa(unescape(encodeURIComponent(JSON.stringify(exportData))));
       },
       importSaveData: (encodedData) => {
         const decoded = decodeURIComponent(escape(atob(encodedData)));
-        const data = JSON.parse(decoded);
-        if (!data.state || !data.state.player || !data.state.inventory) {
+        const exportData = JSON.parse(decoded);
+        
+        if (!exportData.stateData) {
           throw new Error('无效的存档数据');
         }
-        localStorage.setItem(STORAGE_KEY, decoded);
+        
+        localStorage.setItem(STORAGE_KEY, exportData.stateData);
+        if (exportData.saveData) {
+          localStorage.setItem('inflation-rpg-savedata', exportData.saveData);
+        }
+        if (exportData.itemCountData) {
+          localStorage.setItem('inflation-rpg-itemcounts', exportData.itemCountData);
+        }
+        if (exportData.collectionData) {
+          localStorage.setItem('inflation-rpg-collection', exportData.collectionData);
+        }
+        
         window.location.reload();
       },
       // 奖励系统
@@ -2103,19 +2141,23 @@ export const useGameStore = create<GameStore>()(
         if (!map) return;
         set({ currentMap: mapId });
       },
-      unlockAccessorySlot: () => {
+      unlockAccessorySlot: (slotIndex?: number) => {
         const { player } = get();
         const currentSlots = player.maxAccessorySlots;
         if (currentSlots >= MAX_ACCESSORY_SLOTS) return false;
         
-        const price = AKUSE_SLOT_LOCK_MONEY[currentSlots]; // currentSlots 作为索引（0-based）
+        const targetIndex = slotIndex !== undefined ? slotIndex : currentSlots;
+        if (targetIndex < currentSlots) return false;
+        if (targetIndex >= MAX_ACCESSORY_SLOTS) return false;
+        
+        const price = AKUSE_SLOT_LOCK_MONEY[targetIndex];
         if (player.gold < price) return false;
         
         set({
           player: {
             ...player,
             gold: player.gold - price,
-            maxAccessorySlots: currentSlots + 1,
+            maxAccessorySlots: targetIndex + 1,
           },
         });
         return true;
@@ -2288,11 +2330,24 @@ export const useGameStore = create<GameStore>()(
           const accAgi = accessories.reduce((sum: number, a: Equipment) => sum + (a.agilityBonus || 0), 0);
           const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a.luckBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
-          state.player.attack = Math.ceil((initialPlayer.attack) + lvlBonus.attack + weaponAtkContrib + accAtk);
-          state.player.defense = Math.ceil((initialPlayer.defense) + lvlBonus.defense + armorDefContrib + accDef);
-          state.player.maxHp = Math.ceil((initialPlayer.maxHp) + lvlBonus.hp + armorHpContrib + accHp);
-          state.player.agility = Math.ceil((initialPlayer.agility) + lvlBonus.agility + accAgi);
-          state.player.luck = Math.ceil((initialPlayer.luck) + lvlBonus.luck + accLuc);
+          
+          const baseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp);
+          const baseAtk = Math.ceil(initialPlayer.attack + lvlBonus.attack);
+          const baseDef = Math.ceil(initialPlayer.defense + lvlBonus.defense);
+          const baseAgi = Math.ceil(initialPlayer.agility + lvlBonus.agility);
+          const baseLuc = Math.ceil(initialPlayer.luck + lvlBonus.luck);
+          
+          const hpStPtBonus = Math.max(0, (state.player.maxHp || baseHp) - baseHp - armorHpContrib - accHp);
+          const atkStPtBonus = Math.max(0, (state.player.attack || baseAtk) - baseAtk - weaponAtkContrib - accAtk);
+          const defStPtBonus = Math.max(0, (state.player.defense || baseDef) - baseDef - armorDefContrib - accDef);
+          const agiStPtBonus = Math.max(0, (state.player.agility || baseAgi) - baseAgi - accAgi);
+          const lucStPtBonus = Math.max(0, (state.player.luck || baseLuc) - baseLuc - accLuc);
+          
+          state.player.attack = Math.ceil(initialPlayer.attack + lvlBonus.attack + weaponAtkContrib + accAtk) + atkStPtBonus;
+          state.player.defense = Math.ceil(initialPlayer.defense + lvlBonus.defense + armorDefContrib + accDef) + defStPtBonus;
+          state.player.maxHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + armorHpContrib + accHp) + hpStPtBonus;
+          state.player.agility = Math.ceil(initialPlayer.agility + lvlBonus.agility + accAgi) + agiStPtBonus;
+          state.player.luck = Math.ceil(initialPlayer.luck + lvlBonus.luck + accLuc) + lucStPtBonus;
           
           const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
           for (const gem of braveGems) {

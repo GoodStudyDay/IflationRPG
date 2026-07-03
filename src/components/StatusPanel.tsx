@@ -266,8 +266,17 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   
   const expPercent = (player.exp / player.expToNextLevel) * 100;
   
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleReturn();
+    }
+  };
+  
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-[#87a8c9] border-4 border-[#2a4a6a] rounded-lg w-[90%] max-w-lg overflow-hidden">
         <div className="bg-[#5a7a9a] px-4 py-3 text-center text-white font-bold text-lg">
           属性分配
@@ -435,17 +444,15 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
             </div>
           </div>
           
-          <div className="bg-[#7a9abb] rounded px-3 py-2 mb-4">
-            <div className="text-center text-[#2a4a6a] text-xs mb-1">属性点</div>
-            <div className="text-center text-xl font-bold text-white">
-              {availableStPt}
-              {pendingTotal > 0 && <span className="text-sm text-[#ff6666]">(-{pendingTotal})</span>}
+          <div className="bg-[#7a9abb] rounded px-3 py-2 mb-4 flex items-center justify-center gap-4">
+            <div className="flex items-center">
+              <span className="text-[#2a4a6a] text-xs mr-2">属性点</span>
+              <span className="text-xl font-bold text-white">
+                {availableStPt}
+                {pendingTotal > 0 && <span className="text-sm text-[#ff6666]">(-{pendingTotal})</span>}
+              </span>
             </div>
-            <div className="text-center text-xs text-[#4a6a8a] mt-1">升级后可获得属性点</div>
-          </div>
-          
-          <div className="text-center text-xs text-[#4a6a8a] mb-3">
-            请选择强化属性(可以长按)
+            <span className="text-xs text-[#4a6a8a]">升级后可获得属性点</span>
           </div>
           
           <div className="flex gap-2 mb-4">

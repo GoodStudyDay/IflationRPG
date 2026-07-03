@@ -59,7 +59,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   
 
   const handleUnlockSlot = () => {
-    const success = unlockAccessorySlot();
+    const success = unlockAccessorySlot(unlockingSlotIndex);
     if (!success) {
       setShowGoldError(true);
       setTimeout(() => setShowGoldError(false), 2000);
