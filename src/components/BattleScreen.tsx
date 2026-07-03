@@ -161,7 +161,7 @@ export const BattleScreen = () => {
           )}
         </div>
         
-        <div className="absolute bottom-28 sm:bottom-36 md:bottom-44 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
+        <div className="absolute bottom-24 sm:bottom-36 md:bottom-44 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
           <div className={`relative transition-transform duration-100 ${
             battle.playerAnimation === 'attack' ? 'scale-110 translate-x-4' : 
             battle.playerAnimation === 'hurt' ? 'scale-95 opacity-70 -translate-x-2' : ''
@@ -190,7 +190,7 @@ export const BattleScreen = () => {
           {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
         </div>
         
-        <div className="absolute bottom-12 sm:bottom-18 md:bottom-24 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
+        <div className="absolute bottom-12 sm:bottom-20 md:bottom-26 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
           <div className="h-2 sm:h-3 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className="h-full bg-gradient-to-r from-blue-700 to-blue-500 transition-all duration-300"
