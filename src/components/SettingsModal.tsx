@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
+import { getSupabase } from '@/lib/supabase';
 import { getCacheSize, formatCacheSize, clearCache } from '@/utils/imageCache';
 import { ChangelogModal } from './ChangelogModal';
 import { DropGuideModal } from './DropGuideModal';
@@ -10,15 +11,23 @@ interface SettingsModalProps {
 }
 
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
-  const [pasteInput, setPasteInput] = useState('');
-  const [showPasteInput, setShowPasteInput] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [cloudLoading, setCloudLoading] = useState(false);
   const [showPresetPanel, setShowPresetPanel] = useState(false);
   const [editingPreset, setEditingPreset] = useState<number>(0);
   const [cacheSize, setCacheSize] = useState<string>('0 B');
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDropGuide, setShowDropGuide] = useState(false);
+
+  const getUserInfo = () => {
+    const userId = localStorage.getItem('inflation-rpg-user-id') || crypto.randomUUID();
+    if (!localStorage.getItem('inflation-rpg-user-id')) {
+      localStorage.setItem('inflation-rpg-user-id', userId);
+    }
+    const displayName = localStorage.getItem('inflation-rpg-player-name') || 'Player';
+    return { userId, displayName };
+  };
   
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +46,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const { 
     exportSaveData, 
     importSaveData,
+    Highlv,
     presets,
     presetNum,
     autoAllocateEnabled,
@@ -45,31 +55,101 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     setAutoAllocateEnabled,
   } = useGameStore();
 
-  const handleExport = async () => {
-    const data = exportSaveData();
-    await navigator.clipboard.writeText(data);
-    setImportMsg('存档已复制到剪贴板！');
-    setTimeout(() => setImportMsg(null), 2000);
+  const handleCloudUpload = async () => {
+    setCloudLoading(true);
+    try {
+      const data = exportSaveData();
+      const { userId, displayName } = getUserInfo();
+      const supabase = getSupabase();
+      
+      const savePayload = {
+        stateData: data,
+        timestamp: new Date().toISOString(),
+      };
+      
+      const { data: existing, error: fetchError } = await supabase
+        .from('player_saves')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+      
+      if (existing) {
+        const { error } = await supabase
+          .from('player_saves')
+          .update({
+            save_data: savePayload,
+            display_name: displayName,
+            score: Highlv,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('player_saves')
+          .insert({
+            user_id: userId,
+            display_name: displayName,
+            save_data: savePayload,
+            score: Highlv,
+          });
+        if (error) throw error;
+      }
+      
+      setImportMsg('存档已上传到云端！');
+      setTimeout(() => setImportMsg(null), 2000);
+    } catch (err) {
+      console.error('Cloud upload failed:', err);
+      setImportMsg('上传失败，请检查网络连接');
+      setTimeout(() => setImportMsg(null), 3000);
+    } finally {
+      setCloudLoading(false);
+    }
   };
 
-  const handleImport = () => {
-    if (!pasteInput.trim()) {
-      setImportMsg('请输入存档字符串');
-      setTimeout(() => setImportMsg(null), 2000);
-      return;
-    }
+  const handleCloudDownload = async () => {
+    setCloudLoading(true);
     try {
-      importSaveData(pasteInput);
-      setImportMsg('存档导入成功！');
+      const { userId } = getUserInfo();
+      const supabase = getSupabase();
+      
+      const { data, error } = await supabase
+        .from('player_saves')
+        .select('save_data')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (!data || !data.save_data) {
+        setImportMsg('云端没有找到存档');
+        setTimeout(() => setImportMsg(null), 2000);
+        return;
+      }
+      
+      const saveData = data.save_data as any;
+      const stateData = saveData.stateData || '';
+      
+      if (!stateData) {
+        setImportMsg('云端存档数据为空');
+        setTimeout(() => setImportMsg(null), 2000);
+        return;
+      }
+      
+      importSaveData(stateData);
+      setImportMsg('存档已从云端下载并恢复！');
       setTimeout(() => {
         setImportMsg(null);
-        setShowPasteInput(false);
-        setPasteInput('');
         onClose();
       }, 1000);
-    } catch {
-      setImportMsg('存档格式错误，无法解析');
-      setTimeout(() => setImportMsg(null), 2000);
+    } catch (err) {
+      console.error('Cloud download failed:', err);
+      setImportMsg('下载失败，请检查网络连接');
+      setTimeout(() => setImportMsg(null), 3000);
+    } finally {
+      setCloudLoading(false);
     }
   };
 
@@ -220,48 +300,25 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="text-gray-300 text-sm mb-2">存档管理</div>
+            <div className="text-gray-300 text-sm mb-2">云存档</div>
 
             <button
-              onClick={handleExport}
-              className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors"
+              onClick={handleCloudUpload}
+              disabled={cloudLoading}
+              className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
             >
-              导出存档
+              {cloudLoading ? '处理中...' : '上传存档'}
             </button>
-            <div className="text-xs text-gray-400 px-2 mb-2">将存档编码为字符串并复制到剪贴板</div>
+            <div className="text-xs text-gray-400 px-2 mb-2">将当前存档上传到云端保存</div>
 
-            {!showPasteInput ? (
-              <button
-                onClick={() => setShowPasteInput(true)}
-                className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                导入存档
-              </button>
-            ) : (
-              <div className="space-y-2">
-                <textarea
-                  value={pasteInput}
-                  onChange={(e) => setPasteInput(e.target.value)}
-                  placeholder="在此粘贴存档字符串..."
-                  className="w-full h-24 bg-[#1a0a2e] border border-[#4a2c7a] rounded p-2 text-white text-xs resize-none focus:outline-none focus:border-[#6a4c9a]"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleImport}
-                    className="flex-1 bg-blue-700 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
-                  >
-                    确认导入
-                  </button>
-                  <button
-                    onClick={() => { setShowPasteInput(false); setPasteInput(''); }}
-                    className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="text-xs text-gray-400 px-2 mb-2">粘贴存档字符串以恢复进度（会覆盖当前进度）</div>
+            <button
+              onClick={handleCloudDownload}
+              disabled={cloudLoading}
+              className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            >
+              {cloudLoading ? '处理中...' : '下载存档'}
+            </button>
+            <div className="text-xs text-gray-400 px-2 mb-2">从云端下载存档并恢复进度（会覆盖当前进度）</div>
 
             <div className="border-t border-[#4a2c7a] pt-3 mt-3">
               <div className="text-gray-300 text-sm mb-2">游戏设置</div>
