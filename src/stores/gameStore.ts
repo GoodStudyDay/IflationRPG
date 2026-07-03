@@ -153,8 +153,8 @@ const getStoredData = () => {
 
 const storedData = getStoredData();
 
-const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
-  if (!player) return initialPlayer;
+const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Player; unequippedAccessories: Equipment[] } => {
+  if (!player) return { fixedPlayer: initialPlayer, unequippedAccessories: [] };
   
   let fixedPlayer = { ...player };
   
@@ -207,6 +207,8 @@ const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
     }
   }
   
+  const unequippedAccessories: Equipment[] = [];
+
   if (fixedPlayer.equippedAccessories) {
     fixedPlayer.equippedAccessories = fixedPlayer.equippedAccessories
       .map(acc => {
@@ -214,9 +216,27 @@ const fixStoredPlayerEquipment = (player: Player | undefined): Player => {
         return found || acc;
       })
       .filter(acc => getEquipmentById(acc.id));
+    
+    // 检测星级不匹配的饰品：将不符合槽位星级限制的饰品取消装备
+    const getSlotMaxRank = (slotIndex: number): number => {
+      if (slotIndex <= 5) return 3; // 1-6号槽：R1~R4
+      if (slotIndex <= 7) return 2; // 7-8号槽：R1~R3
+      if (slotIndex <= 9) return 1; // 9-10号槽：R1~R2
+      return 0;                      // 11-12号槽：R1
+    };
+    
+    fixedPlayer.equippedAccessories = fixedPlayer.equippedAccessories.filter((acc, idx) => {
+      const accRank = acc.rank ?? -1;
+      if (accRank > getSlotMaxRank(idx)) {
+        // 星级不匹配，取消装备并放回背包
+        unequippedAccessories.push(acc);
+        return false;
+      }
+      return true;
+    });
   }
   
-  return fixedPlayer;
+  return { fixedPlayer, unequippedAccessories };
 };
 
 const calculateCritRate = (hpPercent: number): number => {
@@ -323,9 +343,31 @@ const saveData = loadSaveData();
 
 export const useGameStore = create<GameStore>()(
   persist(
-    (set, get) => ({
-      player: fixStoredPlayerEquipment(storedData?.player),
-      inventory: storedData?.inventory || (collectionData.length > 0 ? collectionData : initialInventory),
+    (set, get) => {
+      const { fixedPlayer, unequippedAccessories } = fixStoredPlayerEquipment(storedData?.player);
+      
+      // 将因星级不匹配被卸下的饰品放回背包
+      let initialInv = storedData?.inventory || (collectionData.length > 0 ? collectionData : initialInventory);
+      if (unequippedAccessories.length > 0) {
+        initialInv = initialInv.map((item: InventoryItem) => ({ ...item }));
+        for (const acc of unequippedAccessories) {
+          const existing = initialInv.find((i: InventoryItem) => i.equipmentId === acc.id);
+          if (existing) {
+            existing.quantity += 1;
+          } else {
+            initialInv.push({
+              equipmentId: acc.id,
+              quantity: 1,
+              equipped: 0,
+              unlocked: false,
+            });
+          }
+        }
+      }
+      
+      return {
+      player: fixedPlayer,
+      inventory: initialInv,
       skills: storedData?.skills || initialSkills,
       currentScene: 'title',
       encounterRate: storedData?.encounterRate || 0,
@@ -2313,8 +2355,9 @@ export const useGameStore = create<GameStore>()(
         const { player } = get();
         set({ player: { ...player, stPt: (player.stPt || 0) + amount } });
       },
-    }),
-    {
+    };
+  },
+  {
       name: STORAGE_KEY,
       version: 3,
       migrate: (persistedState, _version) => {

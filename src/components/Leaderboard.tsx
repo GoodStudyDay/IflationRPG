@@ -88,14 +88,14 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
     }
   }, [isOpen, loadLeaderboard]);
 
-  const submitScore = async () => {
-    if (!playerName.trim()) {
+  const submitScore = async (name?: string) => {
+    const submitName = (name || playerName).trim();
+    if (!submitName) {
       alert('请输入玩家名称');
       return;
     }
 
     const userId = getOrCreateUserId();
-    const name = playerName.trim();
     
     setLoading(true);
     try {
@@ -113,7 +113,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
           const { error: updateError } = await supabase
             .from('leaderboard')
             .update({
-              display_name: name,
+              display_name: submitName,
               score: Highlv,
               updated_at: new Date().toISOString(),
             })
@@ -126,7 +126,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
           .from('leaderboard')
           .insert({
             user_id: userId,
-            display_name: name,
+            display_name: submitName,
             score: Highlv,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -135,7 +135,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
         if (insertError) throw insertError;
       }
 
-      localStorage.setItem('inflation-rpg-player-name', name);
+      localStorage.setItem('inflation-rpg-player-name', submitName);
       setShowNameInput(false);
       setSubmitted(true);
       await loadLeaderboard();
@@ -144,6 +144,18 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
       alert('提交失败，请稍后再试');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmitClick = () => {
+    const savedName = getUserOrCreateName();
+    if (savedName) {
+      // 老玩家：直接用已保存的名称提交，不需要再输入
+      setPlayerName(savedName);
+      submitScore(savedName);
+    } else {
+      // 新玩家：需要输入名称
+      setShowNameInput(true);
     }
   };
 
@@ -176,7 +188,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
             />
             <div className="flex gap-3 mt-4">
               <button
-                onClick={submitScore}
+                onClick={() => submitScore()}
                 className="flex-1 bg-green-700 text-white font-bold py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
                 提交
@@ -197,7 +209,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
               </div>
               {!submitted ? (
                 <button
-                  onClick={() => setShowNameInput(true)}
+                  onClick={handleSubmitClick}
                   className="bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   提交成绩

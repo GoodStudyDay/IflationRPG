@@ -7,7 +7,7 @@ export interface BossData extends Enemy {
 export const BOSS_DATA: BossData[] = [
   {
     id: 'boss-32',
-    name: '史莱姆王',
+    name: '小浣熊',
     bossId: 32,
     hp: 150000,
     maxHp: 150000,
@@ -21,7 +21,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-33',
-    name: '哥布林王',
+    name: '狮身人面像',
     bossId: 33,
     hp: 150000,
     maxHp: 150000,
@@ -35,7 +35,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-34',
-    name: '骷髅王',
+    name: '飞鸟骑士',
     bossId: 34,
     hp: 175000,
     maxHp: 175000,
@@ -49,7 +49,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-35',
-    name: '兽人王',
+    name: '邪恶之眼',
     bossId: 35,
     hp: 200000,
     maxHp: 200000,
