@@ -144,7 +144,7 @@ export const BattleScreen = () => {
           {battle.lastAttacker === 'player' && renderDamageDisplay()}
           
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
-            <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto hidden sm:block">
+            <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">掉落:</div>
               {battle.enemy.drops.slice(0, 5).map((drop, index) => {
                 if (!drop) return null;
