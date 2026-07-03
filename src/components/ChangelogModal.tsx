@@ -4,6 +4,26 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.13',
+    date: '2026-07-03',
+    changes: [
+      '装备列表添加购买功能，未拥有物品可购买',
+      '修复饰品无法重复装备多个同款的问题',
+      '武器/防具/饰品列表隐藏无法购买且未拥有的物品',
+      '修复 BattleScreen 中 A 标签嵌套导致的 React 警告',
+      '优化 localStorage 溢出保护（数据超限时清理旧数据）',
+    ],
+  },
+  {
+    version: 'v0.0.12',
+    date: '2026-07-03',
+    changes: [
+      '集成 Supabase 排行榜系统',
+      '支持提交成绩和查看在线排行榜',
+      '修复 GitHub Pages 部署问题',
+    ],
+  },
+  {
     version: 'v0.0.11',
     date: '2026-07-03',
     changes: [

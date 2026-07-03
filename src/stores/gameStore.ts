@@ -667,13 +667,40 @@ export const useGameStore = create<GameStore>()(
           newPlayer.equippedArmor = equipment;
         } else if (equipment.type === 'accessory') {
           const accessories = [...(newPlayer.equippedAccessories || [])];
+          const accRank = equipment.rank ?? -1;
+          
+          const getSlotMaxRank = (slotIndex: number): number => {
+            if (slotIndex <= 5) return 3; // 1-6号槽位：所有星级 (R1-R4)
+            if (slotIndex <= 7) return 2; // 7-8号槽位：3星及以下 (R1-R3)
+            if (slotIndex <= 9) return 1; // 9-10号槽位：2星及以下 (R1-R2)
+            return 0; // 11-12号槽位：1星 (R1)
+          };
+          
           if (slotIndex !== undefined && slotIndex < accessories.length) {
             // 替换指定栏位的饰品
             if (accessories[slotIndex]?.id === equipment.id) return;
+            if (accRank > getSlotMaxRank(slotIndex)) return; // 星级不匹配
+            accessories[slotIndex] = equipment;
+          } else if (slotIndex !== undefined) {
+            // 指定了空栏位
+            if (slotIndex >= newPlayer.maxAccessorySlots) return;
+            if (accRank > getSlotMaxRank(slotIndex)) return; // 星级不匹配
+            // 扩容到 slotIndex
+            while (accessories.length <= slotIndex) {
+              accessories.push(null as any);
+            }
             accessories[slotIndex] = equipment;
           } else if (accessories.length < newPlayer.maxAccessorySlots) {
-            // 追加到空栏位
-            accessories.push(equipment);
+            // 自动寻找第一个兼容的栏位
+            let placed = false;
+            for (let i = 0; i < newPlayer.maxAccessorySlots; i++) {
+              if (!accessories[i] && accRank <= getSlotMaxRank(i)) {
+                accessories[i] = equipment;
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) return;
           } else {
             return;
           }
