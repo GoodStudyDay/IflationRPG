@@ -128,6 +128,8 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
             user_id: userId,
             display_name: name,
             score: Highlv,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           });
 
         if (insertError) throw insertError;

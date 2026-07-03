@@ -4,6 +4,17 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.17',
+    date: '2026-07-03',
+    changes: [
+      'Boss 名称去重：删除 4 对完全重复的 Boss 条目',
+      'Boss 名称添加难度后缀：剧情(·初)、硬核(·硬)、地狱(·狱)',
+      '购买装备价格递增：每次购买同款+10%，购买5次后为原价150%',
+      '排行榜存入 created_at 和 updated_at 时间戳',
+      '添加装备掉落图鉴页面，查看装备掉落来源/地图/怪物',
+    ],
+  },
+  {
     version: 'v0.0.13',
     date: '2026-07-03',
     changes: [

@@ -482,20 +482,6 @@ export const BOSS_DATA: BossData[] = [
     drops: [],
   },
   {
-    id: 'boss-61',
-    name: '至强神皇',
-    bossId: 61,
-    hp: 1,
-    maxHp: 1,
-    attack: 1,
-    defense: 0,
-    expReward: 1,
-    goldReward: 5000,
-    icon: '👑',
-    level: 615,
-    drops: [],
-  },
-  {
     id: 'boss-62',
     name: '无敌天尊',
     bossId: 62,
@@ -525,7 +511,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-66',
-    name: '骷髅王',
+    name: '骷髅王·硬',
     bossId: 66,
     hp: 2000000,
     maxHp: 2000000,
@@ -538,22 +524,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [],
   },
   {
-    id: 'boss-67',
-    name: '兽人王',
-    bossId: 67,
-    hp: 1,
-    maxHp: 1,
-    attack: 1,
-    defense: 0,
-    expReward: 1,
-    goldReward: 5000,
-    icon: '🐉',
-    level: 675,
-    drops: [],
-  },
-  {
     id: 'boss-68',
-    name: '幼龙王',
+    name: '幼龙王·硬',
     bossId: 68,
     hp: 10000000,
     maxHp: 10000000,
@@ -567,7 +539,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-67',
-    name: '兽人王',
+    name: '兽人王·硬',
     bossId: 67,
     hp: 1,
     maxHp: 1,
@@ -581,7 +553,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-103',
-    name: '天空守护者',
+    name: '天空守护者·狱',
     bossId: 103,
     hp: 1500000000000,
     maxHp: 1500000000000,
@@ -594,22 +566,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [],
   },
   {
-    id: 'boss-104',
-    name: '深渊领主',
-    bossId: 104,
-    hp: 1,
-    maxHp: 1,
-    attack: 1,
-    defense: 0,
-    expReward: 1,
-    goldReward: 5000,
-    icon: '👿',
-    level: 1045,
-    drops: [],
-  },
-  {
     id: 'boss-105',
-    name: '终焉之王',
+    name: '终焉之王·狱',
     bossId: 105,
     hp: 10000000,
     maxHp: 10000000,
@@ -623,7 +581,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-104',
-    name: '深渊领主',
+    name: '深渊领主·狱',
     bossId: 104,
     hp: 1,
     maxHp: 1,
@@ -637,7 +595,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-90',
-    name: '神灵主宰',
+    name: '神灵主宰·硬',
     bossId: 90,
     hp: 7500000,
     maxHp: 7500000,
@@ -651,7 +609,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-91',
-    name: '神秘天尊',
+    name: '神秘天尊·硬',
     bossId: 91,
     hp: 7500000,
     maxHp: 7500000,
@@ -670,20 +628,6 @@ export const BOSS_DATA: BossData[] = [
     hp: 1000000000,
     maxHp: 1000000000,
     attack: 20555555,
-    defense: 0,
-    expReward: 7000000000000,
-    goldReward: 177777,
-    icon: '💎',
-    level: 545,
-    drops: [],
-  },
-  {
-    id: 'boss-54',
-    name: '超级霸主',
-    bossId: 54,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 22000000,
     defense: 0,
     expReward: 7000000000000,
     goldReward: 177777,
@@ -777,7 +721,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-70',
-    name: '龙谷守护者',
+    name: '龙谷守护者·硬',
     bossId: 70,
     hp: 10000000000,
     maxHp: 10000000000,
@@ -791,7 +735,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-71',
-    name: '天空守护者',
+    name: '天空守护者·硬',
     bossId: 71,
     hp: 40000000000,
     maxHp: 40000000000,
@@ -805,7 +749,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-72',
-    name: '深渊领主',
+    name: '深渊领主·硬',
     bossId: 72,
     hp: 70000000000,
     maxHp: 70000000000,
@@ -819,7 +763,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-73',
-    name: '终焉之王',
+    name: '终焉之王·硬',
     bossId: 73,
     hp: 100000000000,
     maxHp: 100000000000,
@@ -833,7 +777,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-74',
-    name: '暗影魔王',
+    name: '暗影魔王·硬',
     bossId: 74,
     hp: 19500000000,
     maxHp: 19500000000,
@@ -847,7 +791,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-75',
-    name: '暗黑大帝',
+    name: '暗黑大帝·硬',
     bossId: 75,
     hp: 72000000000,
     maxHp: 72000000000,
@@ -861,7 +805,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-76',
-    name: '魔王',
+    name: '魔王·硬',
     bossId: 76,
     hp: 300000000000,
     maxHp: 300000000000,
@@ -875,7 +819,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-77',
-    name: '恶魔领主',
+    name: '恶魔领主·硬',
     bossId: 77,
     hp: 10500000000,
     maxHp: 10500000000,
@@ -889,7 +833,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-78',
-    name: '亡灵君主',
+    name: '亡灵君主·硬',
     bossId: 78,
     hp: 300000000000,
     maxHp: 300000000000,
@@ -903,7 +847,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-79',
-    name: '神秘主宰',
+    name: '神秘主宰·硬',
     bossId: 79,
     hp: 300000000000,
     maxHp: 300000000000,
@@ -917,7 +861,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-80',
-    name: '机械霸主',
+    name: '机械霸主·硬',
     bossId: 80,
     hp: 600000000000,
     maxHp: 600000000000,
@@ -931,7 +875,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-80',
-    name: '机械霸主',
+    name: '机械霸主·硬',
     bossId: 80,
     hp: 300000000000,
     maxHp: 300000000000,
@@ -945,7 +889,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-81',
-    name: '远古泰坦',
+    name: '远古泰坦·硬',
     bossId: 81,
     hp: 300000000000,
     maxHp: 300000000000,
@@ -959,7 +903,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-82',
-    name: '深渊魔神',
+    name: '深渊魔神·硬',
     bossId: 82,
     hp: 47125000000,
     maxHp: 47125000000,
@@ -973,7 +917,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-83',
-    name: '精英首领',
+    name: '精英首领·硬',
     bossId: 83,
     hp: 471250,
     maxHp: 471250,
@@ -987,7 +931,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-84',
-    name: '精锐统帅',
+    name: '精锐统帅·硬',
     bossId: 84,
     hp: 471250,
     maxHp: 471250,
@@ -1001,7 +945,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-85',
-    name: '高级统领',
+    name: '高级统领·硬',
     bossId: 85,
     hp: 471250,
     maxHp: 471250,
@@ -1015,7 +959,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-86',
-    name: '超级霸主',
+    name: '超级霸主·硬',
     bossId: 86,
     hp: 170000000000,
     maxHp: 170000000000,
@@ -1029,7 +973,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-87',
-    name: '史诗王者',
+    name: '史诗王者·硬',
     bossId: 87,
     hp: 120000000000,
     maxHp: 120000000000,
@@ -1043,7 +987,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-88',
-    name: '传说至尊',
+    name: '传说至尊·硬',
     bossId: 88,
     hp: 471250,
     maxHp: 471250,
@@ -1057,7 +1001,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-89',
-    name: '神话之神',
+    name: '神话之神·硬',
     bossId: 89,
     hp: 471250,
     maxHp: 471250,
@@ -1071,7 +1015,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-92',
-    name: '终极至尊',
+    name: '终极至尊·硬',
     bossId: 92,
     hp: 550000000000,
     maxHp: 550000000000,
@@ -1085,7 +1029,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-93',
-    name: '至强神皇',
+    name: '至强神皇·硬',
     bossId: 93,
     hp: 560000000000,
     maxHp: 560000000000,
@@ -1099,7 +1043,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-94',
-    name: '无敌天尊',
+    name: '无敌天尊·硬',
     bossId: 94,
     hp: 520000000000,
     maxHp: 520000000000,
@@ -1113,7 +1057,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-95',
-    name: '超越神尊',
+    name: '超越神尊·硬',
     bossId: 95,
     hp: 580000000000,
     maxHp: 580000000000,
@@ -1127,7 +1071,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-96',
-    name: '史莱姆王',
+    name: '史莱姆王·狱',
     bossId: 96,
     hp: 560000000000,
     maxHp: 560000000000,
@@ -1141,7 +1085,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-97',
-    name: '哥布林王',
+    name: '哥布林王·狱',
     bossId: 97,
     hp: 650000000000,
     maxHp: 650000000000,
@@ -1155,7 +1099,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-98',
-    name: '骷髅王',
+    name: '骷髅王·狱',
     bossId: 98,
     hp: 6500000000000,
     maxHp: 6500000000000,
@@ -1169,7 +1113,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-99',
-    name: '兽人王',
+    name: '兽人王·狱',
     bossId: 99,
     hp: 3000000000000,
     maxHp: 3000000000000,
@@ -1183,7 +1127,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-100',
-    name: '幼龙王',
+    name: '幼龙王·狱',
     bossId: 100,
     hp: 4000000000000,
     maxHp: 4000000000000,
@@ -1197,7 +1141,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-101',
-    name: '城堡领主',
+    name: '城堡领主·狱',
     bossId: 101,
     hp: 6000000000000,
     maxHp: 6000000000000,
@@ -1211,7 +1155,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-102',
-    name: '龙谷守护者',
+    name: '龙谷守护者·狱',
     bossId: 102,
     hp: 4300000000000,
     maxHp: 4300000000000,
@@ -1225,7 +1169,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-106',
-    name: '暗影魔王',
+    name: '暗影魔王·狱',
     bossId: 106,
     hp: 6000000000000,
     maxHp: 6000000000000,
@@ -1239,7 +1183,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-107',
-    name: '暗黑大帝',
+    name: '暗黑大帝·狱',
     bossId: 107,
     hp: 6000000000000,
     maxHp: 6000000000000,
@@ -1253,7 +1197,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-108',
-    name: '魔王',
+    name: '魔王·狱',
     bossId: 108,
     hp: 6000000000000,
     maxHp: 6000000000000,
@@ -1267,7 +1211,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-109',
-    name: '恶魔领主',
+    name: '恶魔领主·狱',
     bossId: 109,
     hp: 6000000000000,
     maxHp: 6000000000000,
@@ -1281,7 +1225,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-0',
-    name: '史莱姆王',
+    name: '史莱姆王·初',
     bossId: 0,
     hp: 32000,
     maxHp: 32000,
@@ -1295,7 +1239,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-1',
-    name: '哥布林王',
+    name: '哥布林王·初',
     bossId: 1,
     hp: 300000,
     maxHp: 300000,
@@ -1309,7 +1253,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-2',
-    name: '骷髅王',
+    name: '骷髅王·初',
     bossId: 2,
     hp: 100000,
     maxHp: 100000,
@@ -1323,7 +1267,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-3',
-    name: '兽人王',
+    name: '兽人王·初',
     bossId: 3,
     hp: 700000,
     maxHp: 700000,
@@ -1337,7 +1281,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-4',
-    name: '幼龙王',
+    name: '幼龙王·初',
     bossId: 4,
     hp: 1580000,
     maxHp: 1580000,
@@ -1351,7 +1295,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-5',
-    name: '城堡领主',
+    name: '城堡领主·初',
     bossId: 5,
     hp: 1640000,
     maxHp: 1640000,
@@ -1365,7 +1309,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-6',
-    name: '龙谷守护者',
+    name: '龙谷守护者·初',
     bossId: 6,
     hp: 1720000,
     maxHp: 1720000,
@@ -1379,7 +1323,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-7',
-    name: '天空守护者',
+    name: '天空守护者·初',
     bossId: 7,
     hp: 1600000,
     maxHp: 1600000,
@@ -1393,7 +1337,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-8',
-    name: '深渊领主',
+    name: '深渊领主·初',
     bossId: 8,
     hp: 2800000,
     maxHp: 2800000,
@@ -1407,7 +1351,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-9',
-    name: '终焉之王',
+    name: '终焉之王·初',
     bossId: 9,
     hp: 3150000,
     maxHp: 3150000,
@@ -1421,7 +1365,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-10',
-    name: '暗影魔王',
+    name: '暗影魔王·初',
     bossId: 10,
     hp: 2800000,
     maxHp: 2800000,
@@ -1435,7 +1379,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-11',
-    name: '暗黑大帝',
+    name: '暗黑大帝·初',
     bossId: 11,
     hp: 3600000,
     maxHp: 3600000,
@@ -1449,7 +1393,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-12',
-    name: '魔王',
+    name: '魔王·初',
     bossId: 12,
     hp: 6200000,
     maxHp: 6200000,
@@ -1463,7 +1407,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-13',
-    name: '恶魔领主',
+    name: '恶魔领主·初',
     bossId: 13,
     hp: 8000000,
     maxHp: 8000000,
@@ -1477,7 +1421,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-14',
-    name: '亡灵君主',
+    name: '亡灵君主·初',
     bossId: 14,
     hp: 7000000,
     maxHp: 7000000,
@@ -1491,7 +1435,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-15',
-    name: '神秘主宰',
+    name: '神秘主宰·初',
     bossId: 15,
     hp: 7000000,
     maxHp: 7000000,
@@ -1505,7 +1449,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-16',
-    name: '机械霸主',
+    name: '机械霸主·初',
     bossId: 16,
     hp: 7350000,
     maxHp: 7350000,
@@ -1519,7 +1463,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-17',
-    name: '远古泰坦',
+    name: '远古泰坦·初',
     bossId: 17,
     hp: 8049999,
     maxHp: 8049999,
@@ -1533,7 +1477,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-18',
-    name: '深渊魔神',
+    name: '深渊魔神·初',
     bossId: 18,
     hp: 7000000,
     maxHp: 7000000,
@@ -1547,7 +1491,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-19',
-    name: '精英首领',
+    name: '精英首领·初',
     bossId: 19,
     hp: 12075000,
     maxHp: 12075000,
@@ -1561,7 +1505,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-19',
-    name: '精英首领',
+    name: '精英首领·初',
     bossId: 19,
     hp: 8049999,
     maxHp: 8049999,
@@ -1575,7 +1519,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-20',
-    name: '精锐统帅',
+    name: '精锐统帅·初',
     bossId: 20,
     hp: 4500000,
     maxHp: 4500000,
@@ -1589,7 +1533,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-20',
-    name: '精锐统帅',
+    name: '精锐统帅·初',
     bossId: 20,
     hp: 3000000,
     maxHp: 3000000,
@@ -1603,7 +1547,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-21',
-    name: '高级统领',
+    name: '高级统领·初',
     bossId: 21,
     hp: 16536000,
     maxHp: 16536000,
@@ -1617,7 +1561,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-22',
-    name: '超级霸主',
+    name: '超级霸主·初',
     bossId: 22,
     hp: 11454000,
     maxHp: 11454000,
@@ -1631,7 +1575,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-23',
-    name: '史诗王者',
+    name: '史诗王者·初',
     bossId: 23,
     hp: 20925000,
     maxHp: 20925000,
@@ -1645,7 +1589,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-24',
-    name: '传说至尊',
+    name: '传说至尊·初',
     bossId: 24,
     hp: 30012000,
     maxHp: 30012000,
@@ -1659,7 +1603,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-25',
-    name: '神话之神',
+    name: '神话之神·初',
     bossId: 25,
     hp: 55000000,
     maxHp: 55000000,
@@ -1673,7 +1617,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-25',
-    name: '神话之神',
+    name: '神话之神·初',
     bossId: 25,
     hp: 40000000,
     maxHp: 40000000,
@@ -1687,7 +1631,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-26',
-    name: '神灵主宰',
+    name: '神灵主宰·初',
     bossId: 26,
     hp: 326750000,
     maxHp: 326750000,
@@ -1701,7 +1645,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-27',
-    name: '神秘天尊',
+    name: '神秘天尊·初',
     bossId: 27,
     hp: 205200000,
     maxHp: 205200000,
@@ -1715,7 +1659,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-28',
-    name: '终极至尊',
+    name: '终极至尊·初',
     bossId: 28,
     hp: 800000000,
     maxHp: 800000000,
@@ -1729,7 +1673,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-29',
-    name: '至强神皇',
+    name: '至强神皇·初',
     bossId: 29,
     hp: 600000000,
     maxHp: 600000000,
@@ -1743,7 +1687,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-30',
-    name: '无敌天尊',
+    name: '无敌天尊·初',
     bossId: 30,
     hp: 750000000,
     maxHp: 750000000,
@@ -1757,7 +1701,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-31',
-    name: '超越神尊',
+    name: '超越神尊·初',
     bossId: 31,
     hp: 27125000000,
     maxHp: 27125000000,
