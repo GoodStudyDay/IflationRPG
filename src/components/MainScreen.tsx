@@ -258,7 +258,7 @@ export const MainScreen = () => {
                 const isDefeated = defeatedBosses.includes(boss.bossId);
                 return (
                   <button
-                    key={boss.id}
+                    key={`${boss.id}-${boss.level}`}
                     onClick={() => {
                       if (!isDefeated) {
                         startBossBattle(boss.bossId);

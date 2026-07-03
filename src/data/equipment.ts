@@ -530,9 +530,9 @@ function itemload(): void {
   ItemAkusesaripush(26, '会心威力戒指', 7, 4, 170000, 210, '暴击伤害提高', 0, R3);
   ItemZyouiGokan([26]);
 
-  ItemAkusesaripush(27, '首击会心戒指', 8, 4, 210000, 310, '首次攻击必定暴击', 0, R2);
-  ItemAkusesaripush(56, '2连击会心戒指', 8, 5, 2000000, 311, '前[0]次攻击必定暴击', 0, R3, 1);
-  ItemAkusesaripush(57, '3连击会心戒指', 8, 6, 0, 312, '前[0]次攻击必定暴击', 0, R3, 1);
+  ItemAkusesaripush(27, '首击会心戒指', 8, 4, 210000, 310, '首次攻击必定暴击', 1, R2);
+  ItemAkusesaripush(56, '2连击会心戒指', 8, 5, 2000000, 311, '前[0]次攻击必定暴击', 2, R3, 1);
+  ItemAkusesaripush(57, '3连击会心戒指', 8, 6, 0, 312, '前[0]次攻击必定暴击', 3, R3, 1);
   ItemZyouiGokan([27, 56, 57]);
 
   ItemAkusesaripush(28, '连击率戒指', 4, 5, 0, 250, '连击概率提高', 0, R2);

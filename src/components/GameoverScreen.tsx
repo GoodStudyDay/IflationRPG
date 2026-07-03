@@ -54,18 +54,7 @@ export const GameoverScreen = () => {
           当前所持金额为 {player.gold.toLocaleString()}G
         </div>
 
-        <div className="mt-6 flex flex-col lg:flex-row gap-4 max-w-2xl mx-auto w-full">
-          <div className="flex-1 bg-blue-900/50 border border-blue-700 rounded-lg p-4 text-left">
-            <div className="text-blue-300 text-sm font-bold mb-2">游戏说明</div>
-            <div className="text-gray-300 text-xs sm:text-sm">
-              <div>本轮游戏中获得的装备和角色能力等，在下轮游戏中可以继续使用。</div>
-              <div className="text-red-400 mt-1">金钱无法延续到下轮游戏中。</div>
-            </div>
-            <div className="text-gray-300 text-xs sm:text-sm mt-2">
-              使用游戏结束时剩余的金钱，购买强大的装备，以便在下轮游戏中获得更高等级吧！
-            </div>
-          </div>
-          
+        <div className="mt-6 flex justify-center max-w-2xl mx-auto w-full">
           <div className="flex flex-col gap-3 w-full lg:w-auto">
             <button
               onClick={() => setShowCollection(true)}

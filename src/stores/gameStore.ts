@@ -479,19 +479,7 @@ export const useGameStore = create<GameStore>()(
         let agiInc = Math.ceil(initialPlayer.agility + bonus.agility + accAgi);
         let lucInc = Math.ceil(initialPlayer.luck + bonus.luck + accLuc);
         
-        const prevBonus = getLevelBonus(player.level);
-        
-        let prevHpFromBase = Math.ceil(initialPlayer.maxHp + prevBonus.hp);
-        let prevAtkFromBase = Math.ceil(initialPlayer.attack + prevBonus.attack);
-        let prevDefFromBase = Math.ceil(initialPlayer.defense + prevBonus.defense);
-        let prevAgiFromBase = Math.ceil(initialPlayer.agility + prevBonus.agility);
-        let prevLucFromBase = Math.ceil(initialPlayer.luck + prevBonus.luck);
-        
-        const hpStPtBonus = player.maxHp - prevHpFromBase - armorHpContrib - accHp;
-        const atkStPtBonus = player.attack - prevAtkFromBase - weaponAtkContrib - accAtk;
-        const defStPtBonus = player.defense - prevDefFromBase - armorDefContrib - accDef;
-        const agiStPtBonus = player.agility - prevAgiFromBase - accAgi;
-        const lucStPtBonus = player.luck - prevLucFromBase - accLuc;
+        let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
         
         const playerGems = accessories.filter(acc => acc.t1 === 35);
         for (const gem of playerGems) {
@@ -514,16 +502,28 @@ export const useGameStore = create<GameStore>()(
             itemCount1 = 1000;
           }
           
-          hpInc += itemCount1 * _loc2_;
-          atkInc += itemCount1 * _loc2_;
-          defInc += itemCount1 * _loc2_;
-          agiInc += itemCount1 * _loc2_;
-          lucInc += itemCount2 * (_loc2_ * 4);
+          const itemBonus1 = itemCount1 * _loc2_;
+          const itemBonus2 = itemCount2 * (_loc2_ * 4);
+          gemHp += itemBonus1;
+          gemAtk += itemBonus1;
+          gemDef += itemBonus1;
+          gemAgi += itemBonus1;
+          gemLuc += itemBonus2;
+          hpInc += itemBonus1;
+          atkInc += itemBonus1;
+          defInc += itemBonus1;
+          agiInc += itemBonus1;
+          lucInc += itemBonus2;
         }
         
         const braveGems = accessories.filter(acc => acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
+          gemHp += _loc2_;
+          gemAtk += _loc2_;
+          gemDef += _loc2_;
+          gemAgi += _loc2_;
+          gemLuc += _loc2_;
           hpInc += _loc2_;
           atkInc += _loc2_;
           defInc += _loc2_;
@@ -534,6 +534,9 @@ export const useGameStore = create<GameStore>()(
         const warGems = accessories.filter(acc => acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
+          gemAtk += _loc2_;
+          gemDef += _loc2_;
+          gemAgi += _loc2_;
           atkInc += _loc2_;
           defInc += _loc2_;
           agiInc += _loc2_;
@@ -542,11 +545,28 @@ export const useGameStore = create<GameStore>()(
         const fourGodGems = accessories.filter(acc => acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
+          gemHp += _loc2_;
+          gemAtk += _loc2_;
+          gemDef += _loc2_;
+          gemAgi += _loc2_;
           hpInc += _loc2_;
           atkInc += _loc2_;
           defInc += _loc2_;
           agiInc += _loc2_;
         }
+        
+        const prevBonus = getLevelBonus(player.level);
+        const prevHpFromBase = Math.ceil(initialPlayer.maxHp + prevBonus.hp);
+        const prevAtkFromBase = Math.ceil(initialPlayer.attack + prevBonus.attack);
+        const prevDefFromBase = Math.ceil(initialPlayer.defense + prevBonus.defense);
+        const prevAgiFromBase = Math.ceil(initialPlayer.agility + prevBonus.agility);
+        const prevLucFromBase = Math.ceil(initialPlayer.luck + prevBonus.luck);
+        
+        const hpStPtBonus = Math.max(0, player.maxHp - prevHpFromBase - armorHpContrib - accHp - gemHp);
+        const atkStPtBonus = Math.max(0, player.attack - prevAtkFromBase - weaponAtkContrib - accAtk - gemAtk);
+        const defStPtBonus = Math.max(0, player.defense - prevDefFromBase - armorDefContrib - accDef - gemDef);
+        const agiStPtBonus = Math.max(0, player.agility - prevAgiFromBase - accAgi - gemAgi);
+        const lucStPtBonus = Math.max(0, player.luck - prevLucFromBase - accLuc - gemLuc);
         
         updateHighLv(newLevel);
         
@@ -741,7 +761,15 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        set({ player: newPlayer });
+        let battlePointsChange = 0;
+        if (equipment.type === 'accessory' && equipment.t1 === 500) {
+          battlePointsChange += equipment.t2 || 0;
+        }
+        
+        set({ 
+          player: newPlayer,
+          battlePoints: get().battlePoints + battlePointsChange,
+        });
         
         if (equipment.type === 'accessory') {
           get().checkZeroEquips();
@@ -1597,7 +1625,17 @@ export const useGameStore = create<GameStore>()(
               const totalAttack = player.attack;
               const hpPercent = player.hp / player.maxHp;
               const critRate = calculateCritRate(hpPercent);
-              const isCrit = Math.random() * 100 < critRate;
+              
+              let isCrit = Math.random() * 100 < critRate;
+              
+              const accessories = player.equippedAccessories || [];
+              const critRing = accessories.find(acc => acc.t1 === 310 || acc.t1 === 311 || acc.t1 === 312);
+              if (critRing) {
+                const guaranteedCritCount = critRing.t2 || 1;
+                if (battle.turnCount < guaranteedCritCount) {
+                  isCrit = true;
+                }
+              }
               
               const currentComboCount = renzokukaisu >= 1 ? renzokukaisu : 1;
               const { damage } = calculatePlayerDamage(

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
@@ -24,6 +24,44 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [showGoldError, setShowGoldError] = useState(false);
   const [showSetManager, setShowSetManager] = useState(false);
+
+  // Auto-equip without confirmation dialog when no stat changes
+  useEffect(() => {
+    if (!confirmEquipment || confirmEquipment.type === 'soul') return;
+
+    const currentTotalAtk = player.attack + bonuses.atkBonus;
+    const currentTotalDef = player.defense + bonuses.defBonus;
+    const currentTotalHp = player.maxHp + bonuses.hpBonus;
+    const currentTotalAgi = player.agility + bonuses.agiBonus;
+    const currentTotalLuc = player.luck + bonuses.lucBonus;
+
+    let hasChange = true;
+
+    if (confirmEquipment.type === 'weapon') {
+      const oldWeaponBonus = player.equippedWeapon?.attackBonus || 0;
+      const newTotalAtk = currentTotalAtk - oldWeaponBonus + confirmEquipment.attackBonus;
+      hasChange = newTotalAtk !== currentTotalAtk;
+    } else if (confirmEquipment.type === 'armor') {
+      const oldArmorDefBonus = player.equippedArmor?.defenseBonus || 0;
+      const oldArmorHpBonus = player.equippedArmor?.hpBonus || 0;
+      const newTotalDef = currentTotalDef - oldArmorDefBonus + confirmEquipment.defenseBonus;
+      const newTotalHp = currentTotalHp - oldArmorHpBonus + confirmEquipment.hpBonus;
+      hasChange = newTotalDef !== currentTotalDef || newTotalHp !== currentTotalHp;
+    } else if (confirmEquipment.type === 'accessory') {
+      const newTotalAtk = currentTotalAtk + confirmEquipment.attackBonus;
+      const newTotalDef = currentTotalDef + confirmEquipment.defenseBonus;
+      const newTotalHp = currentTotalHp + confirmEquipment.hpBonus;
+      const newTotalAgi = currentTotalAgi + confirmEquipment.agilityBonus;
+      const newTotalLuc = currentTotalLuc + confirmEquipment.luckBonus;
+      hasChange = newTotalAtk !== currentTotalAtk || newTotalDef !== currentTotalDef ||
+        newTotalHp !== currentTotalHp || newTotalAgi !== currentTotalAgi ||
+        newTotalLuc !== currentTotalLuc;
+    }
+
+    if (!hasChange) {
+      handleConfirmEquip();
+    }
+  }, [confirmEquipment]);
 
   const getTotalBonus = () => {
     let atkBonus = 0;
@@ -893,7 +931,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     }
     
     if ((confirmEquipment.type === 'weapon' || confirmEquipment.type === 'armor' || confirmEquipment.type === 'accessory') && changedStats.length === 0) {
-      handleConfirmEquip();
       return null;
     }
     

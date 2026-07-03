@@ -40,7 +40,7 @@ const changelog = [
   },
   {
     version: 'v0.0.1',
-    date: '2026-06-01',
+    date: '2026-06-30',
     changes: [
       '初始版本发布',
       '基础游戏框架',
