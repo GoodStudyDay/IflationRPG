@@ -19,6 +19,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDropGuide, setShowDropGuide] = useState(false);
+  const [showDownloadUuidInput, setShowDownloadUuidInput] = useState(false);
+  const [downloadUuid, setDownloadUuid] = useState('');
 
   const getUserInfo = () => {
     const userId = localStorage.getItem('inflation-rpg-user-id') || crypto.randomUUID();
@@ -109,16 +111,21 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     }
   };
 
-  const handleCloudDownload = async () => {
+  const handleCloudDownload = async (targetUuid?: string) => {
     setCloudLoading(true);
     try {
-      const { userId } = getUserInfo();
+      const finalUuid = targetUuid || downloadUuid.trim();
+      if (!finalUuid) {
+        setImportMsg('请输入有效的 UUID');
+        setTimeout(() => setImportMsg(null), 2000);
+        return;
+      }
       const supabase = getSupabase();
       
       const { data, error } = await supabase
         .from('player_saves')
         .select('save_data')
-        .eq('user_id', userId)
+        .eq('user_id', finalUuid)
         .maybeSingle();
       
       if (error && error.code !== 'PGRST116') throw error;
@@ -311,13 +318,46 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
             </button>
             <div className="text-xs text-gray-400 px-2 mb-2">将当前存档上传到云端保存</div>
 
-            <button
-              onClick={handleCloudDownload}
-              disabled={cloudLoading}
-              className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
-            >
-              {cloudLoading ? '处理中...' : '下载存档'}
-            </button>
+            {!showDownloadUuidInput ? (
+              <button
+                onClick={() => setShowDownloadUuidInput(true)}
+                disabled={cloudLoading}
+                className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              >
+                下载存档
+              </button>
+            ) : (
+              <div className="bg-[#1a0a2e] rounded-lg p-3 space-y-2">
+                <div className="text-xs text-gray-400">请输入要下载的存档 UUID：</div>
+                <input
+                  type="text"
+                  value={downloadUuid}
+                  onChange={e => setDownloadUuid(e.target.value)}
+                  placeholder="粘贴 UUID..."
+                  className="w-full bg-[#0d0520] border border-[#5a3c8a] text-white text-sm px-3 py-2 rounded focus:outline-none focus:border-blue-400 font-mono"
+                  autoFocus
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleCloudDownload();
+                    if (e.key === 'Escape') setShowDownloadUuidInput(false);
+                  }}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleCloudDownload()}
+                    disabled={cloudLoading || !downloadUuid.trim()}
+                    className="flex-1 bg-blue-700 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm"
+                  >
+                    {cloudLoading ? '下载中...' : '确认下载'}
+                  </button>
+                  <button
+                    onClick={() => { setShowDownloadUuidInput(false); setDownloadUuid(''); }}
+                    className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="text-xs text-gray-400 px-2 mb-2">从云端下载存档并恢复进度（会覆盖当前进度）</div>
 
             <div className="border-t border-[#4a2c7a] pt-3 mt-3">

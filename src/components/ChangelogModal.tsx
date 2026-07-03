@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.18',
+    date: '2026-07-03',
+    changes: [
+      '玩家信息展示最高等级时的装备和属性快照',
+      '排行榜：老玩家提交无需重复输入名称',
+      '检测并自动修复不符合插槽星级限制的饰品',
+      '下载存档改为输入 UUID 从云端恢复',
+      'PlayerInfo 中显示并可修改用户 UUID',
+      '设置页面整合：云存档/属性预设/装备图鉴/更新日志',
+    ],
+  },
+  {
     version: 'v0.0.17',
     date: '2026-07-03',
     changes: [

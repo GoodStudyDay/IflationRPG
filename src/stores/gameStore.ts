@@ -7,6 +7,19 @@ import { getEquipmentById, equipmentData } from '@/data/equipment';
 import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
+
+interface PeakSnapshot {
+  level: number;
+  hp: number;
+  maxHp: number;
+  attack: number;
+  defense: number;
+  agility: number;
+  luck: number;
+  equippedWeapon: { id: string; name: string; x: number; y: number } | null;
+  equippedArmor: { id: string; name: string; x: number; y: number } | null;
+  equippedAccessories: { id: string; name: string; x: number; y: number }[];
+}
 import { eneDropItemInit, equipmentIdToItemTypeAndIndex, itemTypeAndIndexToEquipmentId } from '@/utils/dropManager';
 import { battleVarInit } from '@/utils/battleVar';
 import { BONUS_LIST, getRandomBonusType } from '@/utils/bonusManager';
@@ -50,6 +63,7 @@ interface GameStore {
   bonus: BonusState;
   currentMap: number;
   purchaseCounts: Record<string, number>;
+  peakSnapshot: PeakSnapshot | null;
   setPlayer: (player: Player) => void;
   updatePlayerHp: (amount: number) => void;
   updatePlayerMana: (amount: number) => void;
@@ -430,6 +444,7 @@ export const useGameStore = create<GameStore>()(
       },
       currentMap: 1,
       purchaseCounts: storedData?.purchaseCounts || {},
+      peakSnapshot: storedData?.peakSnapshot || null,
       setPlayer: (player) => set({ player }),
       updatePlayerHp: (amount) => {
         const { player, battle } = get();
@@ -2121,7 +2136,19 @@ export const useGameStore = create<GameStore>()(
         const { winbattle, Highlv, player } = get();
         const newWinbattle = winbattle + 1;
         const newHighlv = Math.max(Highlv, player.level);
-        set({ winbattle: newWinbattle, Highlv: newHighlv });
+        const peakSnapshot = newHighlv > Highlv ? {
+          level: newHighlv,
+          hp: player.hp,
+          maxHp: player.maxHp,
+          attack: player.attack,
+          defense: player.defense,
+          agility: player.agility,
+          luck: player.luck,
+          equippedWeapon: player.equippedWeapon ? { id: player.equippedWeapon.id, name: player.equippedWeapon.name, x: player.equippedWeapon.x, y: player.equippedWeapon.y } : null,
+          equippedArmor: player.equippedArmor ? { id: player.equippedArmor.id, name: player.equippedArmor.name, x: player.equippedArmor.x, y: player.equippedArmor.y } : null,
+          equippedAccessories: (player.equippedAccessories || []).filter(Boolean).map(a => ({ id: a.id, name: a.name, x: a.x, y: a.y })),
+        } : undefined;
+        set({ winbattle: newWinbattle, Highlv: newHighlv, ...(peakSnapshot ? { peakSnapshot } : {}) });
         
         const data = loadSaveData();
         data.winbattle = newWinbattle;
@@ -2169,9 +2196,21 @@ export const useGameStore = create<GameStore>()(
         }
       },
       updateHighLv: (level) => {
-        const { Highlv } = get();
+        const { Highlv, player } = get();
         if (level > Highlv) {
-          set({ Highlv: level });
+          const snapshot: PeakSnapshot = {
+            level,
+            hp: player.hp,
+            maxHp: player.maxHp,
+            attack: player.attack,
+            defense: player.defense,
+            agility: player.agility,
+            luck: player.luck,
+            equippedWeapon: player.equippedWeapon ? { id: player.equippedWeapon.id, name: player.equippedWeapon.name, x: player.equippedWeapon.x, y: player.equippedWeapon.y } : null,
+            equippedArmor: player.equippedArmor ? { id: player.equippedArmor.id, name: player.equippedArmor.name, x: player.equippedArmor.x, y: player.equippedArmor.y } : null,
+            equippedAccessories: (player.equippedAccessories || []).filter(Boolean).map(a => ({ id: a.id, name: a.name, x: a.x, y: a.y })),
+          };
+          set({ Highlv: level, peakSnapshot: snapshot });
           
           const data = loadSaveData();
           data.Highlv = level;
@@ -2511,6 +2550,7 @@ export const useGameStore = create<GameStore>()(
         kyarakutalv: state.kyarakutalv,
         kyarakutaKozinExp: state.kyarakutaKozinExp,
         purchaseCounts: state.purchaseCounts,
+        peakSnapshot: state.peakSnapshot,
       }),
     }
   )

@@ -1,8 +1,23 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getCollection } from '@/utils/collectionStorage';
 import { SpriteIcon } from './SpriteIcon';
+
+const UUID_KEY = 'inflation-rpg-user-id';
+
+function getUUID(): string {
+  let uuid = localStorage.getItem(UUID_KEY);
+  if (!uuid) {
+    uuid = crypto.randomUUID();
+    localStorage.setItem(UUID_KEY, uuid);
+  }
+  return uuid;
+}
+
+function setUUID(uuid: string) {
+  localStorage.setItem(UUID_KEY, uuid);
+}
 
 interface PlayerInfoProps {
   isOpen: boolean;
@@ -10,9 +25,22 @@ interface PlayerInfoProps {
 }
 
 export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
-  const { player, Highlv, HighCombo, HighDamage, winbattle, losebattle, newgamecount } = useGameStore();
+  const { player, Highlv, HighCombo, HighDamage, winbattle, losebattle, newgamecount, peakSnapshot } = useGameStore();
+
+  const [uuid, setUuid] = useState(getUUID);
+  const [isEditingUuid, setIsEditingUuid] = useState(false);
+  const [editUuidValue, setEditUuidValue] = useState(uuid);
 
   const collection = useMemo(() => getCollection(), []);
+
+  const handleSaveUuid = () => {
+    const trimmed = editUuidValue.trim();
+    if (trimmed && trimmed.length >= 8) {
+      setUUID(trimmed);
+      setUuid(trimmed);
+    }
+    setIsEditingUuid(false);
+  };
 
   const stats = useMemo(() => {
     const weapons = equipmentData.filter(e => e.type === 'weapon');
@@ -63,73 +91,107 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
-            <div className="text-gray-300 text-sm font-bold mb-2">当前属性</div>
+            <div className="text-gray-300 text-sm font-bold mb-2 flex items-center justify-between">
+              <span>玩家 UUID</span>
+              {!isEditingUuid && (
+                <button
+                  onClick={() => { setIsEditingUuid(true); setEditUuidValue(uuid); }}
+                  className="text-xs text-yellow-400 hover:text-yellow-300 underline"
+                >
+                  修改
+                </button>
+              )}
+            </div>
+            {isEditingUuid ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editUuidValue}
+                  onChange={e => setEditUuidValue(e.target.value)}
+                  className="flex-1 bg-[#0d0520] border border-[#5a3c8a] text-white text-xs px-2 py-1 rounded focus:outline-none focus:border-yellow-400 font-mono"
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter') handleSaveUuid(); if (e.key === 'Escape') setIsEditingUuid(false); }}
+                />
+                <button
+                  onClick={handleSaveUuid}
+                  className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded hover:bg-green-500"
+                >
+                  保存
+                </button>
+                <button
+                  onClick={() => setIsEditingUuid(false)}
+                  className="bg-gray-600 text-white text-xs px-3 py-1 rounded hover:bg-gray-500"
+                >
+                  取消
+                </button>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-400 font-mono break-all">{uuid}</div>
+            )}
+          </div>
+
+          <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
+            <div className="text-gray-300 text-sm font-bold mb-2">最高等级时属性</div>
             <div className="grid grid-cols-5 gap-2 text-center">
               <div>
-                <div className="text-red-400 font-bold">{player.hp.toLocaleString()}</div>
+                <div className="text-red-400 font-bold">{(peakSnapshot || player).hp.toLocaleString()}</div>
                 <div className="text-xs text-gray-500">HP</div>
               </div>
               <div>
-                <div className="text-orange-400 font-bold">{player.attack.toLocaleString()}</div>
+                <div className="text-orange-400 font-bold">{(peakSnapshot || player).attack.toLocaleString()}</div>
                 <div className="text-xs text-gray-500">ATK</div>
               </div>
               <div>
-                <div className="text-blue-400 font-bold">{player.defense.toLocaleString()}</div>
+                <div className="text-blue-400 font-bold">{(peakSnapshot || player).defense.toLocaleString()}</div>
                 <div className="text-xs text-gray-500">DEF</div>
               </div>
               <div>
-                <div className="text-green-400 font-bold">{player.agility.toLocaleString()}</div>
+                <div className="text-green-400 font-bold">{(peakSnapshot || player).agility.toLocaleString()}</div>
                 <div className="text-xs text-gray-500">AGI</div>
               </div>
               <div>
-                <div className="text-purple-400 font-bold">{player.luck.toLocaleString()}</div>
+                <div className="text-purple-400 font-bold">{(peakSnapshot || player).luck.toLocaleString()}</div>
                 <div className="text-xs text-gray-500">LCK</div>
               </div>
             </div>
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
-            <div className="text-gray-300 text-sm font-bold mb-2">当前装备</div>
+            <div className="text-gray-300 text-sm font-bold mb-2">最高等级时装备</div>
             <div className="grid grid-cols-4 gap-2">
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                  {player.equippedWeapon?.x !== undefined ? (
-                    <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
-                  ) : (
-                    <span className="text-lg">📦</span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 truncate">{player.equippedWeapon?.name || '无'}</div>
-              </div>
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                  {player.equippedArmor?.x !== undefined ? (
-                    <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
-                  ) : (
-                    <span className="text-lg">📦</span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 truncate">{player.equippedArmor?.name || '无'}</div>
-              </div>
-              {player.equippedAccessories?.map((acc, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                    {acc?.x !== undefined ? (
-                      <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" />
-                    ) : (
-                      <span className="text-lg">📦</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-400 truncate">{acc?.name || '无'}</div>
-                </div>
-              )) || Array(2).fill(null).map((_, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                    <span className="text-lg">📦</span>
-                  </div>
-                  <div className="text-xs text-gray-400">无</div>
-                </div>
-              ))}
+              {(() => {
+                const src = (peakSnapshot || player) as any;
+                return (
+                  <>
+                    <div className="text-center">
+                      <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                        {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" /> : <span className="text-lg">📦</span>}
+                      </div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedWeapon?.name || '无'}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                        {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" /> : <span className="text-lg">📦</span>}
+                      </div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedArmor?.name || '无'}</div>
+                    </div>
+                    {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => (
+                      <div key={idx} className="text-center">
+                        <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                          {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" /> : <span className="text-lg">📦</span>}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate">{acc?.name || '无'}</div>
+                      </div>
+                    ))}
+                    {((src.equippedAccessories || []).length === 0) && [0, 1].map(i => (
+                      <div key={i} className="text-center">
+                        <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1"><span className="text-lg">📦</span></div>
+                        <div className="text-xs text-gray-400">无</div>
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
