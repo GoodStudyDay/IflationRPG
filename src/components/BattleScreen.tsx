@@ -190,7 +190,7 @@ export const BattleScreen = () => {
           {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
         </div>
         
-        <div className="absolute bottom-12 sm:bottom-20 md:bottom-26 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
+        <div className="absolute bottom-16 sm:bottom-28 md:bottom-36 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
           <div className="h-2 sm:h-3 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className="h-full bg-gradient-to-r from-blue-700 to-blue-500 transition-all duration-300"

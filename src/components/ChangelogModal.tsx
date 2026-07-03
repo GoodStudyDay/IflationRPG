@@ -4,6 +4,16 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.20',
+    date: '2026-07-03 23:59:00',
+    changes: [
+      '已解锁的空饰品槽不再显示锁图标，改为 + 号',
+      '装备列表点击卡片弹出详情浮层，购买/装备按钮不触发',
+      '战斗 HP 血条位置调整，贴近角色不遮挡名称',
+      '手机端战斗 UI 适配优化',
+    ],
+  },
+  {
     version: 'v0.0.19',
     date: '2026-07-03 23:30:00',
     changes: [
