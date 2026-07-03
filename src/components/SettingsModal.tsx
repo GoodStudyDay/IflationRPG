@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { getCacheSize, formatCacheSize, clearCache } from '@/utils/imageCache';
 import { ChangelogModal } from './ChangelogModal';
+import { DropGuideModal } from './DropGuideModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [cacheSize, setCacheSize] = useState<string>('0 B');
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showDropGuide, setShowDropGuide] = useState(false);
   
   useEffect(() => {
     if (isOpen) {
@@ -314,6 +316,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               <div className="text-gray-300 text-sm mb-2">关于游戏</div>
               
               <button
+                onClick={() => setShowDropGuide(true)}
+                className="w-full bg-[#6a3c7a] text-white font-bold py-3 rounded-lg hover:bg-[#7a4c8a] transition-colors"
+              >
+                装备掉落图鉴
+              </button>
+              <div className="text-xs text-gray-400 px-2 mb-2">查看所有装备的掉落来源、地图和怪物</div>
+              
+              <button
                 onClick={() => setShowChangelog(true)}
                 className="w-full bg-[#4a3c7a] text-white font-bold py-3 rounded-lg hover:bg-[#5a4c8a] transition-colors"
               >
@@ -340,6 +350,10 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
       {showChangelog && (
         <ChangelogModal onClose={() => setShowChangelog(false)} />
+      )}
+
+      {showDropGuide && (
+        <DropGuideModal isOpen={showDropGuide} onClose={() => setShowDropGuide(false)} />
       )}
     </div>
   );
