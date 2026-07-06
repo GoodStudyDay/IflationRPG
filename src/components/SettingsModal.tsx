@@ -25,6 +25,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [showDropGuide, setShowDropGuide] = useState(false);
   const [showDownloadUuidInput, setShowDownloadUuidInput] = useState(false);
   const [downloadUuid, setDownloadUuid] = useState('');
+  const [cloudPassword, setCloudPassword] = useState('');
   const [activeSection, setActiveSection] = useState<ActiveSection>('main');
 
   const handlePresetChange = (index: number, value: number) => {
@@ -77,6 +78,25 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   } = useGameStore();
 
   const handleCloudUpload = async () => {
+    const storedPassword = localStorage.getItem('inflation-rpg-password') || '';
+    if (!storedPassword) {
+      setImportMsg(t('请先设置密码！'));
+      setTimeout(() => setImportMsg(null), 2000);
+      return;
+    }
+    
+    if (!cloudPassword) {
+      setImportMsg(t('请输入密码！'));
+      setTimeout(() => setImportMsg(null), 2000);
+      return;
+    }
+    
+    if (cloudPassword !== storedPassword) {
+      setImportMsg(t('密码错误！'));
+      setTimeout(() => setImportMsg(null), 2000);
+      return;
+    }
+    
     setCloudLoading(true);
     try {
       const data = exportSaveData();
@@ -86,6 +106,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       const savePayload = {
         stateData: data,
         timestamp: new Date().toISOString(),
+        passwordHash: storedPassword ? btoa(storedPassword) : '',
       };
       
       const { data: existing, error: fetchError } = await supabase
@@ -131,6 +152,12 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   };
 
   const handleCloudDownload = async (targetUuid?: string) => {
+    if (!cloudPassword) {
+      setImportMsg(t('请输入密码！'));
+      setTimeout(() => setImportMsg(null), 2000);
+      return;
+    }
+    
     setCloudLoading(true);
     try {
       const finalUuid = targetUuid || downloadUuid.trim();
@@ -156,6 +183,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       }
       
       const saveData = data.save_data as any;
+      const storedHash = saveData.passwordHash || '';
+      
+      if (storedHash && storedHash !== btoa(cloudPassword)) {
+        setImportMsg(t('密码错误！'));
+        setTimeout(() => setImportMsg(null), 2000);
+        return;
+      }
+      
       const stateData = saveData.stateData || '';
       
       if (!stateData) {
@@ -249,6 +284,17 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     <div className="space-y-3">
       {renderSectionHeader(t('存档管理'))}
 
+      <div className="bg-[#1a0a2e] rounded-lg p-3">
+        <div className="text-xs text-gray-400 mb-2">{t('密码')}</div>
+        <input
+          type="password"
+          value={cloudPassword}
+          onChange={e => setCloudPassword(e.target.value)}
+          placeholder={t('输入密码')}
+          className="w-full bg-[#0d0520] border border-[#5a3c8a] text-white text-sm px-3 py-2 rounded focus:outline-none focus:border-blue-400"
+        />
+      </div>
+
       <button
         onClick={handleCloudUpload}
         disabled={cloudLoading}
@@ -293,7 +339,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               onClick={() => { setShowDownloadUuidInput(false); setDownloadUuid(''); }}
               className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
             >
-              {t('キャンセル')}
+              {t('取消')}
             </button>
           </div>
         </div>

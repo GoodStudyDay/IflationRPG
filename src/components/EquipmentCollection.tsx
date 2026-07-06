@@ -4,12 +4,14 @@ import { equipmentData } from '@/data/equipment';
 import type { EquipmentType } from '@/types';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface EquipmentCollectionProps {
   onClose: () => void;
 }
 
 export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
+  const { t } = useTranslation();
   const { getEquipName } = useEquipmentName();
   const { inventory, player, buyEquipment } = useGameStore();
   type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
@@ -21,21 +23,21 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const handleBuy = (equipmentId: string) => {
     const success = buyEquipment(equipmentId);
     if (success) {
-      setBuySuccessMsg('购买成功！');
+      setBuySuccessMsg(t('购买成功！'));
       setTimeout(() => setBuySuccessMsg(null), 1500);
     } else {
-      setBuyErrorMsg('金币不足或已达上限');
+      setBuyErrorMsg(t('金币不足或已达上限'));
       setTimeout(() => setBuyErrorMsg(null), 1500);
     }
   };
 
   const categories: { value: CategoryType; label: string }[] = [
-    { value: 'all', label: '全部' },
-    { value: 'weapon', label: '武器' },
-    { value: 'armor', label: '防具' },
-    { value: 'accessory', label: '饰品' },
-    { value: 'soul', label: '魂' },
-    { value: 'material', label: '材料' },
+    { value: 'all', label: t('全部') },
+    { value: 'weapon', label: t('武器') },
+    { value: 'armor', label: t('防具') },
+    { value: 'accessory', label: t('饰品') },
+    { value: 'soul', label: t('魂') },
+    { value: 'material', label: t('材料') },
   ];
 
   const filteredEquipment = equipmentData.filter(item => {
@@ -52,10 +54,10 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
 
   const getTypeLabel = (type: EquipmentType) => {
     switch (type) {
-      case 'weapon': return '武器';
-      case 'armor': return '防具';
-      case 'consumable': return '消耗品';
-      case 'accessory': return '饰品';
+      case 'weapon': return t('武器');
+      case 'armor': return t('防具');
+      case 'consumable': return t('消耗品');
+      case 'accessory': return t('饰品');
     }
   };
 
@@ -74,7 +76,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
               <div className="w-8 h-8 bg-game-secondary rounded flex items-center justify-center text-game-dark font-bold text-sm">
                 COL
               </div>
-              <span className="text-game-secondary font-bold">装备收集</span>
+              <span className="text-game-secondary font-bold">{t('装备收集')}</span>
             </div>
             <button
               onClick={onClose}
@@ -217,7 +219,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
             onClick={onClose}
             className="w-full bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors text-sm"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>
@@ -285,7 +287,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
               onClick={() => setSelectedEquipment(null)}
               className="w-full mt-4 bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors text-sm"
             >
-              关闭
+              {t('关闭')}
             </button>
           </div>
         </div>

@@ -216,12 +216,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">武器列表</span>
+          <span className="text-white font-bold text-lg">{t('武器列表')}</span>
           <button 
             onClick={() => setViewMode('main')}
             className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
 
@@ -252,10 +252,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{getEquipName(weapon.name)}</div>
-                    {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">{t('当前装备')}</div>}
                     {!isOwned && (
                       <div>
-                        <div className="text-gray-400 text-sm mt-1">未拥有</div>
+                        <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         <div className="text-red-300 text-sm mt-0.5">ATK +{weapon.attackBonus}</div>
                       </div>
                     )}
@@ -263,7 +263,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <>
                         <div className="text-red-300 text-sm mt-1">ATK +{Math.floor(weapon.attackBonus * stockMult)}</div>
                         <div className="text-gray-300 text-xs mt-0.5">
-                          数量: {weapon.quantity}
+                          {t('数量')}: {weapon.quantity}
                           {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
                         </div>
                       </>
@@ -272,13 +272,13 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-gray-400">倍率: {Math.floor(weapon.attributeRate * stockMult)}%</div>
+                        <div className="text-xs text-gray-400">{t('倍率')}: {Math.floor(weapon.attributeRate * stockMult)}%</div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(weapon); }}
                             className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                           >
-                            装备
+                            {t('装备')}
                           </button>
                         )}
                       </>
@@ -287,7 +287,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={(e) => { e.stopPropagation(); handleBuy(weapon.id); }}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {getCurrentPrice(weapon).toLocaleString()}G
+                        {t('购买')} {getCurrentPrice(weapon).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -302,7 +302,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             onClick={() => setViewMode('main')}
             className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>
@@ -315,12 +315,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">防具列表</span>
+          <span className="text-white font-bold text-lg">{t('防具列表')}</span>
           <button 
             onClick={() => setViewMode('main')}
             className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
 
@@ -351,10 +351,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{getEquipName(armor.name)}</div>
-                    {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">{t('当前装备')}</div>}
                     {!isOwned && (
                       <div>
-                        <div className="text-gray-400 text-sm mt-1">未拥有</div>
+                        <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         <div className="text-blue-300 text-sm mt-0.5">DEF +{armor.defenseBonus}</div>
                         {armor.hpBonus > 0 && <div className="text-green-300 text-xs">HP +{armor.hpBonus}</div>}
                       </div>
@@ -366,7 +366,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <div className="text-green-300 text-xs">HP +{Math.floor(armor.hpBonus * stockMult)}</div>
                         )}
                         <div className="text-gray-300 text-xs mt-0.5">
-                          数量: {armor.quantity}
+                          {t('数量')}: {armor.quantity}
                           {armor.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(armor.quantity - 1) * 10}%)</span>}
                         </div>
                       </>
@@ -375,13 +375,13 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-gray-400">倍率: {Math.floor(armor.attributeRate * stockMult)}%</div>
+                        <div className="text-xs text-gray-400">{t('倍率')}: {Math.floor(armor.attributeRate * stockMult)}%</div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(armor); }}
                             className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                           >
-                            装备
+                            {t('装备')}
                           </button>
                         )}
                       </>
@@ -390,7 +390,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         onClick={(e) => { e.stopPropagation(); handleBuy(armor.id); }}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {getCurrentPrice(armor).toLocaleString()}G
+                        {t('购买')} {getCurrentPrice(armor).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -405,7 +405,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             onClick={() => setViewMode('main')}
             className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>
@@ -432,12 +432,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">饰品列表</span>
+          <span className="text-white font-bold text-lg">{t('饰品列表')}</span>
           <button 
             onClick={() => setViewMode('main')}
             className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
 
@@ -474,10 +474,10 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         <span key={i} className={`text-xs ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
                       ))}
                     </div>
-                    {isEquipped && <div className="text-green-300 text-sm mt-1">已装备 {equippedAccs.filter(a => a && a.id === accessory.id).length}个</div>}
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">{t('当前装备')} {equippedAccs.filter(a => a && a.id === accessory.id).length}{t('件')}</div>}
                     {!isOwned && (
                       <div>
-                        <div className="text-gray-400 text-sm mt-1">未拥有</div>
+                        <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         {accessory.description && (
                           <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
                         )}
@@ -522,7 +522,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                             <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
                           )}
                         </div>
-                        <div className="text-gray-300 text-xs mt-0.5">数量: {accessory.quantity}</div>
+                        <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {accessory.quantity}</div>
                       </>
                     )}
                   </div>
@@ -533,17 +533,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           onClick={(e) => { e.stopPropagation(); handleEquip(accessory); }}
                           className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                         >
-                          装备
+                          {t('装备')}
                         </button>
                       ) : (
-                        <div className="text-xs text-gray-400">全部已装备</div>
+                        <div className="text-xs text-gray-400">{t('全部已装备')}</div>
                       )
                     ) : (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleBuy(accessory.id); }}
                         className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                       >
-                        购买 {getCurrentPrice(accessory).toLocaleString()}G
+                        {t('购买')} {getCurrentPrice(accessory).toLocaleString()}G
                       </button>
                     )}
                   </div>
@@ -558,7 +558,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             onClick={() => setViewMode('main')}
             className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>
@@ -571,12 +571,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">魂列表</span>
+          <span className="text-white font-bold text-lg">{t('魂列表')}</span>
           <button 
             onClick={() => setViewMode('main')}
             className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
 
@@ -631,16 +631,16 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-gray-400">属性倍率: {soul.attributeRate}%</div>
+                        <div className="text-xs text-gray-400">{t('倍率')}: {soul.attributeRate}%</div>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleEquip(soul); }}
                           className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                         >
-                          安装 {soul.price.toLocaleString()}G
+                          {t('安装')} {soul.price.toLocaleString()}G
                         </button>
                       </>
                     ) : (
-                      <div className="text-xs text-gray-400">无法安装</div>
+                      <div className="text-xs text-gray-400">{t('未拥有')}</div>
                     )}
                   </div>
                 </div>
@@ -654,7 +654,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             onClick={() => setViewMode('main')}
             className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>
@@ -667,12 +667,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">材料列表</span>
+          <span className="text-white font-bold text-lg">{t('材料列表')}</span>
           <button 
             onClick={() => setViewMode('main')}
             className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
 
@@ -784,7 +784,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
         </div>
 
-        <div className="text-xs text-gray-600 px-4 py-1 bg-[#7a94b7]">点击武器、防具、饰孔可以购买或解锁</div>
+        <div className="text-xs text-gray-600 px-4 py-1 bg-[#7a94b7]">{t('点击武器、防具、饰孔可以购买或解锁')}</div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
           <div className="flex items-start gap-2">
@@ -816,7 +816,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-white font-bold text-sm truncate">{player.equippedWeapon ? getEquipName(player.equippedWeapon.name) : '未装备'}</div>
+                    <div className="text-white font-bold text-sm truncate">{player.equippedWeapon ? getEquipName(player.equippedWeapon.name) : t('未装备')}</div>
                     {player.equippedWeapon && (
                       <>
                         <div className="text-red-300 text-xs mt-1">
@@ -862,7 +862,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-white font-bold text-sm truncate">{player.equippedArmor ? getEquipName(player.equippedArmor.name) : '未装备'}</div>
+                    <div className="text-white font-bold text-sm truncate">{player.equippedArmor ? getEquipName(player.equippedArmor.name) : t('未装备')}</div>
                     {player.equippedArmor && (
                       <>
                         <div className="text-blue-300 text-xs mt-1">
@@ -879,7 +879,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             </div>
           </div>
 
-          <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold">饰品</div>
+          <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold">{t('饰品')}</div>
 
           <div className="grid grid-cols-2 gap-2">
             {[0, 1, 2, 3, 4, 5].map(slotIndex => {
@@ -937,7 +937,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                       <span className="text-lg text-gray-400">+</span>
                     </div>
-                    <div className="text-gray-300 text-xs font-bold">空栏位 {slotIndex + 1}</div>
+                    <div className="text-gray-300 text-xs font-bold">{t('空栏位')} {slotIndex + 1}</div>
                   </div>
                 ) : (
                   <div 
@@ -950,7 +950,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="w-10 h-10 bg-[#3a4a55] rounded flex items-center justify-center">
                       <span className="text-lg">🔒</span>
                     </div>
-                    <div className="text-gray-400 text-xs">未解锁 饰孔{slotIndex + 1}</div>
+                    <div className="text-gray-400 text-xs">{t('未解锁')} {t('饰孔')}{slotIndex + 1}</div>
                   </div>
                 )}
               </div>
@@ -1010,7 +1010,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
 
           <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold flex items-center justify-between">
-            <span>■属性</span>
+            <span>■{t('属性')}</span>
             <div className="flex gap-1">
               <button 
                 onClick={() => setViewMode('material')}
@@ -1049,7 +1049,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             onClick={onClose}
             className="w-full bg-[#4a6fa5] text-white font-bold py-2 rounded hover:bg-[#3a5a95] transition-colors text-sm"
           >
-            关闭
+            {t('关闭')}
           </button>
         </div>
       </div>
@@ -1209,7 +1209,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               </div>
               <div>
                 <div className="text-white font-bold text-lg">{detailEquipment.name}</div>
-                <div className="text-gray-400 text-xs">{detailEquipment.type === 'weapon' ? '武器' : detailEquipment.type === 'armor' ? '防具' : detailEquipment.type === 'accessory' ? '饰品' : detailEquipment.type === 'soul' ? '魂' : '材料'}</div>
+                <div className="text-gray-400 text-xs">{detailEquipment.type === 'weapon' ? t('武器') : detailEquipment.type === 'armor' ? t('防具') : detailEquipment.type === 'accessory' ? t('饰品') : detailEquipment.type === 'soul' ? t('魂') : t('材料')}</div>
               </div>
             </div>
             {detailEquipment.description && (
@@ -1223,18 +1223,18 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             )}
             <div className="space-y-1 mb-3">
               {detailEquipment.type === 'weapon' && detailEquipment.attackBonus > 0 && (
-                <div className="flex justify-between text-sm"><span className="text-gray-400">攻击力</span><span className="text-red-300">+{detailEquipment.attackBonus}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-400">{t('攻击力')}</span><span className="text-red-300">+{detailEquipment.attackBonus}</span></div>
               )}
               {detailEquipment.type === 'armor' && (
                 <>
-                  {detailEquipment.defenseBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">防御力</span><span className="text-blue-300">+{detailEquipment.defenseBonus}</span></div>}
+                  {detailEquipment.defenseBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">{t('防御力')}</span><span className="text-blue-300">+{detailEquipment.defenseBonus}</span></div>}
                   {detailEquipment.hpBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">HP</span><span className="text-green-300">+{detailEquipment.hpBonus}</span></div>}
                 </>
               )}
               {detailEquipment.type === 'accessory' && (
                 <>
-                  {detailEquipment.attackBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">攻击力</span><span className="text-red-300">+{detailEquipment.attackBonus}</span></div>}
-                  {detailEquipment.defenseBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">防御力</span><span className="text-blue-300">+{detailEquipment.defenseBonus}</span></div>}
+                  {detailEquipment.attackBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">{t('攻击力')}</span><span className="text-red-300">+{detailEquipment.attackBonus}</span></div>}
+                  {detailEquipment.defenseBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">{t('防御力')}</span><span className="text-blue-300">+{detailEquipment.defenseBonus}</span></div>}
                   {detailEquipment.hpBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">HP</span><span className="text-green-300">+{detailEquipment.hpBonus}</span></div>}
                   {detailEquipment.agilityBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">AGI</span><span className="text-yellow-300">+{detailEquipment.agilityBonus}</span></div>}
                   {detailEquipment.luckBonus > 0 && <div className="flex justify-between text-sm"><span className="text-gray-400">LUC</span><span className="text-purple-300">+{detailEquipment.luckBonus}</span></div>}
@@ -1248,12 +1248,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               )}
             </div>
             <div className="flex justify-between text-sm mb-3">
-              <span className="text-gray-400">价格</span>
+              <span className="text-gray-400">{t('价格')}</span>
               <span className="text-yellow-400">{detailEquipment.price > 0 ? detailEquipment.price.toLocaleString() + ' G' : '-'}</span>
             </div>
             {(detailEquipment.quantity ?? 0) > 0 && (
               <div className="flex justify-between text-sm mb-3">
-                <span className="text-gray-400">持有数量</span>
+                <span className="text-gray-400">{t('持有数量')}</span>
                 <span className="text-white">{detailEquipment.quantity}</span>
               </div>
             )}
@@ -1271,21 +1271,21 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
             <div className="text-center">
-              <div className="text-xl font-bold text-white mb-2">解锁饰孔 {unlockingSlotIndex + 1}？</div>
+              <div className="text-xl font-bold text-white mb-2">{t('解锁饰孔')} {unlockingSlotIndex + 1}？</div>
               <div className="text-gray-300 mb-4">需要 {(() => { const prices = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000]; return prices[unlockingSlotIndex]; })().toLocaleString()} G</div>
               <div className="flex gap-3">
                 <button
-                  onClick={handleUnlockSlot}
-                  className="flex-1 bg-yellow-600 text-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors"
-                >
-                  解锁
-                </button>
-                <button
-                  onClick={() => setShowUnlockConfirm(false)}
-                  className="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-500 transition-colors"
-                >
-                  取消
-                </button>
+            onClick={handleUnlockSlot}
+            className="flex-1 bg-yellow-600 text-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors"
+          >
+            {t('解锁')}
+          </button>
+          <button
+            onClick={() => setShowUnlockConfirm(false)}
+            className="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-500 transition-colors"
+          >
+            {t('取消')}
+          </button>
               </div>
             </div>
           </div>
@@ -1301,8 +1301,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       {purchaseConfirmSlot !== null && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 w-[80%] max-w-sm">
-            <div className="text-game-secondary font-bold text-lg mb-4">购买背包{purchaseConfirmSlot + 1}</div>
-            <div className="text-white text-sm mb-6">确定花费 {getEquipSetPrice(purchaseConfirmSlot)?.toLocaleString() || 0} 金币购买该背包吗？</div>
+            <div className="text-game-secondary font-bold text-lg mb-4">{t('购买背包')}{purchaseConfirmSlot + 1}</div>
+            <div className="text-white text-sm mb-6">{t('确定花费')} {getEquipSetPrice(purchaseConfirmSlot)?.toLocaleString() || 0} {t('金币购买该背包吗？')}</div>
             <div className="flex gap-3">
               <button
                 onClick={() => {
@@ -1317,13 +1317,13 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }}
                 className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded text-sm transition-colors"
               >
-                确定
+                {t('确定')}
               </button>
               <button
                 onClick={() => setPurchaseConfirmSlot(null)}
                 className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 rounded text-sm transition-colors"
               >
-                取消
+                {t('取消')}
               </button>
             </div>
           </div>

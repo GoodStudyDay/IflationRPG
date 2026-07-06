@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { getSupabase } from '@/lib/supabase';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LeaderboardRow {
   id: string;
@@ -41,6 +42,7 @@ interface LeaderboardProps {
 
 export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
   const { Highlv } = useGameStore();
+  const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState<LeaderboardDisplayEntry[]>([]);
   const [playerName, setPlayerName] = useState('');
   const [showNameInput, setShowNameInput] = useState(false);
@@ -91,9 +93,9 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
   const submitScore = async (name?: string) => {
     const submitName = (name || playerName).trim();
     if (!submitName) {
-      alert('请输入玩家名称');
-      return;
-    }
+        alert(t('请输入玩家名称'));
+        return;
+      }
 
     const userId = getOrCreateUserId();
     
@@ -141,7 +143,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
       await loadLeaderboard();
     } catch (err) {
       console.error('Failed to submit score:', err);
-      alert('提交失败，请稍后再试');
+      alert(t('提交失败，请稍后再试'));
     } finally {
       setLoading(false);
     }
@@ -165,23 +167,23 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg w-[90%] max-w-lg max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="bg-[#1a0a2e] border-b-2 border-[#5a3c8a] px-4 py-3">
-          <div className="text-game-secondary font-bold text-lg text-center">🏆 排行榜</div>
+          <div className="text-game-secondary font-bold text-lg text-center">🏆 {t('排行榜')}</div>
         </div>
 
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="text-gray-400 text-sm">加载中...</div>
+            <div className="text-gray-400 text-sm">{t('加载中...')}</div>
           </div>
         )}
 
         {!loading && showNameInput ? (
           <div className="p-4">
-            <div className="text-white text-sm mb-3 text-center">输入你的玩家名称</div>
+            <div className="text-white text-sm mb-3 text-center">{t('输入你的玩家名称')}</div>
             <input
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="请输入玩家名称..."
+              placeholder={t('请输入玩家名称...')}
               maxLength={20}
               className="w-full bg-[#1a0a2e] border border-[#5a3c8a] rounded-lg p-3 text-white text-center focus:outline-none focus:border-[#6a4c9a]"
               autoFocus
@@ -191,13 +193,13 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
                 onClick={() => submitScore()}
                 className="flex-1 bg-green-700 text-white font-bold py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
-                提交
+                {t('提交')}
               </button>
               <button
                 onClick={() => setShowNameInput(false)}
                 className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors"
               >
-                取消
+                {t('取消')}
               </button>
             </div>
           </div>
@@ -205,29 +207,29 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
           <div className="p-4 overflow-y-auto max-h-[60vh]">
             <div className="flex items-center justify-between mb-3">
               <div className="text-gray-300 text-sm">
-                你的最高等级: <span className="text-yellow-400 font-bold">{Highlv}</span>
+                {t('你的最高等级')}: <span className="text-yellow-400 font-bold">{Highlv}</span>
               </div>
               {!submitted ? (
                 <button
                   onClick={handleSubmitClick}
                   className="bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  提交成绩
+                  {t('提交成绩')}
                 </button>
               ) : (
-                <div className="text-green-400 text-xs">✓ 已提交</div>
+                <div className="text-green-400 text-xs">✓ {t('已提交')}</div>
               )}
             </div>
 
             {playerRank && (
               <div className="bg-[#3d2b6e] rounded-lg p-3 mb-4 text-center">
-                <div className="text-gray-300 text-xs">你的排名</div>
+                <div className="text-gray-300 text-xs">{t('你的排名')}</div>
                 <div className="text-2xl font-bold text-yellow-400">#{playerRank}</div>
               </div>
             )}
 
             {leaderboard.length === 0 ? (
-              <div className="text-center text-gray-400 py-8">暂无排行数据</div>
+              <div className="text-center text-gray-400 py-8">{t('暂无排行数据')}</div>
             ) : (
               <div className="space-y-1">
                 {leaderboard.map((entry, index) => (
@@ -271,7 +273,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
             onClick={onClose}
             className="w-full bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors"
           >
-            关闭
+            {t('关闭')}
           </button>
         </div>
       </div>

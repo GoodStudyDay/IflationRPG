@@ -67,19 +67,19 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
             <div className="text-xs text-gray-400 px-2 mb-2">{t('アイテムを購入、装備をし')}</div>
             
             <button
-              onClick={() => setActivePanel('collection')}
-              className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
-            >
-              装备列表
-            </button>
-            <div className="text-xs text-gray-400 px-2 mb-2">查看已收集的装备</div>
+            onClick={() => setActivePanel('collection')}
+            className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
+          >
+            {t('装备列表')}
+          </button>
+          <div className="text-xs text-gray-400 px-2 mb-2">{t('查看已收集的装备')}</div>
             
             <button
-              onClick={() => setShowSettings(true)}
-              className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
-            >
-              设置
-            </button>
+            onClick={() => setShowSettings(true)}
+            className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
+          >
+            {t('设置')}
+          </button>
             <div className="text-xs text-gray-400 px-2 mb-2">{t('ゲームの設定などを変更しま')}</div>
             
             <div className="flex gap-2">
@@ -90,11 +90,11 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
                 {t('タイトルに戻る')}
               </button>
               <button
-                onClick={() => killPlayer()}
-                className="flex-1 bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
-              >
-                死亡
-              </button>
+            onClick={() => killPlayer()}
+            className="flex-1 bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
+          >
+            {t('死亡')}
+          </button>
             </div>
             <div className="text-xs text-gray-400 px-2 mb-2">{t('ゲームは自動的にセーブされて')}</div>
             
