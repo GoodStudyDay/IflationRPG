@@ -1253,7 +1253,8 @@ export const useGameStore = create<GameStore>()(
         });
       },
       setHardmode: (hardmode) => {
-        set({ hardmode });
+        const maxBP = hardmode === 1 ? 15 : 30;
+        set({ hardmode, maxBattlePoints: maxBP, battlePoints: maxBP });
       },
       setLanguage: (language) => {
         set({ language });
@@ -1263,9 +1264,9 @@ export const useGameStore = create<GameStore>()(
         saveSaveData(data);
       },
       startGame: () => {
-        const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
+        const { player, inventory, skills, battlePoints, maxBattlePoints, hardmode } = get();
         
-        const newBattlePoints = battlePoints <= 0 ? maxBattlePoints : battlePoints;
+        const newBattlePoints = battlePoints <= 0 ? (hardmode === 1 ? 15 : maxBattlePoints) : battlePoints;
         
         const levelBonus = getLevelBonus(player.level);
         
@@ -2459,14 +2460,17 @@ export const useGameStore = create<GameStore>()(
         
         newPlayer.hp = newPlayer.maxHp;
         
+        const { hardmode } = get();
+        const resetBP = hardmode === 1 ? 15 : 30;
+        
         set({
           player: newPlayer,
           inventory: savedInventory,
           skills: initialSkills,
           currentScene: 'title',
           encounterRate: 0,
-          battlePoints: 30,
-          maxBattlePoints: 30,
+          battlePoints: resetBP,
+          maxBattlePoints: resetBP,
           defeatedBosses: [],
           bonus: {
             addUsesLeft: 5,
@@ -2537,8 +2541,8 @@ export const useGameStore = create<GameStore>()(
         if (newHighlv >= 100000 && hardmodeUnlock !== 1) {
           newHardmodeUnlock = 1;
         }
-        // 最高等级达到100万时解锁地狱模式
-        if (newHighlv >= 1000000 && hellmodeUnlock !== 1) {
+        // 最高等级达到1000万时解锁地狱模式
+        if (newHighlv >= 10000000 && hellmodeUnlock !== 1) {
           newHellmodeUnlock = 1;
         }
         
@@ -2624,7 +2628,7 @@ export const useGameStore = create<GameStore>()(
           if (level >= 100000 && hardmodeUnlock !== 1) {
             newHardmodeUnlock = 1;
           }
-          if (level >= 1000000 && hellmodeUnlock !== 1) {
+          if (level >= 10000000 && hellmodeUnlock !== 1) {
             newHellmodeUnlock = 1;
           }
           
