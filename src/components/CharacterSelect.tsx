@@ -9,12 +9,21 @@ interface CharacterSelectProps {
   onBack: () => void;
 }
 
+type Difficulty = 0 | 1 | 2;
+
+const DIFFICULTY_CONFIG = [
+  { id: 0 as Difficulty, name: '普通', color: 'bg-gray-600 border-gray-400', textColor: 'text-gray-100', description: '适合新手玩家' },
+  { id: 1 as Difficulty, name: '困难', color: 'bg-red-600 border-red-400', textColor: 'text-red-100', description: '怪物属性提升，需达成条件解锁' },
+  { id: 2 as Difficulty, name: '地狱', color: 'bg-purple-800 border-purple-500', textColor: 'text-purple-100', description: '怪物属性大幅提升，需达成条件解锁' },
+];
+
 const COLS = 3;
 const ROWS = 4;
 
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
-  const { kyarakutalv, player } = useGameStore();
+  const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode } = useGameStore();
   const [frames, setFrames] = useState<Record<number, number>>({});
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(0);
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -36,7 +45,15 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
   }, []);
 
   const handleHeroSelect = (heroId: number) => {
+    setHardmode(selectedDifficulty);
     onSelect(heroId);
+  };
+
+  const isDifficultyUnlocked = (difficulty: Difficulty): boolean => {
+    if (difficulty === 0) return true;
+    if (difficulty === 1) return hardmodeUnlock === 1;
+    if (difficulty === 2) return hellmodeUnlock === 1;
+    return false;
   };
 
   const getStatDescription = (hero: typeof heroData[0]) => {
@@ -82,6 +99,46 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
             </p>
           </div>
         )}
+
+        <div className="text-center mb-4">
+          <p className="text-gray-400 text-xs mb-2">选择难度</p>
+          <div className="flex justify-center gap-2">
+            {DIFFICULTY_CONFIG.map((diff) => {
+              const unlocked = isDifficultyUnlocked(diff.id);
+              const isSelected = selectedDifficulty === diff.id;
+              
+              return (
+                <button
+                  key={diff.id}
+                  onClick={() => unlocked && setSelectedDifficulty(diff.id)}
+                  disabled={!unlocked}
+                  className={`px-4 py-2 rounded-lg border-2 font-bold text-sm transition-all ${
+                    isSelected
+                      ? `${diff.color} scale-105`
+                      : unlocked
+                        ? `bg-gray-700 border-gray-500 text-gray-200 hover:bg-gray-600`
+                        : `bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed opacity-50`
+                  }`}
+                >
+                  {unlocked ? (
+                    <>
+                      <span>{diff.name}</span>
+                      {isSelected && <span className="ml-1">✓</span>}
+                    </>
+                  ) : (
+                    <span>🔒</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {!isDifficultyUnlocked(1) && (
+            <p className="text-gray-500 text-xs mt-1">困难模式: 最高等级超过100000解锁</p>
+          )}
+          {!isDifficultyUnlocked(2) && (
+            <p className="text-gray-500 text-xs">地狱模式: 最高等级超过10000000解锁</p>
+          )}
+        </div>
 
         <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
           {heroData.map((hero) => {

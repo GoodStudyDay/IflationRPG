@@ -134,6 +134,8 @@ interface GameStore {
   autoAllocateStPt: () => void;
   /** 选择角色 */
   selectHero: (heroId: number) => void;
+  /** 设置难度 */
+  setHardmode: (hardmode: number) => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -253,7 +255,7 @@ const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Pl
   return { fixedPlayer, unequippedAccessories };
 };
 
-const calculateCritRate = (hpPercent: number): number => {
+const calculateCritRate = (hpPercent: number, accessories: Equipment[]): number => {
   let rate = BASE_CRIT_RATE;
   if (hpPercent <= 0.25) {
     rate += 0.05;
@@ -261,10 +263,16 @@ const calculateCritRate = (hpPercent: number): number => {
     if (hpPercent <= 0.1) rate += 0.045;
     if (hpPercent <= 0.05) rate += 0.03;
   }
+  
+  const critChanceRing = accessories.find(acc => acc.t1 === 200);
+  if (critChanceRing) {
+    rate += 0.15;
+  }
+  
   return Math.min(rate, 0.7) * 100;
 };
 
-const calculateComboRate = (hpPercent: number): number => {
+const calculateComboRate = (hpPercent: number, accessories: Equipment[]): number => {
   let rate = BASE_COMBO_RATE;
   if (hpPercent <= 0.25) {
     rate += 0.08;
@@ -272,6 +280,17 @@ const calculateComboRate = (hpPercent: number): number => {
     if (hpPercent <= 0.1) rate += 0.13;
     if (hpPercent <= 0.05) rate += 0.08;
   }
+  
+  const comboRateRing = accessories.find(acc => acc.t1 === 250);
+  if (comboRateRing) {
+    rate += 0.15;
+  }
+  
+  const stormPower = accessories.find(acc => acc.t1 === 4001);
+  if (stormPower) {
+    rate += (stormPower.t2 || 50) / 100;
+  }
+  
   return Math.min(rate, 0.8) * 100;
 };
 
@@ -279,16 +298,30 @@ const calculatePlayerDamage = (
   playerAttack: number,
   enemyDefense: number,
   isCrit: boolean,
-  comboCount: number
+  comboCount: number,
+  accessories: Equipment[],
+  playerLevel: number
 ): { damage: number; isCrit: boolean } => {
   let damage: number;
   
+  const critPowerRing = accessories.find(acc => acc.t1 === 210);
+  const skyPower = accessories.find(acc => acc.t1 === 4002);
+  const stormPower = accessories.find(acc => acc.t1 === 4001);
+  const powerStone = accessories.find(acc => acc.t1 === 2222);
+  
   if (isCrit) {
     const critBonus = Math.random() * 1.2;
-    const critMultiplier = 1.75 + critBonus / 5;
+    let critMultiplier = 1.75 + critBonus / 5;
+    if (critPowerRing) {
+      critMultiplier += 0.3;
+    }
     damage = (playerAttack + 1) * critMultiplier + 4;
   } else {
     damage = playerAttack;
+  }
+  
+  if (powerStone) {
+    damage *= (1 + (powerStone.t2 || 20) / 100);
   }
   
   let defense = enemyDefense;
@@ -313,14 +346,33 @@ const calculatePlayerDamage = (
   }
   
   if (comboCount >= 2) {
-    damage = Math.floor(damage * (1 + (comboCount - 1) * 0.1));
+    let comboMultiplier = 1 + (comboCount - 1) * 0.1;
+    if (stormPower) {
+      comboMultiplier += (stormPower.t2 || 50) / 100;
+    }
+    damage = Math.floor(damage * comboMultiplier);
+  }
+  
+  if (skyPower) {
+    damage += playerLevel * (skyPower.t2 || 50);
   }
   
   return { damage: Math.floor(damage), isCrit };
 };
 
-const calculateEnemyDamage = (enemyAttack: number, playerDefense: number): number => {
+const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, accessories: Equipment[]): number => {
   let damage = (enemyAttack * 2 + (enemyAttack - playerDefense * 0.5) * 12) / 14;
+  
+  const protectionStone = accessories.find(acc => acc.t1 === 1111);
+  const earthPower = accessories.find(acc => acc.t1 === 4003);
+  
+  if (protectionStone) {
+    damage *= (1 - (protectionStone.t2 || 20) / 100);
+  }
+  
+  if (earthPower) {
+    damage *= (1 - (earthPower.t2 || 0) / 100);
+  }
   
   let threshold = enemyAttack * 0.5;
   if (damage < threshold) {
@@ -454,8 +506,9 @@ export const useGameStore = create<GameStore>()(
         const { player, battle } = get();
         const newHp = clamp(player.hp + amount, 0, player.maxHp);
         const hpPercent = newHp / player.maxHp;
-        const newCritRate = calculateCritRate(hpPercent);
-        const newComboRate = calculateComboRate(hpPercent);
+        const accessories = player.equippedAccessories || [];
+        const newCritRate = calculateCritRate(hpPercent, accessories);
+        const newComboRate = calculateComboRate(hpPercent, accessories);
         set({ 
           player: { ...player, hp: newHp },
           battle: { 
@@ -633,7 +686,20 @@ export const useGameStore = create<GameStore>()(
         
         updateHighLv(newLevel);
         
-        const stPtIncrease = lvupsitanum * 4;
+        const attrCrystal = accessories.find(acc => acc.t1 === 700 || acc.t1 === 701 || acc.t1 === 2701);
+        const stPtPerLevel = attrCrystal ? (attrCrystal.t2 || 5) : 4;
+        const stPtIncrease = lvupsitanum * stPtPerLevel;
+        
+        const braveProof = accessories.find(acc => acc.t1 === 820);
+        if (braveProof) {
+          const bonusRate = (braveProof.t2 || 30) / 100;
+          hpInc = Math.ceil(hpInc * (1 + bonusRate));
+          atkInc = Math.ceil(atkInc * (1 + bonusRate));
+          defInc = Math.ceil(defInc * (1 + bonusRate));
+          agiInc = Math.ceil(agiInc * (1 + bonusRate));
+          lucInc = Math.ceil(lucInc * (1 + bonusRate));
+        }
+        
         const { autoAllocateEnabled, autoAllocateStPt } = get();
         
         let finalStPt = (player.stPt || 0) + stPtIncrease;
@@ -868,12 +934,54 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        // 加回 stPt 分配的属性加成
+        const crystalAegis = accessories.filter(acc => acc.t1 === 43);
+        for (const gem of crystalAegis) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        const protectionStone = accessories.filter(acc => acc.t1 === 1111);
+        for (const gem of protectionStone) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_ * 100;
+        }
+        
+        const powerStone = accessories.filter(acc => acc.t1 === 2222);
+        for (const gem of powerStone) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.attack += _loc2_ * 50;
+        }
+        
+        const angelFeather = accessories.filter(acc => acc.t1 === 3333);
+        for (const gem of angelFeather) {
+          const _loc2_ = gem.t2 || 105;
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (_loc2_ / 100));
+        }
+        
+        const earthPower = accessories.filter(acc => acc.t1 === 4003);
+        for (const gem of earthPower) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
+        }
+        
         newPlayer.maxHp += stPtHp;
         newPlayer.attack += stPtAtk;
         newPlayer.defense += stPtDef;
         newPlayer.agility += stPtAgi;
         newPlayer.luck += stPtLuc;
+        
+        const duskCrystal = accessories.filter(acc => acc.t1 === 15);
+        if (duskCrystal.length > 0) {
+          const currentStPt = newPlayer.stPt || 0;
+          newPlayer.stPt = Math.ceil(currentStPt * 0.6);
+        }
+        
+        if (equipment.type === 'accessory' && equipment.t1 === 9999) {
+          set({ battlePoints: 0, currentScene: 'gameover' });
+          return;
+        }
         
         let battlePointsChange = 0;
         if (equipment.type === 'accessory' && equipment.t1 === 500) {
@@ -1114,6 +1222,9 @@ export const useGameStore = create<GameStore>()(
           },
         });
       },
+      setHardmode: (hardmode) => {
+        set({ hardmode });
+      },
       startGame: () => {
         const { player, inventory, skills, battlePoints, maxBattlePoints } = get();
         
@@ -1198,6 +1309,38 @@ export const useGameStore = create<GameStore>()(
           newLuc += itemCount2 * (_loc2_ * 4);
         }
         
+        const crystalAegis = accessories.filter(acc => acc.t1 === 43);
+        for (const gem of crystalAegis) {
+          const _loc2_ = gem.t2 || 0;
+          newMaxHp += _loc2_;
+          newDef += _loc2_;
+          newAgi += _loc2_;
+        }
+        
+        const protectionStone = accessories.filter(acc => acc.t1 === 1111);
+        for (const gem of protectionStone) {
+          const _loc2_ = gem.t2 || 0;
+          newMaxHp += _loc2_ * 100;
+        }
+        
+        const powerStone = accessories.filter(acc => acc.t1 === 2222);
+        for (const gem of powerStone) {
+          const _loc2_ = gem.t2 || 0;
+          newAtk += _loc2_ * 50;
+        }
+        
+        const angelFeather = accessories.filter(acc => acc.t1 === 3333);
+        for (const gem of angelFeather) {
+          const _loc2_ = gem.t2 || 105;
+          newMaxHp = Math.ceil(newMaxHp * (_loc2_ / 100));
+        }
+        
+        const earthPower = accessories.filter(acc => acc.t1 === 4003);
+        for (const gem of earthPower) {
+          const _loc2_ = gem.t2 || 0;
+          newMaxHp = Math.ceil(newMaxHp * (1 + _loc2_ / 100));
+        }
+        
         set({
           player: {
             ...player,
@@ -1250,8 +1393,22 @@ export const useGameStore = create<GameStore>()(
         get().checkZeroEquips();
       },
       addEncounterRate: (amount) => {
-        const { encounterRate } = get();
-        const newRate = Math.min(encounterRate + amount, GAME_CONFIG.ENCOUNTER_MAX);
+        const { encounterRate, player } = get();
+        const accessories = player.equippedAccessories || [];
+        
+        let adjustedAmount = amount;
+        
+        const encounterReduceRing = accessories.find(acc => acc.t1 === 10);
+        if (encounterReduceRing) {
+          adjustedAmount *= 0.5;
+        }
+        
+        const avoidBelt = accessories.find(acc => acc.t1 === 13);
+        if (avoidBelt && encounterRate < (avoidBelt.t2 || 45)) {
+          return;
+        }
+        
+        const newRate = Math.min(encounterRate + adjustedAmount, GAME_CONFIG.ENCOUNTER_MAX);
         set({ encounterRate: newRate });
         if (newRate >= GAME_CONFIG.ENCOUNTER_MAX) {
           get().startBattle();
@@ -1271,12 +1428,35 @@ export const useGameStore = create<GameStore>()(
         const enemy = { ...mapEnemies[randomIndex] };
         
         const hardmode = get().hardmode || 0;
+        
+        const difficultyMultipliers = [
+          { hp: 1, attack: 1, exp: 1, gold: 1 },
+          { hp: 2, attack: 2, exp: 1.5, gold: 1.5 },
+          { hp: 4, attack: 3, exp: 2, gold: 2 },
+        ];
+        
+        const multiplier = difficultyMultipliers[hardmode] || difficultyMultipliers[0];
+        
+        enemy.hp = Math.floor(enemy.maxHp * multiplier.hp);
+        enemy.maxHp = Math.floor(enemy.maxHp * multiplier.hp);
+        enemy.attack = Math.floor(enemy.attack * multiplier.attack);
+        enemy.expReward = Math.floor(enemy.expReward * multiplier.exp);
+        enemy.goldReward = Math.floor(enemy.goldReward * multiplier.gold);
+        
         const normalDrops = enemy.drops.slice(0, 3);
         const hardDrops = enemy.drops.slice(3, 6);
+        const hellDrops = enemy.drops.slice(6, 9);
         
-        const activeDrops = hardmode > 0 ? hardDrops : normalDrops;
+        let activeDrops;
+        if (hardmode === 2) {
+          activeDrops = hellDrops;
+        } else if (hardmode === 1) {
+          activeDrops = hardDrops;
+        } else {
+          activeDrops = normalDrops;
+        }
         
-        const dropSlots = activeDrops.map(drop => {
+        const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
           if (!drop) return null;
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
           return {
@@ -1308,7 +1488,7 @@ export const useGameStore = create<GameStore>()(
           },
           dropSlots.length,
           {
-            hardmode: 0,
+            hardmode,
             renzokuPlusKakuritu: 0,
             crihPlusKakuritu: 0,
             speedwariai: 0,
@@ -1323,7 +1503,7 @@ export const useGameStore = create<GameStore>()(
           donyokuOn: false,
           goyokuOn: false,
           twilightON: false,
-          hardmode: 0,
+          hardmode,
           dropBoost: 1,
         };
         
@@ -1332,7 +1512,18 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings);
+        const accessories = player.equippedAccessories || [];
+        const greedRing = accessories.find(acc => acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc.t1 === 77);
+        let greedBonus = 1;
+        if (greedRing) {
+          greedBonus *= 2;
+        }
+        if (greedPendant) {
+          greedBonus *= 1.4;
+        }
+        
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, greedBonus);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
@@ -1440,12 +1631,36 @@ export const useGameStore = create<GameStore>()(
         }
         
         const hardmode = get().hardmode || 0;
+        
+        const difficultyMultipliers = [
+          { hp: 1, attack: 1, exp: 1, gold: 1 },
+          { hp: 2, attack: 2, exp: 1.5, gold: 1.5 },
+          { hp: 4, attack: 3, exp: 2, gold: 2 },
+        ];
+        
+        const multiplier = difficultyMultipliers[hardmode] || difficultyMultipliers[0];
+        
+        const modifiedBoss = { ...boss };
+        modifiedBoss.hp = Math.floor(boss.maxHp * multiplier.hp);
+        modifiedBoss.maxHp = Math.floor(boss.maxHp * multiplier.hp);
+        modifiedBoss.attack = Math.floor(boss.attack * multiplier.attack);
+        modifiedBoss.expReward = Math.floor(boss.expReward * multiplier.exp);
+        modifiedBoss.goldReward = Math.floor(boss.goldReward * multiplier.gold);
+        
         const normalDrops = boss.drops.slice(0, 3);
         const hardDrops = boss.drops.slice(3, 6);
+        const hellDrops = boss.drops.slice(6, 9);
         
-        const activeDrops = hardmode > 0 ? hardDrops : normalDrops;
+        let activeDrops;
+        if (hardmode === 2) {
+          activeDrops = hellDrops;
+        } else if (hardmode === 1) {
+          activeDrops = hardDrops;
+        } else {
+          activeDrops = normalDrops;
+        }
         
-        const dropSlots = activeDrops.map(drop => {
+        const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
           if (!drop) return null;
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
           return {
@@ -1469,15 +1684,15 @@ export const useGameStore = create<GameStore>()(
             luck: player.luck,
           },
           {
-            hp: boss.maxHp,
-            attack: boss.attack,
-            exp: boss.expReward,
-            gold: boss.goldReward,
+            hp: modifiedBoss.maxHp,
+            attack: modifiedBoss.attack,
+            exp: modifiedBoss.expReward,
+            gold: modifiedBoss.goldReward,
             level: boss.level * 100,
           },
           dropSlots.length,
           {
-            hardmode: 0,
+            hardmode,
             renzokuPlusKakuritu: 0,
             crihPlusKakuritu: 0,
             speedwariai: 0,
@@ -1492,7 +1707,7 @@ export const useGameStore = create<GameStore>()(
           donyokuOn: false,
           goyokuOn: false,
           twilightON: false,
-          hardmode: 0,
+          hardmode,
           dropBoost: 1,
         };
         
@@ -1501,7 +1716,18 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings);
+        const accessories = player.equippedAccessories || [];
+        const greedRing = accessories.find(acc => acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc.t1 === 77);
+        let greedBonus = 1;
+        if (greedRing) {
+          greedBonus *= 2;
+        }
+        if (greedPendant) {
+          greedBonus *= 1.4;
+        }
+        
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, greedBonus);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
@@ -1513,7 +1739,7 @@ export const useGameStore = create<GameStore>()(
           encounterRate: 0,
           battlePoints: battlePoints - 1,
           battle: {
-            enemy: boss,
+            enemy: modifiedBoss,
             status: 'idle',
             battleLog: ['BOSS出现了！', `${boss.name}降临！`, '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
             comboCount: 0,
@@ -1563,14 +1789,27 @@ export const useGameStore = create<GameStore>()(
         let dropItem = undefined;
         let battlePointsChange = 0;
         
+        const accessories = player.equippedAccessories || [];
+        const greedPendant = accessories.find(acc => acc.t1 === 77);
+        const speedHourglass = accessories.find(acc => acc.t1 === 4100 || acc.t1 === 4101);
+        
         if (victory && battle.enemy) {
           goldReward = Math.floor(battle.enemy.goldReward * goldMultiplier);
           expReward = battle.enemy.expReward;
           
-          const expGems = player.equippedAccessories?.filter(acc => acc.t1 === 60) || [];
+          if (greedPendant) {
+            expReward = 0;
+          }
+          
+          const expGems = accessories.filter(acc => acc.t1 === 60);
           for (const gem of expGems) {
             const expBonus = (gem.t2 || 0) / 100;
             expReward = Math.floor(expReward * (1 + expBonus));
+          }
+          
+          if (speedHourglass) {
+            const hourglassValue = speedHourglass.t2 || 0.5;
+            expReward = Math.floor(expReward / hourglassValue);
           }
           
           addGold(goldReward);
@@ -1595,6 +1834,10 @@ export const useGameStore = create<GameStore>()(
           updatePlayerHp(-damage);
           incrementLoseBattle();
           battlePointsChange = -3;
+        }
+        
+        if (speedHourglass) {
+          battlePointsChange = Math.floor(battlePointsChange * 2);
         }
         
         const newBattlePoints = battlePoints + battlePointsChange;
@@ -1759,11 +2002,11 @@ export const useGameStore = create<GameStore>()(
               
               const totalAttack = player.attack;
               const hpPercent = player.hp / player.maxHp;
-              const critRate = calculateCritRate(hpPercent);
+              const accessories = player.equippedAccessories || [];
+              const critRate = calculateCritRate(hpPercent, accessories);
               
               let isCrit = Math.random() * 100 < critRate;
               
-              const accessories = player.equippedAccessories || [];
               const critRing = accessories.find(acc => acc.t1 === 310 || acc.t1 === 311 || acc.t1 === 312);
               if (critRing) {
                 const guaranteedCritCount = critRing.t2 || 1;
@@ -1777,7 +2020,9 @@ export const useGameStore = create<GameStore>()(
                 totalAttack,
                 battle.enemy.defense,
                 isCrit,
-                currentComboCount
+                currentComboCount,
+                accessories,
+                player.level
               );
               
               tdame = damage;
@@ -1810,9 +2055,11 @@ export const useGameStore = create<GameStore>()(
               isProcessing = false;
             } else {
               const totalDefense = player.defense;
+              const accessories = player.equippedAccessories || [];
               const enemyDamage = calculateEnemyDamage(
                 battle.enemy.attack,
-                totalDefense
+                totalDefense,
+                accessories
               );
               tdame = enemyDamage;
               
@@ -1890,6 +2137,55 @@ export const useGameStore = create<GameStore>()(
                 
                 const { player: newPlayer } = get();
                 if (newPlayer.hp <= 0) {
+                  const accessories = newPlayer.equippedAccessories || [];
+                  const resurrectionNecklace = accessories.find(acc => acc.t1 === 1210 || acc.t1 === 1211);
+                  const immortalPower = accessories.find(acc => acc.t1 === 4000);
+                  
+                  let shouldResurrect = false;
+                  let resurrectMessage = '';
+                  
+                  if (resurrectionNecklace) {
+                    const chance = resurrectionNecklace.t1 === 1211 ? 0.5 : 0.3;
+                    if (Math.random() < chance) {
+                      shouldResurrect = true;
+                      resurrectMessage = '起死回生！';
+                      set((s) => ({
+                        player: {
+                          ...s.player,
+                          hp: Math.floor(s.player.maxHp * 0.1),
+                        },
+                      }));
+                    }
+                  }
+                  
+                  if (!shouldResurrect && immortalPower) {
+                    const chance = (immortalPower.t2 || 2) / 100;
+                    if (Math.random() < chance) {
+                      shouldResurrect = true;
+                      resurrectMessage = '不灭之力！';
+                      const statBonus = 0.05;
+                      set((s) => ({
+                        player: {
+                          ...s.player,
+                          hp: Math.floor(s.player.maxHp * 0.1),
+                          maxHp: Math.floor(s.player.maxHp * (1 + statBonus)),
+                          attack: Math.floor(s.player.attack * (1 + statBonus)),
+                          defense: Math.floor(s.player.defense * (1 + statBonus)),
+                          agility: Math.floor(s.player.agility * (1 + statBonus)),
+                          luck: Math.floor(s.player.luck * (1 + statBonus)),
+                        },
+                      }));
+                    }
+                  }
+                  
+                  if (shouldResurrect) {
+                    addBattleLog(resurrectMessage);
+                    eefi = 0;
+                    mode = 5;
+                    isProcessing = false;
+                    return;
+                  }
+                  
                   addBattleLog('战斗失败了');
                   battleEnded = true;
                   set((s) => ({ battle: { ...s.battle, _ending: true } }));
@@ -1909,7 +2205,8 @@ export const useGameStore = create<GameStore>()(
             if (eefi >= 2) {
               if (whichTurn === 0) {
                 const currentHpPercent = battle.enemy.hp / battle.enemy.maxHp;
-                const comboCheckRate = calculateComboRate(1 - currentHpPercent);
+                const accessories = player.equippedAccessories || [];
+                const comboCheckRate = calculateComboRate(1 - currentHpPercent, accessories);
                 const isCombo = Math.random() * 100 < comboCheckRate;
                 
                 if (isCombo) {
@@ -1920,7 +2217,7 @@ export const useGameStore = create<GameStore>()(
                       ...s.battle,
                       comboCount: renzokukaisu,
                       comboRate: comboCheckRate,
-                      critRate: calculateCritRate(1 - currentHpPercent),
+                      critRate: calculateCritRate(1 - currentHpPercent, accessories),
                     },
                   }));
                 } else {
@@ -1932,7 +2229,7 @@ export const useGameStore = create<GameStore>()(
                       comboCount: 1,
                       turnCount: s.battle.turnCount + 1,
                       comboRate: comboCheckRate,
-                      critRate: calculateCritRate(1 - currentHpPercent),
+                      critRate: calculateCritRate(1 - currentHpPercent, accessories),
                     },
                   }));
                 }

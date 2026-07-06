@@ -451,10 +451,15 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" />
+                    <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" image={accessory.image} />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{accessory.name}</div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <span key={i} className={`text-xs ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
+                      ))}
+                    </div>
                     {isEquipped && <div className="text-green-300 text-sm mt-1">已装备 {equippedAccs.filter(a => a.id === accessory.id).length}个</div>}
                     {!isOwned && (
                       <div>
@@ -579,8 +584,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="soul" x={soul.x} y={soul.y} size="large" />
+                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
+                    <SpriteIcon type="soul" x={soul.x} y={soul.y} size="medium" />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{soul.name}</div>
@@ -682,11 +687,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#4a6fa5] rounded flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                     {material.x !== undefined && material.y !== undefined ? (
-                      <SpriteIcon type="accessory" x={material.x} y={material.y} size="large" />
+                      <SpriteIcon type="accessory" x={material.x} y={material.y} size="medium" />
                     ) : (
-                      <span className="text-2xl">{material.icon}</span>
+                      <span className="text-xl">{material.icon}</span>
                     )}
                   </div>
                   <div className="flex-1">
@@ -842,10 +847,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     className="flex items-center gap-2 cursor-pointer hover:bg-[#5a7ab5] rounded"
                   >
                     <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" />
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" image={accessory.image} />
                     </div>
                     <div className="flex-1">
-                      <div className="text-white font-bold text-xs">{accessory.name}</div>
+                      <div className="flex items-center gap-1">
+                        <div className="text-white font-bold text-xs truncate flex-1">{accessory.name}</div>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <span key={i} className={`text-[10px] ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
+                          ))}
+                        </div>
+                      </div>
                       {accessory.effectDescription && (
                         <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
                       )}
@@ -912,7 +924,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     className="flex flex-col items-center cursor-pointer hover:bg-[#5a7ab5] rounded"
                   >
                     <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
-                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="small" />
+                      <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="small" image={accessory.image} />
                     </div>
                     <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
                   </div>

@@ -7,7 +7,7 @@ import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { BOSS_DATA } from '@/data/bossData';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, hardmode } = useGameStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
@@ -254,7 +254,10 @@ export const MainScreen = () => {
           <div className="bg-[#2d1b4e] border-2 border-[#8a2a4a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择BOSS</h3>
             <div className="space-y-2">
-              {[...BOSS_DATA].sort((a, b) => a.level - b.level).map((boss, index) => {
+              {[...BOSS_DATA]
+              .filter(boss => boss.difficulty === hardmode)
+              .sort((a, b) => a.level - b.level)
+              .map((boss, index) => {
                 const isDefeated = defeatedBosses.includes(boss.bossId);
                 return (
                   <button

@@ -49,7 +49,7 @@ const getItemName = (itemType: number, itemIndex: number): string => {
   return equipment?.name || '???';
 };
 
-const dropRateChange = (dropRate: number, settings: GameSettings, saveSettings: GameSaveSettings): number => {
+const dropRateChange = (dropRate: number, settings: GameSettings, saveSettings: GameSaveSettings, greedBonus: number = 1): number => {
   if (settings.donyokuOn) {
     dropRate *= 2;
   }
@@ -62,6 +62,7 @@ const dropRateChange = (dropRate: number, settings: GameSettings, saveSettings: 
   if (saveSettings.dropNum === 1) {
     dropRate *= 1.15;
   }
+  dropRate *= greedBonus;
   if (dropRate >= 0.7) {
     dropRate = 0.7;
   }
@@ -113,7 +114,8 @@ export const dropItemList = (
   difficultyRate: number,
   inventory: any[],
   settings: GameSettings,
-  saveSettings: GameSaveSettings
+  saveSettings: GameSaveSettings,
+  greedBonus: number = 1
 ): DropManagerState => {
   const state: DropManagerState = initDropManager();
   
@@ -178,7 +180,7 @@ export const dropItemList = (
       }
     }
     
-    rate = dropRateChange(rate, settings, saveSettings);
+    rate = dropRateChange(rate, settings, saveSettings, greedBonus);
     
     if (itemType === 3) {
       maxCount = 3;
@@ -215,7 +217,8 @@ export const eneDropItemInit = (
   difficultyRate: number,
   inventory: any[],
   settings: GameSettings,
-  saveSettings: GameSaveSettings
+  saveSettings: GameSaveSettings,
+  greedBonus: number = 1
 ): DropResult => {
   let getItemType = -1;
   let getItemIndex = -1;
@@ -254,92 +257,92 @@ export const eneDropItemInit = (
     }
   }
   
-  const listResult = dropItemList(slot1, slot2, slot3, difficultyRate, inventory, settings, saveSettings);
+  const listResult = dropItemList(slot1, slot2, slot3, difficultyRate, inventory, settings, saveSettings, greedBonus);
   getItemName = listResult.getItemName;
   
   if (slot1 !== null || slot2 !== null || slot3 !== null) {
-    let slotChoice = 1;
-    let score = 0;
+    const slots = [slot1, slot2, slot3].filter(s => s !== null) as DropSlot[];
     
-    const checkSlot = (slot: DropSlot | null, weight: number) => {
-      if (slot !== null) {
-        const itemType = slot.itemType;
-        const times = getItemTimes(itemType, slot.itemIndex, inventory);
-        const maxCount = getItemMaxCount(itemType);
-        if (times < maxCount) {
-          score += weight;
-        }
-      }
+    const isSlotAvailable = (slot: DropSlot): boolean => {
+      const times = getItemTimes(slot.itemType, slot.itemIndex, inventory);
+      const maxCount = getItemMaxCount(slot.itemType);
+      return times < maxCount;
     };
     
-    checkSlot(slot1, 1);
-    checkSlot(slot2, 2);
-    checkSlot(slot3, 4);
+    const availableSlots = slots.filter(isSlotAvailable);
     
-    if (score === 1) slotChoice = 1;
-    else if (score === 2) slotChoice = 2;
-    else if (score === 3) slotChoice = Math.floor(Math.random() * 2) + 1;
-    else if (score === 4) slotChoice = 3;
-    else if (score === 5) slotChoice = 1 + Math.floor(Math.random() * 2) * 2;
-    else if (score === 6) slotChoice = Math.floor(Math.random() * 2) + 2;
-    else if (score === 7) slotChoice = Math.floor(Math.random() * 3) + 1;
-    
-    let selectedSlot: DropSlot | null = null;
-    if (slotChoice === 1) selectedSlot = slot1;
-    else if (slotChoice === 2) selectedSlot = slot2;
-    else if (slotChoice === 3) selectedSlot = slot3;
-    
-    if (selectedSlot !== null) {
-      if (selectedSlot.baseRate < 0.001) {
-        selectedSlot.baseRate = 0.001;
+    if (availableSlots.length > 0) {
+      let slotChoice = 1;
+      let score = 0;
+      
+      const checkSlot = (slot: DropSlot | null, weight: number) => {
+        if (slot !== null && isSlotAvailable(slot)) {
+          score += weight;
+        }
+      };
+      
+      checkSlot(slot1, 1);
+      checkSlot(slot2, 2);
+      checkSlot(slot3, 4);
+      
+      if (score === 1) slotChoice = 1;
+      else if (score === 2) slotChoice = 2;
+      else if (score === 3) slotChoice = Math.floor(Math.random() * 2) + 1;
+      else if (score === 4) slotChoice = 3;
+      else if (score === 5) slotChoice = 1 + Math.floor(Math.random() * 2) * 2;
+      else if (score === 6) slotChoice = Math.floor(Math.random() * 2) + 2;
+      else if (score === 7) slotChoice = Math.floor(Math.random() * 3) + 1;
+      
+      let selectedSlot: DropSlot | null = null;
+      if (slotChoice === 1 && slot1 !== null && isSlotAvailable(slot1)) selectedSlot = slot1;
+      else if (slotChoice === 2 && slot2 !== null && isSlotAvailable(slot2)) selectedSlot = slot2;
+      else if (slotChoice === 3 && slot3 !== null && isSlotAvailable(slot3)) selectedSlot = slot3;
+      
+      if (selectedSlot === null) {
+        selectedSlot = availableSlots[Math.floor(Math.random() * availableSlots.length)];
       }
       
-      getItemDropType = selectedSlot.itemType;
-      getItemDropIndex = selectedSlot.itemIndex;
-      
-      const times = getItemTimes(selectedSlot.itemType, selectedSlot.itemIndex, inventory);
-      let rate = selectedSlot.baseRate * difficultyRate * 3;
-      
-      rate = dropRateChange(rate, settings, saveSettings);
-      
-      if (rate >= 0.6) {
-        rate = rate * 0.7 + 0.18;
-      }
-      
-      if (selectedSlot.itemType === 2) {
-        if (times >= 3) {
-          rate = -7;
+      if (selectedSlot !== null) {
+        if (selectedSlot.baseRate < 0.001) {
+          selectedSlot.baseRate = 0.001;
         }
-      } else if (selectedSlot.itemType === 3) {
-        if (times >= 3) {
-          rate = -7;
+        
+        getItemDropType = selectedSlot.itemType;
+        getItemDropIndex = selectedSlot.itemIndex;
+        
+        const times = getItemTimes(selectedSlot.itemType, selectedSlot.itemIndex, inventory);
+        let rate = selectedSlot.baseRate * difficultyRate * 3;
+        
+        rate = dropRateChange(rate, settings, saveSettings, greedBonus);
+        
+        if (rate >= 0.6) {
+          rate = rate * 0.7 + 0.18;
         }
-        if (times <= 3) {
+        
+        if (selectedSlot.itemType === 3) {
           rate = 0.04;
+          if (settings.twilightON) {
+            rate = 0.08;
+          }
+        } else if (times >= 1) {
+          rate *= 1.2;
+          let i = 0;
+          while (i < times) {
+            rate *= 0.99;
+            i++;
+          }
+          if (times >= 5) {
+            rate *= 0.8;
+          }
         }
-        if (settings.twilightON) {
-          rate = 0.08;
+        
+        rate *= settings.dropBoost;
+        getItemDropRate = rate;
+        
+        if (Math.random() <= rate) {
+          getItemType = selectedSlot.itemType;
+          getItemIndex = selectedSlot.itemIndex;
         }
-      } else if (times >= 10) {
-        rate = -7;
-      } else if (times >= 1) {
-        rate *= 1.2;
-        let i = 0;
-        while (i < times) {
-          rate *= 0.99;
-          i++;
-        }
-        if (times >= 5) {
-          rate *= 0.8;
-        }
-      }
-      
-      rate *= settings.dropBoost;
-      getItemDropRate = rate;
-      
-      if (Math.random() <= rate) {
-        getItemType = selectedSlot.itemType;
-        getItemIndex = selectedSlot.itemIndex;
       }
     }
   }

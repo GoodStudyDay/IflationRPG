@@ -197,7 +197,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                     {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => (
                       <div key={idx} className="text-center">
                         <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                          {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" /> : <span className="text-lg">📦</span>}
+                          {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" image={acc.image} /> : <span className="text-lg">📦</span>}
                         </div>
                         <div className="text-xs text-gray-400 truncate">{acc?.name || '无'}</div>
                       </div>

@@ -39,7 +39,7 @@ export const EquipmentSetManager = ({ onClose }: EquipmentSetManagerProps) => {
     if (!equipmentId) return null;
     const equipment = equipmentData.find(e => e.id === equipmentId);
     if (!equipment) return null;
-    return { x: equipment.x, y: equipment.y };
+    return { x: equipment.x, y: equipment.y, image: equipment.image };
   };
 
   return (
@@ -188,7 +188,7 @@ export const EquipmentSetManager = ({ onClose }: EquipmentSetManagerProps) => {
                           <div className="text-xs text-gray-400 mb-1">饰品{index + 1}</div>
                           <div className="w-12 h-12 bg-[#2d1b4e] rounded flex items-center justify-center overflow-hidden border border-[#4a2c7a]">
                             {getEquipmentIcon(set.accessoryIds[index]) ? (
-                              <SpriteIcon type="accessory" x={getEquipmentIcon(set.accessoryIds[index])!.x} y={getEquipmentIcon(set.accessoryIds[index])!.y} size="medium" />
+                              <SpriteIcon type="accessory" x={getEquipmentIcon(set.accessoryIds[index])!.x} y={getEquipmentIcon(set.accessoryIds[index])!.y} size="medium" image={getEquipmentIcon(set.accessoryIds[index])!.image} />
                             ) : (
                               <span className="text-gray-500 text-xs">无</span>
                             )}
@@ -207,7 +207,7 @@ export const EquipmentSetManager = ({ onClose }: EquipmentSetManagerProps) => {
                             <div className="text-xs text-gray-400 mb-0.5">饰品{index + 3}</div>
                             <div className="w-8 h-8 bg-[#2d1b4e] rounded flex items-center justify-center overflow-hidden border border-[#4a2c7a]">
                               {getEquipmentIcon(id) ? (
-                                <SpriteIcon type="accessory" x={getEquipmentIcon(id)!.x} y={getEquipmentIcon(id)!.y} size="small" />
+                                <SpriteIcon type="accessory" x={getEquipmentIcon(id)!.x} y={getEquipmentIcon(id)!.y} size="small" image={getEquipmentIcon(id)!.image} />
                               ) : (
                                 <span className="text-gray-500 text-xs">无</span>
                               )}

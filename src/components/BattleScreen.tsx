@@ -34,7 +34,7 @@ export const BattleScreen = () => {
     if (battle.damageDisplay === null) return null;
     
     const isPlayerTarget = battle.lastAttacker === 'player';
-    const topPosition = isPlayerTarget ? 'top-1/3 sm:top-1/2' : 'bottom-28 sm:bottom-36 md:bottom-44';
+    const topPosition = isPlayerTarget ? 'top-1/4 sm:top-1/2' : 'bottom-36 sm:bottom-36 md:bottom-44';
     
     return (
       <div 
@@ -89,13 +89,13 @@ export const BattleScreen = () => {
         <div className="absolute top-0 left-0 h-6 sm:h-8 w-full border-t-2 border-blue-500/50" />
         <div className="absolute bottom-0 left-0 h-6 sm:h-8 w-full border-b-2 border-blue-500/50" />
         
-        <div className="absolute top-2 left-0 right-0 flex justify-around px-2 sm:px-4 text-[10px] sm:text-xs font-bold">
+        <div className="absolute top-1 sm:top-2 left-0 right-0 flex justify-around px-2 sm:px-4 text-[10px] sm:text-xs font-bold">
           <span className="text-yellow-400">Combo : {Math.round(battle.comboRate)}%</span>
           <span className="text-red-400">CRI : {Math.round(battle.critRate)}%</span>
           <span className="text-green-400">HPrate : {Math.round(battle.hpRate)}%</span>
         </div>
         
-        <div className="absolute top-6 sm:top-10 left-0 right-0 flex justify-center px-2 sm:px-4 text-[10px] sm:text-xs">
+        <div className="absolute top-4 sm:top-10 left-0 right-0 flex justify-center px-2 sm:px-4 text-[10px] sm:text-xs">
           <div className="bg-black/50 px-2 py-1 rounded">
             <span className="text-purple-400">掉落率: {Math.round(battle.dropRate)}%</span>
             <span className="text-gray-400 mx-1">|</span>
@@ -103,7 +103,7 @@ export const BattleScreen = () => {
           </div>
         </div>
         
-        <div className="absolute top-10 sm:top-16 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8 flex justify-center">
+        <div className="absolute top-8 sm:top-16 left-1/2 transform -translate-x-1/2 w-full px-4 sm:px-8 flex justify-center">
           <div className="w-full max-w-md">
             <div className="h-3 sm:h-4 bg-gray-800 rounded overflow-hidden border border-gray-700">
               <div 
@@ -117,7 +117,7 @@ export const BattleScreen = () => {
           </div>
         </div>
         
-        <div className="absolute top-[12%] sm:top-[18%] left-1/2 transform -translate-x-1/2 text-center w-full px-4">
+        <div className="absolute top-[8%] sm:top-[18%] left-1/2 transform -translate-x-1/2 text-center w-full px-4">
           <div className={`relative transition-transform duration-100 ${
             battle.enemyAnimation === 'attack' ? 'scale-110' : 
             battle.enemyAnimation === 'hurt' ? 'scale-95 opacity-70' : ''
@@ -161,7 +161,7 @@ export const BattleScreen = () => {
           )}
         </div>
         
-        <div className="absolute bottom-24 sm:bottom-36 md:bottom-44 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
+        <div className="absolute bottom-32 sm:bottom-36 md:bottom-44 left-1/2 transform -translate-x-1/2 text-center w-full px-4">
           <div className={`relative transition-transform duration-100 ${
             battle.playerAnimation === 'attack' ? 'scale-110 translate-x-4' : 
             battle.playerAnimation === 'hurt' ? 'scale-95 opacity-70 -translate-x-2' : ''
@@ -190,7 +190,7 @@ export const BattleScreen = () => {
           {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
         </div>
         
-        <div className="absolute bottom-16 sm:bottom-28 md:bottom-36 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
+        <div className="absolute bottom-24 sm:bottom-28 md:bottom-36 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">
           <div className="h-2 sm:h-3 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className="h-full bg-gradient-to-r from-blue-700 to-blue-500 transition-all duration-300"
@@ -204,7 +204,7 @@ export const BattleScreen = () => {
         
         <div 
           ref={scrollRef}
-          className="absolute bottom-0 left-2 right-2 sm:left-4 sm:right-4 h-16 sm:h-20 md:h-24 bg-[#1a0a2e]/80 rounded-lg border border-[#4a2c7a] p-2 sm:p-3 overflow-y-auto"
+          className="absolute bottom-1 left-2 right-2 sm:left-4 sm:right-4 h-14 sm:h-20 md:h-24 bg-[#1a0a2e]/80 rounded-lg border border-[#4a2c7a] p-2 sm:p-3 overflow-y-auto"
         >
           {battle.battleLog.map((log, index) => (
             <div 
