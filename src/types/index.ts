@@ -32,6 +32,9 @@ export interface Equipment {
   maxQuantity: number;
   effectDescription?: string;
   attributeRate: number;
+  soulType?: number;
+  soulPlus?: number;
+  soulPerPlus?: number;
 }
 
 export interface InventoryItem {
@@ -92,6 +95,10 @@ export interface Player {
   equippedWeapon: Equipment | null;
   equippedArmor: Equipment | null;
   equippedAccessories: Equipment[];
+  /** 武器上装备的魂 */
+  weaponSoul: Equipment | null;
+  /** 防具上装备的魂 */
+  armorSoul: Equipment | null;
   /** 已解锁的饰品栏位数 (默认3, 最大12) */
   maxAccessorySlots: number;
   /** 属性点 */

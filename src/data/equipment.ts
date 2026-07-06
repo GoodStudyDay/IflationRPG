@@ -209,11 +209,14 @@ export function ItemSoulpush(
     hpBonus: 0,
     agilityBonus: 0,
     luckBonus: 0,
-    description: '',
+    description: setumei.replace('[0]', String(t1)).replace('[1]', String(t2)),
     icon: '👻',
 
     maxQuantity: 2,
     attributeRate: t2 + 100,
+    soulType: t1 === 14 ? 14 : t1 === 15 ? 15 : undefined,
+    soulPlus: t1,
+    soulPerPlus: t2,
   };
   itemDataMana.ItemuSOUL[index] = equipment;
 }

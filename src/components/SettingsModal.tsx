@@ -198,7 +198,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     <div className="space-y-3">
       <button
         onClick={() => setActiveSection('cloud')}
-        className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors"
+        className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
         存档管理
       </button>

@@ -2,8 +2,11 @@ import type { DropSlot, DropResult, DropManagerState, GameSettings, GameSaveSett
 import { equipmentData } from '@/data/equipment';
 
 export const getItemMaxCount = (itemType: number): number => {
-  if (itemType === 2 || itemType === 3) {
+  if (itemType === 2) {
     return 3;
+  }
+  if (itemType === 3) {
+    return 2;
   }
   return 10;
 };
@@ -21,6 +24,8 @@ export const equipmentIdToItemTypeAndIndex = (equipmentId: string): { itemType: 
     case 'weapon': return { itemType: 0, itemIndex: index };
     case 'armor': return { itemType: 1, itemIndex: index };
     case 'accessory': return { itemType: 2, itemIndex: index };
+    case 'soul': return { itemType: 3, itemIndex: index };
+    case 'material': return { itemType: 4, itemIndex: index };
     case 'consumable': return { itemType: 4, itemIndex: index };
     default: return { itemType: 0, itemIndex: index };
   }
@@ -31,8 +36,8 @@ export const itemTypeAndIndexToEquipmentId = (itemType: number, itemIndex: numbe
     case 0: return `weapon-${itemIndex + 1}`;
     case 1: return `armor-${itemIndex + 1}`;
     case 2: return `accessory-${itemIndex + 1}`;
-    case 3: return `accessory-${itemIndex + 1}`;
-    case 4: return `consumable-${itemIndex + 1}`;
+    case 3: return `soul-${itemIndex + 1}`;
+    case 4: return `material-${itemIndex + 1}`;
     default: return `weapon-${itemIndex + 1}`;
   }
 };

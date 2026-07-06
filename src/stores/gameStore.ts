@@ -581,12 +581,12 @@ export const useGameStore = create<GameStore>()(
         
         const weaponObj = player.equippedWeapon;
         const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty) : 0;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, player.weaponSoul) : 0;
         
         const armorObj = player.equippedArmor;
         const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, player.armorSoul) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, player.armorSoul) : 0;
         
         const accessories = player.equippedAccessories || [];
         const accAtk = accessories.reduce((sum, a) => sum + (a.attackBonus || 0), 0);
@@ -800,6 +800,12 @@ export const useGameStore = create<GameStore>()(
             return;
           }
           newPlayer.equippedArmor = equipment;
+        } else if (equipment.type === 'soul') {
+          if (equipment.soulType === 14) {
+            newPlayer.weaponSoul = equipment;
+          } else if (equipment.soulType === 15) {
+            newPlayer.armorSoul = equipment;
+          }
         } else if (equipment.type === 'accessory') {
           const accessories = [...(newPlayer.equippedAccessories || [])];
           const accRank = equipment.rank ?? -1;
@@ -847,13 +853,13 @@ export const useGameStore = create<GameStore>()(
         // 计算武器贡献（含存货加成和倍率）
         const weaponObj = newPlayer.equippedWeapon;
         const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty) : 0;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, newPlayer.weaponSoul) : 0;
         
         // 计算防具贡献（含存货加成和倍率）
         const armorObj = newPlayer.equippedArmor;
         const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, newPlayer.armorSoul) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, newPlayer.armorSoul) : 0;
         
         const accessories = newPlayer.equippedAccessories || [];
         const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
@@ -864,9 +870,9 @@ export const useGameStore = create<GameStore>()(
         
         // 保存 stPt 已经分配的属性加成（旧装备下的 stPt 贡献）
         const oldAccs = player.equippedAccessories || [];
-        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1)) : 0;
-        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1)) : 0;
-        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1)) : 0;
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
         const oldAccAtk = oldAccs.reduce((sum, a) => sum + a.attackBonus, 0);
         const oldAccDef = oldAccs.reduce((sum, a) => sum + a.defenseBonus, 0);
         const oldAccHp = oldAccs.reduce((sum, a) => sum + a.hpBonus, 0);

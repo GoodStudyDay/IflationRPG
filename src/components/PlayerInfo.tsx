@@ -151,26 +151,26 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
             <div className="text-gray-300 text-sm font-bold mb-2">最高等级时属性</div>
-            <div className="grid grid-cols-5 gap-2 text-center">
-              <div>
-                <div className="text-red-400 font-bold">{(peakSnapshot || player).hp.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">HP</div>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-400 text-sm">HP：</span>
+                <span className="text-red-400 font-bold">{(peakSnapshot || player).hp.toLocaleString()}</span>
               </div>
-              <div>
-                <div className="text-orange-400 font-bold">{(peakSnapshot || player).attack.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">ATK</div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 text-sm">ATK：</span>
+                <span className="text-orange-400 font-bold">{(peakSnapshot || player).attack.toLocaleString()}</span>
               </div>
-              <div>
-                <div className="text-blue-400 font-bold">{(peakSnapshot || player).defense.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">DEF</div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 text-sm">DEF：</span>
+                <span className="text-blue-400 font-bold">{(peakSnapshot || player).defense.toLocaleString()}</span>
               </div>
-              <div>
-                <div className="text-green-400 font-bold">{(peakSnapshot || player).agility.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">AGI</div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 text-sm">AGI：</span>
+                <span className="text-green-400 font-bold">{(peakSnapshot || player).agility.toLocaleString()}</span>
               </div>
-              <div>
-                <div className="text-purple-400 font-bold">{(peakSnapshot || player).luck.toLocaleString()}</div>
-                <div className="text-xs text-gray-500">LCK</div>
+              <div className="flex justify-between">
+                <span className="text-gray-400 text-sm">LCK：</span>
+                <span className="text-purple-400 font-bold">{(peakSnapshot || player).luck.toLocaleString()}</span>
               </div>
             </div>
           </div>

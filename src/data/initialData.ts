@@ -19,6 +19,8 @@ export const initialPlayer: Player = {
   equippedWeapon: null,
   equippedArmor: null,
   equippedAccessories: [],
+  weaponSoul: null,
+  armorSoul: null,
   maxAccessorySlots: 3,
   stPt: 0,
   heroId: 0,
