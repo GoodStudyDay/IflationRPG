@@ -189,6 +189,7 @@ export const translations: Record<string, TranslationKey> = {
   使用: { ja: '使用', en: 'Use', 'zh-Hant': '使用', 'zh-Hans': '使用', ko: '사용', es: 'Usar', id: 'Gunakan' },
   メニュー画面: { ja: 'メニュー画面', en: 'Main Manu', 'zh-Hant': '主選單', 'zh-Hans': '主菜单', ko: '메인 메뉴', es: 'Menú principal', id: 'Menu Utama' },
   ステータス振り分: { ja: 'ステータス振り分け', en: 'Stats', 'zh-Hant': '能力値', 'zh-Hans': '属性', ko: '스테이터스', es: 'Atributos', id: 'Status' },
+  ステータス振り分け: { ja: 'ステータス振り分け', en: 'Stats', 'zh-Hant': '能力値', 'zh-Hans': '属性', ko: '스테이터스', es: 'Atributos', id: 'Status' },
   'ステスポイの振り分けを行うことが': { ja: 'ステータスポイントの振り分けを行うことができます。', en: 'Allows you to see \nthe stat details and allocate your Stat Points.', 'zh-Hant': '可以查看能力値的詳細內容，分配能力點數', 'zh-Hans': '可以查看属性详情，分配属性点', ko: '상태정보를 볼 수 있으며\n스테이터스 포인트을 배분합니다.', es: 'Te permite ver información detallada sobre\natributos y distribuir los Puntos de Atributo.', id: 'Melihat rincian status dan membagi Stat Point' },
   装備: { ja: '装備', en: 'Equipment', 'zh-Hant': '裝備', 'zh-Hans': '装备', ko: '장비', es: 'Equipo', id: 'Peralatan' },
   'アイテムを購入、装備をし': { ja: 'アイテムを購入、装備をします。', en: 'Buy and equip items.', 'zh-Hant': '購買、裝上裝備', 'zh-Hans': '购买装备，进行装备', ko: '장비를 구입하여, 장비합니다.', es: 'Comprar y equipar objetos.', id: 'Beli dan gunakan item.' },

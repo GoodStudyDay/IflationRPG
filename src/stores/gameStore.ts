@@ -801,10 +801,22 @@ export const useGameStore = create<GameStore>()(
           }
           newPlayer.equippedArmor = equipment;
         } else if (equipment.type === 'soul') {
-          if (equipment.soulType === 14) {
+          if (equipment.price > player.gold) {
+            return;
+          }
+          
+          if (slotIndex === 14) {
+            if (player.weaponSoul?.id === equipment.id) {
+              return;
+            }
             newPlayer.weaponSoul = equipment;
-          } else if (equipment.soulType === 15) {
+            newPlayer.gold -= equipment.price;
+          } else if (slotIndex === 15) {
+            if (player.armorSoul?.id === equipment.id) {
+              return;
+            }
             newPlayer.armorSoul = equipment;
+            newPlayer.gold -= equipment.price;
           }
         } else if (equipment.type === 'accessory') {
           const accessories = [...(newPlayer.equippedAccessories || [])];
