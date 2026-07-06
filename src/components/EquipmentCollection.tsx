@@ -58,8 +58,14 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[95%] max-w-lg max-h-[85vh] flex flex-col">
+    <div 
+      className="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[95%] max-w-lg max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

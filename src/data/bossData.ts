@@ -22,9 +22,9 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'weapon-2', dropRate: 0.5 },
       { equipmentId: 'armor-2', dropRate: 0.5 },
-      { equipmentId: 'material-0', dropRate: 0 },
+      { equipmentId: 'soul-0', dropRate: 0 },
       { equipmentId: 'weapon-75', dropRate: 0.4 },
-      { equipmentId: 'material-10', dropRate: 0 },
+      { equipmentId: 'soul-10', dropRate: 0 },
       null,
       null,
       null,

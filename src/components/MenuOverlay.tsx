@@ -35,8 +35,14 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
   
   return (
     <>
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4">
+      <div 
+        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
             <div className="text-game-secondary font-bold">主菜单</div>
           </div>

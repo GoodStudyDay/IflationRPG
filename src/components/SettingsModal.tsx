@@ -4,6 +4,7 @@ import { getSupabase } from '@/lib/supabase';
 import { getCacheSize, formatCacheSize, clearCache } from '@/utils/imageCache';
 import { ChangelogModal } from './ChangelogModal';
 import { DropGuideModal } from './DropGuideModal';
+import { LANGUAGES } from '@/data/languageData';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -55,6 +56,8 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     setPreset,
     setPresetNum,
     setAutoAllocateEnabled,
+    language,
+    setLanguage,
   } = useGameStore();
 
   const handleCloudUpload = async () => {
@@ -174,8 +177,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4 max-h-[90vh] overflow-y-auto">
+    <div 
+        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+        <div 
+          className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4 max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
           <div className="text-game-secondary font-bold">设置</div>
         </div>
@@ -362,6 +371,21 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
             <div className="border-t border-[#4a2c7a] pt-3 mt-3">
               <div className="text-gray-300 text-sm mb-2">游戏设置</div>
+
+              <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
+                <div className="text-xs text-gray-400 mb-2">语言设置</div>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as any)}
+                  className="w-full bg-[#2d1b4e] border border-[#4a2c7a] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#6a4c9a]"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name['zh-Hans']} ({lang.name.en})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <button
                 onClick={() => setShowPresetPanel(true)}

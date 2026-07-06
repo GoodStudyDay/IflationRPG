@@ -7,6 +7,7 @@ import { getEquipmentById, equipmentData } from '@/data/equipment';
 import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
+import type { LanguageCode } from '@/data/languageData';
 
 interface PeakSnapshot {
   level: number;
@@ -136,6 +137,10 @@ interface GameStore {
   selectHero: (heroId: number) => void;
   /** 设置难度 */
   setHardmode: (hardmode: number) => void;
+  /** 当前语言 */
+  language: LanguageCode;
+  /** 设置语言 */
+  setLanguage: (language: LanguageCode) => void;
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
@@ -488,6 +493,7 @@ export const useGameStore = create<GameStore>()(
       hardmode: 0,
       playerid: saveData.playerid,
       DropRate: saveData.DropRate,
+      language: (saveData.language || 'zh-Hans') as LanguageCode,
       speedNum: saveData.speedNum,
       dropNum: saveData.dropNum,
       presetNum: saveData.presetNum,
@@ -1224,6 +1230,13 @@ export const useGameStore = create<GameStore>()(
       },
       setHardmode: (hardmode) => {
         set({ hardmode });
+      },
+      setLanguage: (language) => {
+        set({ language });
+        
+        const data = loadSaveData();
+        data.language = language;
+        saveSaveData(data);
       },
       startGame: () => {
         const { player, inventory, skills, battlePoints, maxBattlePoints } = get();

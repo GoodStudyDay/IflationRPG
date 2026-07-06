@@ -36,6 +36,7 @@ export interface GameSaveData {
   presetAGI: number;
   presetLUK: number;
   bugCheckVersion: number;
+  language: string;
 }
 
 export interface ItemCountData {
@@ -86,4 +87,5 @@ export const initialGameSaveData: GameSaveData = {
   presetAGI: 0,
   presetLUK: 0,
   bugCheckVersion: 1,
+  language: 'zh-Hans',
 };
