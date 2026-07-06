@@ -14,7 +14,7 @@ type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
 export const Inventory = ({ onClose }: InventoryProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
-  const [, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
+  const [selectedSoulSlot, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
   const [confirmEquipment, setConfirmEquipment] = useState<typeof equipmentData[0] | null>(null);
   const [detailEquipment, setDetailEquipment] = useState<(typeof equipmentData[0] & { quantity?: number }) | null>(null);
   const [unlockingSlotIndex, setUnlockingSlotIndex] = useState<number>(0);
@@ -183,7 +183,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
   const handleConfirmEquip = () => {
     if (confirmEquipment) {
-      equipItem(confirmEquipment, selectedAccessorySlot ?? undefined);
+      let slotIndex: number | undefined = selectedAccessorySlot ?? undefined;
+      if (confirmEquipment.type === 'soul' && selectedSoulSlot) {
+        slotIndex = selectedSoulSlot.type === 'weapon' ? 14 : 15;
+      }
+      equipItem(confirmEquipment, slotIndex);
       setConfirmEquipment(null);
       setSelectedAccessorySlot(null);
       setSelectedSoulSlot(null);
@@ -765,7 +769,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }}
                 className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
               >
-                <span className="text-lg">👻</span>
+                {player.weaponSoul ? (
+                  <SpriteIcon type="soul" x={player.weaponSoul.x} y={player.weaponSoul.y} size="medium" />
+                ) : (
+                  <span className="text-lg">👻</span>
+                )}
               </div>
               <div 
                 onClick={() => setViewMode('weapon')}
@@ -802,7 +810,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }}
                 className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
               >
-                <span className="text-lg">👻</span>
+                {player.armorSoul ? (
+                  <SpriteIcon type="soul" x={player.armorSoul.x} y={player.armorSoul.y} size="medium" />
+                ) : (
+                  <span className="text-lg">👻</span>
+                )}
               </div>
               <div 
                 onClick={() => setViewMode('armor')}
@@ -1064,6 +1076,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       return null;
     }
     
+    const canAfford = confirmEquipment.type === 'soul' ? player.gold >= confirmEquipment.price : true;
+    
     return (
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
@@ -1071,6 +1085,18 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="text-xl font-bold text-white mb-4">
               {confirmEquipment.type === 'soul' ? '安装' : '装备'} {confirmEquipment.name} 吗？
             </div>
+            
+            {confirmEquipment.type === 'soul' && (
+              <div className="bg-yellow-900/50 text-yellow-300 px-3 py-2 rounded-lg mb-4">
+                安装需要消耗 {confirmEquipment.price.toLocaleString()} G
+              </div>
+            )}
+            
+            {confirmEquipment.type === 'soul' && !canAfford && (
+              <div className="bg-red-900/50 text-red-300 px-3 py-2 rounded-lg mb-4">
+                金币不足！
+              </div>
+            )}
             
             {changedStats.length > 0 && (
               <div className="space-y-2 mb-4">
@@ -1094,7 +1120,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             <div className="flex gap-3">
               <button
                 onClick={handleConfirmEquip}
-                className="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-500 transition-colors"
+                disabled={!canAfford}
+                className={`flex-1 font-bold py-3 rounded-lg transition-colors ${
+                  canAfford 
+                    ? 'bg-green-600 text-white hover:bg-green-500' 
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
               >
                 确认
               </button>

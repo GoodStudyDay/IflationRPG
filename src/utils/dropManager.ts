@@ -188,12 +188,15 @@ export const dropItemList = (
     rate = dropRateChange(rate, settings, saveSettings, greedBonus);
     
     if (itemType === 3) {
-      maxCount = 3;
-      if (times >= 3) {
+      maxCount = 2;
+      if (times >= 2) {
         rate = -100;
       } else {
         rate = 0.04;
-        if (settings.twilightON) {
+        const hasTwilightCrystal = inventory.some(i => 
+          i.equipmentId === 'accessory-78' && i.quantity > 0
+        );
+        if (hasTwilightCrystal) {
           rate = 0.08;
         }
       }
@@ -213,6 +216,12 @@ export const dropItemList = (
   state.getItemName = itemName.trim();
   
   return state;
+};
+
+const getRandomSoulIndex = (): number => {
+  const souls = equipmentData.filter(e => e.type === 'soul');
+  if (souls.length === 0) return -1;
+  return Math.floor(Math.random() * souls.length);
 };
 
 export const eneDropItemInit = (
@@ -259,6 +268,26 @@ export const eneDropItemInit = (
     if (random4.getItemType !== -1) {
       getItemType = random4.getItemType;
       getItemIndex = random4.getItemIndex;
+    }
+  }
+  
+  if (getItemType === -1) {
+    let soulRate = 0.04;
+    const hasTwilightCrystal = inventory.some(i => 
+      i.equipmentId === 'accessory-78' && i.quantity > 0
+    );
+    if (hasTwilightCrystal) {
+      soulRate = 0.08;
+    }
+    
+    const soulIndex = getRandomSoulIndex();
+    if (soulIndex !== -1) {
+      const times = getItemTimes(3, soulIndex, inventory);
+      const maxCount = getItemMaxCount(3);
+      if (times < maxCount && Math.random() < soulRate) {
+        getItemType = 3;
+        getItemIndex = soulIndex;
+      }
     }
   }
   
@@ -326,7 +355,10 @@ export const eneDropItemInit = (
         
         if (selectedSlot.itemType === 3) {
           rate = 0.04;
-          if (settings.twilightON) {
+          const hasTwilightCrystal = inventory.some(i => 
+            i.equipmentId === 'accessory-78' && i.quantity > 0
+          );
+          if (hasTwilightCrystal) {
             rate = 0.08;
           }
         } else if (times >= 1) {
