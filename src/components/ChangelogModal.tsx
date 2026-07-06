@@ -4,7 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
-    version: 'v0.0.27',
+    version: 'v0.0.29',
+    date: '2026-07-06 00:00:00',
+    changes: [
+      '修复魂属性叠加问题：切换魂时先清除旧魂属性',
+      '修复魂数量管理：安装魂后数量-1，卸载时归还',
+      '修复按钮翻译不生效：菜单/奖励/传送/战斗按钮改为使用t()翻译',
+      '参考locdata.txt重新设计翻译键名，使用日文作为主key',
+      '添加テレポート等缺失翻译',
+    ],
+  },
+  {
+    version: 'v0.0.28',
     date: '2026-07-06 00:00:00',
     changes: [
       '修复困难模式和地狱模式难度倍率：参考battlevar.txt的eneLoad()实现',

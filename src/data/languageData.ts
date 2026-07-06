@@ -169,6 +169,7 @@ export const translations: Record<string, TranslationKey> = {
   ボーナス_マップボタン: { ja: 'ボーナス', en: 'Bonus', 'zh-Hant': '獎勵', 'zh-Hans': '奖励', ko: '보너스', es: 'Bonus', id: 'Bonus' },
   エンカウント: { ja: 'エンカウント', en: 'Encounter', 'zh-Hant': '戰鬥', 'zh-Hans': '战斗', ko: '엔카운트', es: 'Encuentro', id: 'Encounter' },
   メニュー: { ja: 'メニュー', en: 'Menu', 'zh-Hant': '選單', 'zh-Hans': '菜单', ko: '메뉴', es: 'Menú', id: 'Menu' },
+  テレポート: { ja: 'テレポート', en: 'Teleport', 'zh-Hant': '傳送', 'zh-Hans': '传送', ko: '텔레포트', es: 'Teletransportar', id: 'Teleport' },
   '装備SET[0]': { ja: '[0]', en: '[0]', 'zh-Hant': '[0]', 'zh-Hans': '[0]', ko: '[0]', es: '[0]', id: '[0]' },
   '適正LV:[0]': { ja: '適正LV:[0]', en: 'AREA LV:[0]', 'zh-Hant': '適合LV : [0]', 'zh-Hans': '适合LV : [0]', ko: '적정 LV : [0]', es: 'NV APTO : [0]', id: 'LV Tepat :[0]' },
   現在のマップ情報: { ja: '現在のマップ情報', en: 'Current map information', 'zh-Hant': '目前的地圖資訊', 'zh-Hans': '现在的地图信息', ko: '현재 지도 정보', es: 'Información del mapa actual', id: 'Informasi peta saat ini' },

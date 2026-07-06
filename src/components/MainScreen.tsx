@@ -5,9 +5,11 @@ import { BonusOverlay } from './BonusOverlay';
 import { BONUS_LIST } from '@/utils/bonusManager';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { BOSS_DATA } from '@/data/bossData';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export const MainScreen = () => {
   const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, hardmode } = useGameStore();
+  const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
@@ -50,19 +52,19 @@ export const MainScreen = () => {
             onClick={() => setShowMenu(true)}
             className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            菜单
+            {t('メニュー')}
           </button>
           <button
             onClick={() => setShowBonus(true)}
             className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            奖励
+            {t('ボーナス')}
           </button>
           <button
             onClick={() => setShowTeleport(true)}
             className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            传送
+            {t('テレポート')}
           </button>
           <button
             onClick={() => setShowBoss(true)}
@@ -74,7 +76,7 @@ export const MainScreen = () => {
             onClick={handleBattleClick}
             className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            战斗
+            {t('エンカウント')}
           </button>
         </div>
       </div>

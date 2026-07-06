@@ -786,7 +786,7 @@ export const useGameStore = create<GameStore>()(
         set({ inventory: newInventory });
       },
       equipItem: (equipment, slotIndex) => {
-        const { player } = get();
+        const { player, inventory } = get();
         
         let newPlayer = { ...player };
         
@@ -805,17 +805,42 @@ export const useGameStore = create<GameStore>()(
             return;
           }
           
+          const soulItem = inventory.find(i => i.equipmentId === equipment.id);
+          if (!soulItem || soulItem.quantity <= 0) {
+            return;
+          }
+          
           if (slotIndex === 14) {
             if (player.weaponSoul?.id === equipment.id) {
               return;
             }
+            
+            const oldWeaponSoul = player.weaponSoul;
+            if (oldWeaponSoul) {
+              const oldSoulItem = inventory.find(i => i.equipmentId === oldWeaponSoul.id);
+              if (oldSoulItem) {
+                oldSoulItem.quantity += 1;
+              }
+            }
+            
             newPlayer.weaponSoul = equipment;
+            soulItem.quantity -= 1;
             newPlayer.gold -= equipment.price;
           } else if (slotIndex === 15) {
             if (player.armorSoul?.id === equipment.id) {
               return;
             }
+            
+            const oldArmorSoul = player.armorSoul;
+            if (oldArmorSoul) {
+              const oldSoulItem = inventory.find(i => i.equipmentId === oldArmorSoul.id);
+              if (oldSoulItem) {
+                oldSoulItem.quantity += 1;
+              }
+            }
+            
             newPlayer.armorSoul = equipment;
+            soulItem.quantity -= 1;
             newPlayer.gold -= equipment.price;
           }
         } else if (equipment.type === 'accessory') {
@@ -860,8 +885,6 @@ export const useGameStore = create<GameStore>()(
           newPlayer.equippedAccessories = accessories;
         }
         
-        const { inventory } = get();
-        
         // 计算武器贡献（含存货加成和倍率）
         const weaponObj = newPlayer.equippedWeapon;
         const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
@@ -881,10 +904,11 @@ export const useGameStore = create<GameStore>()(
         const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
         
         // 保存 stPt 已经分配的属性加成（旧装备下的 stPt 贡献）
+        // 注意：提取 stPt 时不包含魂的加成，避免切换魂时属性叠加
         const oldAccs = player.equippedAccessories || [];
-        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
-        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
-        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), null) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
         const oldAccAtk = oldAccs.reduce((sum, a) => sum + a.attackBonus, 0);
         const oldAccDef = oldAccs.reduce((sum, a) => sum + a.defenseBonus, 0);
         const oldAccHp = oldAccs.reduce((sum, a) => sum + a.hpBonus, 0);
@@ -903,11 +927,11 @@ export const useGameStore = create<GameStore>()(
         const stPtAgi = Math.max(0, player.agility - oldBaseAgi);
         const stPtLuc = Math.max(0, player.luck - oldBaseLuc);
         
-        newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
-        newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
-        newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus);
-        newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus);
-        newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus);
+        newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus) + stPtAtk;
+        newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus) + stPtDef;
+        newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus) + stPtHp;
+        newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus) + stPtAgi;
+        newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus) + stPtLuc;
         
         const playerGems = accessories.filter(acc => acc.t1 === 35);
         for (const gem of playerGems) {
