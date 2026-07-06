@@ -4,6 +4,17 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.22',
+    date: '2026-07-06 00:00:00',
+    changes: [
+      '修复所有BOSS掉落数据：type=3（魂）和type=4（材料）类型修正',
+      '创建 useTranslation hook，支持语言实时切换',
+      '主菜单添加多语言翻译支持',
+      '设置界面重新设计：分为存档管理、语言设置、属性分配预设、缓存管理、关于游戏五个独立板块',
+      '修复切换语言时界面文字不更新的问题',
+    ],
+  },
+  {
     version: 'v0.0.21',
     date: '2026-07-04 00:00:00',
     changes: [

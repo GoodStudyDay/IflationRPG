@@ -4,6 +4,7 @@ import { Inventory } from './Inventory';
 import { StatusPanel } from './StatusPanel';
 import { EquipmentCollection } from './EquipmentCollection';
 import { SettingsModal } from './SettingsModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MenuOverlayProps {
   onClose: () => void;
@@ -11,6 +12,7 @@ interface MenuOverlayProps {
 
 export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
   const { goToTitle, killPlayer } = useGameStore();
+  const { t } = useTranslation();
   const [activePanel, setActivePanel] = useState<'main' | 'status' | 'inventory' | 'collection'>('main');
   const [showSettings, setShowSettings] = useState(false);
   
@@ -44,7 +46,7 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
-            <div className="text-game-secondary font-bold">主菜单</div>
+            <div className="text-game-secondary font-bold">{t('メニュー画面')}</div>
           </div>
           
           <div className="space-y-2">
@@ -52,17 +54,17 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
               onClick={() => setActivePanel('status')}
               className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
             >
-              属性
+              {t('ステータス振り分け')}
             </button>
-            <div className="text-xs text-gray-400 px-2 mb-2">可以查看属性详情，分配属性点</div>
+            <div className="text-xs text-gray-400 px-2 mb-2">{t('ステスポイの振り分けを行うことが')}</div>
             
             <button
               onClick={() => setActivePanel('inventory')}
               className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
             >
-              装备
+              {t('装備')}
             </button>
-            <div className="text-xs text-gray-400 px-2 mb-2">购买装备，进行装备</div>
+            <div className="text-xs text-gray-400 px-2 mb-2">{t('アイテムを購入、装備をし')}</div>
             
             <button
               onClick={() => setActivePanel('collection')}
@@ -78,14 +80,14 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
             >
               设置
             </button>
-            <div className="text-xs text-gray-400 px-2 mb-2">更改游戏和语言设定等</div>
+            <div className="text-xs text-gray-400 px-2 mb-2">{t('ゲームの設定などを変更しま')}</div>
             
             <div className="flex gap-2">
               <button
                 onClick={handleTitleClick}
                 className="flex-1 bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
               >
-                标题
+                {t('タイトルに戻る')}
               </button>
               <button
                 onClick={() => killPlayer()}
@@ -94,13 +96,13 @@ export const MenuOverlay = ({ onClose }: MenuOverlayProps) => {
                 死亡
               </button>
             </div>
-            <div className="text-xs text-gray-400 px-2 mb-2">游戏自动保存</div>
+            <div className="text-xs text-gray-400 px-2 mb-2">{t('ゲームは自動的にセーブされて')}</div>
             
             <button
               onClick={onClose}
               className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors text-lg"
             >
-              关闭
+              {t('閉じる')}
             </button>
           </div>
         </div>
