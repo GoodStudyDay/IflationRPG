@@ -1933,6 +1933,12 @@ export const BOSS_DATA: BossData[] = [
   },
 ];
 
-export const getBossById = (bossId: number): BossData | undefined => {
+export const getBossById = (bossId: number, hardmode: number = 0): BossData | undefined => {
+  const bossWithDifficulty = BOSS_DATA.find(
+    boss => boss.bossId === bossId && boss.difficulty === hardmode
+  );
+  if (bossWithDifficulty) {
+    return bossWithDifficulty;
+  }
   return BOSS_DATA.find(boss => boss.bossId === bossId);
 };

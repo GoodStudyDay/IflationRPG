@@ -4,6 +4,17 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.30',
+    date: '2026-07-07 00:00:00',
+    changes: [
+      '修复攻击逻辑+暂停问题：角色攻击→暂停→返回游戏→怪物攻击',
+      '修正困难模式下BOSS掉落及掉落显示',
+      '标题界面版本号左侧添加GitHub图标，点击跳转开源页面',
+      '修复武器倍率计算未生效问题：正确处理attributeRate（基础100%+额外倍率）',
+      '翻译键名从日文改为中文',
+    ],
+  },
+  {
     version: 'v0.0.29',
     date: '2026-07-06 00:00:00',
     changes: [

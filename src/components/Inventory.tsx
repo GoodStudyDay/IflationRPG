@@ -626,18 +626,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           onClick={(e) => { e.stopPropagation(); handleEquip(soul); }}
                           className="bg-[#4a6fa5] text-white font-bold py-1 px-3 rounded hover:bg-[#3a5a95] transition-colors text-xs"
                         >
-                          安装
+                          安装 {soul.price.toLocaleString()}G
                         </button>
                       </>
-                    ) : soul.price > 0 ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleBuy(soul.id); }}
-                        className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
-                      >
-                        购买 {getCurrentPrice(soul).toLocaleString()}G
-                      </button>
                     ) : (
-                      <div className="text-xs text-gray-400">无法购买</div>
+                      <div className="text-xs text-gray-400">无法安装</div>
                     )}
                   </div>
                 </div>

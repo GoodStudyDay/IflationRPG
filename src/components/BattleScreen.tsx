@@ -12,7 +12,6 @@ export const BattleScreen = () => {
     resumeBattle, 
     tryEscape,
     setRecoverNextTurn,
-    hardmode,
   } = useGameStore();
   
   const canRecover = !battle.recoverUsed && player.hp < player.maxHp;
@@ -147,21 +146,16 @@ export const BattleScreen = () => {
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">掉落:</div>
-              {(() => {
-                const startIndex = hardmode * 3;
-                const endIndex = startIndex + 3;
-                return battle.enemy.drops.slice(startIndex, endIndex).map((drop, index) => {
-                  if (!drop) return null;
-                  const equipment = getEquipmentById(drop.equipmentId);
-                  const itemName = equipment?.name || drop.equipmentId;
-                  return (
-                    <div key={index} className="flex justify-between">
-                      <span className="truncate">{itemName}</span>
-                      <span className="text-yellow-400 ml-2">{(drop.dropRate * 100).toFixed(1)}%</span>
-                    </div>
-                  );
-                });
-              })()}
+              {battle.enemy.drops.filter(d => d !== null).map((drop, index) => {
+                const equipment = getEquipmentById(drop!.equipmentId);
+                const itemName = equipment?.name || drop!.equipmentId;
+                return (
+                  <div key={index} className="flex justify-between">
+                    <span className="truncate">{itemName}</span>
+                    <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

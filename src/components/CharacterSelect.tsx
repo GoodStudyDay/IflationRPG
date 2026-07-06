@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { heroData, getHeroSpritePath } from '@/data/heroData';
+import { getCurrentKyaraLv } from '@/utils/kyaraLevel';
 
 const BASE_URL = import.meta.env.BASE_URL || '/';
 
@@ -21,7 +22,7 @@ const COLS = 3;
 const ROWS = 4;
 
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
-  const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode } = useGameStore();
+  const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp } = useGameStore();
   const [frames, setFrames] = useState<Record<number, number>>({});
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(0);
   const intervalRef = useRef<number | null>(null);
@@ -64,6 +65,10 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
     if (hero.agiBonus > 0) stats.push(`AGI+${hero.agiBonus}`);
     if (hero.lucBonus > 0) stats.push(`LUC+${hero.lucBonus}`);
     return stats.join(' ');
+  };
+
+  const getHeroLevel = (heroId: number): number => {
+    return getCurrentKyaraLv(kyarakutaKozinExp, heroId);
   };
 
   return (
@@ -182,6 +187,11 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
                   <div className="text-center text-[6px] sm:text-[8px] text-gray-400 truncate px-1">
                     {getStatDescription(hero)}
                   </div>
+                  {getHeroLevel(hero.id) > 0 && (
+                    <div className="text-center text-[6px] sm:text-[8px] text-yellow-400 font-bold truncate px-1">
+                      LV.{getHeroLevel(hero.id)}
+                    </div>
+                  )}
                 </div>
                 {isSelected && (
                   <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
