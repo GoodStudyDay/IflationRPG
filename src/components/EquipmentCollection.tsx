@@ -3,12 +3,14 @@ import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import type { EquipmentType } from '@/types';
 import { SpriteIcon } from './SpriteIcon';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
 
 interface EquipmentCollectionProps {
   onClose: () => void;
 }
 
 export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
+  const { getEquipName } = useEquipmentName();
   const { inventory, player, buyEquipment } = useGameStore();
   type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
@@ -140,7 +142,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                             ? isMaxed ? 'text-gray-400' : 'text-game-secondary'
                             : 'text-gray-500'
                         }`}>
-                          {showInfo ? equipment.name : '？？？'}
+                          {showInfo ? getEquipName(equipment.name) : '？？？'}
                         </span>
                         <span className="text-xs text-gray-400">
                           {getTypeLabel(equipment.type)}
@@ -233,7 +235,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                 )}
               </div>
               <div>
-                <div className="text-game-secondary font-bold text-lg">{selectedEquipment.name}</div>
+                <div className="text-game-secondary font-bold text-lg">{getEquipName(selectedEquipment.name)}</div>
                 <div className="text-gray-400 text-sm">{getTypeLabel(selectedEquipment.type)}</div>
               </div>
             </div>

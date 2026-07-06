@@ -5,11 +5,13 @@ import { Leaderboard } from './Leaderboard';
 import { PlayerInfo } from './PlayerInfo';
 import { CharacterSelect } from './CharacterSelect';
 import { VERSION } from '@/data/version';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type ScreenMode = 'top' | 'gamestart' | 'charselect';
 
 export const TitleScreen = () => {
   const { startGame, resetGame, selectHero, player, battlePoints } = useGameStore();
+  const { t } = useTranslation();
   const [screenMode, setScreenMode] = useState<ScreenMode>('top');
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -90,16 +92,16 @@ export const TitleScreen = () => {
               onClick={handleNewGame}
               className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
             >
-              从新开始
+              {t('重新开始')}
             </button>
-            <div className="text-xs text-gray-600 px-2 mb-2 text-center">前回までの引き継いでます</div>
+            <div className="text-xs text-gray-600 px-2 mb-2 text-center">{t('继承上次进度')}</div>
             
             {canContinue && (
               <button
                 onClick={handleContinue}
                 className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
               >
-                继续游戏
+                {t('继续游戏')}
               </button>
             )}
             
@@ -107,7 +109,7 @@ export const TitleScreen = () => {
               onClick={handleBack}
               className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
             >
-              返回
+              {t('戻る')}
             </button>
           </div>
 
@@ -162,28 +164,28 @@ export const TitleScreen = () => {
             onClick={handleStartGame}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            游戏开始
+            {t('游戏开始')}
           </button>
           
           <button
             onClick={handlePlayerInfo}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            玩家信息
+            {t('玩家信息')}
           </button>
           
           <button
             onClick={handleRanking}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            排行
+            {t('ランキング')}
           </button>
           
           <button
             onClick={() => setShowSettings(true)}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            设置
+            {t('オプション')}
             <span className="block text-xs sm:text-sm opacity-70">SETTING</span>
           </button>
         </div>

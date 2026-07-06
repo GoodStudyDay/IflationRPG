@@ -49,6 +49,8 @@ export interface EquipSet {
   armorId: string | null;
   accessoryIds: (string | null)[];
   createdAt: number;
+  unlocked: boolean;
+  slotIndex: number;
 }
 
 export interface Skill {

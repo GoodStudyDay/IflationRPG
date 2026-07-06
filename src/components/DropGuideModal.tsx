@@ -5,6 +5,9 @@ import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { BOSS_DATA } from '@/data/bossData';
 import { SpriteIcon } from './SpriteIcon';
 import type { Equipment } from '@/types';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useNames } from '@/hooks/useNames';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DropGuideModalProps {
   isOpen: boolean;
@@ -24,6 +27,9 @@ interface DropEntry {
 type FilterType = 'all' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
 
 export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
+  const { getEquipName } = useEquipmentName();
+  const { translateBossName, translateMapName } = useNames();
+  const { t } = useTranslation();
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,25 +141,25 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
 
   if (!isOpen) return null;
 
-  const typeFilters: { key: FilterType; label: string }[] = [
-    { key: 'all', label: '全部' },
-    { key: 'weapon', label: '武器' },
-    { key: 'armor', label: '防具' },
-    { key: 'accessory', label: '饰品' },
-    { key: 'soul', label: '魂' },
-    { key: 'material', label: '材料' },
+  const filterTypes: { key: FilterType; label: string }[] = [
+    { key: 'all', label: t('全部') },
+    { key: 'weapon', label: t('武器') },
+    { key: 'armor', label: t('防具') },
+    { key: 'accessory', label: t('饰品') },
+    { key: 'soul', label: t('魂') },
+    { key: 'material', label: t('材料') },
   ];
 
   const formatRate = (rate: number) => `${(rate * 100).toFixed(1)}%`;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={e => e.stopPropagation()}>
       <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[95%] max-w-lg max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xl">📖</span>
-            <span className="text-game-secondary font-bold">装备掉落图鉴</span>
+            <span className="text-game-secondary font-bold">{t('装备掉落图鉴')}</span>
           </div>
           <button
             onClick={onClose}
@@ -167,13 +173,13 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
         <div className="px-3 py-2 space-y-2 shrink-0">
           <input
             type="text"
-            placeholder="搜索装备名称、地图或怪物..."
+            placeholder={t('搜索装备名称、地图或怪物...')}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full bg-[#1a0a2e] border border-[#4a2c7a] rounded px-3 py-1.5 text-white text-sm focus:outline-none focus:border-[#6a4c9a]"
           />
           <div className="flex gap-1 flex-wrap">
-            {typeFilters.map(f => (
+            {filterTypes.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilterType(f.key)}
@@ -187,8 +193,8 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
               </button>
             ))}
             <span className="text-gray-500 text-xs self-center ml-auto">
-              共 {filteredEntries.length} 件
-            </span>
+                {t('共')} {filteredEntries.length} {t('件')}
+              </span>
           </div>
         </div>
 
@@ -218,10 +224,10 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-white font-bold text-sm truncate">{entry.equipment.name}</div>
+                    <div className="text-white font-bold text-sm truncate">{getEquipName(entry.equipment.name)}</div>
                     <div className="text-gray-400 text-xs">
-                      {entry.sources.length} 个掉落来源 · {entry.sources.reduce((sum, s) => sum + s.enemies.length, 0)} 种怪物
-                    </div>
+                        {entry.sources.length}{t('个掉落来源')} · {entry.sources.reduce((sum, s) => sum + s.enemies.length, 0)}{t('种怪物')}
+                      </div>
                   </div>
                   <span className="text-gray-500 text-lg shrink-0 transition-transform" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
                     ▶
@@ -238,14 +244,14 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
                             source.type === 'general' ? 'bg-blue-900/50 text-blue-300' :
                             'bg-green-900/50 text-green-300'
                           }`}>
-                            {source.type === 'boss' ? 'Boss' : source.type === 'general' ? '通用' : '地图'}
+                            {source.type === 'boss' ? t('Boss') : source.type === 'general' ? t('通用') : t('地图')}
                           </span>
-                          <span className="text-white text-sm font-bold">{source.mapName}</span>
+                          <span className="text-white text-sm font-bold">{translateMapName(source.mapName)}</span>
                         </div>
                         <div className="space-y-0.5">
                           {source.enemies.map((enemy, ei) => (
                             <div key={ei} className="flex justify-between text-xs">
-                              <span className="text-gray-300">{enemy.name}</span>
+                              <span className="text-gray-300">{source.type === 'boss' ? translateBossName(enemy.name) : enemy.name}</span>
                               <span className="text-yellow-400 font-mono">{formatRate(enemy.dropRate)}</span>
                             </div>
                           ))}
@@ -260,7 +266,7 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
 
           {filteredEntries.length === 0 && (
             <div className="text-center text-gray-400 py-8">
-              未找到匹配的掉落信息
+              {t('未找到匹配的掉落信息')}
             </div>
           )}
         </div>
@@ -271,7 +277,7 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
             onClick={onClose}
             className="w-full bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors text-sm"
           >
-            关闭
+            {t('close_button')}
           </button>
         </div>
       </div>

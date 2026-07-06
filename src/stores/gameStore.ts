@@ -51,6 +51,7 @@ interface GameStore {
   kyarakutalv: number;
   kyarakutaKozinExp: number[];
   equipSets: EquipSet[];
+  currentEquipSetSlotIndex: number;
   hardmodeUnlock: number;
   hellmodeUnlock: number;
   hardmode: number;
@@ -131,6 +132,12 @@ interface GameStore {
   deleteEquipSet: (setId: string) => void;
   /** 更新装备套装名称 */
   renameEquipSet: (setId: string, name: string) => void;
+  /** 购买装备套装槽位 */
+  purchaseEquipSet: (slotIndex: number) => boolean;
+  /** 获取装备套装槽位价格 */
+  getEquipSetPrice: (slotIndex: number) => number | null;
+  /** 更新当前装备套装 */
+  updateCurrentEquipSet: () => void;
   /** 自动分配属性点 */
   autoAllocateStPt: () => void;
   /** 选择角色 */
@@ -269,7 +276,7 @@ const calculateCritRate = (hpPercent: number, accessories: Equipment[]): number 
     if (hpPercent <= 0.05) rate += 0.03;
   }
   
-  const critChanceRing = accessories.find(acc => acc.t1 === 200);
+  const critChanceRing = accessories.find(acc => acc && acc.t1 === 200);
   if (critChanceRing) {
     rate += 0.15;
   }
@@ -286,12 +293,12 @@ const calculateComboRate = (hpPercent: number, accessories: Equipment[]): number
     if (hpPercent <= 0.05) rate += 0.08;
   }
   
-  const comboRateRing = accessories.find(acc => acc.t1 === 250);
+  const comboRateRing = accessories.find(acc => acc && acc.t1 === 250);
   if (comboRateRing) {
     rate += 0.15;
   }
   
-  const stormPower = accessories.find(acc => acc.t1 === 4001);
+  const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
   if (stormPower) {
     rate += (stormPower.t2 || 50) / 100;
   }
@@ -309,10 +316,10 @@ const calculatePlayerDamage = (
 ): { damage: number; isCrit: boolean } => {
   let damage: number;
   
-  const critPowerRing = accessories.find(acc => acc.t1 === 210);
-  const skyPower = accessories.find(acc => acc.t1 === 4002);
-  const stormPower = accessories.find(acc => acc.t1 === 4001);
-  const powerStone = accessories.find(acc => acc.t1 === 2222);
+  const critPowerRing = accessories.find(acc => acc && acc.t1 === 210);
+  const skyPower = accessories.find(acc => acc && acc.t1 === 4002);
+  const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
+  const powerStone = accessories.find(acc => acc && acc.t1 === 2222);
   
   if (isCrit) {
     const critBonus = Math.random() * 1.2;
@@ -368,8 +375,8 @@ const calculatePlayerDamage = (
 const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, accessories: Equipment[]): number => {
   let damage = (enemyAttack * 2 + (enemyAttack - playerDefense * 0.5) * 12) / 14;
   
-  const protectionStone = accessories.find(acc => acc.t1 === 1111);
-  const earthPower = accessories.find(acc => acc.t1 === 4003);
+  const protectionStone = accessories.find(acc => acc && acc.t1 === 1111);
+  const earthPower = accessories.find(acc => acc && acc.t1 === 4003);
   
   if (protectionStone) {
     damage *= (1 - (protectionStone.t2 || 20) / 100);
@@ -487,7 +494,19 @@ export const useGameStore = create<GameStore>()(
       gameovercount: saveData.gameovercount,
       kyarakutalv: saveData.kyarakutalv,
       kyarakutaKozinExp: saveData.kyarakutaKozinExp || new Array(20).fill(0),
-      equipSets: saveData.equipSets || [],
+      equipSets: saveData.equipSets || [
+        {
+          id: 'set-0',
+          name: '默认背包',
+          weaponId: null,
+          armorId: null,
+          accessoryIds: [],
+          createdAt: Date.now(),
+          unlocked: true,
+          slotIndex: 0,
+        },
+      ],
+      currentEquipSetSlotIndex: 0,
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
       hardmode: 0,
@@ -589,11 +608,11 @@ export const useGameStore = create<GameStore>()(
         const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, player.armorSoul) : 0;
         
         const accessories = player.equippedAccessories || [];
-        const accAtk = accessories.reduce((sum, a) => sum + (a.attackBonus || 0), 0);
-        const accDef = accessories.reduce((sum, a) => sum + (a.defenseBonus || 0), 0);
-        const accHp = accessories.reduce((sum, a) => sum + (a.hpBonus || 0), 0);
-        const accAgi = accessories.reduce((sum, a) => sum + (a.agilityBonus || 0), 0);
-        const accLuc = accessories.reduce((sum, a) => sum + (a.luckBonus || 0), 0);
+        const accAtk = accessories.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
+        const accDef = accessories.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
+        const accHp = accessories.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
+        const accAgi = accessories.reduce((sum, a) => sum + (a?.agilityBonus || 0), 0);
+        const accLuc = accessories.reduce((sum, a) => sum + (a?.luckBonus || 0), 0);
         
         let hpInc = Math.ceil(initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp);
         let atkInc = Math.ceil(initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk);
@@ -603,7 +622,7 @@ export const useGameStore = create<GameStore>()(
         
         let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
         
-        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
@@ -638,7 +657,7 @@ export const useGameStore = create<GameStore>()(
           lucInc += itemBonus2;
         }
         
-        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
           gemHp += _loc2_;
@@ -653,7 +672,7 @@ export const useGameStore = create<GameStore>()(
           lucInc += _loc2_;
         }
         
-        const warGems = accessories.filter(acc => acc.t1 === 41);
+        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
           gemAtk += _loc2_;
@@ -664,7 +683,7 @@ export const useGameStore = create<GameStore>()(
           agiInc += _loc2_;
         }
         
-        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
           gemHp += _loc2_;
@@ -692,11 +711,11 @@ export const useGameStore = create<GameStore>()(
         
         updateHighLv(newLevel);
         
-        const attrCrystal = accessories.find(acc => acc.t1 === 700 || acc.t1 === 701 || acc.t1 === 2701);
+        const attrCrystal = accessories.find(acc => acc && (acc.t1 === 700 || acc.t1 === 701 || acc.t1 === 2701));
         const stPtPerLevel = attrCrystal ? (attrCrystal.t2 || 5) : 4;
         const stPtIncrease = lvupsitanum * stPtPerLevel;
         
-        const braveProof = accessories.find(acc => acc.t1 === 820);
+        const braveProof = accessories.find(acc => acc && acc.t1 === 820);
         if (braveProof) {
           const bonusRate = (braveProof.t2 || 30) / 100;
           hpInc = Math.ceil(hpInc * (1 + bonusRate));
@@ -897,11 +916,11 @@ export const useGameStore = create<GameStore>()(
         const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, newPlayer.armorSoul) : 0;
         
         const accessories = newPlayer.equippedAccessories || [];
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
         
         // 保存 stPt 已经分配的属性加成（旧装备下的 stPt 贡献）
         // 注意：提取 stPt 时不包含魂的加成，避免切换魂时属性叠加
@@ -909,11 +928,11 @@ export const useGameStore = create<GameStore>()(
         const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), null) : 0;
         const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
         const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
-        const oldAccAtk = oldAccs.reduce((sum, a) => sum + a.attackBonus, 0);
-        const oldAccDef = oldAccs.reduce((sum, a) => sum + a.defenseBonus, 0);
-        const oldAccHp = oldAccs.reduce((sum, a) => sum + a.hpBonus, 0);
-        const oldAccAgi = oldAccs.reduce((sum, a) => sum + a.agilityBonus, 0);
-        const oldAccLuc = oldAccs.reduce((sum, a) => sum + a.luckBonus, 0);
+        const oldAccAtk = oldAccs.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
+        const oldAccDef = oldAccs.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
+        const oldAccHp = oldAccs.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
+        const oldAccAgi = oldAccs.reduce((sum, a) => sum + (a?.agilityBonus || 0), 0);
+        const oldAccLuc = oldAccs.reduce((sum, a) => sum + (a?.luckBonus || 0), 0);
         const lvlBonus = getLevelBonus(player.level);
         // 使用 Math.ceil 对旧基础属性做同样的舍入，避免 stPt 提取时浮点误差累积
         const oldBaseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + oldArmorHp + oldAccHp);
@@ -933,7 +952,7 @@ export const useGameStore = create<GameStore>()(
         newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus) + stPtAgi;
         newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus) + stPtLuc;
         
-        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
@@ -961,7 +980,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.luck += itemCount2 * (_loc2_ * 4);
         }
         
-        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_;
@@ -971,7 +990,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.luck += _loc2_;
         }
         
-        const warGems = accessories.filter(acc => acc.t1 === 41);
+        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.attack += _loc2_;
@@ -979,7 +998,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_;
@@ -988,7 +1007,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        const crystalAegis = accessories.filter(acc => acc.t1 === 43);
+        const crystalAegis = accessories.filter(acc => acc && acc.t1 === 43);
         for (const gem of crystalAegis) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_;
@@ -996,25 +1015,25 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        const protectionStone = accessories.filter(acc => acc.t1 === 1111);
+        const protectionStone = accessories.filter(acc => acc && acc.t1 === 1111);
         for (const gem of protectionStone) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_ * 100;
         }
         
-        const powerStone = accessories.filter(acc => acc.t1 === 2222);
+        const powerStone = accessories.filter(acc => acc && acc.t1 === 2222);
         for (const gem of powerStone) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.attack += _loc2_ * 50;
         }
         
-        const angelFeather = accessories.filter(acc => acc.t1 === 3333);
+        const angelFeather = accessories.filter(acc => acc && acc.t1 === 3333);
         for (const gem of angelFeather) {
           const _loc2_ = gem.t2 || 105;
           newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (_loc2_ / 100));
         }
         
-        const earthPower = accessories.filter(acc => acc.t1 === 4003);
+        const earthPower = accessories.filter(acc => acc && acc.t1 === 4003);
         for (const gem of earthPower) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
@@ -1026,7 +1045,7 @@ export const useGameStore = create<GameStore>()(
         newPlayer.agility += stPtAgi;
         newPlayer.luck += stPtLuc;
         
-        const duskCrystal = accessories.filter(acc => acc.t1 === 15);
+        const duskCrystal = accessories.filter(acc => acc && acc.t1 === 15);
         if (duskCrystal.length > 0) {
           const currentStPt = newPlayer.stPt || 0;
           newPlayer.stPt = Math.ceil(currentStPt * 0.6);
@@ -1042,10 +1061,28 @@ export const useGameStore = create<GameStore>()(
           battlePointsChange += equipment.t2 || 0;
         }
         
+        // 更新当前激活背包的装备数据
+        const currentSets = get().equipSets;
+        const currentSlot = get().currentEquipSetSlotIndex;
+        const newEquipSets = currentSets.map(s =>
+          s.slotIndex === currentSlot ? {
+            ...s,
+            weaponId: newPlayer.equippedWeapon?.id || null,
+            armorId: newPlayer.equippedArmor?.id || null,
+            accessoryIds: (newPlayer.equippedAccessories || []).map(acc => acc?.id || null),
+          } : s
+        );
+        
         set({ 
           player: newPlayer,
+          equipSets: newEquipSets,
           battlePoints: get().battlePoints + battlePointsChange,
         });
+        
+        // 持久化保存
+        const persistData = loadSaveData();
+        persistData.equipSets = newEquipSets;
+        saveSaveData(persistData);
         
         if (equipment.type === 'accessory') {
           get().checkZeroEquips();
@@ -1139,6 +1176,8 @@ export const useGameStore = create<GameStore>()(
           armorId: player.equippedArmor?.id || null,
           accessoryIds: player.equippedAccessories.map(acc => acc?.id || null),
           createdAt: Date.now(),
+          unlocked: true,
+          slotIndex: equipSets.length,
         };
         const updatedSets = [...equipSets, newSet];
         set({ equipSets: updatedSets });
@@ -1148,22 +1187,124 @@ export const useGameStore = create<GameStore>()(
         saveSaveData(data);
       },
       loadEquipSet: (setId) => {
-        const { equipSets } = get();
+        const state = get();
+        const { equipSets, currentEquipSetSlotIndex, player, inventory } = state;
         const equipSet = equipSets.find(set => set.id === setId);
-        if (!equipSet) return;
+        if (!equipSet || !equipSet.unlocked) return;
+        
+        // Save current equipment to current active set
+        let updatedSets = equipSets.map(set =>
+          set.slotIndex === currentEquipSetSlotIndex ? {
+            ...set,
+            weaponId: player.equippedWeapon?.id || null,
+            armorId: player.equippedArmor?.id || null,
+            accessoryIds: (player.equippedAccessories || []).map(acc => acc?.id || null),
+          } : set
+        );
         
         const weapon = equipSet.weaponId ? equipmentData.find(e => e.id === equipSet.weaponId) || null : null;
         const armor = equipSet.armorId ? equipmentData.find(e => e.id === equipSet.armorId) || null : null;
         const accessories = equipSet.accessoryIds.map(id => id ? equipmentData.find(e => e.id === id) || null : null).filter(Boolean) as Equipment[];
         
-        set(state => ({
-          player: {
-            ...state.player,
-            equippedWeapon: weapon,
-            equippedArmor: armor,
-            equippedAccessories: accessories,
-          },
-        }));
+        // Calculate old equipment stPt allocation
+        const oldAccs = player.equippedAccessories || [];
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), null) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
+        const oldAccAtk = oldAccs.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
+        const oldAccDef = oldAccs.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
+        const oldAccHp = oldAccs.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
+        const oldAccAgi = oldAccs.reduce((sum, a) => sum + (a?.agilityBonus || 0), 0);
+        const oldAccLuc = oldAccs.reduce((sum, a) => sum + (a?.luckBonus || 0), 0);
+        const lvlBonus = getLevelBonus(player.level);
+        const oldBaseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + oldArmorHp + oldAccHp);
+        const oldBaseAtk = Math.ceil(initialPlayer.attack + lvlBonus.attack + oldWeaponAtk + oldAccAtk);
+        const oldBaseDef = Math.ceil(initialPlayer.defense + lvlBonus.defense + oldArmorDef + oldAccDef);
+        const oldBaseAgi = Math.ceil(initialPlayer.agility + lvlBonus.agility + oldAccAgi);
+        const oldBaseLuc = Math.ceil(initialPlayer.luck + lvlBonus.luck + oldAccLuc);
+        const stPtHp = Math.max(0, player.maxHp - oldBaseHp);
+        const stPtAtk = Math.max(0, player.attack - oldBaseAtk);
+        const stPtDef = Math.max(0, player.defense - oldBaseDef);
+        const stPtAgi = Math.max(0, player.agility - oldBaseAgi);
+        const stPtLuc = Math.max(0, player.luck - oldBaseLuc);
+        
+        // Calculate new equipment bonuses
+        const weaponQty = weapon ? (inventory.find(i => i.equipmentId === weapon.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = weapon ? getWeaponAtkContribution(weapon, weaponQty, player.weaponSoul) : 0;
+        
+        const armorQty = armor ? (inventory.find(i => i.equipmentId === armor.id)?.quantity || 1) : 1;
+        const armorDefContrib = armor ? getArmorDefContribution(armor, armorQty, player.armorSoul) : 0;
+        const armorHpContrib = armor ? getArmorHpContribution(armor, armorQty, player.armorSoul) : 0;
+        
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
+        
+        // Recalculate stats
+        const newPlayer = {
+          ...player,
+          equippedWeapon: weapon,
+          equippedArmor: armor,
+          equippedAccessories: accessories,
+          attack: Math.ceil(initialPlayer.attack + getLevelBonus(player.level).attack + weaponAtkContrib + accessoryAtkBonus) + stPtAtk,
+          defense: Math.ceil(initialPlayer.defense + getLevelBonus(player.level).defense + armorDefContrib + accessoryDefBonus) + stPtDef,
+          maxHp: Math.ceil(initialPlayer.maxHp + getLevelBonus(player.level).hp + armorHpContrib + accessoryHpBonus) + stPtHp,
+          agility: Math.ceil(initialPlayer.agility + getLevelBonus(player.level).agility + accessoryAgiBonus) + stPtAgi,
+          luck: Math.ceil(initialPlayer.luck + getLevelBonus(player.level).luck + accessoryLucBonus) + stPtLuc,
+        };
+        
+        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        const crystalAegis = accessories.filter(acc => acc && acc.t1 === 43);
+        for (const gem of crystalAegis) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+        }
+        
+        const protectionStone = accessories.filter(acc => acc && acc.t1 === 1111);
+        for (const gem of protectionStone) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_ * 100;
+        }
+        
+        const powerStone = accessories.filter(acc => acc && acc.t1 === 2222);
+        for (const gem of powerStone) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.attack += _loc2_ * 50;
+        }
+        
+        const angelFeather = accessories.filter(acc => acc && acc.t1 === 3333);
+        for (const gem of angelFeather) {
+          const _loc2_ = gem.t2 || 105;
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (_loc2_ / 100));
+        }
+        
+        const earthPower = accessories.filter(acc => acc && acc.t1 === 4003);
+        for (const gem of earthPower) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
+        }
+        
+        set({
+          player: newPlayer,
+          equipSets: updatedSets,
+          currentEquipSetSlotIndex: equipSet.slotIndex,
+        });
+        
+        const data = loadSaveData();
+        data.equipSets = updatedSets;
+        saveSaveData(data);
       },
       deleteEquipSet: (setId) => {
         const { equipSets } = get();
@@ -1179,6 +1320,73 @@ export const useGameStore = create<GameStore>()(
         const updatedSets = equipSets.map(set => 
           set.id === setId ? { ...set, name } : set
         );
+        set({ equipSets: updatedSets });
+        
+        const data = loadSaveData();
+        data.equipSets = updatedSets;
+        saveSaveData(data);
+      },
+      purchaseEquipSet: (slotIndex: number): boolean => {
+        const { player, equipSets } = get();
+        const prices = [0, 300000, 500000, 700000, 150000000, 500000000, 1200000000];
+        if (slotIndex < 0 || slotIndex >= prices.length) return false;
+        
+        const price = prices[slotIndex];
+        if (player.gold < price) return false;
+        
+        const existingSet = equipSets.find(set => set.slotIndex === slotIndex);
+        if (existingSet && existingSet.unlocked) return false;
+        
+        const newSet: EquipSet = {
+          id: `set-${Date.now()}`,
+          name: `背包${slotIndex + 1}`,
+          weaponId: null,
+          armorId: null,
+          accessoryIds: [],
+          createdAt: Date.now(),
+          unlocked: true,
+          slotIndex,
+        };
+        
+        let updatedSets;
+        if (existingSet) {
+          updatedSets = equipSets.map(set => 
+            set.slotIndex === slotIndex ? newSet : set
+          );
+        } else {
+          updatedSets = [...equipSets, newSet];
+        }
+        
+        set(state => ({
+          player: {
+            ...state.player,
+            gold: state.player.gold - price,
+          },
+          equipSets: updatedSets,
+        }));
+        
+        return true;
+      },
+      getEquipSetPrice: (slotIndex: number): number | null => {
+        const prices = [0, 300000, 500000, 700000, 150000000, 500000000, 1200000000];
+        if (slotIndex < 0 || slotIndex >= prices.length) return null;
+        return prices[slotIndex];
+      },
+      updateCurrentEquipSet: () => {
+        const { player, equipSets } = get();
+        const unlockedSets = equipSets.filter(set => set.unlocked);
+        if (unlockedSets.length === 0) return;
+        
+        const firstUnlocked = unlockedSets[0];
+        const updatedSets = equipSets.map(set => 
+          set.id === firstUnlocked.id ? {
+            ...set,
+            weaponId: player.equippedWeapon?.id || null,
+            armorId: player.equippedArmor?.id || null,
+            accessoryIds: player.equippedAccessories.map(acc => acc?.id || null),
+          } : set
+        );
+        
         set({ equipSets: updatedSets });
         
         const data = loadSaveData();
@@ -1304,11 +1512,11 @@ export const useGameStore = create<GameStore>()(
         const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty) : 0;
         
         const accessories = player.equippedAccessories || [];
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc.attackBonus || 0), 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc.defenseBonus || 0), 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc.hpBonus || 0), 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc.agilityBonus || 0), 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc.luckBonus || 0), 0);
+        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
+        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
+        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
+        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
+        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
         
         let newMaxHp = Math.ceil((initialPlayer.maxHp || 1000) + (levelBonus.hp || 0) + (armorHpContrib || 0) + (accessoryHpBonus || 0));
         let newAtk = Math.ceil((initialPlayer.attack || 1000) + (levelBonus.attack || 0) + (weaponAtkContrib || 0) + (accessoryAtkBonus || 0));
@@ -1316,7 +1524,7 @@ export const useGameStore = create<GameStore>()(
         let newAgi = Math.ceil((initialPlayer.agility || 1000) + (levelBonus.agility || 0) + (accessoryAgiBonus || 0));
         let newLuc = Math.ceil((initialPlayer.luck || 1000) + (levelBonus.luck || 0) + (accessoryLucBonus || 0));
         
-        const warGems = accessories.filter(acc => acc.t1 === 41);
+        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
           newAtk += _loc2_;
@@ -1324,7 +1532,7 @@ export const useGameStore = create<GameStore>()(
           newAgi += _loc2_;
         }
         
-        const fourGodGems = accessories.filter(acc => acc.t1 === 42);
+        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
           newMaxHp += _loc2_;
@@ -1333,7 +1541,7 @@ export const useGameStore = create<GameStore>()(
           newAgi += _loc2_;
         }
         
-        const braveGems = accessories.filter(acc => acc.t1 === 40);
+        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
           newMaxHp += _loc2_;
@@ -1343,7 +1551,7 @@ export const useGameStore = create<GameStore>()(
           newLuc += _loc2_;
         }
         
-        const playerGems = accessories.filter(acc => acc.t1 === 35);
+        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
@@ -1371,7 +1579,7 @@ export const useGameStore = create<GameStore>()(
           newLuc += itemCount2 * (_loc2_ * 4);
         }
         
-        const crystalAegis = accessories.filter(acc => acc.t1 === 43);
+        const crystalAegis = accessories.filter(acc => acc && acc.t1 === 43);
         for (const gem of crystalAegis) {
           const _loc2_ = gem.t2 || 0;
           newMaxHp += _loc2_;
@@ -1379,25 +1587,25 @@ export const useGameStore = create<GameStore>()(
           newAgi += _loc2_;
         }
         
-        const protectionStone = accessories.filter(acc => acc.t1 === 1111);
+        const protectionStone = accessories.filter(acc => acc && acc.t1 === 1111);
         for (const gem of protectionStone) {
           const _loc2_ = gem.t2 || 0;
           newMaxHp += _loc2_ * 100;
         }
         
-        const powerStone = accessories.filter(acc => acc.t1 === 2222);
+        const powerStone = accessories.filter(acc => acc && acc.t1 === 2222);
         for (const gem of powerStone) {
           const _loc2_ = gem.t2 || 0;
           newAtk += _loc2_ * 50;
         }
         
-        const angelFeather = accessories.filter(acc => acc.t1 === 3333);
+        const angelFeather = accessories.filter(acc => acc && acc.t1 === 3333);
         for (const gem of angelFeather) {
           const _loc2_ = gem.t2 || 105;
           newMaxHp = Math.ceil(newMaxHp * (_loc2_ / 100));
         }
         
-        const earthPower = accessories.filter(acc => acc.t1 === 4003);
+        const earthPower = accessories.filter(acc => acc && acc.t1 === 4003);
         for (const gem of earthPower) {
           const _loc2_ = gem.t2 || 0;
           newMaxHp = Math.ceil(newMaxHp * (1 + _loc2_ / 100));
@@ -1460,12 +1668,12 @@ export const useGameStore = create<GameStore>()(
         
         let adjustedAmount = amount;
         
-        const encounterReduceRing = accessories.find(acc => acc.t1 === 10);
+        const encounterReduceRing = accessories.find(acc => acc && acc.t1 === 10);
         if (encounterReduceRing) {
           adjustedAmount *= 0.5;
         }
         
-        const avoidBelt = accessories.find(acc => acc.t1 === 13);
+        const avoidBelt = accessories.find(acc => acc && acc.t1 === 13);
         if (avoidBelt && encounterRate < (avoidBelt.t2 || 45)) {
           return;
         }
@@ -1575,8 +1783,8 @@ export const useGameStore = create<GameStore>()(
         };
         
         const accessories = player.equippedAccessories || [];
-        const greedRing = accessories.find(acc => acc.t1 === 12);
-        const greedPendant = accessories.find(acc => acc.t1 === 77);
+        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
         let greedBonus = 1;
         if (greedRing) {
           greedBonus *= 2;
@@ -1779,8 +1987,8 @@ export const useGameStore = create<GameStore>()(
         };
         
         const accessories = player.equippedAccessories || [];
-        const greedRing = accessories.find(acc => acc.t1 === 12);
-        const greedPendant = accessories.find(acc => acc.t1 === 77);
+        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
         let greedBonus = 1;
         if (greedRing) {
           greedBonus *= 2;
@@ -1852,8 +2060,8 @@ export const useGameStore = create<GameStore>()(
         let battlePointsChange = 0;
         
         const accessories = player.equippedAccessories || [];
-        const greedPendant = accessories.find(acc => acc.t1 === 77);
-        const speedHourglass = accessories.find(acc => acc.t1 === 4100 || acc.t1 === 4101);
+        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
+        const speedHourglass = accessories.find(acc => acc && (acc.t1 === 4100 || acc.t1 === 4101));
         
         if (victory && battle.enemy) {
           goldReward = Math.floor(battle.enemy.goldReward * goldMultiplier);
@@ -1863,7 +2071,7 @@ export const useGameStore = create<GameStore>()(
             expReward = 0;
           }
           
-          const expGems = accessories.filter(acc => acc.t1 === 60);
+          const expGems = accessories.filter(acc => acc && acc.t1 === 60);
           for (const gem of expGems) {
             const expBonus = (gem.t2 || 0) / 100;
             expReward = Math.floor(expReward * (1 + expBonus));
@@ -2069,7 +2277,7 @@ export const useGameStore = create<GameStore>()(
               
               let isCrit = Math.random() * 100 < critRate;
               
-              const critRing = accessories.find(acc => acc.t1 === 310 || acc.t1 === 311 || acc.t1 === 312);
+              const critRing = accessories.find(acc => acc && (acc.t1 === 310 || acc.t1 === 311 || acc.t1 === 312));
               if (critRing) {
                 const guaranteedCritCount = critRing.t2 || 1;
                 if (battle.turnCount < guaranteedCritCount) {
@@ -2200,8 +2408,8 @@ export const useGameStore = create<GameStore>()(
                 const { player: newPlayer } = get();
                 if (newPlayer.hp <= 0) {
                   const accessories = newPlayer.equippedAccessories || [];
-                  const resurrectionNecklace = accessories.find(acc => acc.t1 === 1210 || acc.t1 === 1211);
-                  const immortalPower = accessories.find(acc => acc.t1 === 4000);
+                  const resurrectionNecklace = accessories.find(acc => acc && (acc.t1 === 1210 || acc.t1 === 1211));
+                  const immortalPower = accessories.find(acc => acc && acc.t1 === 4000);
                   
                   let shouldResurrect = false;
                   let resurrectMessage = '';
@@ -2406,11 +2614,11 @@ export const useGameStore = create<GameStore>()(
         const armorDefContrib = equippedArmor ? getArmorDefContribution(equippedArmor, armorQty) : 0;
         const armorHpContrib = equippedArmor ? getArmorHpContribution(equippedArmor, armorQty) : 0;
         
-        const accessoryAtkBonus = equippedAccessories.reduce((sum, acc) => sum + acc.attackBonus, 0);
-        const accessoryDefBonus = equippedAccessories.reduce((sum, acc) => sum + acc.defenseBonus, 0);
-        const accessoryHpBonus = equippedAccessories.reduce((sum, acc) => sum + acc.hpBonus, 0);
-        const accessoryAgiBonus = equippedAccessories.reduce((sum, acc) => sum + acc.agilityBonus, 0);
-        const accessoryLucBonus = equippedAccessories.reduce((sum, acc) => sum + acc.luckBonus, 0);
+        const accessoryAtkBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
+        const accessoryDefBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
+        const accessoryHpBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
+        const accessoryAgiBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
+        const accessoryLucBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
         
         const levelBonus = getLevelBonus(initialPlayer.level);
         
@@ -2427,7 +2635,7 @@ export const useGameStore = create<GameStore>()(
           maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
         };
         
-        const playerGems = equippedAccessories.filter(acc => acc.t1 === 35);
+        const playerGems = equippedAccessories.filter(acc => acc && acc.t1 === 35);
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
@@ -2455,7 +2663,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.luck += itemCount2 * (_loc2_ * 4);
         }
         
-        const braveGems = equippedAccessories.filter(acc => acc.t1 === 40);
+        const braveGems = equippedAccessories.filter(acc => acc && acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_;
@@ -2465,7 +2673,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.luck += _loc2_;
         }
         
-        const warGems = equippedAccessories.filter(acc => acc.t1 === 41);
+        const warGems = equippedAccessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.attack += _loc2_;
@@ -2473,7 +2681,7 @@ export const useGameStore = create<GameStore>()(
           newPlayer.agility += _loc2_;
         }
         
-        const fourGodGems = equippedAccessories.filter(acc => acc.t1 === 42);
+        const fourGodGems = equippedAccessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp += _loc2_;
@@ -2774,6 +2982,7 @@ export const useGameStore = create<GameStore>()(
         // 统计每个饰品 ID 在装备栏中出现的次数
         const equippedCountMap: Record<string, number> = {};
         equippedAccs.forEach(acc => {
+          if (!acc) return;
           equippedCountMap[acc.id] = (equippedCountMap[acc.id] || 0) + 1;
         });
         
@@ -2793,6 +3002,7 @@ export const useGameStore = create<GameStore>()(
         // 清理：对每个超出库存的饰品，只保留库存数量的装备
         const remainingCount: Record<string, number> = {};
         const newAccessories = equippedAccs.filter(acc => {
+          if (!acc) return false;
           const maxAllowed = inventory.find(i => i.equipmentId === acc.id)?.quantity || 0;
           const current = remainingCount[acc.id] || 0;
           if (current < maxAllowed) {
@@ -2929,11 +3139,11 @@ export const useGameStore = create<GameStore>()(
           const armorDefContrib = armor ? getArmorDefContribution(armor, armorQty) : 0;
           const armorHpContrib = armor ? getArmorHpContribution(armor, armorQty) : 0;
           
-          const accAtk = accessories.reduce((sum: number, a: Equipment) => sum + (a.attackBonus || 0), 0);
-          const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a.defenseBonus || 0), 0);
-          const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a.hpBonus || 0), 0);
-          const accAgi = accessories.reduce((sum: number, a: Equipment) => sum + (a.agilityBonus || 0), 0);
-          const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a.luckBonus || 0), 0);
+          const accAtk = accessories.reduce((sum: number, a: Equipment) => sum + (a?.attackBonus || 0), 0);
+          const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a?.defenseBonus || 0), 0);
+          const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a?.hpBonus || 0), 0);
+          const accAgi = accessories.reduce((sum: number, a: Equipment) => sum + (a?.agilityBonus || 0), 0);
+          const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a?.luckBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
           
           const baseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp);
@@ -2999,6 +3209,7 @@ export const useGameStore = create<GameStore>()(
         kyarakutaKozinExp: state.kyarakutaKozinExp,
         purchaseCounts: state.purchaseCounts,
         peakSnapshot: state.peakSnapshot,
+        currentEquipSetSlotIndex: state.currentEquipSetSlotIndex,
       }),
     }
   )

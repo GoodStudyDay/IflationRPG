@@ -1,9 +1,11 @@
 import { useGameStore } from '@/stores/gameStore';
 import { SpriteIcon } from './SpriteIcon';
 import { CharacterSprite } from './CharacterSprite';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
 
 export const BattleResult = () => {
   const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
+  const { getEquipName } = useEquipmentName();
   
   const { battleResult } = battle;
   
@@ -91,7 +93,7 @@ export const BattleResult = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold text-purple-400">
-                      {battleResult.dropItem.name}
+                      {getEquipName(battleResult.dropItem.name)}
                     </div>
                     <div className="text-xs text-gray-400">
                       {battleResult.dropItem.description}

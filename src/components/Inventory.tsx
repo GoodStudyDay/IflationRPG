@@ -3,7 +3,8 @@ import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
 import { SpriteIcon } from './SpriteIcon';
-import { EquipmentSetManager } from './EquipmentSetManager';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface InventoryProps {
   onClose: () => void;
@@ -12,6 +13,8 @@ interface InventoryProps {
 type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
 
 export const Inventory = ({ onClose }: InventoryProps) => {
+  const { getEquipName } = useEquipmentName();
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
   const [selectedSoulSlot, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
@@ -26,7 +29,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const unlockAccessorySlot = useGameStore(state => state.unlockAccessorySlot);
   const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [showGoldError, setShowGoldError] = useState(false);
-  const [showSetManager, setShowSetManager] = useState(false);
+  const [purchaseConfirmSlot, setPurchaseConfirmSlot] = useState<number | null>(null);
+  const equipSets = useGameStore(state => state.equipSets);
+  const loadEquipSet = useGameStore(state => state.loadEquipSet);
+  const purchaseEquipSet = useGameStore(state => state.purchaseEquipSet);
+  const getEquipSetPrice = useGameStore(state => state.getEquipSetPrice);
+  const [activeEquipSetSlot, setActiveEquipSetSlot] = useState(0);
 
   // Auto-equip without confirmation dialog when no stat changes
   useEffect(() => {
@@ -81,6 +89,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       hpBonus += player.equippedArmor.hpBonus;
     }
     (player.equippedAccessories || []).forEach(acc => {
+      if (!acc) return;
       atkBonus += acc.attackBonus;
       defBonus += acc.defenseBonus;
       hpBonus += acc.hpBonus;
@@ -205,7 +214,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const weapons = getFullWeaponList();
     
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
           <span className="text-white font-bold text-lg">武器列表</span>
           <button 
@@ -242,7 +251,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">{weapon.name}</div>
+                    <div className="text-white font-bold">{getEquipName(weapon.name)}</div>
                     {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
                     {!isOwned && (
                       <div>
@@ -304,7 +313,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const armors = getFullArmorList();
     
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
           <span className="text-white font-bold text-lg">防具列表</span>
           <button 
@@ -341,7 +350,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">{armor.name}</div>
+                    <div className="text-white font-bold">{getEquipName(armor.name)}</div>
                     {isEquipped && <div className="text-green-300 text-sm mt-1">当前装备</div>}
                     {!isOwned && (
                       <div>
@@ -410,6 +419,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const getAvailableQuantity = (accessoryId: string, inventoryQty: number): number => {
       let equippedCount = 0;
       equippedAccs.forEach((acc, idx) => {
+        if (!acc) return;
         if (acc.id === accessoryId) {
           if (idx !== selectedAccessorySlot) {
             equippedCount++;
@@ -420,7 +430,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     };
     
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
           <span className="text-white font-bold text-lg">饰品列表</span>
           <button 
@@ -433,7 +443,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {accessories.map(accessory => {
-            const isEquipped = equippedAccs.some(acc => acc.id === accessory.id);
+            const isEquipped = equippedAccs.some(acc => acc && acc.id === accessory.id);
             const isOwned = accessory.quantity > 0;
             const availableQty = getAvailableQuantity(accessory.id, accessory.quantity);
             const canEquipMore = availableQty > 0;
@@ -458,13 +468,13 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="large" image={accessory.image} />
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">{accessory.name}</div>
+                    <div className="text-white font-bold">{getEquipName(accessory.name)}</div>
                     <div className="flex items-center gap-1 mt-0.5">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <span key={i} className={`text-xs ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
                       ))}
                     </div>
-                    {isEquipped && <div className="text-green-300 text-sm mt-1">已装备 {equippedAccs.filter(a => a.id === accessory.id).length}个</div>}
+                    {isEquipped && <div className="text-green-300 text-sm mt-1">已装备 {equippedAccs.filter(a => a && a.id === accessory.id).length}个</div>}
                     {!isOwned && (
                       <div>
                         <div className="text-gray-400 text-sm mt-1">未拥有</div>
@@ -559,7 +569,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const souls = getFullSoulList();
     
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
           <span className="text-white font-bold text-lg">魂列表</span>
           <button 
@@ -592,7 +602,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <SpriteIcon type="soul" x={soul.x} y={soul.y} size="medium" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">{soul.name}</div>
+                    <div className="text-white font-bold">{getEquipName(soul.name)}</div>
                     {!isOwned && (
                       <div>
                         <div className="text-gray-400 text-sm mt-1">未拥有</div>
@@ -655,7 +665,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     const materials = getFullMaterialList();
     
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
         <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
           <span className="text-white font-bold text-lg">材料列表</span>
           <button 
@@ -692,7 +702,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-bold">{material.name}</div>
+                    <div className="text-white font-bold">{getEquipName(material.name)}</div>
                     {!isOwned && (
                       <div>
                         <div className="text-gray-400 text-sm mt-1">未拥有</div>
@@ -741,19 +751,44 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
   const renderMainView = () => {
     return (
-      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md max-h-[90vh] flex flex-col">
-        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-center">
-          <button 
-            onClick={() => setShowSetManager(true)}
-            className="bg-[#4a6fa5] text-white font-bold py-2 px-6 rounded hover:bg-[#3a5a95] transition-colors"
-          >
-            装备套装管理
-          </button>
+      <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
+          <div className="flex gap-2">
+            {Array.from({ length: 8 }).map((_, i) => {
+              const set = equipSets.find(s => s.slotIndex === i);
+              const isUnlocked = i === 0 || set?.unlocked;
+              
+              return (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (set && set.unlocked) {
+                      loadEquipSet(set.id);
+                      setActiveEquipSetSlot(i);
+                    } else if (!isUnlocked) {
+                      setPurchaseConfirmSlot(i);
+                    }
+                  }}
+                  className={`font-bold py-1.5 px-3 rounded transition-colors text-sm ${
+                    activeEquipSetSlot === i
+                      ? 'bg-green-600 text-white'
+                      : isUnlocked
+                        ? 'bg-[#4a6fa5] text-white hover:bg-[#3a5a95]'
+                        : 'bg-[#3a3a55] text-gray-400 hover:bg-[#4a4a65] cursor-pointer'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        <div className="text-xs text-gray-600 px-4 py-1 bg-[#7a94b7]">点击武器、防具、饰孔可以购买或解锁</div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">武器</div>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">■武器</div>
             <div className="flex gap-2 flex-1">
               <div 
                 onClick={() => {
@@ -780,12 +815,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <span className="text-xl">❓</span>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <div className="text-white font-bold text-sm">{player.equippedWeapon?.name || '未装备'}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-bold text-sm truncate">{player.equippedWeapon ? getEquipName(player.equippedWeapon.name) : '未装备'}</div>
                     {player.equippedWeapon && (
-                      <div className="text-red-300 text-xs mt-1">
-                        ATK {totalAttack} (+{bonuses.atkBonus})
-                      </div>
+                      <>
+                        <div className="text-red-300 text-xs mt-1">
+                          ATK {totalAttack} (+{bonuses.atkBonus})
+                        </div>
+                        <div className="text-red-300 text-xs">
+                          ATK x {(player.equippedWeapon.attributeRate || 100)}%
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -794,7 +834,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
 
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">防具</div>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">■防具</div>
             <div className="flex gap-2 flex-1">
               <div 
                 onClick={() => {
@@ -821,12 +861,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <span className="text-xl">❓</span>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <div className="text-white font-bold text-sm">{player.equippedArmor?.name || '未装备'}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-bold text-sm truncate">{player.equippedArmor ? getEquipName(player.equippedArmor.name) : '未装备'}</div>
                     {player.equippedArmor && (
-                      <div className="text-blue-300 text-xs mt-1">
-                        DEF {totalDefense} (+{bonuses.defBonus})
-                      </div>
+                      <>
+                        <div className="text-blue-300 text-xs mt-1">
+                          DEF {totalDefense} (+{bonuses.defBonus})
+                        </div>
+                        <div className="text-blue-300 text-xs">
+                          DEF x {(player.equippedArmor.attributeRate || 100)}%
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -856,7 +901,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-1">
-                        <div className="text-white font-bold text-xs truncate flex-1">{accessory.name}</div>
+                        <div className="text-white font-bold text-xs truncate flex-1">{getEquipName(accessory.name)}</div>
                         <div className="flex items-center gap-0.5">
                           {Array.from({ length: 4 }).map((_, i) => (
                             <span key={i} className={`text-[10px] ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
@@ -931,7 +976,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="w-8 h-8 bg-[#4a6fa5] rounded flex items-center justify-center">
                       <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="small" image={accessory.image} />
                     </div>
-                    <div className="text-white text-xs mt-0.5 truncate w-full text-center">{accessory.name}</div>
+                    <div className="text-white text-xs mt-0.5 truncate w-full text-center">{getEquipName(accessory.name)}</div>
                   </div>
                 ) : isUnlocked ? (
                   <div 
@@ -965,7 +1010,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
 
           <div className="bg-[#5a7aa5] px-2 py-1 rounded text-white text-xs font-bold flex items-center justify-between">
-            <span>属性</span>
+            <span>■属性</span>
             <div className="flex gap-1">
               <button 
                 onClick={() => setViewMode('material')}
@@ -999,12 +1044,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
         </div>
 
-        <div className="bg-[#5a7aa5] px-4 py-3 border-t-2 border-[#4a6fa5]">
+        <div className="bg-[#5a7aa5] px-4 py-2 border-t-2 border-[#4a6fa5]">
           <button
             onClick={onClose}
-            className="w-full bg-[#4a6fa5] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a95] transition-colors text-lg"
+            className="w-full bg-[#4a6fa5] text-white font-bold py-2 rounded hover:bg-[#3a5a95] transition-colors text-sm"
           >
-            返回
+            关闭
           </button>
         </div>
       </div>
@@ -1076,18 +1121,18 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
           <div className="text-center">
             <div className="text-xl font-bold text-white mb-4">
-              {confirmEquipment.type === 'soul' ? '安装' : '装备'} {confirmEquipment.name} 吗？
+              {confirmEquipment.type === 'soul' ? t('安装') : t('装备')} {getEquipName(confirmEquipment.name)} {t('吗？')}
             </div>
             
             {confirmEquipment.type === 'soul' && (
               <div className="bg-yellow-900/50 text-yellow-300 px-3 py-2 rounded-lg mb-4">
-                安装需要消耗 {confirmEquipment.price.toLocaleString()} G
+                {t('安装需要消耗')} {confirmEquipment.price.toLocaleString()} G
               </div>
             )}
             
             {confirmEquipment.type === 'soul' && !canAfford && (
               <div className="bg-red-900/50 text-red-300 px-3 py-2 rounded-lg mb-4">
-                金币不足！
+                {t('金币不足！')}
               </div>
             )}
             
@@ -1096,11 +1141,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 {changedStats.map(stat => (
                   <div key={stat.name}>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">现在的 {stat.name}:</span>
+                      <span className="text-gray-400">{t('现在的')} {stat.name}:</span>
                       <span className="text-white">{stat.old}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">装备后的 {stat.name}:</span>
+                      <span className="text-gray-400">{t('装备后的')} {stat.name}:</span>
                       <span className={`${stat.new > stat.old ? 'text-green-400' : stat.new < stat.old ? 'text-red-400' : 'text-white'}`}>
                         {stat.new}
                       </span>
@@ -1120,13 +1165,13 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                确认
+                {t('确认')}
               </button>
               <button
                 onClick={handleCancelEquip}
                 className="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-500 transition-colors"
               >
-                取消
+                {t('取消')}
               </button>
             </div>
           </div>
@@ -1253,8 +1298,36 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         </div>
       )}
 
-      {showSetManager && (
-        <EquipmentSetManager onClose={() => setShowSetManager(false)} />
+      {purchaseConfirmSlot !== null && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 w-[80%] max-w-sm">
+            <div className="text-game-secondary font-bold text-lg mb-4">购买背包{purchaseConfirmSlot + 1}</div>
+            <div className="text-white text-sm mb-6">确定花费 {getEquipSetPrice(purchaseConfirmSlot)?.toLocaleString() || 0} 金币购买该背包吗？</div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  const success = purchaseEquipSet(purchaseConfirmSlot);
+                  if (success) {
+                    setActiveEquipSetSlot(purchaseConfirmSlot);
+                  } else {
+                    setShowGoldError(true);
+                    setTimeout(() => setShowGoldError(false), 1500);
+                  }
+                  setPurchaseConfirmSlot(null);
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded text-sm transition-colors"
+              >
+                确定
+              </button>
+              <button
+                onClick={() => setPurchaseConfirmSlot(null)}
+                className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 rounded text-sm transition-colors"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

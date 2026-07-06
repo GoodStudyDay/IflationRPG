@@ -58,7 +58,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     clearCache();
     setCacheSize(formatCacheSize(getCacheSize()));
     setShowConfirmClear(false);
-    setImportMsg('缓存已清除！');
+    setImportMsg(t('缓存已清除！'));
     setTimeout(() => setImportMsg(null), 2000);
   };
 
@@ -119,11 +119,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         if (error) throw error;
       }
       
-      setImportMsg('存档已上传到云端！');
+      setImportMsg(t('存档已上传到云端！'));
       setTimeout(() => setImportMsg(null), 2000);
     } catch (err) {
       console.error('Cloud upload failed:', err);
-      setImportMsg('上传失败，请检查网络连接');
+      setImportMsg(t('上传失败，请检查网络连接'));
       setTimeout(() => setImportMsg(null), 3000);
     } finally {
       setCloudLoading(false);
@@ -135,7 +135,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     try {
       const finalUuid = targetUuid || downloadUuid.trim();
       if (!finalUuid) {
-        setImportMsg('请输入有效的 UUID');
+        setImportMsg(t('请输入有效的 UUID'));
         setTimeout(() => setImportMsg(null), 2000);
         return;
       }
@@ -150,7 +150,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       if (error && error.code !== 'PGRST116') throw error;
       
       if (!data || !data.save_data) {
-        setImportMsg('云端没有找到存档');
+        setImportMsg(t('云端没有找到存档'));
         setTimeout(() => setImportMsg(null), 2000);
         return;
       }
@@ -159,20 +159,20 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       const stateData = saveData.stateData || '';
       
       if (!stateData) {
-        setImportMsg('云端存档数据为空');
+        setImportMsg(t('云端存档数据为空'));
         setTimeout(() => setImportMsg(null), 2000);
         return;
       }
       
       importSaveData(stateData);
-      setImportMsg('存档已从云端下载并恢复！');
+      setImportMsg(t('存档已从云端下载并恢复！'));
       setTimeout(() => {
         setImportMsg(null);
         onClose();
       }, 1000);
     } catch (err) {
       console.error('Cloud download failed:', err);
-      setImportMsg('下载失败，请检查网络连接');
+      setImportMsg(t('下载失败，请检查网络连接'));
       setTimeout(() => setImportMsg(null), 3000);
     } finally {
       setCloudLoading(false);
@@ -200,41 +200,41 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         onClick={() => setActiveSection('cloud')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
-        存档管理
+        {t('存档管理')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">上传存档到云端或下载存档</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('上传存档到云端或下载存档')}</div>
 
       <button
         onClick={() => setActiveSection('language')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
-        语言设置
+        {t('语言设置')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">切换游戏语言</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('切换游戏语言')}</div>
 
       <button
         onClick={() => setActiveSection('preset')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
-        属性分配预设
+        {t('属性分配预设')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">设置战斗结算后属性点自动分配比例</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('设置战斗结算后属性点自动分配比例')}</div>
 
       <button
         onClick={() => setActiveSection('cache')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
-        缓存管理
+        {t('缓存管理')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">管理游戏图片缓存</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('管理游戏图片缓存')}</div>
 
       <button
         onClick={() => setActiveSection('about')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
-        关于游戏
+        {t('关于游戏')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">查看更新日志和装备图鉴</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('查看更新日志和装备图鉴')}</div>
 
       <button
         onClick={onClose}
@@ -247,16 +247,16 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
 
   const renderCloudSection = () => (
     <div className="space-y-3">
-      {renderSectionHeader('存档管理')}
+      {renderSectionHeader(t('存档管理'))}
 
       <button
         onClick={handleCloudUpload}
         disabled={cloudLoading}
         className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
       >
-        {cloudLoading ? '处理中...' : '上传存档'}
+        {cloudLoading ? t('处理中...') : t('上传存档')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">将当前存档上传到云端保存</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('将当前存档上传到云端保存')}</div>
 
       {!showDownloadUuidInput ? (
         <button
@@ -264,16 +264,16 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           disabled={cloudLoading}
           className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
-          下载存档
+          {t('下载存档')}
         </button>
       ) : (
         <div className="bg-[#1a0a2e] rounded-lg p-3 space-y-2">
-          <div className="text-xs text-gray-400">请输入要下载的存档 UUID：</div>
+          <div className="text-xs text-gray-400">{t('请输入要下载的存档 UUID：')}</div>
           <input
             type="text"
             value={downloadUuid}
             onChange={e => setDownloadUuid(e.target.value)}
-            placeholder="粘贴 UUID..."
+            placeholder={t('粘贴 UUID...')}
             className="w-full bg-[#0d0520] border border-[#5a3c8a] text-white text-sm px-3 py-2 rounded focus:outline-none focus:border-blue-400 font-mono"
             autoFocus
             onKeyDown={e => {
@@ -287,27 +287,27 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               disabled={cloudLoading || !downloadUuid.trim()}
               className="flex-1 bg-blue-700 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm"
             >
-              {cloudLoading ? '下载中...' : '确认下载'}
+              {cloudLoading ? t('下载中') : t('确认下载')}
             </button>
             <button
               onClick={() => { setShowDownloadUuidInput(false); setDownloadUuid(''); }}
               className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
             >
-              取消
+              {t('キャンセル')}
             </button>
           </div>
         </div>
       )}
-      <div className="text-xs text-gray-400 px-2 mb-2">从云端下载存档并恢复进度（会覆盖当前进度）</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('从云端下载存档并恢复进度（会覆盖当前进度）')}</div>
     </div>
   );
 
   const renderLanguageSection = () => (
     <div className="space-y-3">
-      {renderSectionHeader('语言设置')}
+      {renderSectionHeader(t('语言设置'))}
 
       <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
-        <div className="text-xs text-gray-400 mb-2">选择语言</div>
+        <div className="text-xs text-gray-400 mb-2">{t('选择语言')}</div>
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value as any)}
@@ -321,13 +321,13 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         </select>
       </div>
 
-      <div className="text-xs text-gray-400 px-2">语言更改会立即生效，无需重新启动游戏</div>
+      <div className="text-xs text-gray-400 px-2">{t('语言更改会立即生效，无需重新启动游戏')}</div>
     </div>
   );
 
   const renderPresetSection = () => (
     <div className="space-y-3">
-      {renderSectionHeader('属性分配预设')}
+      {renderSectionHeader(t('属性分配预设'))}
 
       <div className="flex gap-2 mb-3">
         {[0, 1, 2, 3, 4].map((i) => (
@@ -340,14 +340,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
                 : 'bg-[#3d2b5e] text-gray-300 hover:bg-[#4d3b6e]'
             }`}
           >
-            预设{i + 1}
+            {t('预设')}{i + 1}
           </button>
         ))}
       </div>
 
       <div className="bg-[#1a0a2e] rounded-lg p-3 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">HP</span>
+          <span className="text-gray-400 text-sm">{t('HP')}</span>
           <input
             type="number"
             min="0"
@@ -358,7 +358,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">攻击</span>
+          <span className="text-gray-400 text-sm">{t('攻击')}</span>
           <input
             type="number"
             min="0"
@@ -369,7 +369,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">防御</span>
+          <span className="text-gray-400 text-sm">{t('防御')}</span>
           <input
             type="number"
             min="0"
@@ -380,7 +380,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">敏捷</span>
+          <span className="text-gray-400 text-sm">{t('敏捷')}</span>
           <input
             type="number"
             min="0"
@@ -391,7 +391,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-sm">幸运</span>
+          <span className="text-gray-400 text-sm">{t('幸运')}</span>
           <input
             type="number"
             min="0"
@@ -403,16 +403,16 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         </div>
         <div className="border-t border-[#4a2c7a] pt-2">
           <div className="text-xs text-gray-500">
-            总和: {presets[editingPreset].reduce((a, b) => a + b, 0)}%
+            {t('总和')}: {presets[editingPreset].reduce((a, b) => a + b, 0)}%
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            当前使用: 预设{presetNum + 1}
+            {t('当前使用')}: {t('预设')}{presetNum + 1}
           </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between bg-[#1a0a2e] rounded-lg p-3">
-        <span className="text-gray-400 text-sm">自动分配开启</span>
+        <span className="text-gray-400 text-sm">{t('自动分配开启')}</span>
         <button
           onClick={() => setAutoAllocateEnabled(!autoAllocateEnabled)}
           className={`w-12 h-6 rounded-full transition-colors ${
@@ -431,17 +431,17 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         onClick={handleApplyPreset}
         className="w-full bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-colors"
       >
-        应用当前预设
+        {t('应用当前预设')}
       </button>
     </div>
   );
 
   const renderCacheSection = () => (
     <div className="space-y-3">
-      {renderSectionHeader('缓存管理')}
+      {renderSectionHeader(t('缓存管理'))}
 
       <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
-        <div className="text-xs text-gray-400">当前缓存大小</div>
+        <div className="text-xs text-gray-400">{t('当前缓存大小')}</div>
         <div className="text-white font-bold text-lg mt-1">{cacheSize}</div>
       </div>
       
@@ -450,50 +450,50 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           onClick={() => setShowConfirmClear(true)}
           className="w-full bg-red-700 text-white font-bold py-3 rounded-lg hover:bg-red-600 transition-colors"
         >
-          清除缓存
+          {t('清除缓存')}
         </button>
       ) : (
         <div className="space-y-2">
-          <div className="text-xs text-red-400 px-2">确定要清除图片缓存吗？存档数据不会受影响。</div>
+          <div className="text-xs text-red-400 px-2">{t('确定要清除图片缓存吗？存档数据不会受影响。')}</div>
           <div className="flex gap-2">
             <button
               onClick={handleClearCache}
               className="flex-1 bg-red-700 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-colors text-sm"
             >
-              确认清除
+              {t('确认清除')}
             </button>
             <button
               onClick={() => setShowConfirmClear(false)}
               className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
             >
-              取消
+              {t('キャンセル')}
             </button>
           </div>
         </div>
       )}
-      <div className="text-xs text-gray-400 px-2 mt-2">清除后下次加载图片会重新下载</div>
+      <div className="text-xs text-gray-400 px-2 mt-2">{t('清除后下次加载图片会重新下载')}</div>
     </div>
   );
 
   const renderAboutSection = () => (
     <div className="space-y-3">
-      {renderSectionHeader('关于游戏')}
+      {renderSectionHeader(t('关于游戏'))}
       
       <button
         onClick={() => setShowDropGuide(true)}
         className="w-full bg-[#6a3c7a] text-white font-bold py-3 rounded-lg hover:bg-[#7a4c8a] transition-colors"
       >
-        装备掉落图鉴
+        {t('装备掉落图鉴')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">查看所有装备的掉落来源、地图和怪物</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('查看所有装备的掉落来源、地图和怪物')}</div>
       
       <button
         onClick={() => setShowChangelog(true)}
         className="w-full bg-[#4a3c7a] text-white font-bold py-3 rounded-lg hover:bg-[#5a4c8a] transition-colors"
       >
-        更新日志
+        {t('更新日志')}
       </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">查看游戏版本更新记录</div>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('查看游戏版本更新记录')}</div>
     </div>
   );
 
@@ -507,7 +507,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
           onClick={(e) => e.stopPropagation()}
         >
         <div className="bg-[#1a0a2e] border-b-2 border-[#4a2c7a] px-4 py-2 mb-4">
-          <div className="text-game-secondary font-bold">设置</div>
+          <div className="text-game-secondary font-bold">{t('オプション')}</div>
         </div>
 
         {activeSection === 'main' && renderMainSection()}

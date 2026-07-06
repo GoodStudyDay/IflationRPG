@@ -3,6 +3,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getCollection } from '@/utils/collectionStorage';
 import { SpriteIcon } from './SpriteIcon';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
 
 const UUID_KEY = 'inflation-rpg-user-id';
 const UUID_MODIFIED_KEY = 'inflation-rpg-uuid-modified';
@@ -31,6 +32,7 @@ interface PlayerInfoProps {
 }
 
 export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
+  const { getEquipName } = useEquipmentName();
   const { player, Highlv, HighCombo, HighDamage, winbattle, losebattle, newgamecount, peakSnapshot } = useGameStore();
 
   const [uuid, setUuid] = useState(getUUID);
@@ -186,20 +188,20 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                         {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" /> : <span className="text-lg">📦</span>}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">{src.equippedWeapon?.name || '无'}</div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedWeapon ? getEquipName(src.equippedWeapon.name) : '无'}</div>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                         {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" /> : <span className="text-lg">📦</span>}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">{src.equippedArmor?.name || '无'}</div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedArmor ? getEquipName(src.equippedArmor.name) : '无'}</div>
                     </div>
                     {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => (
                       <div key={idx} className="text-center">
                         <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                           {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" image={acc.image} /> : <span className="text-lg">📦</span>}
                         </div>
-                        <div className="text-xs text-gray-400 truncate">{acc?.name || '无'}</div>
+                        <div className="text-xs text-gray-400 truncate">{acc ? getEquipName(acc.name) : '无'}</div>
                       </div>
                     ))}
                     {((src.equippedAccessories || []).length === 0) && [0, 1].map(i => (
