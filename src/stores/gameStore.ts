@@ -891,11 +891,17 @@ export const useGameStore = create<GameStore>()(
         const oldAccAgi = oldAccs.reduce((sum, a) => sum + a.agilityBonus, 0);
         const oldAccLuc = oldAccs.reduce((sum, a) => sum + a.luckBonus, 0);
         const lvlBonus = getLevelBonus(player.level);
-        const stPtHp = Math.max(0, player.maxHp - (initialPlayer.maxHp + lvlBonus.hp + oldArmorHp + oldAccHp));
-        const stPtAtk = Math.max(0, player.attack - (initialPlayer.attack + lvlBonus.attack + oldWeaponAtk + oldAccAtk));
-        const stPtDef = Math.max(0, player.defense - (initialPlayer.defense + lvlBonus.defense + oldArmorDef + oldAccDef));
-        const stPtAgi = Math.max(0, player.agility - (initialPlayer.agility + lvlBonus.agility + oldAccAgi));
-        const stPtLuc = Math.max(0, player.luck - (initialPlayer.luck + lvlBonus.luck + oldAccLuc));
+        // 使用 Math.ceil 对旧基础属性做同样的舍入，避免 stPt 提取时浮点误差累积
+        const oldBaseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + oldArmorHp + oldAccHp);
+        const oldBaseAtk = Math.ceil(initialPlayer.attack + lvlBonus.attack + oldWeaponAtk + oldAccAtk);
+        const oldBaseDef = Math.ceil(initialPlayer.defense + lvlBonus.defense + oldArmorDef + oldAccDef);
+        const oldBaseAgi = Math.ceil(initialPlayer.agility + lvlBonus.agility + oldAccAgi);
+        const oldBaseLuc = Math.ceil(initialPlayer.luck + lvlBonus.luck + oldAccLuc);
+        const stPtHp = Math.max(0, player.maxHp - oldBaseHp);
+        const stPtAtk = Math.max(0, player.attack - oldBaseAtk);
+        const stPtDef = Math.max(0, player.defense - oldBaseDef);
+        const stPtAgi = Math.max(0, player.agility - oldBaseAgi);
+        const stPtLuc = Math.max(0, player.luck - oldBaseLuc);
         
         newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
         newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
@@ -2521,9 +2527,21 @@ export const useGameStore = create<GameStore>()(
         });
       },
       incrementWinBattle: () => {
-        const { winbattle, Highlv, player } = get();
+        const { winbattle, Highlv, player, hardmodeUnlock, hellmodeUnlock } = get();
         const newWinbattle = winbattle + 1;
         const newHighlv = Math.max(Highlv, player.level);
+        let newHardmodeUnlock = hardmodeUnlock;
+        let newHellmodeUnlock = hellmodeUnlock;
+        
+        // 最高等级达到10万时解锁困难模式
+        if (newHighlv >= 100000 && hardmodeUnlock !== 1) {
+          newHardmodeUnlock = 1;
+        }
+        // 最高等级达到100万时解锁地狱模式
+        if (newHighlv >= 1000000 && hellmodeUnlock !== 1) {
+          newHellmodeUnlock = 1;
+        }
+        
         const peakSnapshot = newHighlv > Highlv ? {
           level: newHighlv,
           hp: player.hp,
@@ -2536,11 +2554,13 @@ export const useGameStore = create<GameStore>()(
           equippedArmor: player.equippedArmor ? { id: player.equippedArmor.id, name: player.equippedArmor.name, x: player.equippedArmor.x, y: player.equippedArmor.y } : null,
           equippedAccessories: (player.equippedAccessories || []).filter(Boolean).map(a => ({ id: a.id, name: a.name, x: a.x, y: a.y })),
         } : undefined;
-        set({ winbattle: newWinbattle, Highlv: newHighlv, ...(peakSnapshot ? { peakSnapshot } : {}) });
+        set({ winbattle: newWinbattle, Highlv: newHighlv, hardmodeUnlock: newHardmodeUnlock, hellmodeUnlock: newHellmodeUnlock, ...(peakSnapshot ? { peakSnapshot } : {}) });
         
         const data = loadSaveData();
         data.winbattle = newWinbattle;
         data.Highlv = newHighlv;
+        data.hardmodeUnlock = newHardmodeUnlock;
+        data.hellmodeUnlock = newHellmodeUnlock;
         saveSaveData(data);
       },
       incrementLoseBattle: () => {
@@ -2584,7 +2604,7 @@ export const useGameStore = create<GameStore>()(
         }
       },
       updateHighLv: (level) => {
-        const { Highlv, player } = get();
+        const { Highlv, player, hardmodeUnlock, hellmodeUnlock } = get();
         if (level > Highlv) {
           const snapshot: PeakSnapshot = {
             level,
@@ -2598,10 +2618,22 @@ export const useGameStore = create<GameStore>()(
             equippedArmor: player.equippedArmor ? { id: player.equippedArmor.id, name: player.equippedArmor.name, x: player.equippedArmor.x, y: player.equippedArmor.y } : null,
             equippedAccessories: (player.equippedAccessories || []).filter(Boolean).map(a => ({ id: a.id, name: a.name, x: a.x, y: a.y })),
           };
-          set({ Highlv: level, peakSnapshot: snapshot });
+          
+          let newHardmodeUnlock = hardmodeUnlock;
+          let newHellmodeUnlock = hellmodeUnlock;
+          if (level >= 100000 && hardmodeUnlock !== 1) {
+            newHardmodeUnlock = 1;
+          }
+          if (level >= 1000000 && hellmodeUnlock !== 1) {
+            newHellmodeUnlock = 1;
+          }
+          
+          set({ Highlv: level, peakSnapshot: snapshot, hardmodeUnlock: newHardmodeUnlock, hellmodeUnlock: newHellmodeUnlock });
           
           const data = loadSaveData();
           data.Highlv = level;
+          data.hardmodeUnlock = newHardmodeUnlock;
+          data.hellmodeUnlock = newHellmodeUnlock;
           saveSaveData(data);
         }
       },
