@@ -1469,8 +1469,8 @@ export const useGameStore = create<GameStore>()(
         
         const difficultyMultipliers = [
           { hp: 1, attack: 1, exp: 1, gold: 1 },
-          { hp: 2, attack: 2, exp: 1.5, gold: 1.5 },
-          { hp: 4, attack: 3, exp: 2, gold: 2 },
+          { hp: 10.1, attack: 8.65, exp: 12, gold: 5 },
+          { hp: 100, attack: 86, exp: 22, gold: 9 },
         ];
         
         const multiplier = difficultyMultipliers[hardmode] || difficultyMultipliers[0];
@@ -1672,8 +1672,8 @@ export const useGameStore = create<GameStore>()(
         
         const difficultyMultipliers = [
           { hp: 1, attack: 1, exp: 1, gold: 1 },
-          { hp: 2, attack: 2, exp: 1.5, gold: 1.5 },
-          { hp: 4, attack: 3, exp: 2, gold: 2 },
+          { hp: 10.1, attack: 8.65, exp: 12, gold: 5 },
+          { hp: 100, attack: 86, exp: 22, gold: 9 },
         ];
         
         const multiplier = difficultyMultipliers[hardmode] || difficultyMultipliers[0];

@@ -4,7 +4,19 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
-    version: 'v0.0.24',
+    version: 'v0.0.27',
+    date: '2026-07-06 00:00:00',
+    changes: [
+      '修复困难模式和地狱模式难度倍率：参考battlevar.txt的eneLoad()实现',
+      '困难模式：HP×10.1、ATK×8.65、EXP×12、Gold×5',
+      '地狱模式：HP×100、ATK×86、EXP×22、Gold×9',
+      '更新全局VERSION变量为v0.0.27',
+      '地狱模式解锁条件调整为1000万级',
+      '困难模式开局BP调整为15',
+    ],
+  },
+  {
+    version: 'v0.0.26',
     date: '2026-07-06 00:00:00',
     changes: [
       '修复魂安装逻辑：安装魂需要消耗金币，安装后不可重复安装同一魂',
