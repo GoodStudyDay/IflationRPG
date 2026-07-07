@@ -104,7 +104,7 @@ export const BattleScreen = () => {
           <div className="bg-black/50 px-2 py-1 rounded">
             <span className="text-purple-400">{t('掉落率')}: {Math.round(battle.dropRate)}%</span>
             <span className="text-gray-400 mx-1">|</span>
-            <span className="text-blue-400">{t('目标')}: {battle.dropItemName}</span>
+            <span className="text-blue-400">{t('目标')}: {getEquipName(battle.dropItemName)}</span>
           </div>
         </div>
         
