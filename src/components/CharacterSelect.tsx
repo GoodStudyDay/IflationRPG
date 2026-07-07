@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { heroData, getHeroSpritePath } from '@/data/heroData';
 import { getCurrentKyaraLv } from '@/utils/kyaraLevel';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const BASE_URL = import.meta.env.BASE_URL || '/';
 
@@ -13,9 +14,9 @@ interface CharacterSelectProps {
 type Difficulty = 0 | 1 | 2;
 
 const DIFFICULTY_CONFIG = [
-  { id: 0 as Difficulty, name: '普通', color: 'bg-gray-600 border-gray-400', textColor: 'text-gray-100', description: '适合新手玩家' },
-  { id: 1 as Difficulty, name: '困难', color: 'bg-red-600 border-red-400', textColor: 'text-red-100', description: '怪物属性提升，需达成条件解锁' },
-  { id: 2 as Difficulty, name: '地狱', color: 'bg-purple-800 border-purple-500', textColor: 'text-purple-100', description: '怪物属性大幅提升，需达成条件解锁' },
+  { id: 0 as Difficulty, nameKey: '普通', color: 'bg-gray-600 border-gray-400', textColor: 'text-gray-100', descriptionKey: '适合新手玩家' },
+  { id: 1 as Difficulty, nameKey: '困难', color: 'bg-red-600 border-red-400', textColor: 'text-red-100', descriptionKey: '怪物属性提升，需达成条件解锁' },
+  { id: 2 as Difficulty, nameKey: '地狱', color: 'bg-purple-800 border-purple-500', textColor: 'text-purple-100', descriptionKey: '怪物属性大幅提升，需达成条件解锁' },
 ];
 
 const COLS = 3;
@@ -23,6 +24,7 @@ const ROWS = 4;
 
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
   const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp } = useGameStore();
+  const { t } = useTranslation();
   const [frames, setFrames] = useState<Record<number, number>>({});
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(0);
   const intervalRef = useRef<number | null>(null);
@@ -81,18 +83,18 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
       <div className="relative z-10 w-full px-4 max-w-lg">
         <div className="text-center mb-6">
           <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
-            角色选择
+            {t('角色选择')}
           </h1>
-          <p className="text-gray-400 text-sm">选择你的角色开始冒险</p>
+          <p className="text-gray-400 text-sm">{t('选择你的角色开始冒险')}</p>
         </div>
 
         {kyarakutalv > 0 && (
           <div className="text-center mb-4">
             <p className="text-yellow-400 text-sm">
-              基础能力: {kyarakutalv} LV
+              {t('基础能力')}: {kyarakutalv} LV
             </p>
             <p className="text-gray-500 text-xs mt-1">
-              ※基础能力LV与角色能力LV的合计影响属性加成
+              ※{t('基础能力LV说明')}
             </p>
           </div>
         )}
@@ -100,13 +102,13 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
         {kyarakutalv === 0 && (
           <div className="text-center mb-4">
             <p className="text-gray-500 text-xs">
-              ※角色可以在游戏中随时更换
+              ※{t('角色可更换说明')}
             </p>
           </div>
         )}
 
         <div className="text-center mb-4">
-          <p className="text-gray-400 text-xs mb-2">选择难度</p>
+          <p className="text-gray-400 text-xs mb-2">{t('选择难度')}</p>
           <div className="flex justify-center gap-2">
             {DIFFICULTY_CONFIG.map((diff) => {
               const unlocked = isDifficultyUnlocked(diff.id);
@@ -127,7 +129,7 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
                 >
                   {unlocked ? (
                     <>
-                      <span>{diff.name}</span>
+                      <span>{t(diff.nameKey)}</span>
                       {isSelected && <span className="ml-1">✓</span>}
                     </>
                   ) : (
@@ -138,10 +140,10 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
             })}
           </div>
           {!isDifficultyUnlocked(1) && (
-            <p className="text-gray-500 text-xs mt-1">困难模式: 最高等级超过100000解锁</p>
+            <p className="text-gray-500 text-xs mt-1">{t('困难模式: 最高等级超过100000解锁')}</p>
           )}
           {!isDifficultyUnlocked(2) && (
-            <p className="text-gray-500 text-xs">地狱模式: 最高等级超过10000000解锁</p>
+            <p className="text-gray-500 text-xs">{t('地狱模式: 最高等级超过10000000解锁')}</p>
           )}
         </div>
 
@@ -205,7 +207,7 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
           onClick={onBack}
           className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
         >
-          返回
+          {t('返回')}
         </button>
       </div>
     </div>

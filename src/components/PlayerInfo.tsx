@@ -178,13 +178,13 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
             <div className="text-gray-300 text-sm font-bold mb-2 flex items-center justify-between">
-              <span>密码</span>
+              <span>{t('密码')}</span>
               {!isEditingPassword && (
                 <button
                   onClick={() => { setIsEditingPassword(true); setEditPasswordValue(password); }}
                   className="text-xs text-yellow-400 hover:text-yellow-300 underline"
                 >
-                  变更
+                  {t('变更')}
                 </button>
               )}
             </div>
@@ -203,25 +203,25 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                   onClick={handleSavePassword}
                   className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded hover:bg-green-500"
                 >
-                  保存
+                  {t('保存')}
                 </button>
                 <button
                   onClick={() => setIsEditingPassword(false)}
                   className="bg-gray-600 text-white text-xs px-3 py-1 rounded hover:bg-gray-500"
                 >
-                  取消
+                  {t('取消')}
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="text-xs text-gray-400">{password ? '●●●●●●' : '未设置'}</div>
-                {passwordSaved && <span className="text-xs text-green-400">✓ 已保存</span>}
+                <div className="text-xs text-gray-400">{password ? '●●●●●●' : t('未设置')}</div>
+                {passwordSaved && <span className="text-xs text-green-400">✓ {t('已保存')}</span>}
               </div>
             )}
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
-            <div className="text-gray-300 text-sm font-bold mb-2">最高等级时属性</div>
+            <div className="text-gray-300 text-sm font-bold mb-2">{t('最高等级时属性')}</div>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-400 text-sm">HP：</span>
@@ -247,7 +247,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
-            <div className="text-gray-300 text-sm font-bold mb-2">最高等级时装备</div>
+            <div className="text-gray-300 text-sm font-bold mb-2">{t('最高等级时装备')}</div>
             <div className="grid grid-cols-4 gap-2">
               {(() => {
                 const src = (peakSnapshot || player) as any;
@@ -257,26 +257,26 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                         {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" /> : <span className="text-lg">📦</span>}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">{src.equippedWeapon ? getEquipName(src.equippedWeapon.name) : '无'}</div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedWeapon ? getEquipName(src.equippedWeapon.name) : t('无')}</div>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                         {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" /> : <span className="text-lg">📦</span>}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">{src.equippedArmor ? getEquipName(src.equippedArmor.name) : '无'}</div>
+                      <div className="text-xs text-gray-400 truncate">{src.equippedArmor ? getEquipName(src.equippedArmor.name) : t('无')}</div>
                     </div>
                     {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => (
                       <div key={idx} className="text-center">
                         <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
                           {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" image={acc.image} /> : <span className="text-lg">📦</span>}
                         </div>
-                        <div className="text-xs text-gray-400 truncate">{acc ? getEquipName(acc.name) : '无'}</div>
+                        <div className="text-xs text-gray-400 truncate">{acc ? getEquipName(acc.name) : t('无')}</div>
                       </div>
                     ))}
                     {((src.equippedAccessories || []).length === 0) && [0, 1].map(i => (
                       <div key={i} className="text-center">
                         <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1"><span className="text-lg">📦</span></div>
-                        <div className="text-xs text-gray-400">无</div>
+                        <div className="text-xs text-gray-400">{t('无')}</div>
                       </div>
                     ))}
                   </>
@@ -286,12 +286,12 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3 mb-4">
-            <div className="text-gray-300 text-sm font-bold mb-2">装备收集统计</div>
+            <div className="text-gray-300 text-sm font-bold mb-2">{t('装备收集统计')}</div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span>⚔️</span>
-                  <span className="text-gray-400 text-sm">武器</span>
+                  <span className="text-gray-400 text-sm">{t('武器')}</span>
                 </div>
                 <div className="text-white font-bold">
                   [{stats.collectedWeaponCount}/{stats.weaponTotal}]
@@ -306,7 +306,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span>🛡️</span>
-                  <span className="text-gray-400 text-sm">防具</span>
+                  <span className="text-gray-400 text-sm">{t('防具')}</span>
                 </div>
                 <div className="text-white font-bold">
                   [{stats.collectedArmorCount}/{stats.armorTotal}]
@@ -321,7 +321,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span>💍</span>
-                  <span className="text-gray-400 text-sm">饰品</span>
+                  <span className="text-gray-400 text-sm">{t('饰品')}</span>
                 </div>
                 <div className="text-white font-bold">
                   [{stats.collectedAccessoryCount}/{stats.accessoryTotal}]
@@ -337,19 +337,19 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
           </div>
 
           <div className="bg-[#1a0a2e] rounded-lg p-3">
-            <div className="text-gray-300 text-sm font-bold mb-2">游戏统计</div>
+            <div className="text-gray-300 text-sm font-bold mb-2">{t('游戏统计')}</div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <div className="text-green-400 font-bold">{winbattle}</div>
-                <div className="text-xs text-gray-500">胜利</div>
+                <div className="text-xs text-gray-500">{t('胜利')}</div>
               </div>
               <div>
                 <div className="text-red-400 font-bold">{losebattle}</div>
-                <div className="text-xs text-gray-500">失败</div>
+                <div className="text-xs text-gray-500">{t('失败')}</div>
               </div>
               <div>
                 <div className="text-yellow-400 font-bold">{newgamecount}</div>
-                <div className="text-xs text-gray-500">新游戏</div>
+                <div className="text-xs text-gray-500">{t('新游戏')}</div>
               </div>
             </div>
           </div>
@@ -360,7 +360,7 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
             onClick={onClose}
             className="w-full bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors"
           >
-            关闭
+            {t('关闭')}
           </button>
         </div>
       </div>

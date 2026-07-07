@@ -605,7 +605,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="text-white font-bold">{getEquipName(soul.name)}</div>
                     {!isOwned && (
                       <div>
-                        <div className="text-gray-400 text-sm mt-1">未拥有</div>
+                        <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         {soul.setumei && (
                           <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
                         )}
@@ -624,7 +624,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
                           <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
                         </div>
-                        <div className="text-gray-300 text-xs mt-0.5">数量: {soul.quantity}</div>
+                        <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {soul.quantity}</div>
                       </>
                     )}
                   </div>
@@ -705,7 +705,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="text-white font-bold">{getEquipName(material.name)}</div>
                     {!isOwned && (
                       <div>
-                        <div className="text-gray-400 text-sm mt-1">未拥有</div>
+                        <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         {material.setumei && (
                           <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
                         )}
@@ -716,7 +716,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         {material.setumei && (
                           <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
                         )}
-                        <div className="text-gray-300 text-xs mt-0.5">数量: {material.quantity}</div>
+                        <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {material.quantity}</div>
                       </>
                     )}
                   </div>
@@ -725,11 +725,11 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       onClick={(e) => { e.stopPropagation(); handleBuy(material.id); }}
                       className="bg-yellow-600 text-white font-bold py-1 px-3 rounded hover:bg-yellow-500 transition-colors text-xs"
                     >
-                      购买 {getCurrentPrice(material).toLocaleString()}G
+                      {t('购买')} {getCurrentPrice(material).toLocaleString()}G
                     </button>
                   )}
                   {!isOwned && material.price <= 0 && (
-                    <div className="text-xs text-gray-400">无法购买</div>
+                    <div className="text-xs text-gray-400">{t('无法购买')}</div>
                   )}
                 </div>
               </div>

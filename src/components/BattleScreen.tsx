@@ -95,9 +95,9 @@ export const BattleScreen = () => {
         <div className="absolute bottom-0 left-0 h-6 sm:h-8 w-full border-b-2 border-blue-500/50" />
         
         <div className="absolute top-1 sm:top-2 left-0 right-0 flex justify-around px-2 sm:px-4 text-[10px] sm:text-xs font-bold">
-          <span className="text-yellow-400">Combo : {Math.round(battle.comboRate)}%</span>
-          <span className="text-red-400">CRI : {Math.round(battle.critRate)}%</span>
-          <span className="text-green-400">HPrate : {Math.round(battle.hpRate)}%</span>
+          <span className="text-yellow-400">{t('Combo')} : {Math.round(battle.comboRate)}%</span>
+          <span className="text-red-400">{t('CRI')} : {Math.round(battle.critRate)}%</span>
+          <span className="text-green-400">{t('HPrate')} : {Math.round(battle.hpRate)}%</span>
         </div>
         
         <div className="absolute top-4 sm:top-10 left-0 right-0 flex justify-center px-2 sm:px-4 text-[10px] sm:text-xs">

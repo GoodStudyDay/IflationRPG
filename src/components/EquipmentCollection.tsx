@@ -244,31 +244,31 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
             <div className="space-y-2">
               {selectedEquipment.attackBonus > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-red-400">攻击力</span>
+                  <span className="text-red-400">{t('攻击力')}</span>
                   <span className="text-red-400">+{selectedEquipment.attackBonus}</span>
                 </div>
               )}
               {selectedEquipment.defenseBonus > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-blue-400">防御力</span>
+                  <span className="text-blue-400">{t('防御力')}</span>
                   <span className="text-blue-400">+{selectedEquipment.defenseBonus}</span>
                 </div>
               )}
               {selectedEquipment.hpBonus > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-400">生命值</span>
+                  <span className="text-green-400">{t('生命值')}</span>
                   <span className="text-green-400">+{selectedEquipment.hpBonus}</span>
                 </div>
               )}
               {selectedEquipment.agilityBonus > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-cyan-400">敏捷度</span>
+                  <span className="text-cyan-400">{t('敏捷度')}</span>
                   <span className="text-cyan-400">+{selectedEquipment.agilityBonus}</span>
                 </div>
               )}
               {selectedEquipment.luckBonus > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-yellow-400">幸运值</span>
+                  <span className="text-yellow-400">{t('幸运值')}</span>
                   <span className="text-yellow-400">+{selectedEquipment.luckBonus}</span>
                 </div>
               )}

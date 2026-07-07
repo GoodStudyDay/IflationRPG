@@ -1,5 +1,6 @@
 import type { Enemy } from '@/types';
 import { oneExpTableFunc } from '@/utils/expTable';
+import { getEnemyImageUrl } from './enemyImageMap';
 
 /**
  * 地图信息
@@ -452,6 +453,7 @@ export function getMapEnemies(mapId: number): Enemy[] {
       defense: e.defense || 0,
       expReward,
       drops,
+      imageUrl: getEnemyImageUrl(e.id),
     };
   });
 }

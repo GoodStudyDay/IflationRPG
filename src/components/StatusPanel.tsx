@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface StatusPanelProps {
   onClose: () => void;
@@ -8,6 +9,7 @@ interface StatusPanelProps {
 
 export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   const { player, allocateStPt } = useGameStore();
+  const { t } = useTranslation();
   
   const [pendingHp, setPendingHp] = useState(0);
   const [pendingAtk, setPendingAtk] = useState(0);
@@ -121,7 +123,7 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
   
   const handleReturn = () => {
     if (!applied && pendingTotal > 0) {
-      if (window.confirm('未按决定按钮，属性不会被强化，确定返回吗？')) {
+      if (window.confirm(t('未按决定按钮，属性不会被强化，确定返回吗？'))) {
         onClose();
       }
     } else {
@@ -279,12 +281,12 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
     >
       <div className="bg-[#87a8c9] border-4 border-[#2a4a6a] rounded-lg w-[90%] max-w-lg overflow-hidden">
         <div className="bg-[#5a7a9a] px-4 py-3 text-center text-white font-bold text-lg">
-          属性分配
+          {t('属性分配')}
         </div>
         
         <div className="p-4">
           <div className="text-center text-gray-800 text-sm mb-2">
-            将属性点分配后，可以强化属性
+            {t('将属性点分配后，可以强化属性')}
           </div>
           
           <div className="flex items-center gap-4 mb-4">
@@ -328,14 +330,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Half
+                  {t('Half')}
                 </button>
                 <button
                   onClick={() => handleAll('hp')}
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  All
+                  {t('All')}
                 </button>
               </div>
             </div>
@@ -353,14 +355,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Half
+                  {t('Half')}
                 </button>
                 <button
                   onClick={() => handleAll('atk')}
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  All
+                  {t('All')}
                 </button>
               </div>
             </div>
@@ -378,14 +380,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Half
+                  {t('Half')}
                 </button>
                 <button
                   onClick={() => handleAll('def')}
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  All
+                  {t('All')}
                 </button>
               </div>
             </div>
@@ -403,14 +405,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Half
+                  {t('Half')}
                 </button>
                 <button
                   onClick={() => handleAll('agi')}
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  All
+                  {t('All')}
                 </button>
               </div>
             </div>
@@ -423,7 +425,7 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                     {player.luck}{getBonusText(player.luck, pendingLuc, 1)}
                   </span>
                 </div>
-                <div className="text-xs text-[#9ab8d8]">暴击率、所得物品、金额取决于LUC</div>
+                <div className="text-xs text-[#9ab8d8]">{t('暴击率、所得物品、金额取决于LUC')}</div>
               </div>
               <div className="flex gap-1">
                 <button
@@ -431,14 +433,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Half
+                  {t('Half')}
                 </button>
                 <button
                   onClick={() => handleAll('luc')}
                   disabled={availableStPt <= 0}
                   className="px-3 py-1 bg-[#4a6a8a] text-white text-xs font-bold rounded hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  All
+                  {t('All')}
                 </button>
               </div>
             </div>
@@ -446,13 +448,13 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
           
           <div className="bg-[#7a9abb] rounded px-3 py-2 mb-4 flex items-center justify-center gap-4">
             <div className="flex items-center">
-              <span className="text-[#2a4a6a] text-xs mr-2">属性点</span>
+              <span className="text-[#2a4a6a] text-xs mr-2">{t('属性点')}</span>
               <span className="text-xl font-bold text-white">
                 {availableStPt}
                 {pendingTotal > 0 && <span className="text-sm text-[#ff6666]">(-{pendingTotal})</span>}
               </span>
             </div>
-            <span className="text-xs text-[#4a6a8a]">升级后可获得属性点</span>
+            <span className="text-xs text-[#4a6a8a]">{t('升级后可获得属性点')}</span>
           </div>
           
           <div className="flex gap-2 mb-4">
@@ -519,14 +521,14 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
               disabled={applied}
               className="flex-1 bg-[#6a8aaa] text-white font-bold py-3 rounded-lg hover:bg-[#5a7a9a] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              取消
+              {t('取消')}
             </button>
             <button
               onClick={handleConfirm}
               disabled={pendingTotal === 0}
               className="flex-1 bg-[#4a6a8a] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a7a] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              决定
+              {t('决定')}
             </button>
           </div>
           
@@ -534,7 +536,7 @@ export const StatusPanel = ({ onClose }: StatusPanelProps) => {
             onClick={handleReturn}
             className="w-full bg-[#4a6a8a] text-white font-bold py-3 rounded-lg hover:bg-[#3a5a7a]"
           >
-            返回
+            {t('返回')}
           </button>
         </div>
       </div>

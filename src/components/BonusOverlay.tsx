@@ -1,4 +1,5 @@
 import { useGameStore } from '@/stores/gameStore';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface BonusOverlayProps {
   onClose: () => void;
@@ -6,6 +7,7 @@ interface BonusOverlayProps {
 
 export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
   const { bonus, addMapBonus, clearMapBonus, getBonusInfo } = useGameStore();
+  const { t } = useTranslation();
   const bonusInfo = getBonusInfo();
 
   const handleAdd = () => {
@@ -20,8 +22,8 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
       <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg p-6 max-w-sm w-full mx-4">
         <div className="text-center mb-6">
-          <h2 className="text-xl font-bold text-white mb-2">地图奖励</h2>
-          <p className="text-gray-400 text-sm">使用奖励来增强你的冒险!</p>
+          <h2 className="text-xl font-bold text-white mb-2">{t('地图奖励')}</h2>
+          <p className="text-gray-400 text-sm">{t('使用奖励来增强你的冒险')}</p>
         </div>
 
         {bonusInfo && (
@@ -35,7 +37,7 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
             </div>
             {bonus.currentBonus && (
               <div className="text-gray-400 text-xs mt-2">
-                剩余次数: {bonus.currentBonus.remainingCount > 0 ? bonus.currentBonus.remainingCount : '已用完'}
+                {t('剩余次数')}: {bonus.currentBonus.remainingCount > 0 ? bonus.currentBonus.remainingCount : t('已用完')}
               </div>
             )}
           </div>
@@ -43,8 +45,8 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
 
         {!bonusInfo && (
           <div className="bg-[#1a0a2e] border border-[#3d2b6e] rounded-lg p-4 mb-6 text-center">
-            <div className="text-gray-500 text-sm">暂无奖励效果</div>
-            <div className="text-gray-600 text-xs mt-1">点击"新增"来获得随机奖励</div>
+            <div className="text-gray-500 text-sm">{t('暂无奖励效果')}</div>
+            <div className="text-gray-600 text-xs mt-1">{t('点击"新增"来获得随机奖励')}</div>
           </div>
         )}
 
@@ -58,7 +60,7 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
                 : 'bg-gray-600 cursor-not-allowed'
             }`}
           >
-            新增 (剩余 {bonus.addUsesLeft} 次)
+            {t('新增')} ({t('剩余次数')} {bonus.addUsesLeft} {t('次')})
           </button>
           <button
             onClick={handleClear}
@@ -69,7 +71,7 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
                 : 'bg-gray-600 cursor-not-allowed'
             }`}
           >
-            清除 (剩余 {bonus.clearUsesLeft} 次)
+            {t('清除')} ({t('剩余次数')} {bonus.clearUsesLeft} {t('次')})
           </button>
         </div>
 
@@ -77,7 +79,7 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
           onClick={onClose}
           className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
         >
-          关闭
+          {t('关闭')}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Enemy } from '@/types';
+import { getBossImageUrl } from './enemyImageMap';
 
 export interface BossData extends Enemy {
   bossId: number;
@@ -1937,8 +1938,12 @@ export const getBossById = (bossId: number, hardmode: number = 0): BossData | un
   const bossWithDifficulty = BOSS_DATA.find(
     boss => boss.bossId === bossId && boss.difficulty === hardmode
   );
-  if (bossWithDifficulty) {
-    return bossWithDifficulty;
+  const boss = bossWithDifficulty || BOSS_DATA.find(boss => boss.bossId === bossId);
+  if (boss) {
+    return {
+      ...boss,
+      imageUrl: getBossImageUrl(bossId, hardmode),
+    };
   }
-  return BOSS_DATA.find(boss => boss.bossId === bossId);
+  return undefined;
 };

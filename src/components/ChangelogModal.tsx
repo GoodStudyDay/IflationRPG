@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.32',
+    date: '2026-07-07 00:00:00',
+    changes: [
+      '全页面多语言翻译：所有.tsx页面添加t()翻译支持（changelogmodal除外）',
+      '存档导出优化：上传存档包含所有背包页装备和语言设置',
+      '敌人图片显示：结合enedata.txt为mapdata.ts和bossdata.ts添加敌人/BOSS图片',
+      '使用import.meta.glob自动匹配带数字前缀的敌人图片文件',
+      '修复languageData.ts重复翻译键导致编译错误',
+      '修复Inventory.tsx中t()嵌套调用语法错误',
+    ],
+  },
+  {
     version: 'v0.0.31',
     date: '2026-07-07 00:00:00',
     changes: [

@@ -70,7 +70,7 @@ export const MainScreen = () => {
             onClick={() => setShowBoss(true)}
             className="bg-[#5a3c8a] px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-white font-bold text-xs sm:text-sm hover:bg-[#6a4c9a] transition-colors flex-1"
           >
-            BOSS
+            {t('BOSS')}
           </button>
           <button
             onClick={handleBattleClick}
@@ -108,9 +108,9 @@ export const MainScreen = () => {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <div className="text-white font-bold text-lg">{currentMapData.icon} {currentMapData.name}</div>
-            <div className="text-gray-300 text-sm">解锁等级: {currentMapData.unlockLevel}</div>
+            <div className="text-gray-300 text-sm">{t('解锁等级')}: {currentMapData.unlockLevel}</div>
             {bonusText && (
-              <div className="text-yellow-400 text-sm mt-1">奖励: {bonusText}</div>
+              <div className="text-yellow-400 text-sm mt-1">{t('奖励')}: {bonusText}</div>
             )}
             <div className="text-gray-500 text-xs mt-2">
               {mapEnemies.slice(0, 3).map(e => e.icon).join(' ')} ...
@@ -137,18 +137,18 @@ export const MainScreen = () => {
       <div className="bg-[#1a0a2e] border-t-2 border-[#4a2c7a] p-2 sm:p-3">
         <div className="flex items-start gap-2 mb-2">
           <div className="flex-1">
-            <div className="text-[10px] sm:text-xs text-gray-500 mb-1">现在的地图信息</div>
-            <div className="text-[10px] sm:text-xs text-white">
-              {currentMapData.icon} {currentMapData.name}
-              {bonusText ? ` , Bonus: ${bonusText}` : ''}
-            </div>
-          </div>
+                <div className="text-[10px] sm:text-xs text-gray-500 mb-1">{t('现在的地图信息')}</div>
+                <div className="text-[10px] sm:text-xs text-white">
+                  {currentMapData.icon} {currentMapData.name}
+                  {bonusText ? ` , ${t('奖励')}: ${bonusText}` : ''}
+                </div>
+              </div>
           
           <div className={`bg-[#3d2b6e] px-3 sm:px-4 py-2 sm:py-3 rounded-lg border ${
             battlePoints > 10 ? 'border-[#5a3c8a]' : 
             battlePoints > 0 ? 'border-yellow-500' : 'border-red-500'
           }`}>
-            <div className="text-[10px] sm:text-xs text-gray-400 text-center">BATTLE POINT</div>
+            <div className="text-[10px] sm:text-xs text-gray-400 text-center">{t('BATTLE POINT')}</div>
             <div className={`text-xl sm:text-3xl font-bold text-center ${
               battlePoints > 10 ? 'text-yellow-400' : 
               battlePoints > 0 ? 'text-yellow-300' : 'text-red-400'
@@ -159,7 +159,7 @@ export const MainScreen = () => {
         </div>
         
         <div className="mb-2">
-          <div className="text-[10px] sm:text-xs text-yellow-400 mb-1">Encounter Gauge</div>
+          <div className="text-[10px] sm:text-xs text-yellow-400 mb-1">{t('Encounter Gauge')}</div>
           <div className="h-2 bg-[#3d2b6e] rounded overflow-hidden border border-[#5a3c8a]">
             <div 
               className={`h-full transition-all duration-300 ${
@@ -170,20 +170,20 @@ export const MainScreen = () => {
               style={{ width: `${encounterRate}%` }}
             />
           </div>
-          <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">槽越高越容易与敌人相遇</div>
+          <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">{t('槽越高越容易与敌人相遇')}</div>
         </div>
         
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div>
-            <div className="text-[10px] sm:text-xs text-gray-400">Level</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">{t('Level')}</div>
             <div className="text-sm sm:text-lg font-bold text-white">{player.level}LV</div>
           </div>
           <div>
-            <div className="text-[10px] sm:text-xs text-gray-400">Money</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">{t('Money')}</div>
             <div className="text-sm sm:text-lg font-bold text-yellow-400">{player.gold}G</div>
           </div>
           <div>
-            <div className="text-[10px] sm:text-xs text-gray-400">EXP</div>
+            <div className="text-[10px] sm:text-xs text-gray-400">{t('EXP')}</div>
             <div className="text-sm sm:text-lg font-bold text-green-400">{player.exp}</div>
             <div className="h-1.5 bg-[#3d2b6e] rounded overflow-hidden mt-1">
               <div 
@@ -191,7 +191,7 @@ export const MainScreen = () => {
                 style={{ width: `${expPercent}%` }}
               />
             </div>
-            <div className="text-[10px] sm:text-xs text-gray-500">Next {player.expToNextLevel}</div>
+            <div className="text-[10px] sm:text-xs text-gray-500">{t('Next')} {player.expToNextLevel}</div>
           </div>
         </div>
       </div>
@@ -200,7 +200,7 @@ export const MainScreen = () => {
       {showTeleport && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowTeleport(false)}>
           <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择地图</h3>
+            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择地图')}</h3>
             <div className="space-y-2">
               {MAP_LIST.map(map => {
                 const isCurrent = map.id === currentMap;
@@ -224,9 +224,9 @@ export const MainScreen = () => {
                       </div>
                       <div className="text-xs">
                         {isCurrent ? (
-                          <span className="text-yellow-400">当前</span>
+                          <span className="text-yellow-400">{t('当前')}</span>
                         ) : (
-                          <span className="text-green-400">传送</span>
+                          <span className="text-green-400">{t('传送')}</span>
                         )}
                       </div>
                     </div>
@@ -238,11 +238,11 @@ export const MainScreen = () => {
               })}
             </div>
             <button
-              onClick={() => setShowTeleport(false)}
-              className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
-            >
-              关闭
-            </button>
+            onClick={() => setShowTeleport(false)}
+            className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
+          >
+            {t('关闭')}
+          </button>
           </div>
         </div>
       )}
@@ -254,7 +254,7 @@ export const MainScreen = () => {
       {showBoss && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowBoss(false)}>
           <div className="bg-[#2d1b4e] border-2 border-[#8a2a4a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">选择BOSS</h3>
+            <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择BOSS')}</h3>
             <div className="space-y-2">
               {[...BOSS_DATA]
               .filter(boss => boss.difficulty === hardmode)
@@ -285,9 +285,9 @@ export const MainScreen = () => {
                       </div>
                       <div className="text-xs">
                         {isDefeated ? (
-                          <span className="text-gray-400">已击败</span>
+                          <span className="text-gray-400">{t('已击败')}</span>
                         ) : (
-                          <span className="text-red-400">挑战</span>
+                          <span className="text-red-400">{t('挑战')}</span>
                         )}
                       </div>
                     </div>
@@ -299,11 +299,11 @@ export const MainScreen = () => {
               })}
             </div>
             <button
-              onClick={() => setShowBoss(false)}
-              className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
-            >
-              关闭
-            </button>
+            onClick={() => setShowBoss(false)}
+            className="w-full mt-3 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-500 transition-colors"
+          >
+            {t('关闭')}
+          </button>
           </div>
         </div>
       )}
@@ -312,20 +312,20 @@ export const MainScreen = () => {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-[#2d1b4e] border-2 border-red-500 rounded-lg p-4 sm:p-6 w-[90%] max-w-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-400 mb-4">BATTLE POINT 耗尽!</div>
-              <div className="text-gray-300 mb-6">战斗点数已用完，需要重新开始游戏才能继续战斗。</div>
+              <div className="text-2xl font-bold text-red-400 mb-4">{t('BATTLE POINT 耗尽!')}</div>
+              <div className="text-gray-300 mb-6">{t('战斗点数已用完，需要重新开始游戏才能继续战斗。')}</div>
               <div className="space-y-3">
                 <button
                   onClick={handleReset}
                   className="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-500 transition-colors"
                 >
-                  重新开始
+                  {t('重新开始')}
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(false)}
                   className="w-full bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-500 transition-colors"
                 >
-                  取消
+                  {t('取消')}
                 </button>
               </div>
             </div>
