@@ -871,6 +871,18 @@ export const useGameStore = create<GameStore>()(
       equipItem: (equipment, slotIndex) => {
         const { player, inventory } = get();
         
+        // [DEBUG] dump current stats on demand
+        if ((window as any).__dumpStats) {
+          console.group('%c📊 当前属性快照', 'color: cyan; font-weight: bold');
+          console.log('HP:', player.maxHp, 'ATK:', player.attack, 'DEF:', player.defense, 'AGI:', player.agility, 'LUC:', player.luck);
+          const accs = player.equippedAccessories || [];
+          console.log('饰品:', accs.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(' | '));
+          if (player.equippedWeapon) console.log('武器:', player.equippedWeapon.name, `(t1=${player.equippedWeapon.t1})`);
+          if (player.equippedArmor) console.log('防具:', player.equippedArmor.name, `(t1=${player.equippedArmor.t1})`);
+          console.groupEnd();
+          delete (window as any).__dumpStats;
+        }
+        
         let newPlayer = { ...player };
         
         if (equipment.type === 'weapon') {
@@ -991,6 +1003,15 @@ export const useGameStore = create<GameStore>()(
         const oldAccs = player.equippedAccessories || [];
         const oldSpecialAdd = computeOldSpecialAdditive(oldAccs, inventory);
         
+        // [DEBUG] equipItem - only log for accessory type
+        if (equipment.type === 'accessory') {
+          console.group('%c🔧 equipItem: 替换饰品', 'color: orange; font-weight: bold');
+          console.log('装备:', equipment.name, `(t1=${equipment.t1}, t2=${equipment.t2})`);
+          console.log('旧饰品:', oldAccs.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', '));
+          console.log('旧属性:', {hp: player.maxHp, atk: player.attack, def: player.defense, agi: player.agility, luc: player.luck});
+          console.log('剥离旧特殊效果:', oldSpecialAdd);
+        }
+        
         // 临时去除旧饰品特殊效果，得到纯净的 (base+equip+stPt)
         const cleanHp = reverseOldMultipliers(oldAccs, player.maxHp) - oldSpecialAdd.hp;
         const cleanAtk = player.attack - oldSpecialAdd.atk;
@@ -1020,57 +1041,18 @@ export const useGameStore = create<GameStore>()(
         const stPtAgi = Math.max(0, cleanAgi - oldBaseAgi);
         const stPtLuc = Math.max(0, cleanLuc - oldBaseLuc);
         
+        // [DEBUG] show stPt and clean stats
+        if (equipment.type === 'accessory') {
+          console.log('纯净属性(clean):', {hp: cleanHp, atk: cleanAtk, def: cleanDef, agi: cleanAgi, luc: cleanLuc});
+          console.log('旧基础(oldBase):', {hp: oldBaseHp, atk: oldBaseAtk, def: oldBaseDef, agi: oldBaseAgi, luc: oldBaseLuc});
+          console.log('提取 stPt:', {hp: stPtHp, atk: stPtAtk, def: stPtDef, agi: stPtAgi, luc: stPtLuc});
+        }
+        
         newPlayer.attack = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus) + stPtAtk;
         newPlayer.defense = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus) + stPtDef;
         newPlayer.maxHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus) + stPtHp;
         newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus) + stPtAgi;
         newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus) + stPtLuc;
-        
-        // equipItem playerGems
-        for (const gem of accessories.filter((acc: Equipment | null) => acc && acc.t1 === 35)) {
-          const gemLevel = gem.y || 0;
-          const _loc2_ = gemLevel + 1;
-          
-          let itemCount1 = 0;
-          for (const item of inventory) {
-            const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2) {
-              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
-                itemCount1 += item.quantity;
-              }
-            }
-          }
-          
-          let itemCount2 = 0;
-          if (itemCount1 > 1000) {
-            itemCount2 = itemCount1 - 1000;
-            itemCount1 = 1000;
-          }
-          
-          newPlayer.maxHp += itemCount1 * _loc2_;
-          newPlayer.attack += itemCount1 * _loc2_;
-          newPlayer.defense += itemCount1 * _loc2_;
-          newPlayer.agility += itemCount1 * _loc2_;
-          newPlayer.luck += itemCount2 * (_loc2_ * 4);
-        }
-        
-        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
-        for (const gem of braveGems) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp += _loc2_;
-          newPlayer.attack += _loc2_;
-          newPlayer.defense += _loc2_;
-          newPlayer.agility += _loc2_;
-          newPlayer.luck += _loc2_;
-        }
-        
-        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
-        for (const gem of warGems) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.attack += _loc2_;
-          newPlayer.defense += _loc2_;
-          newPlayer.agility += _loc2_;
-        }
         
         const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
@@ -1149,12 +1131,6 @@ export const useGameStore = create<GameStore>()(
           newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
         }
         
-        newPlayer.maxHp += stPtHp;
-        newPlayer.attack += stPtAtk;
-        newPlayer.defense += stPtDef;
-        newPlayer.agility += stPtAgi;
-        newPlayer.luck += stPtLuc;
-        
         const duskCrystal = accessories.filter(acc => acc && acc.t1 === 15);
         if (duskCrystal.length > 0) {
           const currentStPt = newPlayer.stPt || 0;
@@ -1182,6 +1158,21 @@ export const useGameStore = create<GameStore>()(
             accessoryIds: (newPlayer.equippedAccessories || []).map(acc => acc?.id || null),
           } : s
         );
+        
+        // [DEBUG] log final stats and delta
+        if (equipment.type === 'accessory') {
+          const newAccs = newPlayer.equippedAccessories || [];
+          console.log('新饰品:', newAccs.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', '));
+          console.log('新属性:', {hp: newPlayer.maxHp, atk: newPlayer.attack, def: newPlayer.defense, agi: newPlayer.agility, luc: newPlayer.luck});
+          console.log('属性变化:', {
+            hp: newPlayer.maxHp - player.maxHp,
+            atk: newPlayer.attack - player.attack,
+            def: newPlayer.defense - player.defense,
+            agi: newPlayer.agility - player.agility,
+            luc: newPlayer.luck - player.luck
+          });
+          console.groupEnd();
+        }
         
         set({ 
           player: newPlayer,
@@ -1321,6 +1312,12 @@ export const useGameStore = create<GameStore>()(
         const oldAccs = player.equippedAccessories || [];
         const oldSpecialAdd = computeOldSpecialAdditive(oldAccs, inventory);
         
+        // [DEBUG] loadEquipSet
+        console.group('%c📦 loadEquipSet: 切换背包', 'color: blue; font-weight: bold');
+        console.log('旧饰品:', oldAccs.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', '));
+        console.log('旧属性:', {hp: player.maxHp, atk: player.attack, def: player.defense, agi: player.agility, luc: player.luck});
+        console.log('剥离旧特殊效果:', oldSpecialAdd);
+        
         // 临时去除旧饰品特殊效果，得到纯净的 (base+equip+stPt)
         const cleanHp = reverseOldMultipliers(oldAccs, player.maxHp) - oldSpecialAdd.hp;
         const cleanAtk = player.attack - oldSpecialAdd.atk;
@@ -1348,6 +1345,11 @@ export const useGameStore = create<GameStore>()(
         const stPtDef = Math.max(0, cleanDef - oldBaseDef);
         const stPtAgi = Math.max(0, cleanAgi - oldBaseAgi);
         const stPtLuc = Math.max(0, cleanLuc - oldBaseLuc);
+        
+        // [DEBUG] loadEquipSet stPt
+        console.log('纯净属性(clean):', {hp: cleanHp, atk: cleanAtk, def: cleanDef, agi: cleanAgi, luc: cleanLuc});
+        console.log('旧基础(oldBase):', {hp: oldBaseHp, atk: oldBaseAtk, def: oldBaseDef, agi: oldBaseAgi, luc: oldBaseLuc});
+        console.log('提取 stPt:', {hp: stPtHp, atk: stPtAtk, def: stPtDef, agi: stPtAgi, luc: stPtLuc});
         
         // Calculate new equipment bonuses
         const weaponQty = weapon ? (inventory.find(i => i.equipmentId === weapon.id)?.quantity || 1) : 1;
@@ -1416,6 +1418,19 @@ export const useGameStore = create<GameStore>()(
           const _loc2_ = gem.t2 || 0;
           newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
         }
+        
+        // [DEBUG] loadEquipSet final
+        const newAccs = newPlayer.equippedAccessories || [];
+        console.log('新饰品:', newAccs.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', '));
+        console.log('新属性:', {hp: newPlayer.maxHp, atk: newPlayer.attack, def: newPlayer.defense, agi: newPlayer.agility, luc: newPlayer.luck});
+        console.log('属性变化:', {
+          hp: newPlayer.maxHp - player.maxHp,
+          atk: newPlayer.attack - player.attack,
+          def: newPlayer.defense - player.defense,
+          agi: newPlayer.agility - player.agility,
+          luc: newPlayer.luck - player.luck
+        });
+        console.groupEnd();
         
         set({
           player: newPlayer,
