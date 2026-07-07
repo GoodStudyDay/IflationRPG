@@ -2066,12 +2066,11 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
-        const boss = getBossById(bossId);
+        const hardmode = get().hardmode || 0;
+        const boss = getBossById(bossId, hardmode);
         if (!boss) {
           return;
         }
-        
-        const hardmode = get().hardmode || 0;
         
         const difficultyMultipliers = [
           { hp: 1, attack: 1, exp: 1, gold: 1 },

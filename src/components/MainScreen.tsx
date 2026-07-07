@@ -8,7 +8,7 @@ import { BOSS_DATA } from '@/data/bossData';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, hardmode } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses } = useGameStore();
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -265,13 +265,13 @@ export const MainScreen = () => {
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择BOSS')}</h3>
             <div className="space-y-2">
               {[...BOSS_DATA]
-              .filter(boss => boss.difficulty === hardmode)
+              .filter(boss => boss.difficulty === 0)
               .sort((a, b) => a.level - b.level)
-              .map((boss, index) => {
+              .map((boss) => {
                 const isDefeated = defeatedBosses.includes(boss.bossId);
                 return (
                   <button
-                    key={`boss-${index}`}
+                    key={`boss-${boss.bossId}`}
                     onClick={() => {
                       if (!isDefeated) {
                         startBossBattle(boss.bossId);
