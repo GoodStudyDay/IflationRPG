@@ -140,7 +140,15 @@ export const BattleScreen = () => {
               />
             ) : null}
             <div className={`w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-[#3d2b6e] rounded-lg border-2 border-red-500 flex items-center justify-center mx-auto ${battle.enemy.imageUrl ? 'hidden' : ''}`}>
-              <span className="text-3xl sm:text-5xl md:text-6xl">{battle.enemy.icon}</span>
+              {battle.enemy.icon ? (
+                <img 
+                  src={battle.enemy.icon} 
+                  alt={battle.enemy.name}
+                  className="w-full h-full object-contain rounded-lg"
+                />
+              ) : (
+                <span className="text-3xl sm:text-5xl md:text-6xl">?</span>
+              )}
             </div>
             
           </div>

@@ -9,7 +9,7 @@ export interface BossData extends Enemy {
 export const BOSS_DATA: BossData[] = [
   {
     id: 'boss-0',
-    name: '史莱姆王',
+    name: '小浣熊',
     bossId: 0,
     hp: 32000,
     maxHp: 32000,
@@ -34,7 +34,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-1',
-    name: '哥布林王',
+    name: '狮身人面像',
     bossId: 1,
     hp: 300000,
     maxHp: 300000,
@@ -59,7 +59,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-2',
-    name: '骷髅王',
+    name: '飞龙骑士',
     bossId: 2,
     hp: 100000,
     maxHp: 100000,
@@ -84,7 +84,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-3',
-    name: '兽人王',
+    name: '恐怖之眼',
     bossId: 3,
     hp: 700000,
     maxHp: 700000,
@@ -109,7 +109,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-4',
-    name: '深渊领主',
+    name: '火之守护者',
     bossId: 4,
     hp: 1580000,
     maxHp: 1580000,
@@ -134,7 +134,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-5',
-    name: '终焉之王',
+    name: '雷之守护者',
     bossId: 5,
     hp: 1640000,
     maxHp: 1640000,
@@ -159,7 +159,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-6',
-    name: '暗影魔王',
+    name: '土之守护者',
     bossId: 6,
     hp: 1720000,
     maxHp: 1720000,
@@ -184,7 +184,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-7',
-    name: '暗黑大帝',
+    name: '冰之守护者',
     bossId: 7,
     hp: 1600000,
     maxHp: 1600000,
@@ -209,7 +209,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-8',
-    name: '魔王',
+    name: '恐怖之婴',
     bossId: 8,
     hp: 2800000,
     maxHp: 2800000,
@@ -234,7 +234,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-9',
-    name: '恶魔领主',
+    name: '邪恶之婴',
     bossId: 9,
     hp: 3150000,
     maxHp: 3150000,
@@ -259,7 +259,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-10',
-    name: '亡灵君主',
+    name: '绿眼蓝龙',
     bossId: 10,
     hp: 2800000,
     maxHp: 2800000,
@@ -284,7 +284,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-11',
-    name: '神秘主宰',
+    name: '红眼蓝龙',
     bossId: 11,
     hp: 3600000,
     maxHp: 3600000,
@@ -309,7 +309,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-12',
-    name: '神灵主宰',
+    name: '幽灵之婴',
     bossId: 12,
     hp: 6200000,
     maxHp: 6200000,
@@ -334,7 +334,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-13',
-    name: '神话之神',
+    name: '伪神',
     bossId: 13,
     hp: 8000000,
     maxHp: 8000000,
@@ -359,7 +359,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-14',
-    name: '天空守护者',
+    name: '生命之石',
     bossId: 14,
     hp: 7000000,
     maxHp: 7000000,
@@ -384,7 +384,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-15',
-    name: '深渊领主',
+    name: '攻击之石',
     bossId: 15,
     hp: 7000000,
     maxHp: 7000000,
@@ -409,7 +409,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-16',
-    name: '终焉之王',
+    name: '防御之石',
     bossId: 16,
     hp: 7350000,
     maxHp: 7350000,
@@ -434,7 +434,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-17',
-    name: '暗影魔王',
+    name: '敏捷之石',
     bossId: 17,
     hp: 8049999,
     maxHp: 8049999,
@@ -459,7 +459,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-18',
-    name: '暗黑大帝',
+    name: '幸运之石',
     bossId: 18,
     hp: 7000000,
     maxHp: 7000000,
@@ -1940,9 +1940,11 @@ export const getBossById = (bossId: number, hardmode: number = 0): BossData | un
   );
   const boss = bossWithDifficulty || BOSS_DATA.find(boss => boss.bossId === bossId);
   if (boss) {
+    const imageUrl = getBossImageUrl(bossId, hardmode);
     return {
       ...boss,
-      imageUrl: getBossImageUrl(bossId, hardmode),
+      imageUrl,
+      icon: imageUrl || boss.icon,
     };
   }
   return undefined;
