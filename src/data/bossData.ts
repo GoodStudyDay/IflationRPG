@@ -484,7 +484,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-19',
-    name: '魔王·硬',
+    name: '彩虹之石',
     bossId: 19,
     hp: 12075000,
     maxHp: 12075000,
@@ -494,7 +494,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 19998,
     icon: '😈',
     level: 195,
-    difficulty: 1,
+    difficulty: 0,
     drops: [
       { equipmentId: 'accessory-45', dropRate: 0.05 },
       { equipmentId: 'accessory-64', dropRate: 0.066 },
@@ -584,7 +584,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-21',
-    name: '亡灵君主·硬',
+    name: '白虎',
     bossId: 21,
     hp: 16536000,
     maxHp: 16536000,
@@ -609,7 +609,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-22',
-    name: '神秘主宰·硬',
+    name: '朱雀',
     bossId: 22,
     hp: 11454000,
     maxHp: 11454000,
@@ -634,7 +634,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-23',
-    name: '神灵主宰·硬',
+    name: '青龙',
     bossId: 23,
     hp: 20925000,
     maxHp: 20925000,
@@ -659,7 +659,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-24',
-    name: '神话之神·硬',
+    name: '玄武',
     bossId: 24,
     hp: 30012000,
     maxHp: 30012000,
@@ -684,7 +684,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-25',
-    name: '天空守护者·硬',
+    name: '白龙',
     bossId: 25,
     hp: 55000000,
     maxHp: 55000000,
@@ -694,7 +694,7 @@ export const BOSS_DATA: BossData[] = [
     goldReward: 35000,
     icon: '☁️',
     level: 255,
-    difficulty: 1,
+    difficulty: 0,
     drops: [
       { equipmentId: 'accessory-70', dropRate: 0.028 },
       { equipmentId: 'accessory-70', dropRate: 0.078 },
@@ -734,7 +734,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-26',
-    name: '深渊领主·硬',
+    name: '米迦勒',
     bossId: 26,
     hp: 326750000,
     maxHp: 326750000,
@@ -759,7 +759,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-27',
-    name: '终焉之王·硬',
+    name: '加百列',
     bossId: 27,
     hp: 205200000,
     maxHp: 205200000,
@@ -784,7 +784,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-28',
-    name: '暗影魔王·硬',
+    name: '末地守护者',
     bossId: 28,
     hp: 800000000,
     maxHp: 800000000,
@@ -809,7 +809,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-29',
-    name: '暗黑大帝·硬',
+    name: '巨剑恶魔',
     bossId: 29,
     hp: 600000000,
     maxHp: 600000000,
@@ -834,7 +834,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-30',
-    name: '魔王·硬',
+    name: '白袍恶魔',
     bossId: 30,
     hp: 750000000,
     maxHp: 750000000,
@@ -859,7 +859,7 @@ export const BOSS_DATA: BossData[] = [
   },
   {
     id: 'boss-31',
-    name: '恶魔领主·硬',
+    name: '血之守护者',
     bossId: 31,
     hp: 27125000000,
     maxHp: 27125000000,
@@ -1933,6 +1933,14 @@ export const BOSS_DATA: BossData[] = [
     ],
   },
 ];
+
+// 将所有BOSS的icon替换为实际图片URL
+BOSS_DATA.forEach(boss => {
+  const url = getBossImageUrl(boss.bossId, boss.difficulty || 0);
+  if (url) {
+    boss.icon = url;
+  }
+});
 
 export const getBossById = (bossId: number, hardmode: number = 0): BossData | undefined => {
   const bossWithDifficulty = BOSS_DATA.find(

@@ -4,6 +4,15 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.33',
+    date: '2026-07-07 00:00:00',
+    changes: [
+      'BOSS图标替换为实际BOSS小图片：bossData.ts中icon字段替换为图片URL',
+      'MainScreen.tsx添加renderIcon函数：自动判断icon是URL还是emoji并正确渲染',
+      '修复boss-19（彩虹之石）普通模式下缺少图片映射的问题',
+    ],
+  },
+  {
     version: 'v0.0.32',
     date: '2026-07-07 00:00:00',
     changes: [
