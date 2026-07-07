@@ -687,8 +687,7 @@ export const useGameStore = create<GameStore>()(
         
         let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
         
-        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
-        for (const gem of playerGems) {
+        for (const gem of accessories.filter(acc => acc && acc.t1 === 35)) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
           
@@ -1027,8 +1026,8 @@ export const useGameStore = create<GameStore>()(
         newPlayer.agility = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus) + stPtAgi;
         newPlayer.luck = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus) + stPtLuc;
         
-        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
-        for (const gem of playerGems) {
+        // equipItem playerGems
+        for (const gem of accessories.filter((acc: Equipment | null) => acc && acc.t1 === 35)) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
           
@@ -1100,6 +1099,42 @@ export const useGameStore = create<GameStore>()(
         for (const gem of powerStone) {
           const _loc2_ = gem.t2 || 0;
           newPlayer.attack += _loc2_ * 50;
+        }
+        
+        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
+        for (const gem of playerGems) {
+          const gemLevel = gem.y || 0;
+          const _loc2_ = gemLevel + 1;
+          let itemCount1 = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && eq.y >= 1 && eq.y <= 2 && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount1 += item.quantity;
+            }
+          }
+          let itemCount2 = 0;
+          if (itemCount1 > 1000) { itemCount2 = itemCount1 - 1000; itemCount1 = 1000; }
+          newPlayer.maxHp += itemCount1 * _loc2_;
+          newPlayer.attack += itemCount1 * _loc2_;
+          newPlayer.defense += itemCount1 * _loc2_;
+          newPlayer.agility += itemCount1 * _loc2_;
+          newPlayer.luck += itemCount2 * (_loc2_ * 4);
+        }
+        
+        for (const gem of accessories.filter(acc => acc && acc.t1 === 40)) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.maxHp += _loc2_;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
+          newPlayer.luck += _loc2_;
+        }
+        
+        for (const gem of accessories.filter(acc => acc && acc.t1 === 41)) {
+          const _loc2_ = gem.t2 || 0;
+          newPlayer.attack += _loc2_;
+          newPlayer.defense += _loc2_;
+          newPlayer.agility += _loc2_;
         }
         
         const angelFeather = accessories.filter(acc => acc && acc.t1 === 3333);
