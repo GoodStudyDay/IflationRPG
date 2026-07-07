@@ -3,8 +3,10 @@ import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
 import { getEquipmentById } from '@/data/equipment';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export const BattleScreen = () => {
+  const { t } = useTranslation();
   const { 
     player, 
     battle, 
@@ -43,12 +45,12 @@ export const BattleScreen = () => {
         <div className="flex flex-col gap-1">
           {battle.isCrit && (
             <div className="text-yellow-300 text-sm sm:text-base font-bold animate-pulse drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]">
-              暴击
+              {t('暴击')}
             </div>
           )}
           {battle.isCombo && (
             <div className="text-orange-400 text-xs sm:text-sm font-bold">
-              {battle.comboCount}连击
+              {t('{0}连击').replace('{0}', String(battle.comboCount))}
             </div>
           )}
           <div className={`font-black text-xl sm:text-3xl md:text-4xl ${
@@ -97,9 +99,9 @@ export const BattleScreen = () => {
         
         <div className="absolute top-4 sm:top-10 left-0 right-0 flex justify-center px-2 sm:px-4 text-[10px] sm:text-xs">
           <div className="bg-black/50 px-2 py-1 rounded">
-            <span className="text-purple-400">掉落率: {Math.round(battle.dropRate)}%</span>
+            <span className="text-purple-400">{t('掉落率')}: {Math.round(battle.dropRate)}%</span>
             <span className="text-gray-400 mx-1">|</span>
-            <span className="text-blue-400">目标: {battle.dropItemName}</span>
+            <span className="text-blue-400">{t('目标')}: {battle.dropItemName}</span>
           </div>
         </div>
         
@@ -145,7 +147,7 @@ export const BattleScreen = () => {
           
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
-              <div className="text-gray-500 mb-1">掉落:</div>
+              <div className="text-gray-500 mb-1">{t('掉落')}:</div>
               {battle.enemy.drops.filter(d => d !== null).map((drop, index) => {
                 const equipment = getEquipmentById(drop!.equipmentId);
                 const itemName = equipment?.name || drop!.equipmentId;
@@ -224,7 +226,7 @@ export const BattleScreen = () => {
           >
             <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg w-[90%] max-w-md p-4">
               <div className="text-center text-white font-bold mb-4">
-                战斗暂停
+                {t('战斗暂停')}
               </div>
               <div className="space-y-3">
                 <button
@@ -236,19 +238,19 @@ export const BattleScreen = () => {
                       : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {player.hp >= player.maxHp ? 'HP已满' : '恢复'}
+                  {player.hp >= player.maxHp ? t('HP已满') : t('恢复')}
                 </button>
                 <button
                   onClick={tryEscape}
                   className="w-full bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-500 transition-colors text-base sm:text-lg"
                 >
-                  逃跑
+                  {t('逃跑')}
                 </button>
                 <button
                   onClick={resumeBattle}
                   className="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-600 transition-colors text-base sm:text-lg"
                 >
-                  返回战斗
+                  {t('返回战斗')}
                 </button>
               </div>
             </div>

@@ -1261,7 +1261,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               onClick={() => setDetailEquipment(null)}
               className="w-full bg-[#4a2c7a] text-white font-bold py-2 rounded-lg hover:bg-[#5a3c8a] transition-colors"
             >
-              关闭
+              {t('关闭')}
             </button>
           </div>
         </div>

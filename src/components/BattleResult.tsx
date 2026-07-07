@@ -2,10 +2,12 @@ import { useGameStore } from '@/stores/gameStore';
 import { SpriteIcon } from './SpriteIcon';
 import { CharacterSprite } from './CharacterSprite';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export const BattleResult = () => {
   const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
   const { getEquipName } = useEquipmentName();
+  const { t } = useTranslation();
   
   const { battleResult } = battle;
   
@@ -32,9 +34,9 @@ export const BattleResult = () => {
         <div className="text-center mb-3 sm:mb-4">
           <h2 className="text-3xl sm:text-4xl font-black text-white mb-2">
             {battleResult.victory ? (
-              <span className="text-green-400">胜利!</span>
+              <span className="text-green-400">{t('胜利!')}</span>
             ) : (
-              <span className="text-red-400">失败!</span>
+              <span className="text-red-400">{t('失败!')}</span>
             )}
           </h2>
           <div className="flex justify-center">
@@ -49,14 +51,14 @@ export const BattleResult = () => {
         {battleResult.victory ? (
           <div className="space-y-3">
             <div className="bg-[#1a0a2e] rounded-lg p-3">
-              <div className="text-gray-400 text-sm mb-1">Money</div>
+              <div className="text-gray-400 text-sm mb-1">{t('Money')}</div>
               <div className="text-2xl font-bold text-yellow-400">
                 {player.gold}G +{battleResult.goldReward}G
               </div>
             </div>
             
             <div className="bg-[#1a0a2e] rounded-lg p-3">
-              <div className="text-gray-400 text-sm mb-1">EXP</div>
+              <div className="text-gray-400 text-sm mb-1">{t('EXP')}</div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-700 rounded-full h-4">
                   <div 
@@ -75,7 +77,7 @@ export const BattleResult = () => {
             
             {battleResult.dropItem && (
               <div className="bg-[#1a0a2e] rounded-lg p-3">
-                <div className="text-gray-400 text-sm mb-2">装备</div>
+                <div className="text-gray-400 text-sm mb-2">{t('装备')}</div>
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-10 h-10 bg-[#3a2a5e] rounded-lg flex items-center justify-center">
                     {battleResult.dropItem.x !== undefined && battleResult.dropItem.y !== undefined ? (
@@ -106,31 +108,31 @@ export const BattleResult = () => {
         ) : (
           <div className="space-y-3">
             <div className="bg-[#1a0a2e] rounded-lg p-3">
-              <div className="text-gray-400 text-sm mb-1">惩罚</div>
+              <div className="text-gray-400 text-sm mb-1">{t('惩罚')}</div>
               <div className="text-2xl font-bold text-red-400">
                 BATTLE POINT -{Math.abs(battleResult.battlePointsChange || 0)}
               </div>
               <div className="text-sm text-gray-500 mt-1">
-                剩余: {battlePoints + (battleResult.battlePointsChange || 0)}
+                {t('剩余')}: {battlePoints + (battleResult.battlePointsChange || 0)}
               </div>
             </div>
             
             {isGameOver && (
               <div className="bg-red-900/50 rounded-lg p-3 border border-red-500">
-                <div className="text-red-400 font-bold text-lg">游戏结束!</div>
-                <div className="text-gray-400 text-sm mt-1">即将返回标题页面...</div>
+                <div className="text-red-400 font-bold text-lg">{t('游戏结束!')}</div>
+                <div className="text-gray-400 text-sm mt-1">{t('即将返回标题页面...')}</div>
               </div>
             )}
             
             <div className="bg-[#1a0a2e]/50 rounded-lg p-3 text-center">
-              <div className="text-gray-400 text-sm">再接再厉!</div>
-              <div className="text-gray-500 text-xs mt-1">提升属性后再战吧</div>
+              <div className="text-gray-400 text-sm">{t('再接再厉!')}</div>
+              <div className="text-gray-500 text-xs mt-1">{t('提升属性后再战吧')}</div>
             </div>
           </div>
         )}
         
         <div className="text-center text-gray-500 text-sm mt-4">
-          点击画面打开回到地图
+          {t('点击画面回到地图')}
         </div>
       </div>
     </div>
