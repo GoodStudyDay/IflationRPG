@@ -4,6 +4,17 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.34',
+    date: '2026-07-07 00:00:00',
+    changes: [
+      '根据stagemapvar.txt更新StageLvData数据，包含地图1-150完整等级数据',
+      '移除地图18-55、80-90、95-104、120-145，地图列表顺序重新编码',
+      '更新MAP_ENEMIES_RAW地图键值以匹配新的编码',
+      '扩展地图数据至65个地图，添加详细敌人数据和掉落',
+      '添加敌人图片映射，支持动态加载敌人图像',
+    ],
+  },
+  {
     version: 'v0.0.33',
     date: '2026-07-07 00:00:00',
     changes: [
