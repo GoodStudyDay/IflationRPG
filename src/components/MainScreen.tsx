@@ -31,7 +31,7 @@ export const MainScreen = () => {
   
   // 渲染icon：如果是URL则显示图片，否则显示文字emoji
   const renderIcon = (icon: string, className: string = 'text-lg mr-2') => {
-    if (icon && (icon.startsWith('/') || icon.startsWith('http'))) {
+    if (icon && (icon.startsWith('/') || icon.startsWith('http') || icon.startsWith('data:'))) {
       return <img src={icon} alt="" className="w-6 h-6 object-contain inline-block mr-2 align-middle" />;
     }
     return <span className={className}>{icon}</span>;
