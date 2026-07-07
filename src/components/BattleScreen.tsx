@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
+import { SpriteIcon } from './SpriteIcon';
 import { getEquipmentById } from '@/data/equipment';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
@@ -160,15 +161,35 @@ export const BattleScreen = () => {
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">{t('掉落')}:</div>
               {(() => {
-                // 按难度模式切片：普通0-2，困难3-5，地狱6-8
                 const start = hardmode * 3;
                 const modeDrops = battle.enemy.drops.slice(start, start + 3);
                 return modeDrops.filter(d => d !== null).map((drop, index) => {
                   const equipment = getEquipmentById(drop!.equipmentId);
                   const itemName = equipment ? getEquipName(equipment.name) : drop!.equipmentId;
+                  const getSpriteType = () => {
+                    if (!equipment) return 'accessory';
+                    switch (equipment.type) {
+                      case 'weapon': return 'weapon';
+                      case 'armor': return 'armor';
+                      case 'soul': return 'soul';
+                      default: return 'accessory';
+                    }
+                  };
                   return (
-                    <div key={index} className="flex justify-between">
-                      <span className="truncate">{itemName}</span>
+                    <div key={index} className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1">
+                        {equipment && equipment.x !== undefined && equipment.y !== undefined ? (
+                          <SpriteIcon 
+                            type={getSpriteType()} 
+                            x={equipment.x} 
+                            y={equipment.y} 
+                            size="small" 
+                          />
+                        ) : (
+                          <span className="text-xs">📦</span>
+                        )}
+                        <span className="truncate">{itemName}</span>
+                      </div>
                       <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
                     </div>
                   );
