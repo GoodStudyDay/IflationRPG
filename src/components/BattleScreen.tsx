@@ -4,9 +4,11 @@ import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
 import { getEquipmentById } from '@/data/equipment';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useEquipmentName } from '@/hooks/useEquipmentName';
 
 export const BattleScreen = () => {
   const { t } = useTranslation();
+  const { getEquipName } = useEquipmentName();
   const { 
     player, 
     battle, 
@@ -14,6 +16,7 @@ export const BattleScreen = () => {
     resumeBattle, 
     tryEscape,
     setRecoverNextTurn,
+    hardmode,
   } = useGameStore();
   
   const canRecover = !battle.recoverUsed && player.hp < player.maxHp;
@@ -148,16 +151,21 @@ export const BattleScreen = () => {
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">{t('掉落')}:</div>
-              {battle.enemy.drops.filter(d => d !== null).map((drop, index) => {
-                const equipment = getEquipmentById(drop!.equipmentId);
-                const itemName = equipment?.name || drop!.equipmentId;
-                return (
-                  <div key={index} className="flex justify-between">
-                    <span className="truncate">{itemName}</span>
-                    <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
-                  </div>
-                );
-              })}
+              {(() => {
+                // 按难度模式切片：普通0-2，困难3-5，地狱6-8
+                const start = hardmode * 3;
+                const modeDrops = battle.enemy.drops.slice(start, start + 3);
+                return modeDrops.filter(d => d !== null).map((drop, index) => {
+                  const equipment = getEquipmentById(drop!.equipmentId);
+                  const itemName = equipment ? getEquipName(equipment.name) : drop!.equipmentId;
+                  return (
+                    <div key={index} className="flex justify-between">
+                      <span className="truncate">{itemName}</span>
+                      <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
         </div>
