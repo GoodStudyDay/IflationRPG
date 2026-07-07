@@ -998,9 +998,9 @@ export const useGameStore = create<GameStore>()(
         const cleanAgi = player.agility - oldSpecialAdd.agi;
         const cleanLuc = player.luck - oldSpecialAdd.luc;
         
-        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), null) : 0;
-        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
-        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
         const oldAccAtk = oldAccs.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
         const oldAccDef = oldAccs.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
         const oldAccHp = oldAccs.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
@@ -1328,9 +1328,9 @@ export const useGameStore = create<GameStore>()(
         const cleanAgi = player.agility - oldSpecialAdd.agi;
         const cleanLuc = player.luck - oldSpecialAdd.luc;
         
-        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), null) : 0;
-        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
-        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), null) : 0;
+        const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
+        const oldArmorDef = player.equippedArmor ? getArmorDefContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
+        const oldArmorHp = player.equippedArmor ? getArmorHpContribution(player.equippedArmor, (inventory.find(i => i.equipmentId === player.equippedArmor!.id)?.quantity || 1), player.armorSoul) : 0;
         const oldAccAtk = oldAccs.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
         const oldAccDef = oldAccs.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
         const oldAccHp = oldAccs.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
