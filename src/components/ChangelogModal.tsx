@@ -4,6 +4,28 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.51',
+    date: '2026-07-08 18:00:00',
+    changes: [
+      '修复重新开始游戏时魂（Soul）消失的问题：魂现在与武器/防具/饰品一样在 resetGame 中被保留',
+      '修复切换背包后魂错误保留的问题：EquipSet 新增 weaponSoulId/armorSoulId 字段，每个背包独立保存魂状态',
+      '修复切换背包后无法切回1号背包的问题：空数组 truthy 判定导致默认背包缺失',
+      '修复 ene59_ba.png 不显示的问题：BOSS_IMAGE_MAP 中难度0缺少键值映射',
+      '回退 TitleScreen.tsx 死亡后可继续游戏的错误修复：死亡后不可继续游戏',
+    ],
+  },
+  {
+    version: 'v0.0.50',
+    date: '2026-07-08 12:00:00',
+    changes: [
+      '修复 BattleResult.tsx 中掉落物品描述未使用多语言翻译的问题',
+      '修复 DropGuideModal.tsx 中 Equipment Drop 搜索不支持多语言的问题（现支持7种语言搜索）',
+      '修复 Inventory.tsx 中 Soul 列表和详情弹窗中"属性值""百分比"硬编码中文问题',
+      '补充 names.ts 中 70+ 条缺失的 Boss 名称多语言翻译',
+      'languageData.ts 新增"属性值"和"百分比"的7语言翻译',
+    ],
+  },
+  {
     version: 'v0.0.34',
     date: '2026-07-07 00:00:00',
     changes: [

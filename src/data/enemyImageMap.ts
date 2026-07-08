@@ -709,7 +709,7 @@ export const BOSS_IMAGE_MAP: Record<number, Record<number, string>> = {
   17: { 0: 'ene58_bd' },
   18: { 0: 'ene58_be' },
   19: { 0: 'ene58_bf', 1: 'ene58_hb', 2: 'ene58_bf' },
-  20: { 1: 'ene59_hb', 2: 'ene59_ba' },
+  20: { 0: 'ene59_ba', 1: 'ene59_hb', 2: 'ene59_ba' },
   21: { 0: 'ene63_bb' },
   22: { 0: 'ene64_ba' },
   23: { 0: 'ene64_bb' },

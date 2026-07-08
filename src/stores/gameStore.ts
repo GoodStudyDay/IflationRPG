@@ -559,20 +559,39 @@ export const useGameStore = create<GameStore>()(
       gameovercount: saveData.gameovercount,
       kyarakutalv: saveData.kyarakutalv,
       kyarakutaKozinExp: saveData.kyarakutaKozinExp || new Array(20).fill(0),
-      equipSets: saveData.equipSets || [
-        {
-          id: 'set-0',
-          name: '默认背包',
-          weaponId: null,
-          armorId: null,
-          accessoryIds: [],
-          weaponSoulId: null,
-          armorSoulId: null,
-          createdAt: Date.now(),
-          unlocked: true,
-          slotIndex: 0,
-        },
-      ],
+      equipSets: (() => {
+        const saved = saveData.equipSets;
+        if (!saved || saved.length === 0) {
+          return [{
+            id: 'set-0',
+            name: '默认背包',
+            weaponId: null,
+            armorId: null,
+            accessoryIds: [],
+            weaponSoulId: null,
+            armorSoulId: null,
+            createdAt: Date.now(),
+            unlocked: true,
+            slotIndex: 0,
+          }];
+        }
+        // 确保 slot 0 始终存在
+        if (!saved.some(s => s.slotIndex === 0)) {
+          saved.unshift({
+            id: 'set-0',
+            name: '默认背包',
+            weaponId: null,
+            armorId: null,
+            accessoryIds: [],
+            weaponSoulId: null,
+            armorSoulId: null,
+            createdAt: Date.now(),
+            unlocked: true,
+            slotIndex: 0,
+          });
+        }
+        return saved;
+      })(),
       currentEquipSetSlotIndex: 0,
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
