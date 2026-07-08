@@ -4,6 +4,7 @@ import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useEquipmentDescription } from '@/hooks/useEquipmentDescription';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface InventoryProps {
@@ -14,6 +15,7 @@ type ViewMode = 'main' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
 
 export const Inventory = ({ onClose }: InventoryProps) => {
   const { getEquipName } = useEquipmentName();
+  const { getEquipDescription } = useEquipmentDescription();
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
@@ -607,7 +609,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <div>
                         <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         {soul.setumei && (
-                          <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
+                          <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
                           <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
@@ -618,7 +620,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     {isOwned && (
                       <>
                         {soul.setumei && (
-                          <div className="text-purple-300 text-sm mt-1">{soul.setumei}</div>
+                          <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
                           <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
@@ -707,14 +709,14 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <div>
                         <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
                         {material.setumei && (
-                          <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
+                          <div className="text-gray-300 text-sm mt-1">{getEquipDescription(material.setumei, material.t1, material.t2)}</div>
                         )}
                       </div>
                     )}
                     {isOwned && (
                       <>
                         {material.setumei && (
-                          <div className="text-gray-300 text-sm mt-1">{material.setumei}</div>
+                          <div className="text-gray-300 text-sm mt-1">{getEquipDescription(material.setumei, material.t1, material.t2)}</div>
                         )}
                         <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {material.quantity}</div>
                       </>
@@ -788,7 +790,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">■武器</div>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">{t('武器')}</div>
             <div className="flex gap-2 flex-1">
               <div 
                 onClick={() => {
@@ -834,7 +836,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           </div>
 
           <div className="flex items-start gap-2">
-            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">■防具</div>
+            <div className="bg-[#6a8ac5] text-white text-sm font-bold px-2 py-1 rounded mt-1 flex-shrink-0">{t('防具')}</div>
             <div className="flex gap-2 flex-1">
               <div 
                 onClick={() => {
@@ -900,14 +902,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       <SpriteIcon type="accessory" x={accessory.x} y={accessory.y} size="medium" image={accessory.image} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-1">
-                        <div className="text-white font-bold text-xs truncate flex-1">{getEquipName(accessory.name)}</div>
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 4 }).map((_, i) => (
-                            <span key={i} className={`text-[10px] ${i <= (accessory.rank ?? 0) ? 'text-yellow-400' : 'text-gray-600'}`}>★</span>
-                          ))}
-                        </div>
-                      </div>
+                      <div className="text-white font-bold text-xs truncate">{getEquipName(accessory.name)}</div>
                       {accessory.effectDescription && (
                         <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
                       )}
@@ -1221,7 +1216,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               <div className="text-purple-300 text-sm mb-2">{detailEquipment.description}</div>
             )}
             {detailEquipment.setumei && (
-              <div className="text-purple-300 text-sm mb-2">{detailEquipment.setumei}</div>
+              <div className="text-purple-300 text-sm mb-2">{getEquipDescription(detailEquipment.setumei, detailEquipment.t1, detailEquipment.t2)}</div>
             )}
             {detailEquipment.effectDescription && (
               <div className="text-yellow-300 text-sm mb-2">{detailEquipment.effectDescription}</div>

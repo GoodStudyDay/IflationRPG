@@ -4,6 +4,7 @@ import { equipmentData } from '@/data/equipment';
 import type { EquipmentType } from '@/types';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useEquipmentDescription } from '@/hooks/useEquipmentDescription';
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface EquipmentCollectionProps {
@@ -13,6 +14,7 @@ interface EquipmentCollectionProps {
 export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const { t } = useTranslation();
   const { getEquipName } = useEquipmentName();
+  const { getEquipDescription } = useEquipmentDescription();
   const { inventory, player, buyEquipment } = useGameStore();
   type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
@@ -279,7 +281,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
               )}
               {selectedEquipment.setumei && !selectedEquipment.description && (
                 <div className="text-gray-300 text-sm mt-3 p-2 bg-[#1a0a2e] rounded">
-                  {selectedEquipment.setumei.replace('[0]', String(selectedEquipment.t2 || 0))}
+                  {getEquipDescription(selectedEquipment.setumei, selectedEquipment.t1, selectedEquipment.t2)}
                 </div>
               )}
             </div>
