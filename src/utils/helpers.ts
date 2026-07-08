@@ -37,43 +37,48 @@ export const getStockBonus = (quantity: number): number => {
 /** 获取武器带的攻击力贡献（包含存货加成、倍率和魂加成） */
 export const getWeaponAtkContribution = (weapon: Equipment, quantity: number, soul?: Equipment | null): number => {
   const stockMult = getStockBonus(quantity);
-  const weaponPlus = weapon.attackBonus || 0;
-  const weaponMulti = (weapon.attributeRate || 100) - 100;
+  const weaponPlus = weapon.plus || weapon.attackBonus || 0;
+  const weaponMulti = weapon.multi || ((weapon.attributeRate || 100) - 100);
   
-  const soulPlus = soul?.soulPlus || 0;
-  const soulPerPlus = soul?.soulPerPlus || 0;
+  const soulPlus = soul?.plus || soul?.soulPlus || 0;
+  const soulPerPlus = soul?.t2 || soul?.soulPerPlus || 0;
   
   const effectiveAtk = (weaponPlus + soulPlus) * stockMult;
-  const effectiveRate = (weaponMulti + soulPerPlus) * stockMult / 100;
+  const effectiveRate = (weaponMulti + soulPerPlus) / 100;
   return Math.ceil(effectiveAtk * (1 + effectiveRate));
 };
 
 /** 获取防具带的防御力贡献（包含存货加成、倍率和魂加成） */
 export const getArmorDefContribution = (armor: Equipment, quantity: number, soul?: Equipment | null): number => {
   const stockMult = getStockBonus(quantity);
-  const armorPlus = armor.defenseBonus || 0;
-  const armorMulti = (armor.attributeRate || 100) - 100;
+  const armorPlus = armor.plus || armor.defenseBonus || 0;
+  const armorMulti = armor.multi || ((armor.attributeRate || 100) - 100);
   
-  const soulPlus = soul?.soulPlus || 0;
-  const soulPerPlus = soul?.soulPerPlus || 0;
+  const soulPlus = soul?.plus || soul?.soulPlus || 0;
+  const soulPerPlus = soul?.t2 || soul?.soulPerPlus || 0;
   
   const effectiveDef = (armorPlus + soulPlus) * stockMult;
-  const effectiveRate = (armorMulti + soulPerPlus) * stockMult / 100;
+  const effectiveRate = (armorMulti + soulPerPlus) / 100;
   return Math.ceil(effectiveDef * (1 + effectiveRate));
 };
 
 /** 获取防具带的 HP 贡献（包含存货加成、倍率和魂加成） */
-export const getArmorHpContribution = (armor: Equipment, quantity: number, soul?: Equipment | null): number => {
+export const getArmorHpContribution = (armor: Equipment, quantity: number, soul?: Equipment | null, currentHp: number = 1000): number => {
   const stockMult = getStockBonus(quantity);
-  const armorPlus = armor.hpBonus || 0;
-  const armorMulti = (armor.attributeRate || 100) - 100;
+  const armorPlus = armor.plus || armor.defenseBonus || 0;
+  const armorMulti = armor.multi || ((armor.attributeRate || 100) - 100);
   
-  const soulPlus = soul?.soulPlus || 0;
-  const soulPerPlus = soul?.soulPerPlus || 0;
+  const soulPlus = soul?.plus || soul?.soulPlus || 0;
+  const soulPerPlus = soul?.t2 || soul?.soulPerPlus || 0;
   
-  const effectiveHp = (armorPlus + soulPlus) * stockMult;
-  const effectiveRate = (armorMulti + soulPerPlus) * stockMult / 100;
-  return Math.ceil(effectiveHp * (1 + effectiveRate));
+  const effectiveDef = (armorPlus + soulPlus) * stockMult;
+  const effectiveRate = (armorMulti + soulPerPlus) / 100;
+  
+  const defContribution = Math.ceil(effectiveDef * (1 + effectiveRate));
+  
+  const hpFromDef = Math.floor(currentHp * ((armorMulti - 0.1) * 0.0011));
+  
+  return defContribution + hpFromDef;
 };
 
 export const formatNumber = (num: number): string => {

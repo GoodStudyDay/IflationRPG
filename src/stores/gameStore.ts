@@ -1720,22 +1720,54 @@ export const useGameStore = create<GameStore>()(
         saveSaveData(data);
       },
       startGame: () => {
-        const { player, inventory, skills, battlePoints, maxBattlePoints, hardmode } = get();
+        const { player, inventory, skills, battlePoints, maxBattlePoints, hardmode, gameovercount } = get();
+        
+        let finalInventory = [...inventory];
+        let finalEquippedWeapon = player.equippedWeapon;
+        let finalEquippedArmor = player.equippedArmor;
+        let finalWeaponSoul = player.weaponSoul;
+        let finalArmorSoul = player.armorSoul;
+        let finalEquippedAccessories = [...(player.equippedAccessories || [])];
+        
+        if (gameovercount === 0) {
+          const starterWeapon = getEquipmentById('weapon-0');
+          const starterArmor = getEquipmentById('armor-0');
+          
+          if (starterWeapon && !player.equippedWeapon) {
+            finalEquippedWeapon = starterWeapon;
+            const existingWeapon = finalInventory.find(i => i.equipmentId === 'weapon-0');
+            if (!existingWeapon) {
+              finalInventory.push({ equipmentId: 'weapon-0', quantity: 1 });
+            }
+          }
+          
+          if (starterArmor && !player.equippedArmor) {
+            finalEquippedArmor = starterArmor;
+            const existingArmor = finalInventory.find(i => i.equipmentId === 'armor-0');
+            if (!existingArmor) {
+              finalInventory.push({ equipmentId: 'armor-0', quantity: 1 });
+            }
+          }
+          
+          finalEquippedAccessories = [];
+          finalWeaponSoul = null;
+          finalArmorSoul = null;
+        }
         
         const newBattlePoints = battlePoints <= 0 ? (hardmode === 1 ? 15 : maxBattlePoints) : battlePoints;
         
         const levelBonus = getLevelBonus(player.level);
         
-        const weaponObj = player.equippedWeapon;
-        const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, player.weaponSoul) : 0;
+        const weaponObj = finalEquippedWeapon;
+        const weaponQty = weaponObj ? (finalInventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
+        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, finalWeaponSoul) : 0;
         
-        const armorObj = player.equippedArmor;
-        const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, player.armorSoul) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, player.armorSoul) : 0;
+        const armorObj = finalEquippedArmor;
+        const armorQty = armorObj ? (finalInventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
+        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, finalArmorSoul) : 0;
+        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, finalArmorSoul) : 0;
         
-        const accessories = player.equippedAccessories || [];
+        const accessories = finalEquippedAccessories || [];
         const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
         const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
         const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
@@ -1781,7 +1813,7 @@ export const useGameStore = create<GameStore>()(
           const _loc2_ = gemLevel + 1;
           
           let itemCount1 = 0;
-          for (const item of inventory) {
+          for (const item of finalInventory) {
             const eq = getEquipmentById(item.equipmentId);
             if (eq && eq.y >= 1 && eq.y <= 2) {
               if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
@@ -1846,8 +1878,13 @@ export const useGameStore = create<GameStore>()(
             luck: newLuc,
             maxMana: initialPlayer.maxMana + levelBonus.mana,
             mana: initialPlayer.maxMana + levelBonus.mana,
+            equippedWeapon: finalEquippedWeapon,
+            equippedArmor: finalEquippedArmor,
+            equippedAccessories: finalEquippedAccessories,
+            weaponSoul: finalWeaponSoul,
+            armorSoul: finalArmorSoul,
           },
-          inventory,
+          inventory: finalInventory,
           skills,
           currentScene: 'world',
           encounterRate: 0,
