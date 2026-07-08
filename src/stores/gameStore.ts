@@ -1239,10 +1239,30 @@ export const useGameStore = create<GameStore>()(
         set({ currentScene: 'title' });
       },
       killPlayer: () => {
+        const { player, kyarakutalv, kyarakutaKozinExp } = get();
+        
+        let newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, player.heroId, player.level);
+        const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, player.heroId);
+        let newKyarakutalv = kyarakutalv;
+        if (newKyarakutalv > 0) {
+          if (currentKyaraLv > newKyarakutalv) {
+            newKyarakutalv = currentKyaraLv;
+          }
+        } else {
+          newKyarakutalv = Math.max(currentKyaraLv, 1);
+        }
+        
         set({ 
           battlePoints: 0,
-          currentScene: 'gameover'
+          currentScene: 'gameover',
+          kyarakutalv: newKyarakutalv,
+          kyarakutaKozinExp: newKyarakutaKozinExp,
         });
+
+        const saveData = loadSaveData();
+        saveData.kyarakutalv = newKyarakutalv;
+        saveData.kyarakutaKozinExp = newKyarakutaKozinExp;
+        saveSaveData(saveData);
       },
       setPreset: (presetIndex, preset) => {
         const { presets } = get();
@@ -2925,6 +2945,7 @@ export const useGameStore = create<GameStore>()(
           newgamecount: saveData.newgamecount,
           gameovercount: saveData.gameovercount,
           kyarakutalv: saveData.kyarakutalv,
+          kyarakutaKozinExp: saveData.kyarakutaKozinExp || new Array(20).fill(0),
           hardmodeUnlock: saveData.hardmodeUnlock,
           hellmodeUnlock: saveData.hellmodeUnlock,
           playerid: saveData.playerid,
