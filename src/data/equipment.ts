@@ -232,7 +232,7 @@ export function ItemMaterialpush(
   baset2: number = 0,
   rank: number = -1,
   _param10: boolean = false,
-  _param11: number = 0
+  bit32: number = 0
 ): void {
   const index = itemDataMana.ItemuMATERIAL.length;
   const equipment: Equipment = {
@@ -248,6 +248,7 @@ export function ItemMaterialpush(
     t2: baset2,
     rank: rank === -1 ? undefined : rank,
     hardmode: 0,
+    bit32,
     attackBonus: 0,
     defenseBonus: 0,
     hpBonus: 0,

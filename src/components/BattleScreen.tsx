@@ -171,9 +171,23 @@ export const BattleScreen = () => {
                     switch (equipment.type) {
                       case 'weapon': return 'weapon';
                       case 'armor': return 'armor';
+                      case 'material': return 'material';
                       case 'soul': return 'soul';
                       default: return 'accessory';
                     }
+                  };
+                  const getBit32 = () => {
+                    if (!equipment) return undefined;
+                    if (equipment.type === 'weapon') return equipment.bit32;
+                    if (equipment.type === 'armor') return equipment.bougu32png;
+                    if (equipment.type === 'material') return equipment.bit32;
+                    return undefined;
+                  };
+                  const getImage = () => {
+                    if (!equipment) return undefined;
+                    if (equipment.type === 'accessory') return equipment.image;
+                    if (equipment.type === 'soul') return equipment.image;
+                    return undefined;
                   };
                   return (
                     <div key={index} className="flex items-center justify-between gap-1">
@@ -184,6 +198,8 @@ export const BattleScreen = () => {
                             x={equipment.x} 
                             y={equipment.y} 
                             size="small" 
+                            image={getImage()}
+                            bit32={getBit32()}
                           />
                         ) : (
                           <span className="text-xs">📦</span>

@@ -84,10 +84,16 @@ export const BattleResult = () => {
                       <SpriteIcon 
                         type={battleResult.dropItem.type === 'weapon' ? 'weapon' : 
                                battleResult.dropItem.type === 'armor' ? 'armor' : 
+                               battleResult.dropItem.type === 'material' ? 'material' : 
                                battleResult.dropItem.type === 'soul' ? 'soul' : 'accessory'}
                         x={battleResult.dropItem.x} 
                         y={battleResult.dropItem.y} 
                         size="medium" 
+                        image={battleResult.dropItem.type === 'accessory' ? battleResult.dropItem.image : 
+                               battleResult.dropItem.type === 'soul' ? battleResult.dropItem.image : undefined}
+                        bit32={battleResult.dropItem.type === 'weapon' ? battleResult.dropItem.bit32 : 
+                               battleResult.dropItem.type === 'armor' ? battleResult.dropItem.bougu32png : 
+                               battleResult.dropItem.type === 'material' ? battleResult.dropItem.bit32 : undefined}
                       />
                     ) : (
                       <span className="text-xl">{battleResult.dropItem.icon}</span>

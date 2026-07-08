@@ -130,7 +130,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                     </div>
                     <div className="flex-shrink-0 w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center overflow-hidden">
                       {showInfo && equipment.x !== undefined && equipment.y !== undefined ? (
-                        <SpriteIcon type={equipment.type === 'weapon' ? 'weapon' : equipment.type === 'armor' ? 'armor' : equipment.type === 'accessory' ? 'accessory' : 'soul'} x={equipment.x} y={equipment.y} size="medium" image={equipment.type === 'accessory' ? equipment.image : undefined} />
+                        <SpriteIcon type={equipment.type === 'weapon' ? 'weapon' : equipment.type === 'armor' ? 'armor' : equipment.type === 'accessory' ? 'accessory' : equipment.type === 'material' ? 'material' : 'soul'} x={equipment.x} y={equipment.y} size="medium" image={equipment.type === 'accessory' ? equipment.image : equipment.type === 'soul' ? equipment.image : undefined} bit32={equipment.type === 'weapon' || equipment.type === 'armor' || equipment.type === 'material' ? equipment.bit32 : undefined} />
                       ) : (
                         <span className="text-xl">
                           {showInfo ? equipment.icon : '❓'}
@@ -231,7 +231,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-[#1a0a2e] rounded-lg flex items-center justify-center overflow-hidden">
                 {selectedEquipment.x !== undefined && selectedEquipment.y !== undefined ? (
-                  <SpriteIcon type={selectedEquipment.type === 'weapon' ? 'weapon' : selectedEquipment.type === 'armor' ? 'armor' : selectedEquipment.type === 'accessory' ? 'accessory' : 'soul'} x={selectedEquipment.x} y={selectedEquipment.y} size="large" image={selectedEquipment.type === 'accessory' ? selectedEquipment.image : undefined} />
+                  <SpriteIcon type={selectedEquipment.type === 'weapon' ? 'weapon' : selectedEquipment.type === 'armor' ? 'armor' : selectedEquipment.type === 'accessory' ? 'accessory' : selectedEquipment.type === 'material' ? 'material' : 'soul'} x={selectedEquipment.x} y={selectedEquipment.y} size="large" image={selectedEquipment.type === 'accessory' ? selectedEquipment.image : selectedEquipment.type === 'soul' ? selectedEquipment.image : undefined} bit32={selectedEquipment.type === 'weapon' || selectedEquipment.type === 'armor' || selectedEquipment.type === 'material' ? selectedEquipment.bit32 : undefined} />
                 ) : (
                   <span className="text-3xl">{selectedEquipment.icon}</span>
                 )}

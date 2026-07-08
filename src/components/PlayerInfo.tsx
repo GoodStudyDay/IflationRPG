@@ -255,13 +255,13 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                   <>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                        {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" /> : <span className="text-lg">📦</span>}
+                        {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" bit32={src.equippedWeapon.bit32} /> : <span className="text-lg">📦</span>}
                       </div>
                       <div className="text-xs text-gray-400 truncate">{src.equippedWeapon ? getEquipName(src.equippedWeapon.name) : t('无')}</div>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                        {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" /> : <span className="text-lg">📦</span>}
+                        {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" bit32={src.equippedArmor.bougu32png} /> : <span className="text-lg">📦</span>}
                       </div>
                       <div className="text-xs text-gray-400 truncate">{src.equippedArmor ? getEquipName(src.equippedArmor.name) : t('无')}</div>
                     </div>

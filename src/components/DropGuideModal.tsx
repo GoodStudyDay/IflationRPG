@@ -212,12 +212,17 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
                   className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[#4d3b7e] transition-colors"
                 >
                   <div className="w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center shrink-0">
-                    {['weapon', 'armor', 'accessory', 'soul'].includes(entry.equipment.type) ? (
+                    {['weapon', 'armor', 'accessory', 'material', 'soul'].includes(entry.equipment.type) ? (
                       <SpriteIcon
-                        type={entry.equipment.type as 'weapon' | 'armor' | 'accessory' | 'soul'}
+                        type={entry.equipment.type as 'weapon' | 'armor' | 'accessory' | 'material' | 'soul'}
                         x={entry.equipment.x}
                         y={entry.equipment.y}
                         size="small"
+                        image={entry.equipment.type === 'accessory' ? entry.equipment.image : 
+                               entry.equipment.type === 'soul' ? entry.equipment.image : undefined}
+                        bit32={entry.equipment.type === 'weapon' ? entry.equipment.bit32 : 
+                               entry.equipment.type === 'armor' ? entry.equipment.bougu32png : 
+                               entry.equipment.type === 'material' ? entry.equipment.bit32 : undefined}
                       />
                     ) : (
                       <span className="text-xl">{entry.equipment.icon || '📦'}</span>

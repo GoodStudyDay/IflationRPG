@@ -248,7 +248,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" />
+                    <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" bit32={weapon.bit32} />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{getEquipName(weapon.name)}</div>
@@ -347,7 +347,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" />
+                    <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" bit32={armor.bougu32png} />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{getEquipName(armor.name)}</div>
@@ -599,7 +599,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
-                    <SpriteIcon type="soul" x={soul.x} y={soul.y} size="medium" />
+                    <SpriteIcon type="soul" x={soul.x} y={soul.y} size="medium" image={soul.image} />
                   </div>
                   <div className="flex-1">
                     <div className="text-white font-bold">{getEquipName(soul.name)}</div>
@@ -696,7 +696,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                     {material.x !== undefined && material.y !== undefined ? (
-                      <SpriteIcon type="accessory" x={material.x} y={material.y} size="medium" />
+                      <SpriteIcon type="material" x={material.x} y={material.y} size="medium" bit32={material.bit32} />
                     ) : (
                       <span className="text-xl">{material.icon}</span>
                     )}
@@ -798,7 +798,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
               >
                 {player.weaponSoul ? (
-                  <SpriteIcon type="soul" x={player.weaponSoul.x} y={player.weaponSoul.y} size="medium" />
+                  <SpriteIcon type="soul" x={player.weaponSoul.x} y={player.weaponSoul.y} size="medium" image={player.weaponSoul.image} />
                 ) : (
                   <span className="text-lg">👻</span>
                 )}
@@ -810,7 +810,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                     {player.equippedWeapon?.x !== undefined ? (
-                      <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" />
+                      <SpriteIcon type="weapon" x={player.equippedWeapon.x} y={player.equippedWeapon.y} size="medium" bit32={player.equippedWeapon.bit32} />
                     ) : (
                       <span className="text-xl">❓</span>
                     )}
@@ -844,7 +844,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 className="w-10 h-10 bg-[#4a3a65] border-2 border-[#6a5a85] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#5a4a75] transition-colors flex-shrink-0"
               >
                 {player.armorSoul ? (
-                  <SpriteIcon type="soul" x={player.armorSoul.x} y={player.armorSoul.y} size="medium" />
+                  <SpriteIcon type="soul" x={player.armorSoul.x} y={player.armorSoul.y} size="medium" image={player.armorSoul.image} />
                 ) : (
                   <span className="text-lg">👻</span>
                 )}
@@ -856,7 +856,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-[#4a6fa5] rounded flex items-center justify-center">
                     {player.equippedArmor?.x !== undefined ? (
-                      <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" />
+                      <SpriteIcon type="armor" x={player.equippedArmor.x} y={player.equippedArmor.y} size="medium" bit32={player.equippedArmor.bougu32png} />
                     ) : (
                       <span className="text-xl">❓</span>
                     )}
@@ -1200,12 +1200,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60]" onClick={() => setDetailEquipment(null)}>
           <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-5 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-[#4a2c7a] rounded flex items-center justify-center">
+              <div className="w-16 h-16 bg-[#4a2c7a] rounded flex items-center justify-center">
                 <SpriteIcon type={
-                  detailEquipment.type === 'material' ? 'accessory' : 
+                  detailEquipment.type === 'material' ? 'material' : 
                   detailEquipment.type === 'consumable' ? 'accessory' : 
                   detailEquipment.type
-                } x={detailEquipment.x} y={detailEquipment.y} size="large" />
+                } x={detailEquipment.x} y={detailEquipment.y} size="large" 
+                  image={detailEquipment.type === 'accessory' ? detailEquipment.image : 
+                         detailEquipment.type === 'soul' ? detailEquipment.image : undefined}
+                  bit32={detailEquipment.type === 'weapon' ? detailEquipment.bit32 : 
+                         detailEquipment.type === 'armor' ? detailEquipment.bougu32png : 
+                         detailEquipment.type === 'material' ? detailEquipment.bit32 : undefined} />
               </div>
               <div>
                 <div className="text-white font-bold text-lg">{detailEquipment.name}</div>
