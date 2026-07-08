@@ -502,7 +502,6 @@ export const translations: Record<string, TranslationKey> = {
   '标题': { ja: 'タイトル', en: 'Title', 'zh-Hant': '標題', 'zh-Hans': '标题', ko: '타이틀', es: 'Título', id: 'Judul' },
   '普通': { ja: 'ノーマル', en: 'Normal', 'zh-Hant': '普通', 'zh-Hans': '普通', ko: '일반', es: 'Normal', id: 'Normal' },
   '困难': { ja: 'ハード', en: 'Hard', 'zh-Hant': '困難', 'zh-Hans': '困难', ko: '하드', es: 'Difícil', id: 'Sulit' },
-  '地狱': { ja: 'ヘル', en: 'Hell', 'zh-Hant': '地獄', 'zh-Hans': '地狱', ko: '헬', es: 'Inferno', id: 'Neraka' },
   'Half': { ja: '半分', en: 'Half', 'zh-Hant': '一半', 'zh-Hans': '一半', ko: '절반', es: 'Mitad', id: 'Separuh' },
   'All': { ja: '全て', en: 'All', 'zh-Hant': '全部', 'zh-Hans': '全部', ko: '전부', es: 'Todos', id: 'Semua' },
   '该名称已被使用，请选择其他名称': { ja: 'この名前は既に使用されています。他の名前を選択してください', en: 'This name is already in use. Please choose another name', 'zh-Hant': '此名稱已被使用，請選擇其他名稱', 'zh-Hans': '该名称已被使用，请选择其他名称', ko: '이 이름은 이미 사용 중입니다. 다른 이름을 선택해주세요', es: 'Este nombre ya está en uso. Elija otro nombre', id: 'Nama ini sudah digunakan. Silakan pilih nama lain' },
