@@ -2289,14 +2289,14 @@ export const useGameStore = create<GameStore>()(
           let newKyarakutaKozinExp = [...kyarakutaKozinExp];
           let newKyarakutalv = kyarakutalv;
           
+          newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, player.heroId, player.level);
+          const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, player.heroId);
           if (newKyarakutalv > 0) {
-            newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, player.heroId, player.level);
-            const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, player.heroId);
             if (currentKyaraLv > newKyarakutalv) {
               newKyarakutalv = currentKyaraLv;
             }
           } else {
-            newKyarakutalv = 1;
+            newKyarakutalv = Math.max(currentKyaraLv, 1);
           }
           
           set({
