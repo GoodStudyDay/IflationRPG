@@ -2317,6 +2317,11 @@ export const useGameStore = create<GameStore>()(
               },
             },
           });
+
+          const saveData = loadSaveData();
+          saveData.kyarakutalv = newKyarakutalv;
+          saveData.kyarakutaKozinExp = newKyarakutaKozinExp;
+          saveSaveData(saveData);
           return;
         }
         
