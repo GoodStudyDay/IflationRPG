@@ -8,6 +8,8 @@ interface LeaderboardRow {
   user_id: string;
   display_name: string;
   score: number;
+  ip_address: string;
+  country_code: string;
   created_at: string;
   updated_at: string;
 }
@@ -17,6 +19,7 @@ interface LeaderboardDisplayEntry {
   playerName: string;
   score: number;
   date: string;
+  countryCode: string;
 }
 
 const STORAGE_KEY = 'inflation-rpg-user-id';
@@ -50,6 +53,16 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
   const [playerRank, setPlayerRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const getCountryFlag = (countryCode: string | undefined): string => {
+    const flagMap: Record<string, string> = {
+      CN: '🇨🇳', JP: '🇯🇵', KR: '🇰🇷', US: '🇺🇸', EN: '🇬🇧',
+      ES: '🇪🇸', ID: '🇮🇩', TW: '🇹🇼', HK: '🇭🇰', SG: '🇸🇬',
+      FR: '🇫🇷', DE: '🇩🇪', IT: '🇮🇹', AU: '🇦🇺', CA: '🇨🇦',
+      RU: '🇷🇺', BR: '🇧🇷', MX: '🇲🇽', TH: '🇹🇭', VN: '🇻🇳',
+    };
+    return flagMap[countryCode?.toUpperCase() || ''] || '🌍';
+  };
+
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
@@ -67,6 +80,7 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
         playerName: row.display_name,
         score: row.score,
         date: row.updated_at ? new Date(row.updated_at).toISOString().split('T')[0] : '',
+        countryCode: row.country_code || '',
       }));
 
       setLeaderboard(entries);
@@ -93,15 +107,46 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
   const submitScore = async (name?: string) => {
     const submitName = (name || playerName).trim();
     if (!submitName) {
-        alert(t('请输入玩家名称'));
-        return;
-      }
+      alert(t('请输入玩家名称'));
+      return;
+    }
 
     const userId = getOrCreateUserId();
     
     setLoading(true);
     try {
       const supabase = getSupabase();
+
+      const { data: nameCheck, error: nameError } = await supabase
+        .from('leaderboard')
+        .select('display_name')
+        .eq('display_name', submitName)
+        .not('user_id', 'eq', userId)
+        .limit(1);
+
+      if (nameError) throw nameError;
+      if (nameCheck && nameCheck.length > 0) {
+        alert(t('该名称已被使用，请选择其他名称'));
+        setLoading(false);
+        return;
+      }
+
+      let ipAddress = '';
+      let countryCode = '';
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip || '';
+        
+        if (ipAddress) {
+          const geoResponse = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+          const geoData = await geoResponse.json();
+          countryCode = geoData.country_code || '';
+        }
+      } catch (geoErr) {
+        console.warn('Failed to get IP/geo info:', geoErr);
+      }
+
       const { data: existing, error: fetchError } = await supabase
         .from('leaderboard')
         .select('*')
@@ -117,6 +162,8 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
             .update({
               display_name: submitName,
               score: Highlv,
+              ip_address: ipAddress,
+              country_code: countryCode,
               updated_at: new Date().toISOString(),
             })
             .eq('user_id', userId);
@@ -130,6 +177,8 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
             user_id: userId,
             display_name: submitName,
             score: Highlv,
+            ip_address: ipAddress,
+            country_code: countryCode,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -254,7 +303,8 @@ export const Leaderboard = ({ isOpen, onClose }: LeaderboardProps) => {
                       }`}>
                         {entry.rank}
                       </div>
-                      <div className="text-white text-sm font-medium truncate max-w-[120px]">
+                      <span className="text-lg">{getCountryFlag(entry.countryCode)}</span>
+                      <div className="text-white text-sm font-medium truncate max-w-[100px]">
                         {entry.playerName}
                       </div>
                     </div>
