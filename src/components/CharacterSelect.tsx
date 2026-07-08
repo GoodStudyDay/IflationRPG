@@ -181,6 +181,11 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
                       imageRendering: 'pixelated',
                     }}
                   />
+                  {getHeroLevel(hero.id) > 0 && (
+                    <div className="absolute top-1 left-1 bg-black/70 text-yellow-400 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded">
+                      LV.{getHeroLevel(hero.id)}
+                    </div>
+                  )}
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-black/60 rounded-b-lg py-1">
                   <div className="text-center text-[8px] sm:text-[10px] text-white font-bold truncate px-1">
@@ -189,11 +194,6 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
                   <div className="text-center text-[6px] sm:text-[8px] text-gray-400 truncate px-1">
                     {getStatDescription(hero)}
                   </div>
-                  {getHeroLevel(hero.id) > 0 && (
-                    <div className="text-center text-[6px] sm:text-[8px] text-yellow-400 font-bold truncate px-1">
-                      LV.{getHeroLevel(hero.id)}
-                    </div>
-                  )}
                 </div>
                 {isSelected && (
                   <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />

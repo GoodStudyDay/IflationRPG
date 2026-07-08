@@ -1,13 +1,5 @@
-import type { Enemy } from '@/types';
-import { getBossImageUrl } from './enemyImageMap';
-
-export interface BossData extends Enemy {
-  bossId: number;
-  difficulty?: number;
-}
-
-export const BOSS_DATA: BossData[] = [
-  {
+export const BOSS_DATA: Boss[] = [
+{
     id: 'boss-0',
     name: '小浣熊',
     bossId: 0,
@@ -30,9 +22,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-1',
     name: '狮身人面像',
     bossId: 1,
@@ -55,9 +46,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-2',
     name: '飞龙骑士',
     bossId: 2,
@@ -80,9 +70,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-3',
     name: '恐怖之眼',
     bossId: 3,
@@ -105,9 +94,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-4',
     name: '火之守护者',
     bossId: 4,
@@ -130,9 +118,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-5',
     name: '雷之守护者',
     bossId: 5,
@@ -155,9 +142,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-6',
     name: '土之守护者',
     bossId: 6,
@@ -180,9 +166,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-7',
     name: '冰之守护者',
     bossId: 7,
@@ -205,9 +190,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-8',
     name: '恐怖之婴',
     bossId: 8,
@@ -230,9 +214,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-9',
     name: '邪恶之婴',
     bossId: 9,
@@ -255,9 +238,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-10',
     name: '绿眼蓝龙',
     bossId: 10,
@@ -280,9 +262,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-11',
     name: '红眼蓝龙',
     bossId: 11,
@@ -305,9 +286,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-12',
     name: '幽灵之婴',
     bossId: 12,
@@ -330,9 +310,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-13',
     name: '伪神',
     bossId: 13,
@@ -355,9 +334,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-14',
     name: '生命之石',
     bossId: 14,
@@ -380,9 +358,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-15',
     name: '攻击之石',
     bossId: 15,
@@ -405,9 +382,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-16',
     name: '防御之石',
     bossId: 16,
@@ -430,9 +406,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-17',
     name: '敏捷之石',
     bossId: 17,
@@ -455,9 +430,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-18',
     name: '幸运之石',
     bossId: 18,
@@ -480,9 +454,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-19',
     name: '彩虹之石',
     bossId: 19,
@@ -505,34 +478,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-19',
-    name: '魔王·硬',
-    bossId: 19,
-    hp: 8049999,
-    maxHp: 8049999,
-    attack: 169499,
-    defense: 0,
-    expReward: 7000000000,
-    goldReward: 9999,
-    icon: '😈',
-    level: 195,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-45', dropRate: 0.025 },
-      { equipmentId: 'accessory-64', dropRate: 0.022 },
-      null,
-      { equipmentId: 'accessory-51', dropRate: 0.017 },
-      { equipmentId: 'accessory-65', dropRate: 0.017 },
-      { equipmentId: 'accessory-69', dropRate: 0.017 },
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-20',
     name: '恶魔领主·硬',
     bossId: 20,
@@ -555,34 +502,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-20',
-    name: '恶魔领主·硬',
-    bossId: 20,
-    hp: 3000000,
-    maxHp: 3000000,
-    attack: 77000,
-    defense: 0,
-    expReward: 2000000000,
-    goldReward: 30000,
-    icon: '🔥',
-    level: 205,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-23', dropRate: 0.04 },
-      { equipmentId: 'accessory-52', dropRate: 0.03 },
-      null,
-      { equipmentId: 'accessory-52', dropRate: 0.065 },
-      { equipmentId: 'accessory-72', dropRate: 0.035 },
-      { equipmentId: 'accessory-73', dropRate: 0.027 },
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-21',
     name: '白虎',
     bossId: 21,
@@ -605,9 +526,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-22',
     name: '朱雀',
     bossId: 22,
@@ -630,9 +550,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-23',
     name: '青龙',
     bossId: 23,
@@ -655,9 +574,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-24',
     name: '玄武',
     bossId: 24,
@@ -680,9 +598,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-25',
     name: '白龙',
     bossId: 25,
@@ -705,34 +622,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-25',
-    name: '天空守护者·硬',
-    bossId: 25,
-    hp: 40000000,
-    maxHp: 40000000,
-    attack: 1032000,
-    defense: 0,
-    expReward: 0,
-    goldReward: 20000,
-    icon: '☁️',
-    level: 255,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-70', dropRate: 0.014 },
-      { equipmentId: 'accessory-70', dropRate: 0.026 },
-      null,
-      { equipmentId: 'accessory-71', dropRate: 0.01 },
-      { equipmentId: 'accessory-71', dropRate: 0.018 },
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-26',
     name: '米迦勒',
     bossId: 26,
@@ -755,9 +646,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-27',
     name: '加百列',
     bossId: 27,
@@ -780,9 +670,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-28',
     name: '末地守护者',
     bossId: 28,
@@ -805,9 +694,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-29',
     name: '巨剑恶魔',
     bossId: 29,
@@ -830,9 +718,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-30',
     name: '白袍恶魔',
     bossId: 30,
@@ -855,9 +742,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-31',
     name: '血之守护者',
     bossId: 31,
@@ -880,9 +766,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'armor-48', dropRate: 0.008 },
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-32',
     name: '?A?1',
     bossId: 32,
@@ -905,9 +790,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-33',
     name: '?A?2',
     bossId: 33,
@@ -930,9 +814,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-34',
     name: '?A?3',
     bossId: 34,
@@ -955,9 +838,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-35',
     name: '?A?4',
     bossId: 35,
@@ -980,209 +862,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-32',
-    name: '新界吸血',
-    bossId: 32,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '👑',
-    level: 325,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-33',
-    name: '新界吸血',
-    bossId: 33,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '💀',
-    level: 335,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-34',
-    name: '新界吸血',
-    bossId: 34,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '🦹',
-    level: 345,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-35',
-    name: '新界吸血',
-    bossId: 35,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '🐉',
-    level: 355,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-32',
-    name: '?B?1',
-    bossId: 32,
-    hp: 960000,
-    maxHp: 960000,
-    attack: 55555,
-    defense: 0,
-    expReward: 2400000,
-    goldReward: 30000,
-    icon: '👑',
-    level: 325,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-56', dropRate: 0.045 },
-      { equipmentId: 'accessory-57', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-33',
-    name: '?B?2',
-    bossId: 33,
-    hp: 1380000,
-    maxHp: 1380000,
-    attack: 44444,
-    defense: 0,
-    expReward: 2400000,
-    goldReward: 30000,
-    icon: '💀',
-    level: 335,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-58', dropRate: 0.038 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-34',
-    name: '?B?3',
-    bossId: 34,
-    hp: 1050000,
-    maxHp: 1050000,
-    attack: 44444,
-    defense: 0,
-    expReward: 2700000,
-    goldReward: 30000,
-    icon: '🦹',
-    level: 345,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-28', dropRate: 0.08 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-35',
-    name: '?B?4',
-    bossId: 35,
-    hp: 1200000,
-    maxHp: 1200000,
-    attack: 55555,
-    defense: 0,
-    expReward: 3000000,
-    goldReward: 30000,
-    icon: '🐉',
-    level: 355,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-29', dropRate: 0.1 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-40',
     name: '?B?1',
     bossId: 40,
@@ -1205,9 +886,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-41',
     name: '?B?2',
     bossId: 41,
@@ -1230,9 +910,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-42',
     name: '?B?3',
     bossId: 42,
@@ -1255,159 +934,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-40',
-    name: '深渊领主·硬',
-    bossId: 40,
-    hp: 4500000,
-    maxHp: 4500000,
-    attack: 100000,
-    defense: 0,
-    expReward: 1000000,
-    goldReward: 111111,
-    icon: '👿',
-    level: 405,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-40',
-    name: '深渊领主·硬',
-    bossId: 40,
-    hp: 1500000,
-    maxHp: 1500000,
-    attack: 45000,
-    defense: 0,
-    expReward: 1000000,
-    goldReward: 50000,
-    icon: '👿',
-    level: 405,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-41',
-    name: '终焉之王·硬',
-    bossId: 41,
-    hp: 12000000,
-    maxHp: 12000000,
-    attack: 175000,
-    defense: 0,
-    expReward: 10000000,
-    goldReward: 333333,
-    icon: '💀',
-    level: 415,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-41',
-    name: '终焉之王·硬',
-    bossId: 41,
-    hp: 5000000,
-    maxHp: 5000000,
-    attack: 80000,
-    defense: 0,
-    expReward: 10000000,
-    goldReward: 100000,
-    icon: '💀',
-    level: 415,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-42',
-    name: '暗影魔王·硬',
-    bossId: 42,
-    hp: 32000000,
-    maxHp: 32000000,
-    attack: 320000,
-    defense: 0,
-    expReward: 100000000,
-    goldReward: 777777,
-    icon: '🌑',
-    level: 425,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-42',
-    name: '暗影魔王·硬',
-    bossId: 42,
-    hp: 15000000,
-    maxHp: 15000000,
-    attack: 140000,
-    defense: 0,
-    expReward: 100000000,
-    goldReward: 200000,
-    icon: '🌑',
-    level: 425,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-48',
     name: '?C?1',
     bossId: 48,
@@ -1430,9 +958,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-49',
     name: '?C?2',
     bossId: 49,
@@ -1455,9 +982,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-50',
     name: '?C?3',
     bossId: 50,
@@ -1480,9 +1006,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-51',
     name: '?C?4',
     bossId: 51,
@@ -1505,9 +1030,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-52',
     name: '?C?5',
     bossId: 52,
@@ -1530,9 +1054,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-53',
     name: '?C?6',
     bossId: 53,
@@ -1555,159 +1078,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       null,
-    ],
-  },
-  {
-    id: 'boss-48',
-    name: '机械霸主·硬',
-    bossId: 48,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 56000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '⚙️',
-    level: 485,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-49',
-    name: '远古泰坦·硬',
-    bossId: 49,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 60000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '🏛️',
-    level: 495,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-50',
-    name: '深渊魔神·硬',
-    bossId: 50,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 60000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '🕳️',
-    level: 505,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-51',
-    name: '精英首领·硬',
-    bossId: 51,
-    hp: 3400000,
-    maxHp: 3400000,
-    attack: 72000,
-    defense: 0,
-    expReward: 54000000,
-    goldReward: 40000,
-    icon: '⭐',
-    level: 515,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-52',
-    name: '精锐统帅·硬',
-    bossId: 52,
-    hp: 11200000,
-    maxHp: 11200000,
-    attack: 84000,
-    defense: 0,
-    expReward: 96000000,
-    goldReward: 50000,
-    icon: '⚔️',
-    level: 525,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-53',
-    name: '高级统领·硬',
-    bossId: 53,
-    hp: 8000000,
-    maxHp: 8000000,
-    attack: 112000,
-    defense: 0,
-    expReward: 96000000,
-    goldReward: 50000,
-    icon: '🛡️',
-    level: 535,
-    difficulty: 0,
-    drops: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-54',
     name: '超级霸主',
     bossId: 54,
@@ -1722,42 +1094,16 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-54',
-    name: '弓女',
-    bossId: 54,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 22000000,
-    defense: 0,
-    expReward: 7000000000000,
-    goldReward: 177777,
-    icon: '💎',
-    level: 545,
-    difficulty: 0,
-    drops: [
+      { equipmentId: 'weapon-90', dropRate: 0.035 },
+      { equipmentId: 'accessory-8', dropRate: 0 },
       { equipmentId: 'weapon-97', dropRate: 0.02 },
       null,
       null,
-      null,
-      null,
-      null,
+      { equipmentId: 'weapon-97', dropRate: 0.02 },
       { equipmentId: 'weapon-103', dropRate: 0.008 },
-      { equipmentId: 'soul-26', dropRate: 0.008 },
-      null,
-    ],
-  },
-  {
+      { equipmentId: 'armor-26', dropRate: 0.008 },
+    ],},
+{
     id: 'boss-55',
     name: '火神',
     bossId: 55,
@@ -1780,9 +1126,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'armor-48', dropRate: 0.011 },
       { equipmentId: 'accessory-129', dropRate: 0.003 },
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-56',
     name: '冰女',
     bossId: 56,
@@ -1805,9 +1150,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'soul-22', dropRate: 0.009 },
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-57',
     name: '女巫',
     bossId: 57,
@@ -1830,9 +1174,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'soul-23', dropRate: 0.005 },
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-58',
     name: '雷虎',
     bossId: 58,
@@ -1855,9 +1198,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'weapon-104', dropRate: 0.008 },
       null,
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-59',
     name: '新界伪神',
     bossId: 59,
@@ -1880,9 +1222,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'soul-24', dropRate: 0.008 },
       { equipmentId: 'weapon-105', dropRate: 0.005 },
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-60',
     name: '神秘Boss60',
     bossId: 60,
@@ -1897,9 +1238,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-3', dropRate: 0.2 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-61',
     name: '神秘Boss61',
     bossId: 61,
@@ -1912,9 +1252,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 615,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-62',
     name: '神秘Boss62',
     bossId: 62,
@@ -1927,9 +1266,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 625,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-66',
     name: '神秘Boss66',
     bossId: 66,
@@ -1944,9 +1282,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-3', dropRate: 0.15 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-67',
     name: '神秘Boss67',
     bossId: 67,
@@ -1959,9 +1296,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 675,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-68',
     name: '神秘Boss68',
     bossId: 68,
@@ -1974,9 +1310,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 685,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-70',
     name: '新界朱雀',
     bossId: 70,
@@ -1999,9 +1334,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'soul-10', dropRate: 0.007 },
       { equipmentId: 'weapon-106', dropRate: 0.007 },
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-71',
     name: '新界白虎',
     bossId: 71,
@@ -2024,9 +1358,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'soul-11', dropRate: 0.007 },
       { equipmentId: 'armor-50', dropRate: 0.007 },
       null,
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-72',
     name: '新界朱雀',
     bossId: 72,
@@ -2047,9 +1380,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       { equipmentId: 'soul-12', dropRate: 0.007 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-73',
     name: '新界玄武',
     bossId: 73,
@@ -2071,9 +1403,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       { equipmentId: 'soul-13', dropRate: 0.008 },
       { equipmentId: 'armor-51', dropRate: 0.008 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-74',
     name: '极界青龙',
     bossId: 74,
@@ -2092,9 +1423,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       { equipmentId: 'weapon-61', dropRate: 0.021 },
       { equipmentId: 'accessory-112', dropRate: 0.032 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-75',
     name: '极界白虎',
     bossId: 75,
@@ -2113,9 +1443,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       { equipmentId: 'armor-25', dropRate: 0.01 },
       { equipmentId: 'soul-23', dropRate: 0 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-76',
     name: '深渊魔王',
     bossId: 76,
@@ -2133,9 +1462,8 @@ export const BOSS_DATA: BossData[] = [
       { equipmentId: 'accessory-94', dropRate: 0.015 },
       null,
       { equipmentId: 'accessory-120', dropRate: 0.012 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-77',
     name: '上古狮身',
     bossId: 77,
@@ -2156,9 +1484,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       { equipmentId: 'accessory-130', dropRate: 0.013 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-78',
     name: '地狱守卫A',
     bossId: 78,
@@ -2174,9 +1501,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'armor-44', dropRate: 0.018 },
       { equipmentId: 'soul-17', dropRate: 0.012 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-79',
     name: '地狱守卫B',
     bossId: 79,
@@ -2191,9 +1517,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-115', dropRate: 0.018 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-80',
     name: '地狱守卫C',
     bossId: 80,
@@ -2208,9 +1533,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'soul-4', dropRate: 0.018 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-81',
     name: '地狱守卫D',
     bossId: 81,
@@ -2225,9 +1549,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-116', dropRate: 0.017 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-82',
     name: '异界使者',
     bossId: 82,
@@ -2248,9 +1571,8 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       { equipmentId: 'armor-49', dropRate: 0.008 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-83',
     name: '天界使者',
     bossId: 83,
@@ -2263,9 +1585,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '👼',
     level: 835,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-84',
     name: '暗黑使者A',
     bossId: 84,
@@ -2278,9 +1599,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '😈',
     level: 845,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-85',
     name: '暗黑使者B',
     bossId: 85,
@@ -2293,9 +1613,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '👿',
     level: 855,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-86',
     name: '极界朱雀',
     bossId: 86,
@@ -2310,9 +1629,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'soul-3', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-87',
     name: '极界玄武',
     bossId: 87,
@@ -2327,9 +1645,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'soul-13', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-88',
     name: '混沌使者',
     bossId: 88,
@@ -2342,9 +1659,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '🌀',
     level: 885,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-89',
     name: '随机魔王',
     bossId: 89,
@@ -2357,9 +1673,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '🎲',
     level: 895,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-90',
     name: '异界魔灵',
     bossId: 90,
@@ -2372,9 +1687,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '👻',
     level: 905,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-91',
     name: '异界魔灵X',
     bossId: 91,
@@ -2389,9 +1703,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-125', dropRate: 0.019 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-92',
     name: '深渊五王B',
     bossId: 92,
@@ -2404,9 +1717,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '🖤',
     level: 925,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-93',
     name: '深渊五王C',
     bossId: 93,
@@ -2419,9 +1731,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '💚',
     level: 935,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-94',
     name: '深渊五王D',
     bossId: 94,
@@ -2434,9 +1745,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '💙',
     level: 945,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-95',
     name: '深渊五王E',
     bossId: 95,
@@ -2449,9 +1759,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '💜',
     level: 955,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-96',
     name: '深渊五王A',
     bossId: 96,
@@ -2464,9 +1773,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '❤️',
     level: 965,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-97',
     name: '深渊魔王X',
     bossId: 97,
@@ -2481,9 +1789,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-1', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-98',
     name: '远古恶魔B',
     bossId: 98,
@@ -2499,9 +1806,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'weapon-101', dropRate: 0.015 },
       { equipmentId: 'soul-0', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-99',
     name: '远古恶魔A',
     bossId: 99,
@@ -2517,9 +1823,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'armor-46', dropRate: 0.015 },
       { equipmentId: 'accessory-102', dropRate: 0.012 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-100',
     name: '虚空魔王B',
     bossId: 100,
@@ -2534,9 +1839,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-108', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-101',
     name: '虚空魔王A',
     bossId: 101,
@@ -2552,9 +1856,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'accessory-123', dropRate: 0.016 },
       { equipmentId: 'accessory-101', dropRate: 0.016 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-102',
     name: '虚空魔王C',
     bossId: 102,
@@ -2569,9 +1872,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-124', dropRate: 0.016 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-103',
     name: '神秘Boss103',
     bossId: 103,
@@ -2584,9 +1886,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 1035,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-104',
     name: '神秘Boss104',
     bossId: 104,
@@ -2599,9 +1900,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 1045,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-105',
     name: '神秘Boss105',
     bossId: 105,
@@ -2614,9 +1914,8 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 1055,
     difficulty: 0,
-    drops: [],
-  },
-  {
+    drops: [],},
+{
     id: 'boss-106',
     name: '混沌魔王',
     bossId: 106,
@@ -2631,9 +1930,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'accessory-114', dropRate: 0.015 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-107',
     name: '毁灭魔王B',
     bossId: 107,
@@ -2649,9 +1947,8 @@ export const BOSS_DATA: BossData[] = [
     drops: [
       { equipmentId: 'soul-24', dropRate: 0.015 },
       { equipmentId: 'accessory-103', dropRate: 0.012 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-108',
     name: '毁灭魔王A',
     bossId: 108,
@@ -2666,9 +1963,8 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'armor-47', dropRate: 0.012 },
-    ],
-  },
-  {
+    ],},
+{
     id: 'boss-109',
     name: '毁灭魔王C',
     bossId: 109,
@@ -2683,30 +1979,5 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [
       { equipmentId: 'weapon-102', dropRate: 0.012 },
-    ],
-  },
+    ],},
 ];
-
-// 将所有BOSS的icon替换为实际图片URL
-BOSS_DATA.forEach(boss => {
-  const url = getBossImageUrl(boss.bossId, boss.difficulty || 0);
-  if (url) {
-    boss.icon = url;
-  }
-});
-
-export const getBossById = (bossId: number, hardmode: number = 0): BossData | undefined => {
-  const bossWithDifficulty = BOSS_DATA.find(
-    boss => boss.bossId === bossId && boss.difficulty === hardmode
-  );
-  const boss = bossWithDifficulty || BOSS_DATA.find(boss => boss.bossId === bossId);
-  if (boss) {
-    const imageUrl = getBossImageUrl(bossId, hardmode);
-    return {
-      ...boss,
-      imageUrl,
-      icon: imageUrl || boss.icon,
-    };
-  }
-  return undefined;
-};
