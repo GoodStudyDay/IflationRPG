@@ -87,11 +87,6 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
     return getCurrentKyaraLv(kyarakutaKozinExp, heroId);
   };
 
-  const atkHeroes = heroData.filter(h => getHeroCategory(h) === 'atk');
-  const agiHeroes = heroData.filter(h => getHeroCategory(h) === 'agi');
-  const hpHeroes = heroData.filter(h => getHeroCategory(h) === 'hp');
-  const lucHeroes = heroData.filter(h => getHeroCategory(h) === 'luc');
-
   const renderHeroButton = (hero: typeof heroData[0]) => {
     const isSelected = player.heroId === hero.id;
     const displaySize = 36;
@@ -206,7 +201,7 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
             <p className="text-gray-500 text-xs mt-1">{t('困难模式: 最高等级超过100000解锁')}</p>
           )}
           {!isDifficultyUnlocked(2) && (
-            <p className="text-gray-500 text-xs">{t('地狱模式: 最高等级超过10000000解锁')}</p>
+            <p className="text-gray-500 text-xs mt-1">{t('地狱模式: 最高等级超过10000000解锁')}</p>
           )}
         </div>
 
@@ -225,23 +220,19 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
         </div>
 
         <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {atkHeroes.slice(0, 4).map(renderHeroButton)}
+          {heroData.filter(h => h.id >= 0 && h.id <= 3).map(renderHeroButton)}
         </div>
 
         <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {atkHeroes.slice(4, 8).map(renderHeroButton)}
+          {heroData.filter(h => h.id >= 4 && h.id <= 7).map(renderHeroButton)}
         </div>
 
         <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {agiHeroes.map(renderHeroButton)}
-        </div>
-
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {hpHeroes.map(renderHeroButton)}
+          {heroData.filter(h => h.id >= 8 && h.id <= 11).map(renderHeroButton)}
         </div>
 
         <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-4">
-          {lucHeroes.map(renderHeroButton)}
+          {heroData.filter(h => h.id >= 12 && h.id <= 15).map(renderHeroButton)}
         </div>
 
         <div className="flex justify-center mb-4">
