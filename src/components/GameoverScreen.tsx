@@ -1,16 +1,26 @@
 import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { loadSaveData } from '@/utils/saveDataStorage';
+import { getkyaraLv, getkyaraLvMaxExp, SEIGEN_KYARA_LV } from '@/utils/kyaraLevel';
 import { EquipmentCollection } from './EquipmentCollection';
 import { Leaderboard } from './Leaderboard';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const GameoverScreen = () => {
-  const { player, goToTitle } = useGameStore();
+  const { player, kyarakutaKozinExp, goToTitle } = useGameStore();
   const { t } = useTranslation();
   const [showCollection, setShowCollection] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const saveData = loadSaveData();
+
+  const heroIndex = player.heroId;
+  const currentExp = kyarakutaKozinExp[heroIndex] || 0;
+  const gainedExp = player.level;
+  const totalExp = currentExp + gainedExp;
+  const oldCharLv = getkyaraLv(currentExp);
+  const newCharLv = getkyaraLv(totalExp);
+  const leveledUp = newCharLv > oldCharLv;
+  const maxLv = SEIGEN_KYARA_LV;
 
   return (
     <div className="min-h-screen bg-black/80 flex flex-col items-center justify-center relative">
@@ -34,9 +44,23 @@ export const GameoverScreen = () => {
           <div className="bg-[#2d1b4e]/80 border border-[#4a2c7a] rounded-lg p-3 text-left">
             <div className="text-gray-400 text-xs sm:text-sm mb-1">{t('角色能力信息')}</div>
             <div className="text-white text-sm">
-              <div>{t('获得')}{player.exp.toLocaleString()}EXP!</div>
-              <div>{t('合计为')}{player.exp.toLocaleString()}EXP / {player.expToNextLevel.toLocaleString()}EXP</div>
-              <div>{t('现在的角色能力为')}{player.level}LV</div>
+              <div>{t('获得')} {gainedExp.toLocaleString()} {t('经验值，合计为')} {totalExp.toLocaleString()}EXP</div>
+              {oldCharLv >= maxLv ? (
+                <div>
+                  <div>{t('当前角色等级已达到')}{maxLv}LV{t('，无法再提升')}</div>
+                </div>
+              ) : (
+                <div>
+                  {leveledUp ? (
+                    <div>{t('角色能力从')}{oldCharLv}LV{t('升级到')}{newCharLv}LV</div>
+                  ) : (
+                    <div>
+                      <div>{t('现在的角色能力为')}{oldCharLv}LV</div>
+                      <div>{t('距离下一级还需要')} {getkyaraLvMaxExp(newCharLv) - totalExp >= 0 ? (getkyaraLvMaxExp(newCharLv) - totalExp).toLocaleString() : '0'}EXP</div>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="text-gray-500 text-xs mt-1">{t('角色能力越高，属性值中的奖金倍增')}</div>
             </div>
           </div>
