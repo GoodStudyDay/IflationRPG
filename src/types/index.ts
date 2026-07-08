@@ -48,6 +48,8 @@ export interface EquipSet {
   weaponId: string | null;
   armorId: string | null;
   accessoryIds: (string | null)[];
+  weaponSoulId: string | null;
+  armorSoulId: string | null;
   createdAt: number;
   unlocked: boolean;
   slotIndex: number;

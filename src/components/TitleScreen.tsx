@@ -192,7 +192,7 @@ export const TitleScreen = () => {
 
         <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
           <a 
-            href="https://github.com/chencheng860517/IflationRPG" 
+            href="https://github.com/GoodStudyDay/IflationRPG/actions" 
             target="_blank" 
             rel="noopener noreferrer"
             className="hover:opacity-60 transition-opacity"

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.51 (2026-07-08)
+
+### 修复
+- 修复 `resetGame()` 重新开始游戏时魂（Soul）丢失的问题：魂现在与武器/防具/饰品一样在 resetGame 中被保留
+- 修复切换背包后魂错误保留的问题：`EquipSet` 新增 `weaponSoulId`/`armorSoulId` 字段，每个背包独立保存魂状态
+- 修复切换背包后无法切回的问题：默认背包初始化补充 `weaponSoulId`/`armorSoulId` 字段，`accessoryIds` 增加空数组防御
+
+### 回退
+- `TitleScreen.tsx` 恢复原有逻辑：死亡后不可继续游戏（`canContinue = battlePoints > 0`）
+
 ## 0.0.50 (2026-07-08)
 
 ### 修复
