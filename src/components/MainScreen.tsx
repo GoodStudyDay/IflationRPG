@@ -26,7 +26,7 @@ export const MainScreen = () => {
     if (!bonus.currentBonus) return null;
     const info = BONUS_LIST[bonus.currentBonus.bonusType];
     if (!info) return null;
-    return `${info.name}(${bonus.currentBonus.remainingCount})`;
+    return `${t(info.name)}(${bonus.currentBonus.remainingCount})`;
   };
   
   // 渲染icon：如果是URL则显示图片，否则显示文字emoji
@@ -288,7 +288,7 @@ export const MainScreen = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         {renderIcon(boss.icon)}
-                        <span className="text-white font-bold">{boss.name}</span>
+                        <span className="text-white font-bold">{t(boss.name)}</span>
                         <span className="text-yellow-400 text-xs ml-2">LV{boss.level}</span>
                       </div>
                       <div className="text-xs">

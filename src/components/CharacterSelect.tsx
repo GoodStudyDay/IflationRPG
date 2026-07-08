@@ -22,6 +22,27 @@ const DIFFICULTY_CONFIG = [
 const COLS = 3;
 const ROWS = 4;
 
+const STAT_CATEGORIES = [
+  { id: 'atk', name: 'ATK', color: 'bg-orange-700', borderColor: 'border-orange-500', textColor: 'text-orange-100' },
+  { id: 'agi', name: 'AGI', color: 'bg-blue-700', borderColor: 'border-blue-500', textColor: 'text-blue-100' },
+  { id: 'hp', name: 'HP', color: 'bg-green-700', borderColor: 'border-green-500', textColor: 'text-green-100' },
+  { id: 'luc', name: 'LUC', color: 'bg-yellow-700', borderColor: 'border-yellow-500', textColor: 'text-yellow-100' },
+  { id: 'def', name: 'DEF', color: 'bg-gray-700', borderColor: 'border-gray-500', textColor: 'text-gray-100' },
+];
+
+const getHeroCategory = (hero: typeof heroData[0]) => {
+  if (hero.atkBonus === 2) return 'atk';
+  if (hero.agiBonus === 2) return 'agi';
+  if (hero.hpBonus === 2) return 'hp';
+  if (hero.lucBonus === 2) return 'luc';
+  if (hero.defBonus === 2) return 'def';
+  return 'atk';
+};
+
+const getHeroAbilityLevel = (hero: typeof heroData[0]) => {
+  return hero.atkBonus + hero.hpBonus + hero.defBonus + hero.agiBonus + hero.lucBonus;
+};
+
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
   const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp } = useGameStore();
   const { t } = useTranslation();
@@ -59,18 +80,12 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
     return false;
   };
 
-  const getStatDescription = (hero: typeof heroData[0]) => {
-    const stats = [];
-    if (hero.hpBonus > 0) stats.push(`HP+${hero.hpBonus}`);
-    if (hero.atkBonus > 0) stats.push(`ATK+${hero.atkBonus}`);
-    if (hero.defBonus > 0) stats.push(`DEF+${hero.defBonus}`);
-    if (hero.agiBonus > 0) stats.push(`AGI+${hero.agiBonus}`);
-    if (hero.lucBonus > 0) stats.push(`LUC+${hero.lucBonus}`);
-    return stats.join(' ');
-  };
-
   const getHeroLevel = (heroId: number): number => {
     return getCurrentKyaraLv(kyarakutaKozinExp, heroId);
+  };
+
+  const getCategoryHeroes = (categoryId: string) => {
+    return heroData.filter(hero => getHeroCategory(hero) === categoryId);
   };
 
   return (
@@ -80,32 +95,22 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-600 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 w-full px-4 max-w-lg">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
+      <div className="relative z-10 w-full px-4 max-w-2xl">
+        <div className="text-center mb-4">
+          <h1 className="text-3xl sm:text-4xl font-black text-white mb-1">
             {t('角色选择')}
           </h1>
-          <p className="text-gray-400 text-sm">{t('选择你的角色开始冒险')}</p>
+          <p className="text-gray-400 text-sm">{t('请选择角色')}</p>
         </div>
 
-        {kyarakutalv > 0 && (
-          <div className="text-center mb-4">
-            <p className="text-yellow-400 text-sm">
-              {t('基础能力')}: {kyarakutalv} LV
-            </p>
-            <p className="text-gray-500 text-xs mt-1">
-              ※{t('基础能力LV说明')}
-            </p>
-          </div>
-        )}
-
-        {kyarakutalv === 0 && (
-          <div className="text-center mb-4">
-            <p className="text-gray-500 text-xs">
-              ※{t('角色可更换说明')}
-            </p>
-          </div>
-        )}
+        <div className="text-center mb-4">
+          <p className="text-yellow-400 text-sm">
+            {t('天赋')}: {kyarakutalv}LV
+          </p>
+          <p className="text-gray-500 text-xs mt-1">
+            {t('天赋和角色能力的合计越高，数据值的倍率额外奖励会增加更多')}
+          </p>
+        </div>
 
         <div className="text-center mb-4">
           <p className="text-gray-400 text-xs mb-2">{t('选择难度')}</p>
@@ -147,60 +152,96 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
           )}
         </div>
 
-        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
-          {heroData.map((hero) => {
-            const isSelected = player.heroId === hero.id;
-            const displaySize = 40;
-            const bgSizeX = COLS * displaySize;
-            const bgSizeY = ROWS * displaySize;
-            const frame = frames[hero.id] || 0;
-            const bgPosX = -frame * displaySize;
-            const bgPosY = 0;
-            
-            const imagePath = BASE_URL + getHeroSpritePath(hero.id, 'idle').replace(/^\//, '');
+        <div className="flex justify-center items-center mb-2">
+          <div className="text-gray-400 text-sm font-bold">AGI</div>
+          <div className="flex-1 h-px bg-gray-600 mx-2" />
+          <div className="text-gray-400 text-sm font-bold">HP</div>
+          <div className="flex-1 h-px bg-gray-600 mx-2" />
+          <div className="text-gray-400 text-sm font-bold">LUC</div>
+        </div>
+
+        <div className="grid grid-cols-5 gap-1 sm:gap-2 mb-4">
+          {STAT_CATEGORIES.map((category) => {
+            const heroes = getCategoryHeroes(category.id);
             
             return (
-              <button
-                key={hero.id}
-                onClick={() => handleHeroSelect(hero.id)}
-                className={`relative aspect-square rounded-lg border-2 transition-all duration-200 ${
-                  isSelected
-                    ? 'border-yellow-400 bg-yellow-400/20 scale-105'
-                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-500 hover:bg-gray-700/50'
-                }`}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    style={{
-                      width: displaySize,
-                      height: displaySize,
-                      backgroundImage: `url(${imagePath})`,
-                      backgroundPosition: `${bgPosX}px ${bgPosY}px`,
-                      backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
-                      backgroundRepeat: 'no-repeat',
-                      imageRendering: 'pixelated',
-                    }}
-                  />
-                  {getHeroLevel(hero.id) > 0 && (
-                    <div className="absolute top-1 left-1 bg-black/70 text-yellow-400 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded">
-                      LV.{getHeroLevel(hero.id)}
-                    </div>
-                  )}
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-black/60 rounded-b-lg py-1">
-                  <div className="text-center text-[8px] sm:text-[10px] text-white font-bold truncate px-1">
-                    {hero.name}
+              <div key={category.id} className="flex flex-col">
+                {category.id === 'atk' && (
+                  <div className="text-center mb-1">
+                    <span className={`font-bold text-sm px-2 py-0.5 rounded ${category.color} ${category.textColor}`}>
+                      {category.name}
+                    </span>
                   </div>
-                  <div className="text-center text-[6px] sm:text-[8px] text-gray-400 truncate px-1">
-                    {getStatDescription(hero)}
-                  </div>
-                </div>
-                {isSelected && (
-                  <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
                 )}
-              </button>
+                <div className="space-y-1">
+                  {heroes.map((hero) => {
+                    const isSelected = player.heroId === hero.id;
+                    const displaySize = 36;
+                    const bgSizeX = COLS * displaySize;
+                    const bgSizeY = ROWS * displaySize;
+                    const frame = frames[hero.id] || 0;
+                    const bgPosX = -frame * displaySize;
+                    const bgPosY = 0;
+                    
+                    const imagePath = BASE_URL + getHeroSpritePath(hero.id, 'idle').replace(/^\//, '');
+                    const abilityLv = getHeroAbilityLevel(hero);
+                    const heroLv = getHeroLevel(hero.id);
+                    
+                    return (
+                      <button
+                        key={hero.id}
+                        onClick={() => handleHeroSelect(hero.id)}
+                        className={`relative rounded-lg border-2 transition-all duration-200 ${
+                          isSelected
+                            ? 'border-yellow-400 bg-yellow-400/20 scale-105'
+                            : `border-gray-700 ${category.color}/30 hover:border-gray-500 hover:${category.color}/50`
+                        }`}
+                      >
+                        <div className="p-1">
+                          <div
+                            style={{
+                              width: displaySize,
+                              height: displaySize,
+                              backgroundImage: `url(${imagePath})`,
+                              backgroundPosition: `${bgPosX}px ${bgPosY}px`,
+                              backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
+                              backgroundRepeat: 'no-repeat',
+                              imageRendering: 'pixelated',
+                              margin: '0 auto',
+                            }}
+                          />
+                        </div>
+                        {heroLv > 0 && (
+                          <div className="absolute top-1 left-1 bg-black/70 text-yellow-400 text-[8px] font-bold px-1.5 py-0.5 rounded">
+                            LV.{heroLv}
+                          </div>
+                        )}
+                        <div className="text-center text-[8px] font-bold text-yellow-400 py-0.5">
+                          +{t('角色能力')}:{abilityLv}LV
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {category.id === 'def' && (
+                  <div className="text-center mt-1">
+                    <span className={`font-bold text-sm px-2 py-0.5 rounded ${category.color} ${category.textColor}`}>
+                      {category.name}
+                    </span>
+                  </div>
+                )}
+              </div>
             );
           })}
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <span className={`font-bold text-sm px-2 py-0.5 rounded ${STAT_CATEGORIES[4].color} ${STAT_CATEGORIES[4].textColor}`}>
+            DEF
+          </span>
         </div>
 
         <button

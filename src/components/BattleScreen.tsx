@@ -153,7 +153,7 @@ export const BattleScreen = () => {
             </div>
             
           </div>
-          <div className="text-red-400 font-bold text-xs sm:text-sm md:text-base mt-1">{battle.enemy.name}</div>
+          <div className="text-red-400 font-bold text-xs sm:text-sm md:text-base mt-1">{t(battle.enemy.name)}</div>
           
           {battle.lastAttacker === 'player' && renderDamageDisplay()}
           
