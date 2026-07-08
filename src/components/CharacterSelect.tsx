@@ -22,30 +22,6 @@ const DIFFICULTY_CONFIG = [
 const COLS = 3;
 const ROWS = 4;
 
-const getHeroCategory = (hero: typeof heroData[0]) => {
-  if (hero.atkBonus === 2) return 'atk';
-  if (hero.agiBonus === 2) return 'agi';
-  if (hero.hpBonus === 2) return 'hp';
-  if (hero.lucBonus === 2) return 'luc';
-  if (hero.defBonus === 2) return 'def';
-  return 'atk';
-};
-
-const getHeroAbilityLevel = (hero: typeof heroData[0]) => {
-  return hero.atkBonus + hero.hpBonus + hero.defBonus + hero.agiBonus + hero.lucBonus;
-};
-
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'atk': return { bg: 'bg-orange-700', border: 'border-orange-500', text: 'text-orange-100', light: 'bg-orange-900/30' };
-    case 'agi': return { bg: 'bg-blue-700', border: 'border-blue-500', text: 'text-blue-100', light: 'bg-blue-900/30' };
-    case 'hp': return { bg: 'bg-green-700', border: 'border-green-500', text: 'text-green-100', light: 'bg-green-900/30' };
-    case 'luc': return { bg: 'bg-yellow-700', border: 'border-yellow-500', text: 'text-yellow-100', light: 'bg-yellow-900/30' };
-    case 'def': return { bg: 'bg-gray-700', border: 'border-gray-500', text: 'text-gray-100', light: 'bg-gray-900/30' };
-    default: return { bg: 'bg-gray-700', border: 'border-gray-500', text: 'text-gray-100', light: 'bg-gray-900/30' };
-  }
-};
-
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
   const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp } = useGameStore();
   const { t } = useTranslation();
@@ -83,62 +59,18 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
     return false;
   };
 
-  const getHeroLevel = (heroId: number): number => {
-    return getCurrentKyaraLv(kyarakutaKozinExp, heroId);
+  const getStatDescription = (hero: typeof heroData[0]) => {
+    const stats = [];
+    if (hero.hpBonus > 0) stats.push(`HP+${hero.hpBonus}`);
+    if (hero.atkBonus > 0) stats.push(`ATK+${hero.atkBonus}`);
+    if (hero.defBonus > 0) stats.push(`DEF+${hero.defBonus}`);
+    if (hero.agiBonus > 0) stats.push(`AGI+${hero.agiBonus}`);
+    if (hero.lucBonus > 0) stats.push(`LUC+${hero.lucBonus}`);
+    return stats.join(' ');
   };
 
-  const renderHeroButton = (hero: typeof heroData[0]) => {
-    const isSelected = player.heroId === hero.id;
-    const displaySize = 36;
-    const bgSizeX = COLS * displaySize;
-    const bgSizeY = ROWS * displaySize;
-    const frame = frames[hero.id] || 0;
-    const bgPosX = -frame * displaySize;
-    const bgPosY = 0;
-    
-    const imagePath = BASE_URL + getHeroSpritePath(hero.id, 'idle').replace(/^\//, '');
-    const abilityLv = getHeroAbilityLevel(hero);
-    const heroLv = getHeroLevel(hero.id);
-    const category = getHeroCategory(hero);
-    const color = getCategoryColor(category);
-    
-    return (
-      <button
-        key={hero.id}
-        onClick={() => handleHeroSelect(hero.id)}
-        className={`relative rounded-lg border-2 transition-all duration-200 ${
-          isSelected
-            ? 'border-yellow-400 bg-yellow-400/20 scale-105'
-            : `${color.border} ${color.light} hover:${color.bg}/50`
-        }`}
-      >
-        <div className="p-1">
-          <div
-            style={{
-              width: displaySize,
-              height: displaySize,
-              backgroundImage: `url(${imagePath})`,
-              backgroundPosition: `${bgPosX}px ${bgPosY}px`,
-              backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
-              backgroundRepeat: 'no-repeat',
-              imageRendering: 'pixelated',
-              margin: '0 auto',
-            }}
-          />
-        </div>
-        {heroLv > 0 && (
-          <div className="absolute top-1 left-1 bg-black/70 text-yellow-400 text-[8px] font-bold px-1.5 py-0.5 rounded">
-            LV.{heroLv}
-          </div>
-        )}
-        <div className="text-center text-[8px] font-bold text-yellow-400 py-0.5">
-          +{t('角色能力')}:{abilityLv}LV
-        </div>
-        {isSelected && (
-          <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
-        )}
-      </button>
-    );
+  const getHeroLevel = (heroId: number): number => {
+    return getCurrentKyaraLv(kyarakutaKozinExp, heroId);
   };
 
   return (
@@ -148,22 +80,32 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-600 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 w-full px-4 max-w-2xl">
-        <div className="text-center mb-4">
-          <h1 className="text-3xl sm:text-4xl font-black text-white mb-1">
+      <div className="relative z-10 w-full px-4 max-w-lg">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
             {t('角色选择')}
           </h1>
-          <p className="text-gray-400 text-sm">{t('请选择角色')}</p>
+          <p className="text-gray-400 text-sm">{t('选择你的角色开始冒险')}</p>
         </div>
 
-        <div className="text-center mb-4">
-          <p className="text-yellow-400 text-sm">
-            {t('天赋')}: {kyarakutalv}LV
-          </p>
-          <p className="text-gray-500 text-xs mt-1">
-            {t('天赋和角色能力的合计越高，数据值的倍率额外奖励会增加更多')}
-          </p>
-        </div>
+        {kyarakutalv > 0 && (
+          <div className="text-center mb-4">
+            <p className="text-yellow-400 text-sm">
+              {t('基础能力')}: {kyarakutalv} LV
+            </p>
+            <p className="text-gray-500 text-xs mt-1">
+              ※{t('基础能力LV说明')}
+            </p>
+          </div>
+        )}
+
+        {kyarakutalv === 0 && (
+          <div className="text-center mb-4">
+            <p className="text-gray-500 text-xs">
+              ※{t('角色可更换说明')}
+            </p>
+          </div>
+        )}
 
         <div className="text-center mb-4">
           <p className="text-gray-400 text-xs mb-2">{t('选择难度')}</p>
@@ -201,44 +143,65 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
             <p className="text-gray-500 text-xs mt-1">{t('困难模式: 最高等级超过100000解锁')}</p>
           )}
           {!isDifficultyUnlocked(2) && (
-            <p className="text-gray-500 text-xs mt-1">{t('地狱模式: 最高等级超过10000000解锁')}</p>
+            <p className="text-gray-500 text-xs">{t('地狱模式: 最高等级超过10000000解锁')}</p>
           )}
         </div>
 
-        <div className="flex justify-center items-center mb-2">
-          <div className="text-gray-400 text-sm font-bold">AGI</div>
-          <div className="flex-1 h-px bg-gray-600 mx-2" />
-          <div className="text-gray-400 text-sm font-bold">HP</div>
-          <div className="flex-1 h-px bg-gray-600 mx-2" />
-          <div className="text-gray-400 text-sm font-bold">LUC</div>
-        </div>
-
-        <div className="text-center mb-1">
-          <span className={`font-bold text-sm px-2 py-0.5 rounded ${getCategoryColor('atk').bg} ${getCategoryColor('atk').text}`}>
-            ATK
-          </span>
-        </div>
-
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {heroData.filter(h => h.id >= 0 && h.id <= 3).map(renderHeroButton)}
-        </div>
-
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {heroData.filter(h => h.id >= 4 && h.id <= 7).map(renderHeroButton)}
-        </div>
-
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
-          {heroData.filter(h => h.id >= 8 && h.id <= 11).map(renderHeroButton)}
-        </div>
-
-        <div className="grid grid-cols-4 gap-1 sm:gap-2 mb-4">
-          {heroData.filter(h => h.id >= 12 && h.id <= 15).map(renderHeroButton)}
-        </div>
-
-        <div className="flex justify-center mb-4">
-          <span className={`font-bold text-sm px-2 py-0.5 rounded ${getCategoryColor('def').bg} ${getCategoryColor('def').text}`}>
-            DEF
-          </span>
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
+          {heroData.map((hero) => {
+            const isSelected = player.heroId === hero.id;
+            const heroLv = getHeroLevel(hero.id);
+            const displaySize = 40;
+            const bgSizeX = COLS * displaySize;
+            const bgSizeY = ROWS * displaySize;
+            const frame = frames[hero.id] || 0;
+            const bgPosX = -frame * displaySize;
+            const bgPosY = 0;
+            
+            const imagePath = BASE_URL + getHeroSpritePath(hero.id, 'idle').replace(/^\//, '');
+            
+            return (
+              <button
+                key={hero.id}
+                onClick={() => handleHeroSelect(hero.id)}
+                className={`relative aspect-square rounded-lg border-2 transition-all duration-200 ${
+                  isSelected
+                    ? 'border-yellow-400 bg-yellow-400/20 scale-105'
+                    : 'border-gray-700 bg-gray-800/50 hover:border-gray-500 hover:bg-gray-700/50'
+                }`}
+              >
+                {heroLv > 0 && (
+                  <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-black/70 text-yellow-400 text-[8px] font-bold px-1.5 py-0.5 rounded z-10">
+                    LV.{heroLv}
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    style={{
+                      width: displaySize,
+                      height: displaySize,
+                      backgroundImage: `url(${imagePath})`,
+                      backgroundPosition: `${bgPosX}px ${bgPosY}px`,
+                      backgroundSize: `${bgSizeX}px ${bgSizeY}px`,
+                      backgroundRepeat: 'no-repeat',
+                      imageRendering: 'pixelated',
+                    }}
+                  />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 rounded-b-lg py-1">
+                  <div className="text-center text-[8px] sm:text-[10px] text-white font-bold truncate px-1">
+                    {hero.name}
+                  </div>
+                  <div className="text-center text-[6px] sm:text-[8px] text-gray-400 truncate px-1">
+                    {getStatDescription(hero)}
+                  </div>
+                </div>
+                {isSelected && (
+                  <div className="absolute top-1 right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         <button
