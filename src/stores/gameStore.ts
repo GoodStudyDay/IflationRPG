@@ -1613,7 +1613,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       selectHero: (heroId) => {
-        const { player, playerid } = get();
+        const { player } = get();
         const hero = getHeroById(heroId);
         if (!hero) return;
         
@@ -1626,7 +1626,7 @@ export const useGameStore = create<GameStore>()(
         const baseLuc = 1000 + levelBonus.luck;
         
         const { kyarakutalv, kyarakutaKozinExp } = get();
-        const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, playerid);
+        const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
         const kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75);
         
         const hpBonus = hero.hpBonus * kyaraLv * 0.06;
@@ -2212,7 +2212,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       endBattle: (victory) => {
-        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, kyarakutalv, kyarakutaKozinExp, playerid, battle: { comboCount, goldMultiplier } } = get();
+        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, kyarakutalv, kyarakutaKozinExp, battle: { comboCount, goldMultiplier } } = get();
         
         if (battle.battleResult) {
           return;
@@ -2290,8 +2290,8 @@ export const useGameStore = create<GameStore>()(
           let newKyarakutalv = kyarakutalv;
           
           if (newKyarakutalv > 0) {
-            newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, playerid, player.level);
-            const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, playerid);
+            newKyarakutaKozinExp = addExpKyarakutaKozinExp(kyarakutaKozinExp, player.heroId, player.level);
+            const currentKyaraLv = getCurrentKyaraLv(newKyarakutaKozinExp, player.heroId);
             if (currentKyaraLv > newKyarakutalv) {
               newKyarakutalv = currentKyaraLv;
             }
