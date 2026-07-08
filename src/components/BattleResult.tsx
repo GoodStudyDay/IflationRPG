@@ -2,11 +2,13 @@ import { useGameStore } from '@/stores/gameStore';
 import { SpriteIcon } from './SpriteIcon';
 import { CharacterSprite } from './CharacterSprite';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
+import { useEquipmentDescription } from '@/hooks/useEquipmentDescription';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const BattleResult = () => {
   const { battle, battlePoints, setCurrentScene, player, clearBattleResult, killPlayer } = useGameStore();
   const { getEquipName } = useEquipmentName();
+  const { getEquipDescription } = useEquipmentDescription();
   const { t } = useTranslation();
   
   const { battleResult } = battle;
@@ -104,7 +106,7 @@ export const BattleResult = () => {
                       {getEquipName(battleResult.dropItem.name)}
                     </div>
                     <div className="text-xs text-gray-400">
-                      {battleResult.dropItem.description}
+                      {battleResult.dropItem.setumei ? getEquipDescription(battleResult.dropItem.setumei, battleResult.dropItem.t1, battleResult.dropItem.t2) : ''}
                     </div>
                   </div>
                 </div>

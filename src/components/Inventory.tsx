@@ -480,8 +480,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     {!isOwned && (
                       <div>
                         <div className="text-gray-400 text-sm mt-1">{t('未拥有')}</div>
-                        {accessory.description && (
-                          <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
+                        {accessory.setumei && (
+                          <div className="text-purple-300 text-sm mt-1">{getEquipDescription(accessory.setumei, accessory.t1, accessory.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {accessory.hpBonus > 0 && (
@@ -504,8 +504,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                     {isOwned && (
                       <>
-                        {accessory.description && (
-                          <div className="text-purple-300 text-sm mt-1">{accessory.description}</div>
+                        {accessory.setumei && (
+                          <div className="text-purple-300 text-sm mt-1">{getEquipDescription(accessory.setumei, accessory.t1, accessory.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {accessory.hpBonus > 0 && (
@@ -612,8 +612,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
-                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t1}</span>
+                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t2}%</span>
                         </div>
                       </div>
                     )}
@@ -623,8 +623,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">属性值 +{soul.t1}</span>
-                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">百分比 +{soul.t2}%</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t1}</span>
+                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t2}%</span>
                         </div>
                         <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {soul.quantity}</div>
                       </>
@@ -1208,7 +1208,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                          detailEquipment.type === 'material' ? detailEquipment.bit32 : undefined} />
               </div>
               <div>
-                <div className="text-white font-bold text-lg">{detailEquipment.name}</div>
+                <div className="text-white font-bold text-lg">{getEquipName(detailEquipment.name)}</div>
                 <div className="text-gray-400 text-xs">{detailEquipment.type === 'weapon' ? t('武器') : detailEquipment.type === 'armor' ? t('防具') : detailEquipment.type === 'accessory' ? t('饰品') : detailEquipment.type === 'soul' ? t('魂') : t('材料')}</div>
               </div>
             </div>
@@ -1239,8 +1239,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               )}
               {detailEquipment.type === 'soul' && (
                 <>
-                  <div className="flex justify-between text-sm"><span className="text-gray-400">属性值</span><span className="text-yellow-300">+{detailEquipment.t1}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-400">百分比</span><span className="text-purple-300">+{detailEquipment.t2}%</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('属性值')}</span><span className="text-yellow-300">+{detailEquipment.t1}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('百分比')}</span><span className="text-purple-300">+{detailEquipment.t2}%</span></div>
                 </>
               )}
             </div>

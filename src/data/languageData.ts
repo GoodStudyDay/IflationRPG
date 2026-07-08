@@ -359,6 +359,8 @@ export const translations: Record<string, TranslationKey> = {
   '无法购买': { ja: '購入不可', en: 'Cannot Buy', 'zh-Hant': '無法購買', 'zh-Hans': '无法购买', ko: '구매 불가', es: 'No Se Puede Comprar', id: 'Tidak Dapat Dibeli' },
   '数量': { ja: '数量', en: 'Quantity', 'zh-Hant': '數量', 'zh-Hans': '数量', ko: '수량', es: 'Cantidad', id: 'Jumlah' },
   '倍率': { ja: '倍率', en: 'Multiplier', 'zh-Hant': '倍率', 'zh-Hans': '倍率', ko: '배율', es: 'Multiplicador', id: 'Pengali' },
+  '属性值': { ja: '属性値', en: 'Stat Value', 'zh-Hant': '屬性值', 'zh-Hans': '属性值', ko: '속성 값', es: 'Valor de Atributo', id: 'Nilai Stat' },
+  '百分比': { ja: 'パーセント', en: 'Percentage', 'zh-Hant': '百分比', 'zh-Hans': '百分比', ko: '퍼센트', es: 'Porcentaje', id: 'Persentase' },
   '全部已装备': { ja: '全て装備済み', en: 'All Equipped', 'zh-Hant': '全部已裝備', 'zh-Hans': '全部已装备', ko: '모두 장비됨', es: 'Todos Equipados', id: 'Semua Dipasang' },
   '点击武器、防具、饰孔可以购买或解锁': { ja: '武器、防具、アクセサリースロットをクリックして購入またはアンロック', en: 'Click weapon, armor, accessory slot to buy or unlock', 'zh-Hant': '點擊武器、防具、飾孔可以購買或解鎖', 'zh-Hans': '点击武器、防具、饰孔可以购买或解锁', ko: '무기, 방어구, 액세서리 슬롯 클릭하여 구매 또는 잠금 해제', es: 'Haz clic en arma, armadura o ranura para comprar o desbloquear', id: 'Klik senjata, armor, slot aksesoris untuk beli atau buka kunci' },
   '空栏位': { ja: '空スロット', en: 'Empty Slot', 'zh-Hant': '空欄位', 'zh-Hans': '空栏位', ko: '빈 슬롯', es: 'Ranura Vacía', id: 'Slot Kosong' },

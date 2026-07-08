@@ -8,6 +8,8 @@ import type { Equipment } from '@/types';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
 import { useNames } from '@/hooks/useNames';
 import { useTranslation } from '@/hooks/useTranslation';
+import { equipmentNameTranslations } from '@/data/equipmentNames';
+import { bossNameTranslations, mapNameTranslations } from '@/data/names';
 
 interface DropGuideModalProps {
   isOpen: boolean;
@@ -129,11 +131,26 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
     if (searchTerm.trim()) {
       const term = searchTerm.trim().toLowerCase();
       entries = entries.filter(e => {
-        return (
-          e.equipment.name.toLowerCase().includes(term) ||
-          e.sources.some(s => s.mapName.toLowerCase().includes(term)) ||
-          e.sources.some(s => s.enemies.some(en => en.name.toLowerCase().includes(term)))
-        );
+        // Check equipment name - raw + all translations
+        const eqTrans = equipmentNameTranslations[e.equipment.name];
+        const eqNameMatch = e.equipment.name.toLowerCase().includes(term) ||
+          (eqTrans && Object.values(eqTrans).some(v => v.toLowerCase().includes(term)));
+        if (eqNameMatch) return true;
+
+        return e.sources.some(s => {
+          // Check map name - raw + all translations
+          const mapTrans = mapNameTranslations[s.mapName];
+          const mapNameMatch = s.mapName.toLowerCase().includes(term) ||
+            (mapTrans && Object.values(mapTrans).some(v => v.toLowerCase().includes(term)));
+          if (mapNameMatch) return true;
+
+          // Check enemy names - raw + all translations
+          return s.enemies.some(en => {
+            const bossTrans = bossNameTranslations[en.name];
+            return en.name.toLowerCase().includes(term) ||
+              (bossTrans && Object.values(bossTrans).some(v => v.toLowerCase().includes(term)));
+          });
+        });
       });
     }
     return entries;

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.50 (2026-07-08)
+
+### 修复
+- 修复 BattleResult.tsx 中掉落物品描述未使用多语言翻译的问题
+- 修复 DropGuideModal.tsx 中 Equipment Drop 搜索不支持多语言的问题（现在支持7种语言搜索）
+- 修复 Inventory.tsx 中 Soul 列表和详情弹窗中"属性值""百分比"硬编码中文未使用 `t()` 的问题
+- 补充 names.ts 中 70+ 条缺失的 Boss 名称多语言翻译
+
+### 新增
+- `languageData.ts`: 新增"属性值"和"百分比"的7语言翻译
+
+### 修改
+- `equipmentNames.ts`: 导出 `equipmentNameTranslations` 供多语言搜索使用
+
 ## 0.0.49 (2026-07-08)
 
 ### 修复

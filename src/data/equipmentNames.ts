@@ -1,6 +1,6 @@
 import type { LanguageCode } from './languageData';
 
-const equipmentNameTranslations: Record<string, Record<LanguageCode, string>> = {
+export const equipmentNameTranslations: Record<string, Record<LanguageCode, string>> = {
   'アイアンソード': { ja: 'アイアンソード', en: 'Iron Sword', 'zh-Hant': '鐵劍', 'zh-Hans': '铁剑', ko: '아이언 소드', es: 'Espada de Hierro', id: 'Pedang Besi' },
   'ブロンズソード': { ja: 'ブロンズソード', en: 'Bronze Sword', 'zh-Hant': '青銅劍', 'zh-Hans': '青铜剑', ko: '브론즈 소드', es: 'Espada de Bronce', id: 'Pedang Perunggu' },
   'スチールソード': { ja: 'スチールソード', en: 'Steel Sword', 'zh-Hant': '鋼劍', 'zh-Hans': '钢剑', ko: '스틸 소드', es: 'Espada de Acero', id: 'Pedang Baja' },
