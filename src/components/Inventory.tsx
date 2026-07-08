@@ -1212,9 +1212,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 <div className="text-gray-400 text-xs">{detailEquipment.type === 'weapon' ? t('武器') : detailEquipment.type === 'armor' ? t('防具') : detailEquipment.type === 'accessory' ? t('饰品') : detailEquipment.type === 'soul' ? t('魂') : t('材料')}</div>
               </div>
             </div>
-            {detailEquipment.description && (
-              <div className="text-purple-300 text-sm mb-2">{detailEquipment.description}</div>
-            )}
             {detailEquipment.setumei && (
               <div className="text-purple-300 text-sm mb-2">{getEquipDescription(detailEquipment.setumei, detailEquipment.t1, detailEquipment.t2)}</div>
             )}

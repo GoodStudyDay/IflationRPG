@@ -64,11 +64,11 @@ export const SpriteIcon = ({ type, x, y, size = 'medium', className = '', image,
     }
   } else if (type === 'material') {
     switch (bit32) {
-      case 0: config = SPRITE_CONFIG.material3; break;
       case 1: config = SPRITE_CONFIG.material1; break;
       case 2: config = SPRITE_CONFIG.material2; break;
       case 3: config = SPRITE_CONFIG.material3; break;
       case 4: config = SPRITE_CONFIG.accessory; break;
+      default: config = SPRITE_CONFIG.material; break;
     }
   } else if (type === 'soul') {
     if (image === 2) {

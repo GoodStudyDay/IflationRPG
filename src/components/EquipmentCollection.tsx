@@ -179,9 +179,9 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                               LUC +{equipment.luckBonus}
                             </span>
                           )}
-                          {equipment.description && (
+                          {equipment.setumei && (
                             <span className="text-purple-400 text-xs">
-                              {equipment.description}
+                              {getEquipDescription(equipment.setumei, equipment.t1, equipment.t2)}
                             </span>
                           )}
                         </div>
@@ -274,12 +274,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                   <span className="text-yellow-400">+{selectedEquipment.luckBonus}</span>
                 </div>
               )}
-              {selectedEquipment.description && (
-                <div className="text-gray-300 text-sm mt-3 p-2 bg-[#1a0a2e] rounded">
-                  {selectedEquipment.description}
-                </div>
-              )}
-              {selectedEquipment.setumei && !selectedEquipment.description && (
+              {selectedEquipment.setumei && (
                 <div className="text-gray-300 text-sm mt-3 p-2 bg-[#1a0a2e] rounded">
                   {getEquipDescription(selectedEquipment.setumei, selectedEquipment.t1, selectedEquipment.t2)}
                 </div>
