@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, EquipSet } from '@/types';
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
-import { getEquipmentById, equipmentData } from '@/data/equipment';
+import { getEquipmentById, equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
 import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
@@ -133,6 +133,7 @@ interface GameStore {
   lastMapId: number | null;
   originalMap: number;
   hiddenMapBonusCount: number;
+  debugKill: boolean;
   purchaseCounts: Record<string, number>;
   peakSnapshot: PeakSnapshot | null;
   setPlayer: (player: Player) => void;
@@ -144,6 +145,7 @@ interface GameStore {
   removeFromInventory: (equipmentId: string, quantity: number) => void;
   equipItem: (equipment: Equipment, slotIndex?: number) => void;
   buyEquipment: (equipmentId: string) => boolean;
+  synthesizeEquipment: (equipmentId: string) => boolean;
   useConsumable: (equipmentId: string) => void;
   setCurrentScene: (scene: GameScene) => void;
   goToTitle: () => void;
@@ -624,6 +626,7 @@ export const useGameStore = create<GameStore>()(
       lastMapId: null,
       originalMap: 1,
       hiddenMapBonusCount: 0,
+      debugKill: false,
       purchaseCounts: storedData?.purchaseCounts || {},
       peakSnapshot: storedData?.peakSnapshot || null,
       setPlayer: (player) => set({ player }),
@@ -1247,6 +1250,42 @@ export const useGameStore = create<GameStore>()(
           player: { ...player, gold: player.gold - currentPrice },
           purchaseCounts: { ...purchaseCounts, [equipmentId]: purchasedTimes + 1 },
         });
+        addToInventory(equipmentId, 1);
+        return true;
+      },
+      synthesizeEquipment: (equipmentId) => {
+        const { inventory, addToInventory, removeFromInventory } = get();
+        const equipment = getEquipmentById(equipmentId);
+        if (!equipment) return false;
+
+        const typeMap: Record<string, string> = {
+          weapon: 'weapon',
+          armor: 'armor',
+          accessory: 'accessory',
+          soul: 'soul',
+          material: 'material',
+        };
+        
+        const recipe = getRecipeForEquipment(typeMap[equipment.type] || 'material', equipment.listnum || 0);
+        if (!recipe) return false;
+
+        for (const material of recipe.materials) {
+          const matEquipment = getEquipmentByTypeAndListnum(material.type, material.listnum);
+          if (!matEquipment) return false;
+          
+          const owned = inventory.find(i => i.equipmentId === matEquipment.id);
+          if (!owned || owned.quantity < material.quantity) {
+            return false;
+          }
+        }
+
+        for (const material of recipe.materials) {
+          const matEquipment = getEquipmentByTypeAndListnum(material.type, material.listnum);
+          if (matEquipment) {
+            removeFromInventory(matEquipment.id, material.quantity);
+          }
+        }
+
         addToInventory(equipmentId, 1);
         return true;
       },
@@ -2779,6 +2818,9 @@ export const useGameStore = create<GameStore>()(
               );
               
               tdame = damage;
+              if (state.debugKill) {
+                tdame = battle.enemy!.hp + 999999;
+              }
               updateHighDamage(damage);
               
               let logMessage = `攻击 ${Math.floor(damage)}伤害！`;
@@ -3250,6 +3292,7 @@ export const useGameStore = create<GameStore>()(
           presets: saveData.presets || INITIAL_PRESETS,
           autoAllocateEnabled: saveData.autoAllocateEnabled || false,
           currentMap: 1,
+          debugKill: false,
         });
       },
       incrementWinBattle: () => {

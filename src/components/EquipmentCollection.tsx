@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
-import { equipmentData } from '@/data/equipment';
+import { equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
 import type { EquipmentType } from '@/types';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
@@ -15,7 +15,7 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const { t } = useTranslation();
   const { getEquipName } = useEquipmentName();
   const { getEquipDescription } = useEquipmentDescription();
-  const { inventory, player, buyEquipment } = useGameStore();
+  const { inventory, player, buyEquipment, synthesizeEquipment } = useGameStore();
   type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [buySuccessMsg, setBuySuccessMsg] = useState<string | null>(null);
@@ -280,6 +280,71 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                 </div>
               )}
             </div>
+
+            {(() => {
+              const typeMap: Record<string, string> = {
+                weapon: 'weapon',
+                armor: 'armor',
+                accessory: 'accessory',
+                soul: 'soul',
+                material: 'material',
+              };
+              const recipe = getRecipeForEquipment(typeMap[selectedEquipment.type] || 'material', selectedEquipment.listnum || 0);
+              if (recipe) {
+                const canSynthesize = recipe.materials.every(material => {
+                  const matEquipment = getEquipmentByTypeAndListnum(material.type, material.listnum);
+                  if (!matEquipment) return false;
+                  const owned = inventory.find(i => i.equipmentId === matEquipment.id);
+                  return owned && owned.quantity >= material.quantity;
+                });
+
+                return (
+                  <div className="mt-4">
+                    <div className="text-game-secondary font-bold text-sm mb-2">{t('合成材料')}</div>
+                    <div className="bg-[#1a0a2e] rounded p-2 space-y-1">
+                      {recipe.materials.map((material, idx) => {
+                        const matEquipment = getEquipmentByTypeAndListnum(material.type, material.listnum);
+                        const owned = matEquipment ? inventory.find(i => i.equipmentId === matEquipment.id)?.quantity || 0 : 0;
+                        const hasEnough = owned >= material.quantity;
+                        return (
+                          <div key={idx} className="flex items-center justify-between text-sm">
+                            <span className={hasEnough ? 'text-gray-300' : 'text-red-400'}>
+                              {matEquipment ? getEquipName(matEquipment.name) : '???'}
+                            </span>
+                            <span className={hasEnough ? 'text-gray-400' : 'text-red-400'}>
+                              {owned}/{material.quantity}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const success = synthesizeEquipment(selectedEquipment.id);
+                        if (success) {
+                          setBuySuccessMsg(t('合成成功！'));
+                          setTimeout(() => setBuySuccessMsg(null), 1500);
+                          setSelectedEquipment(null);
+                        } else {
+                          setBuyErrorMsg(t('材料不足'));
+                          setTimeout(() => setBuyErrorMsg(null), 1500);
+                        }
+                      }}
+                      disabled={!canSynthesize}
+                      className={`w-full mt-3 font-bold py-2 rounded-lg transition-colors text-sm ${
+                        canSynthesize
+                          ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {t('合成')}
+                    </button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <button
               onClick={() => setSelectedEquipment(null)}
               className="w-full mt-4 bg-[#5a3c8a] text-white font-bold py-2 rounded-lg hover:bg-[#6a4c9a] transition-colors text-sm"

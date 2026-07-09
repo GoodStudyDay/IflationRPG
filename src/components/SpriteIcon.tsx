@@ -15,21 +15,21 @@ const BASE_URL = import.meta.env.BASE_URL || '/';
 
 const SPRITE_CONFIG = {
   weapon: { path: `${BASE_URL}images/item/244_item0png.png`, tileSize: 24, width: 384, height: 240 },
-  weapon1: { path: `${BASE_URL}images/item/921_buki32png.png`, tileSize: 32, width: 512, height: 512 },
+  weapon1: { path: `${BASE_URL}images/item/921_buki32png.png`, tileSize: 32, width: 448, height: 512 },
   weapon2: { path: `${BASE_URL}images/item/244_item0png.png`, tileSize: 24, width: 384, height: 240 },
-  weapon3: { path: `${BASE_URL}images/item/984_weaponpng01.png`, tileSize: 32, width: 512, height: 512 },
-  weapon4: { path: `${BASE_URL}images/item/1052_newbuki32.png`, tileSize: 32, width: 512, height: 512 },
-  weapon5: { path: `${BASE_URL}images/item/1068_new32weapons.png`, tileSize: 32, width: 512, height: 512 },
+  weapon3: { path: `${BASE_URL}images/item/984_weaponpng01.png`, tileSize: 32, width: 160, height: 32 },
+  weapon4: { path: `${BASE_URL}images/item/1052_newbuki32.png`, tileSize: 32, width: 192, height: 160 },
+  weapon5: { path: `${BASE_URL}images/item/1068_new32weapons.png`, tileSize: 32, width: 160, height: 192 },
   armor: { path: `${BASE_URL}images/item/245_item1png.png`, tileSize: 24, width: 384, height: 120 },
   accessory: { path: `${BASE_URL}images/item/246_item2png.png`, tileSize: 24, width: 336, height: 240 },
   accessory1: { path: `${BASE_URL}images/item/919_item3png.png`, tileSize: 24, width: 264, height: 264 },
   accessory2: { path: `${BASE_URL}images/item/928_accPlus.png`, tileSize: 24, width: 384, height: 408 },
   soul: { path: `${BASE_URL}images/item/934_SoulPng.png`, tileSize: 24, width: 384, height: 120 },
   soul2: { path: `${BASE_URL}images/item/935_SoulPng2.png`, tileSize: 48, width: 384, height: 576 },
-  material: { path: `${BASE_URL}images/item/1041_item4png.png`, tileSize: 24, width: 336, height: 240 },
+  material: { path: `${BASE_URL}images/item/1041_item4png.png`, tileSize: 24, width: 240, height: 240 },
   material1: { path: `${BASE_URL}images/item/919_item3png.png`, tileSize: 24, width: 264, height: 264 },
   material2: { path: `${BASE_URL}images/item/928_accPlus.png`, tileSize: 24, width: 384, height: 408 },
-  material3: { path: `${BASE_URL}images/item/1041_item4png.png`, tileSize: 24, width: 336, height: 240 },
+  material3: { path: `${BASE_URL}images/item/1041_item4png.png`, tileSize: 24, width: 240, height: 240 },
 };
 
 const SIZE_MAP = {

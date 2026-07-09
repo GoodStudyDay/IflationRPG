@@ -23,6 +23,7 @@ declare global {
       addAllArmor: () => void;
       addAllAccessories: () => void;
       clearSave: () => void;
+      kill: (enable?: boolean) => void;
     };
   }
 }
@@ -92,5 +93,11 @@ window.gameDebug = {
   clearSave: () => {
     useGameStore.getState().resetGame();
     console.log('存档已清除');
+  },
+  kill: (enable?: boolean) => {
+    const store = useGameStore.getState();
+    const newState = enable !== undefined ? enable : !store.debugKill;
+    useGameStore.setState({ debugKill: newState });
+    console.log(`一键击杀: ${newState ? '已开启' : '已关闭'}`);
   },
 };

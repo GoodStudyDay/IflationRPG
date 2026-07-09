@@ -368,7 +368,7 @@ function itemload(): void {
   ItemBUKIpush(39, '聖槍・ロンギヌス', 15, 3, 0, 3000, 290);
   ItemBUKIpush(69, '聖槍・ロンギヌス+1', 15, 7, 0, 5000, 540, 1);
   ItemBUKIpush(89, '伝説・呪われた光の剣', 2, 5, 0, 100000, 650, 0, 0);
-  ItemBUKIpush(90, '伝説・アストラ', 7, 4, 0, 222222, 700, 2, 2);
+  ItemBUKIpush(90, '伝説・アストラ', 7, 4, 0, 222222, 700, 2, 1);
   ItemBUKIpush(93, '氷・魔法ジェム', 8, 3, 0, 433333, 770, 2, 99);
   ItemBUKIpush(94, '雷・魔法ジェム', 8, 2, 0, 499999, 830, 2, 99);
   ItemBUKIpush(91, '氷・吹雪', 5, 1, 0, 466666, 825, 3, 1, 93, 94);
@@ -661,6 +661,28 @@ function itemload(): void {
   ItemMaterialpush(22, '四つ葉のクローバー', 0, 1, 0, 1999, '来自异世界的奇异材料', 0, R4);
   ItemMaterialpush(23, '紫水晶', 0, 6, 0, 1999, '来自异世界的奇异材料', 0, R4);
   ItemMaterialpush(24, '灰色の水晶', 0, 5, 0, 1999, '来自异世界的奇异材料', 0, R4);
+
+  itemRecipepush([21101, 21111, 40082]);
+  itemRecipepush([911, 931, 40061]);
+  itemRecipepush([951, 941, 40061]);
+  itemRecipepush([921, 901, 911]);
+  itemRecipepush([961, 40191, 40011]);
+  itemRecipepush([981, 971, 40071]);
+  itemRecipepush([1001, 991, 40032]);
+  itemRecipepush([10411, 10181, 10281, 10391, 40021]);
+  itemRecipepush([10421, 40051, 40201]);
+  itemRecipepush([21091, 20731, 20841, 20921, 20931]);
+  itemRecipepush([21041, 20951, 20941, 40171, 40161]);
+  itemRecipepush([21001, 20931, 20921, 20841, 40161]);
+  itemRecipepush([21131, 20241, 20551, 20711, 40181]);
+  itemRecipepush([21071, 20851, 20861, 20871, 20881, 40161]);
+  itemRecipepush([21191, 21121, 40041]);
+  itemRecipepush([20951, 20942, 40161]);
+  itemRecipepush([20991, 20981, 40161, 40171]);
+  itemRecipepush([21211, 20881, 40132]);
+  itemRecipepush([21271, 21092, 20891]);
+  itemRecipepush([21301, 21072, 40221, 21211, 40131]);
+  itemRecipepush([1051, 1031, 1041, 40241]);
 }
 
 itemload();
@@ -675,4 +697,83 @@ export const equipmentData: Equipment[] = [
 
 export const getEquipmentById = (equipmentId: string): Equipment | undefined => {
   return equipmentData.find(e => e.id === equipmentId);
+};
+
+export const recipes = itemDataMana.ItemuRECIPE;
+
+export interface Recipe {
+  targetType: 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
+  targetListnum: number;
+  materials: {
+    type: 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
+    listnum: number;
+    quantity: number;
+  }[];
+}
+
+const getTypeFromCategory = (category: number): 'weapon' | 'armor' | 'accessory' | 'soul' | 'material' => {
+  switch (category) {
+    case 0: return 'weapon';
+    case 1: return 'armor';
+    case 2: return 'accessory';
+    case 3: return 'soul';
+    case 4: return 'material';
+    default: return 'material';
+  }
+};
+
+export const getRecipeForEquipment = (type: string, listnum: number): Recipe | undefined => {
+  const categoryMap: Record<string, number> = {
+    weapon: 0,
+    armor: 1,
+    accessory: 2,
+    soul: 3,
+    material: 4,
+  };
+  const category = categoryMap[type] ?? 4;
+
+  for (const recipeData of recipes) {
+    if (recipeData.length < 2) continue;
+    const recipeTargetId = recipeData[0];
+    const recipeCategory = Math.floor(recipeTargetId / 10000);
+    const recipeListnum = Math.floor((recipeTargetId % 10000) / 10);
+    if (recipeCategory === category && recipeListnum === listnum) {
+      
+      const materials = recipeData.slice(1).map(materialData => {
+        const matCategory = Math.floor(materialData / 10000);
+        const matListnum = Math.floor((materialData % 10000) / 10);
+        const matQuantity = materialData % 10;
+        return {
+          type: getTypeFromCategory(matCategory),
+          listnum: matListnum,
+          quantity: matQuantity,
+        };
+      });
+
+      return {
+        targetType: getTypeFromCategory(recipeCategory),
+        targetListnum: recipeListnum,
+        materials,
+      };
+    }
+  }
+
+  return undefined;
+};
+
+export const getEquipmentByTypeAndListnum = (type: string, listnum: number): Equipment | undefined => {
+  switch (type) {
+    case 'weapon':
+      return itemDataMana.ItemuBUKI.find(e => e.listnum === listnum);
+    case 'armor':
+      return itemDataMana.ItemuBOUGU.find(e => e.listnum === listnum);
+    case 'accessory':
+      return itemDataMana.ItemuAKUSE.find(e => e.listnum === listnum);
+    case 'soul':
+      return itemDataMana.ItemuSOUL.find(e => e.listnum === listnum);
+    case 'material':
+      return itemDataMana.ItemuMATERIAL.find(e => e.listnum === listnum);
+    default:
+      return undefined;
+  }
 };

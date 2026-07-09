@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.55',
+    date: '2026-07-09 18:00:00',
+    changes: [
+      '装备合成系统：根据原版recipe数据实现装备合成，在装备收集页面点击可合成装备可查看所需材料并合成',
+      '修复Ice Blizzard、Legendary Astra、Legendary Astra (Ice)武器图片显示异常（精灵表尺寸不匹配）',
+      '修复weapon1/weapon3/weapon4/weapon5/material精灵表尺寸与实际图片不符的问题',
+      'Legendary Astra改回使用buki32png精灵表（原buki2png资产缺失）',
+      '添加合成材料、合成、合成成功、材料不足的7语言翻译',
+      'gamedebug新增+kill命令：开启后每次战斗一击必杀',
+    ],
+  },
+  {
     version: 'v0.0.54',
     date: '2026-07-09 18:00:00',
     changes: [
