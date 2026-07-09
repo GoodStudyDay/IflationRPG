@@ -4,7 +4,7 @@ import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, E
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
 import { getEquipmentById, equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
-import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution } from '@/utils/helpers';
+import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution, WinBossGetBattlePoint } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
 import type { LanguageCode } from '@/data/languageData';
@@ -182,6 +182,10 @@ interface GameStore {
   teleportToMap: (mapId: number) => void;
   /** 进入隐藏地图 */
   enterHiddenMap: (mapId: number, bonusType: number) => void;
+  /** 播放战斗特效 */
+  playBattleEffect: (effectId: number, position: 'player' | 'enemy') => void;
+  /** 清除战斗特效 */
+  clearBattleEffect: () => void;
   /** 退出隐藏地图 */
   exitHiddenMap: () => void;
   /** 解锁饰品栏位 */
@@ -562,6 +566,7 @@ export const useGameStore = create<GameStore>()(
           _loopTick: 0,
           _loopComboCount: 1,
         specialBonusType: null,
+        activeEffect: null,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -1842,11 +1847,11 @@ export const useGameStore = create<GameStore>()(
         const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
         const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
         
-        let newMaxHp = Math.ceil((initialPlayer.maxHp || 1000) + (levelBonus.hp || 0) + (armorHpContrib || 0) + (accessoryHpBonus || 0));
-        let newAtk = Math.ceil((initialPlayer.attack || 1000) + (levelBonus.attack || 0) + (weaponAtkContrib || 0) + (accessoryAtkBonus || 0));
-        let newDef = Math.ceil((initialPlayer.defense || 1000) + (levelBonus.defense || 0) + (armorDefContrib || 0) + (accessoryDefBonus || 0));
-        let newAgi = Math.ceil((initialPlayer.agility || 1000) + (levelBonus.agility || 0) + (accessoryAgiBonus || 0));
-        let newLuc = Math.ceil((initialPlayer.luck || 1000) + (levelBonus.luck || 0) + (accessoryLucBonus || 0));
+        let newMaxHp = Math.ceil((player.maxHp || 1000) + (levelBonus.hp || 0) + (armorHpContrib || 0) + (accessoryHpBonus || 0));
+        let newAtk = Math.ceil((player.attack || 1000) + (levelBonus.attack || 0) + (weaponAtkContrib || 0) + (accessoryAtkBonus || 0));
+        let newDef = Math.ceil((player.defense || 1000) + (levelBonus.defense || 0) + (armorDefContrib || 0) + (accessoryDefBonus || 0));
+        let newAgi = Math.ceil((player.agility || 1000) + (levelBonus.agility || 0) + (accessoryAgiBonus || 0));
+        let newLuc = Math.ceil((player.luck || 1000) + (levelBonus.luck || 0) + (accessoryLucBonus || 0));
         
         const warGems = accessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
@@ -1988,6 +1993,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             specialBonusType: null,
+            activeEffect: null,
           },
         });
         get().checkZeroEquips();
@@ -2021,6 +2027,10 @@ export const useGameStore = create<GameStore>()(
         if (battlePoints <= 0) {
           return;
         }
+        
+        const accessories = player.equippedAccessories || [];
+        const speedHourglass = accessories.find(acc => acc && (acc.t1 === 4100 || acc.t1 === 4101));
+        const hourglassMultiplier = speedHourglass?.t1 === 4101 ? 3 : speedHourglass?.t1 === 4100 ? 2 : 1;
         
         const hardmode = get().hardmode || 0;
         const currentMap = get().currentMap;
@@ -2278,7 +2288,6 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const accessories = player.equippedAccessories || [];
         const greedRing = accessories.find(acc => acc && acc.t1 === 12);
         const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
         let greedBonus = 1;
@@ -2352,7 +2361,7 @@ export const useGameStore = create<GameStore>()(
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
           encounterRate: 0,
-          battlePoints: battlePoints - 1,
+          battlePoints: battlePoints - hourglassMultiplier,
           battle: {
             enemy,
             status: 'idle',
@@ -2384,6 +2393,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            activeEffect: null,
           },
         });
       },
@@ -2397,6 +2407,10 @@ export const useGameStore = create<GameStore>()(
         if (defeatedBosses.includes(bossId)) {
           return;
         }
+        
+        const accessories = player.equippedAccessories || [];
+        const speedHourglass = accessories.find(acc => acc && (acc.t1 === 4100 || acc.t1 === 4101));
+        const hourglassMultiplier = speedHourglass?.t1 === 4101 ? 3 : speedHourglass?.t1 === 4100 ? 2 : 1;
         
         set({ lastBossId: bossId });
         
@@ -2508,7 +2522,6 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const accessories = player.equippedAccessories || [];
         const greedRing = accessories.find(acc => acc && acc.t1 === 12);
         const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
         let greedBonus = 1;
@@ -2534,7 +2547,7 @@ export const useGameStore = create<GameStore>()(
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
           encounterRate: 0,
-          battlePoints: battlePoints - 1,
+          battlePoints: battlePoints - hourglassMultiplier,
           battle: {
             enemy: modifiedBoss,
             status: 'idle',
@@ -2566,6 +2579,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             specialBonusType,
+            activeEffect: null,
           },
         });
       },
@@ -2606,8 +2620,13 @@ export const useGameStore = create<GameStore>()(
           }
           
           if (speedHourglass) {
-            const hourglassValue = speedHourglass.t2 || 0.5;
-            expReward = Math.floor(expReward / hourglassValue);
+            const hourglassType = speedHourglass.t1;
+            const hourglassExpMultiplier = hourglassType === 4101 ? 3 : 2;
+            const hourglassGoldMultiplier = hourglassType === 4101 ? 3 : 2;
+            const hourglassBonus = speedHourglass.t2 || 0;
+            
+            expReward = Math.floor(expReward * hourglassExpMultiplier * (1 + hourglassBonus));
+            goldReward = Math.floor(goldReward * hourglassGoldMultiplier);
           }
           
           addGold(goldReward);
@@ -2625,7 +2644,7 @@ export const useGameStore = create<GameStore>()(
           updateHighCombo(comboCount);
           
           if ((battle.enemy as any).bossId !== undefined) {
-            battlePointsChange = 3;
+            battlePointsChange = WinBossGetBattlePoint((battle.enemy as any).bossId);
           }
         } else if (!victory) {
           const damage = Math.floor(player.maxHp * 0.3);
@@ -2635,7 +2654,8 @@ export const useGameStore = create<GameStore>()(
         }
         
         if (speedHourglass) {
-          battlePointsChange = Math.floor(battlePointsChange * 2);
+          const hourglassMultiplier = speedHourglass.t1 === 4101 ? 3 : 2;
+          battlePointsChange = Math.floor(battlePointsChange * hourglassMultiplier);
         }
         
         const newBattlePoints = battlePoints + battlePointsChange;
@@ -2722,9 +2742,15 @@ export const useGameStore = create<GameStore>()(
           const spType = battle.specialBonusType;
           if (bossId && spType) {
             if (spType === 12 && (bossId === 60 || bossId === 61)) {
-              enterHiddenMap(13, 12);
+              const map13 = MAP_LIST.find(m => m.id === 13);
+              if (map13 && player.level >= map13.unlockLevel) {
+                enterHiddenMap(13, 12);
+              }
             } else if (spType === 13 && (bossId === 66 || bossId === 67)) {
-              enterHiddenMap(14, 13);
+              const map14 = MAP_LIST.find(m => m.id === 14);
+              if (map14 && player.level >= map14.unlockLevel) {
+                enterHiddenMap(14, 13);
+              }
             }
           }
           
@@ -2892,22 +2918,30 @@ export const useGameStore = create<GameStore>()(
               }
               addBattleLog(logMessage);
               
-              set((s) => ({
-                battle: {
-                  ...s.battle,
-                  playerAnimation: 'attack',
-                  enemyAnimation: 'hurt',
-                  damageDisplay: damage,
-                  isCrit: isCrit,
-                  isCombo: currentComboCount >= 2,
-                  comboCount: currentComboCount,
-                  lastAttacker: 'player',
-                },
-              }));
+              let attackEffectIndex = 0;
+              if (isCrit) {
+                attackEffectIndex = Math.floor(Math.random() * 6) + 5;
+              } else {
+                attackEffectIndex = Math.floor(Math.random() * 4);
+              }
               
-              eefi = 0;
-              mode = 4;
-              isProcessing = false;
+              set((s) => ({
+              battle: {
+                ...s.battle,
+                playerAnimation: 'attack',
+                enemyAnimation: 'hurt',
+                damageDisplay: damage,
+                isCrit: isCrit,
+                isCombo: currentComboCount >= 2,
+                comboCount: currentComboCount,
+                lastAttacker: 'player',
+                activeEffect: { effectId: attackEffectIndex, position: 'enemy' },
+              },
+            }));
+            
+            eefi = 0;
+            mode = 4;
+            isProcessing = false;
             } else {
               const totalDefense = player.defense;
               const accessories = player.equippedAccessories || [];
@@ -2927,6 +2961,7 @@ export const useGameStore = create<GameStore>()(
                   isCrit: false,
                   isCombo: false,
                   lastAttacker: 'enemy',
+                  activeEffect: { effectId: 13, position: 'player' },
                 },
               }));
               
@@ -3157,6 +3192,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             specialBonusType: null,
+            activeEffect: null,
           },
         });
       },
@@ -3328,6 +3364,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             specialBonusType: null,
+            activeEffect: null,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
@@ -3581,6 +3618,22 @@ export const useGameStore = create<GameStore>()(
         });
         console.log(`[HiddenMap] Entered map ${mapId}, bonusType: ${bonusType}, bonusCount: ${bonusCount}, original map: ${currentMap}`);
       },
+      playBattleEffect: (effectId, position) => {
+        set({
+          battle: {
+            ...get().battle,
+            activeEffect: { effectId, position },
+          },
+        });
+      },
+      clearBattleEffect: () => {
+        set({
+          battle: {
+            ...get().battle,
+            activeEffect: null,
+          },
+        });
+      },
       exitHiddenMap: () => {
         const { originalMap } = get();
         set({
@@ -3687,6 +3740,10 @@ export const useGameStore = create<GameStore>()(
         set({ player: newPlayer });
         const stPtData = loadSaveData();
         stPtData.stPt = newPlayer.stPt;
+        if (!stPtData.stPtAllocate) {
+          stPtData.stPtAllocate = { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
+        }
+        stPtData.stPtAllocate[statType] += amount;
         saveSaveData(stPtData);
       },
       addStPt: (amount) => {
