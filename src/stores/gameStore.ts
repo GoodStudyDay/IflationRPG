@@ -1956,7 +1956,7 @@ export const useGameStore = create<GameStore>()(
         
         const hardmode = get().hardmode || 0;
         const currentMap = get().currentMap;
-        const mapEnemies = getMapEnemies(currentMap);
+        const mapEnemies = getMapEnemies(currentMap, hardmode);
         const randomIndex = Math.floor(Math.random() * mapEnemies.length);
         
         let enemy: ReturnType<typeof getMapEnemies>[0] = { ...mapEnemies[randomIndex] };

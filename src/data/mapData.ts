@@ -572,30 +572,30 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
     { id:'m12-7', name:'暗黑巨人', hp:1900000, maxHp:1900000, attack:40000, defense:0, expReward:6, goldReward:2200, icon:'🐺', lv:2, tekiseiLvBai:260, expBonus:6, drops:[] },
   ],
   13: [
-    { id:'m13-0', name:'魔王爪牙', hp:1800000, maxHp:1800000, attack:96000, defense:0, expReward:3600000, goldReward:25000, icon:'🟢', lv:0, tekiseiLvBai:-2, expBonus:3600000, drops:[{type:0, index:37, rate:0.05},{type:0, index:38, rate:0.05},{type:0, index:39, rate:0.04}] },
-    { id:'m13-1', name:'魔王侍从', hp:2700000, maxHp:2700000, attack:72000, defense:0, expReward:3600000, goldReward:25000, icon:'🐀', lv:0, tekiseiLvBai:-2, expBonus:3600000, drops:[{type:2, index:24, rate:0.034},{type:3, index:5, rate:0}] },
-    { id:'m13-2', name:'魔王', hp:2000000, maxHp:2000000, attack:60000, defense:0, expReward:3600000, goldReward:25000, icon:'🐝', lv:0, tekiseiLvBai:-2, expBonus:3600000, drops:[{type:1, index:16, rate:0.04}] },
-    { id:'m13-3', name:'魔王爪牙', hp:30000000, maxHp:30000000, attack:300000, defense:0, expReward:36000000, goldReward:99999, icon:'🐍', lv:0, tekiseiLvBai:-2, expBonus:36000000, drops:[{type:0, index:67, rate:0.018},{type:0, index:68, rate:0.017},{type:0, index:69, rate:0.016}] },
-    { id:'m13-4', name:'魔王侍从', hp:40000000, maxHp:40000000, attack:240000, defense:0, expReward:36000000, goldReward:99999, icon:'🐦‍⬛', lv:0, tekiseiLvBai:-2, expBonus:36000000, drops:[{type:2, index:55, rate:0.012},{type:3, index:15, rate:0}] },
-    { id:'m13-5', name:'魔王', hp:25000000, maxHp:25000000, attack:200000, defense:0, expReward:36000000, goldReward:99999, icon:'🦊', lv:0, tekiseiLvBai:-2, expBonus:36000000, drops:[] },
+    { id:'m13-0', name:'魔王爪牙', hp:1800000, maxHp:1800000, attack:96000, defense:0, expReward:3600000, goldReward:25000, icon:'🟢', lv:0, tekiseiLvBai:-2, expBonus:3600000, hardmode:0, drops:[{type:0, index:37, rate:0.05},{type:0, index:38, rate:0.05},{type:0, index:39, rate:0.04}] },
+    { id:'m13-1', name:'魔王侍从', hp:2700000, maxHp:2700000, attack:72000, defense:0, expReward:3600000, goldReward:25000, icon:'🐀', lv:0, tekiseiLvBai:-2, expBonus:3600000, hardmode:0, drops:[{type:2, index:24, rate:0.034},{type:3, index:5, rate:0}] },
+    { id:'m13-2', name:'魔王', hp:2000000, maxHp:2000000, attack:60000, defense:0, expReward:3600000, goldReward:25000, icon:'🐝', lv:0, tekiseiLvBai:-2, expBonus:3600000, hardmode:0, drops:[{type:1, index:16, rate:0.04}] },
+    { id:'m13-3', name:'魔王爪牙', hp:30000000, maxHp:30000000, attack:300000, defense:0, expReward:36000000, goldReward:99999, icon:'🐍', lv:0, tekiseiLvBai:-2, expBonus:36000000, hardmode:1, drops:[{type:0, index:67, rate:0.018},{type:0, index:68, rate:0.017},{type:0, index:69, rate:0.016}] },
+    { id:'m13-4', name:'魔王侍从', hp:40000000, maxHp:40000000, attack:240000, defense:0, expReward:36000000, goldReward:99999, icon:'🐦‍⬛', lv:0, tekiseiLvBai:-2, expBonus:36000000, hardmode:1, drops:[{type:2, index:55, rate:0.012},{type:3, index:15, rate:0}] },
+    { id:'m13-5', name:'魔王', hp:25000000, maxHp:25000000, attack:200000, defense:0, expReward:36000000, goldReward:99999, icon:'🦊', lv:0, tekiseiLvBai:-2, expBonus:36000000, hardmode:1, drops:[{type:1, index:28, rate:0.015}] },
   ],
   14: [
-    { id:'m14-0', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🟢', lv:0, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:0, index:36, rate:0.05},{type:0, index:37, rate:0.04},{type:0, index:38, rate:0.04}] },
-    { id:'m14-1', name:'恶魔领主', hp:1350000, maxHp:1350000, attack:48000, defense:0, expReward:2000000, goldReward:10000, icon:'🐀', lv:0, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:2, index:22, rate:0.034},{type:3, index:5, rate:0}] },
-    { id:'m14-2', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐝', lv:1, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:0, index:36, rate:0.05},{type:0, index:37, rate:0.04},{type:0, index:38, rate:0.04}] },
-    { id:'m14-3', name:'恶魔领主', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐍', lv:1, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:2, index:22, rate:0.034},{type:3, index:5, rate:0}] },
-    { id:'m14-4', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐦‍⬛', lv:2, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:0, index:36, rate:0.05},{type:0, index:37, rate:0.04},{type:0, index:38, rate:0.04}] },
-    { id:'m14-5', name:'恶魔领主', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🦊', lv:2, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:2, index:22, rate:0.034},{type:3, index:5, rate:0}] },
-    { id:'m14-6', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:54000, defense:0, expReward:2000000, goldReward:10000, icon:'🐻', lv:3, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:0, index:36, rate:0.05},{type:0, index:37, rate:0.04},{type:0, index:38, rate:0.04}] },
-    { id:'m14-7', name:'恶魔领主', hp:2000000, maxHp:2000000, attack:60000, defense:0, expReward:2000000, goldReward:10000, icon:'🐺', lv:3, tekiseiLvBai:-2, expBonus:2000000, drops:[{type:2, index:22, rate:0.034},{type:3, index:5, rate:0}] },
-    { id:'m14-8', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'👹', lv:4, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:0, index:66, rate:0.018},{type:0, index:67, rate:0.017},{type:0, index:68, rate:0.016}] },
-    { id:'m14-9', name:'恶魔领主', hp:18000000, maxHp:18000000, attack:190000, defense:0, expReward:20000000, goldReward:10000, icon:'🧌', lv:4, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:2, index:54, rate:0.012},{type:3, index:15, rate:0}] },
-    { id:'m14-10', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🕷️', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:0, index:66, rate:0.018},{type:0, index:67, rate:0.017},{type:0, index:68, rate:0.016}] },
-    { id:'m14-11', name:'恶魔领主', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🐛', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:2, index:54, rate:0.012},{type:3, index:15, rate:0}] },
-    { id:'m14-12', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🦗', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:0, index:66, rate:0.018},{type:0, index:67, rate:0.017},{type:0, index:68, rate:0.016}] },
-    { id:'m14-13', name:'恶魔领主', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🌸', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:2, index:54, rate:0.012},{type:3, index:15, rate:0}] },
-    { id:'m14-14', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:190000, defense:0, expReward:20000000, goldReward:10000, icon:'🐗', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:0, index:66, rate:0.018},{type:0, index:67, rate:0.017},{type:0, index:68, rate:0.016}] },
-    { id:'m14-15', name:'恶魔领主', hp:24000000, maxHp:24000000, attack:240000, defense:0, expReward:20000000, goldReward:10000, icon:'🪱', lv:5, tekiseiLvBai:-2, expBonus:20000000, drops:[{type:2, index:54, rate:0.012},{type:3, index:15, rate:0}] },
+    { id:'m14-0', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🟢', lv:0, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:2, index:39, rate:0.05},{type:2, index:40, rate:0.05},{type:2, index:41, rate:0.05}] },
+    { id:'m14-1', name:'恶魔领主', hp:1350000, maxHp:1350000, attack:48000, defense:0, expReward:2000000, goldReward:10000, icon:'🐀', lv:0, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:0, index:33, rate:0.045}] },
+    { id:'m14-2', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐝', lv:1, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:0, index:36, rate:0.05}] },
+    { id:'m14-3', name:'恶魔领主', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐍', lv:1, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:2, index:42, rate:0.05},{type:2, index:43, rate:0.055}] },
+    { id:'m14-4', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🐦‍⬛', lv:2, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:0, index:34, rate:0.045}] },
+    { id:'m14-5', name:'恶魔领主', hp:1200000, maxHp:1200000, attack:42000, defense:0, expReward:2000000, goldReward:10000, icon:'🦊', lv:2, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:1, index:15, rate:0.045}] },
+    { id:'m14-6', name:'恶魔使者', hp:1200000, maxHp:1200000, attack:54000, defense:0, expReward:2000000, goldReward:10000, icon:'🐻', lv:3, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:0, index:35, rate:0.045}] },
+    { id:'m14-7', name:'恶魔领主', hp:2000000, maxHp:2000000, attack:60000, defense:0, expReward:2000000, goldReward:10000, icon:'🐺', lv:3, tekiseiLvBai:-2, expBonus:2000000, hardmode:0, drops:[{type:0, index:74, rate:0.03},{type:3, index:4, rate:0}] },
+    { id:'m14-8', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'👹', lv:4, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:2, index:39, rate:0.05},{type:2, index:40, rate:0.05},{type:2, index:41, rate:0.05}] },
+    { id:'m14-9', name:'恶魔领主', hp:18000000, maxHp:18000000, attack:190000, defense:0, expReward:20000000, goldReward:10000, icon:'🧌', lv:4, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:0, index:33, rate:0.045},{type:0, index:63, rate:0.028}] },
+    { id:'m14-10', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🕷️', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:0, index:36, rate:0.05},{type:0, index:66, rate:0.028}] },
+    { id:'m14-11', name:'恶魔领主', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🐛', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:2, index:42, rate:0.05},{type:2, index:43, rate:0.055},{type:2, index:68, rate:0.035}] },
+    { id:'m14-12', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🦗', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:0, index:34, rate:0.045},{type:0, index:64, rate:0.028}] },
+    { id:'m14-13', name:'恶魔领主', hp:15000000, maxHp:15000000, attack:170000, defense:0, expReward:20000000, goldReward:10000, icon:'🌸', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:1, index:15, rate:0.045},{type:1, index:27, rate:0.028}] },
+    { id:'m14-14', name:'恶魔使者', hp:15000000, maxHp:15000000, attack:190000, defense:0, expReward:20000000, goldReward:10000, icon:'🐗', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:0, index:35, rate:0.045},{type:0, index:65, rate:0.03}] },
+    { id:'m14-15', name:'恶魔领主', hp:24000000, maxHp:24000000, attack:240000, defense:0, expReward:20000000, goldReward:10000, icon:'🪱', lv:5, tekiseiLvBai:-2, expBonus:20000000, hardmode:1, drops:[{type:0, index:74, rate:0.03},{type:0, index:82, rate:0.017},{type:2, index:67, rate:0.012},{type:3, index:14, rate:0}] },
   ],
   15: [
     { id:'m15-0', name:'亡灵战士', hp:1650000, maxHp:1650000, attack:39000, defense:0, expReward:0, goldReward:2400, icon:'🟢', lv:0, tekiseiLvBai:340, expBonus:0, drops:[] },
@@ -958,9 +958,12 @@ const itemTypeAndIndexToEquipmentId = (type: number, index: number): string => {
 /**
  * 获取指定地图的敌人列表（固定属性）
  */
-export function getMapEnemies(mapId: number): Enemy[] {
+export function getMapEnemies(mapId: number, hardmode?: number): Enemy[] {
   const raw = MAP_ENEMIES_RAW[mapId] || MAP_ENEMIES_RAW[1];
-  return raw.map((e: any) => {
+  const filtered = hardmode !== undefined
+    ? raw.filter((e: any) => e.hardmode === undefined || e.hardmode === hardmode)
+    : raw;
+  return filtered.map((e: any) => {
     const expReward = e.tekiseiLvBai !== undefined 
       ? calculateExpReward(mapId, e.lv || 0, e.tekiseiLvBai, e.expBonus || 0)
       : e.expReward;

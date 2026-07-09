@@ -4,6 +4,13 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.53',
+    date: '2026-07-09 12:00:00',
+    changes: [
+      '移除 compareDrops.js 和 compareDrops.ts 文件',
+    ],
+  },
+  {
     version: 'v0.0.51',
     date: '2026-07-08 18:00:00',
     changes: [
