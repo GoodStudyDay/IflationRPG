@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { SettingsModal } from './SettingsModal';
 import { Leaderboard } from './Leaderboard';
 import { PlayerInfo } from './PlayerInfo';
 import { CharacterSelect } from './CharacterSelect';
+import { LoadingScreen } from './LoadingScreen';
 import { VERSION } from '@/data/version';
 import { useTranslation } from '@/hooks/useTranslation';
+import { preloadImages } from '@/utils/imageCache';
+import { getAllGameImageUrls } from '@/utils/gameAssets';
 
 type ScreenMode = 'top' | 'gamestart' | 'charselect';
 
@@ -16,9 +19,30 @@ export const TitleScreen = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showPlayerInfo, setShowPlayerInfo] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
 
   const hasSavedGame = player.gold > 0 || player.exp > 0 || player.level > 1;
   const canContinue = battlePoints > 0;
+
+  const handlePreloadAndStart = useCallback(async (callback: () => void) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    const urls = getAllGameImageUrls();
+    setTotalImages(urls.length);
+    setLoadingProgress(0);
+    
+    try {
+      await preloadImages(urls, (loaded) => {
+        setLoadingProgress(loaded);
+      });
+    } catch {
+    }
+    
+    callback();
+  }, [isLoading]);
 
   const handleStartGame = () => {
     if (hasSavedGame) {
@@ -34,7 +58,9 @@ export const TitleScreen = () => {
   };
 
   const handleContinue = () => {
-    startGame();
+    handlePreloadAndStart(() => {
+      startGame();
+    });
   };
 
   const handleBack = () => {
@@ -50,13 +76,25 @@ export const TitleScreen = () => {
   };
 
   const handleHeroSelect = (heroId: number) => {
-    selectHero(heroId);
-    startGame();
+    handlePreloadAndStart(() => {
+      selectHero(heroId);
+      startGame();
+    });
   };
 
   const handleCharSelectBack = () => {
     setScreenMode('top');
   };
+
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        progress={loadingProgress} 
+        total={totalImages}
+        onComplete={() => {}}
+      />
+    );
+  }
 
   const renderContent = () => {
     if (screenMode === 'charselect') {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getEffectByIndex } from '@/data/battleEffects';
+import { getOrCacheImage } from '@/utils/imageCache';
 
 interface BattleEffectProps {
   effectId: number;
@@ -7,24 +8,28 @@ interface BattleEffectProps {
   onComplete?: () => void;
 }
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 const PRELOADED_IMAGES: Record<string, { width: number; height: number }> = {
-  '/images/eef/257_ef_kougeki1.png': { width: 540, height: 60 },
-  '/images/eef/258_ef_kougeki2.png': { width: 540, height: 60 },
-  '/images/eef/259_ef_kougeki3.png': { width: 540, height: 90 },
-  '/images/eef/260_ef_kougeki4.png': { width: 810, height: 60 },
-  '/images/eef/256_ef_kaihuku.png': { width: 1080, height: 90 },
-  '/images/eef/250_ef_Skougeki1.png': { width: 360, height: 216 },
-  '/images/eef/251_ef_Skougeki2.png': { width: 360, height: 216 },
-  '/images/eef/252_ef_Skougeki3.png': { width: 360, height: 432 },
-  '/images/eef/253_ef_Skougeki4.png': { width: 360, height: 432 },
-  '/images/eef/254_ef_Skougeki5.png': { width: 360, height: 432 },
-  '/images/eef/255_ef_Skougeki6.png': { width: 360, height: 432 },
-  '/images/eef/249_ef_Enekougeki1.png': { width: 420, height: 60 },
+  [`${BASE_URL}images/eef/257_ef_kougeki1.png`]: { width: 540, height: 60 },
+  [`${BASE_URL}images/eef/258_ef_kougeki2.png`]: { width: 540, height: 60 },
+  [`${BASE_URL}images/eef/259_ef_kougeki3.png`]: { width: 540, height: 90 },
+  [`${BASE_URL}images/eef/260_ef_kougeki4.png`]: { width: 810, height: 60 },
+  [`${BASE_URL}images/eef/256_ef_kaihuku.png`]: { width: 1080, height: 90 },
+  [`${BASE_URL}images/eef/250_ef_Skougeki1.png`]: { width: 360, height: 216 },
+  [`${BASE_URL}images/eef/251_ef_Skougeki2.png`]: { width: 360, height: 216 },
+  [`${BASE_URL}images/eef/252_ef_Skougeki3.png`]: { width: 360, height: 432 },
+  [`${BASE_URL}images/eef/253_ef_Skougeki4.png`]: { width: 360, height: 432 },
+  [`${BASE_URL}images/eef/254_ef_Skougeki5.png`]: { width: 360, height: 432 },
+  [`${BASE_URL}images/eef/255_ef_Skougeki6.png`]: { width: 360, height: 432 },
+  [`${BASE_URL}images/eef/249_ef_Enekougeki1.png`]: { width: 420, height: 60 },
 };
 
 const processedCanvasCache = new Map<string, HTMLCanvasElement>();
 
-const loadImageWithTransparentBlack = (url: string): Promise<HTMLCanvasElement> => {
+const loadImageWithTransparentBlack = async (url: string): Promise<HTMLCanvasElement> => {
+  const cachedUrl = await getOrCacheImage(url);
+  
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -58,7 +63,7 @@ const loadImageWithTransparentBlack = (url: string): Promise<HTMLCanvasElement> 
       canvas.height = 1;
       resolve(canvas);
     };
-    img.src = url;
+    img.src = cachedUrl;
   });
 };
 
