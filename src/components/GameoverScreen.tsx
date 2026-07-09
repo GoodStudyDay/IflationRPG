@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { loadSaveData } from '@/utils/saveDataStorage';
 import { getkyaraLv, getkyaraLvMaxExp, SEIGEN_KYARA_LV } from '@/utils/kyaraLevel';
-import { EquipmentCollection } from './EquipmentCollection';
+import { Inventory } from './Inventory';
 import { Leaderboard } from './Leaderboard';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -107,7 +107,7 @@ export const GameoverScreen = () => {
       </div>
 
       {showCollection && (
-        <EquipmentCollection onClose={() => setShowCollection(false)} />
+        <Inventory onClose={() => setShowCollection(false)} />
       )}
       
       {showLeaderboard && (

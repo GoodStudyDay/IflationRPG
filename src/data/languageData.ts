@@ -245,7 +245,7 @@ export const translations: Record<string, TranslationKey> = {
   '存档管理': { ja: 'セーブデータ管理', en: 'Save Data', 'zh-Hant': '存檔管理', 'zh-Hans': '存档管理', ko: '세이브 데이터 관리', es: 'Datos de Guardado', id: 'Kelola Simpanan' },
   '上传存档到云端或下载存档': { ja: 'クラウドにアップロードまたはダウンロード', en: 'Upload or download save data', 'zh-Hant': '上傳存檔到雲端或下載存檔', 'zh-Hans': '上传存档到云端或下载存档', ko: '클라우드에 업로드 또는 다운로드', es: 'Subir o descargar datos', id: 'Unggah atau unduh simpanan' },
   '语言设置': { ja: '言語設定', en: 'Language', 'zh-Hant': '語言設定', 'zh-Hans': '语言设置', ko: '언어 설정', es: 'Idioma', id: 'Bahasa' },
-  '切换游戏语言': { ja: 'ゲーム言語を切り替え', en: 'Change game language', 'zh-Hant': '切換遊戲語言', 'zh-Hans': '切换游戏语言', ko: '게임 언어 변경', es: 'Cambiar idioma', id: 'Ubah bahasa game' },
+  '切换游戏语言': { ja: 'ゲーム言語を切り替え', en: 'Change game language', 'zh-Hant': '切換遊戲語言', 'zh-Hans': 'language', ko: '게임 언어 변경', es: 'Cambiar idioma', id: 'Ubah bahasa game' },
   '属性分配预设': { ja: 'ステータス振り分けプリセット', en: 'Stat Preset', 'zh-Hant': '屬性分配預設', 'zh-Hans': '属性分配预设', ko: '스탯 분배 프리셋', es: 'Preajuste de Atributos', id: 'Preset Alokasi Status' },
   '设置战斗结算后属性点自动分配比例': { ja: '戦闘終了後のステータスポイント自動配分設定', en: 'Auto-allocate stat points after battle', 'zh-Hant': '設置戰鬥結算後屬性點自動分配比例', 'zh-Hans': '设置战斗结算后属性点自动分配比例', ko: '전투 후 스탯 포인트 자동 분배 설정', es: 'Configurar asignación automática', id: 'Setel alokasi otomatis point' },
   '缓存管理': { ja: 'キャッシュ管理', en: 'Cache', 'zh-Hant': '快取管理', 'zh-Hans': '缓存管理', ko: '캐시 관리', es: 'Caché', id: 'Cache' },
