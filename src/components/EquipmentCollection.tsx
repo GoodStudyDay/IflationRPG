@@ -200,9 +200,18 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                           {equipment.price.toLocaleString()}G
                         </button>
                       )}
-                      <div className={`text-lg font-bold mt-0.5 ${
+                      <div className={`relative text-lg font-bold mt-0.5 ${
                         isMaxed ? 'text-gray-400' : 'text-yellow-400'
                       }`}>
+                        {equipment.hardmode === 1 && (
+                          <span className="absolute -top-1 -left-8 text-xs font-bold text-red-400">Hard</span>
+                        )}
+                        {equipment.hardmode === 2 && (
+                          <span className="absolute -top-1 -left-8 text-xs font-bold text-pink-400">Hell</span>
+                        )}
+                        {(equipment.mixbase1 !== undefined || equipment.mixbase2 !== undefined || equipment.mixbase3 !== undefined || equipment.mixbase4 !== undefined) && (
+                          <span className="absolute -top-1 -left-8 text-xs font-bold text-purple-400">Mix</span>
+                        )}
                         {ownedQuantity} / {equipment.maxQuantity}
                       </div>
                       {isMaxed && (

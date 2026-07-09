@@ -306,7 +306,7 @@ export const BattleScreen = () => {
               useBackView={true}
             />
           </div>
-          <div className="text-white font-bold text-[10px] sm:text-xs md:text-sm mt-1">{player.name}</div>
+          <div className="text-white font-bold text-[10px] sm:text-xs md:text-sm mt-1">{t(player.name)}</div>
           
           {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
         </div>
