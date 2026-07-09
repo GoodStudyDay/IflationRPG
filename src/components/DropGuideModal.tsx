@@ -119,7 +119,7 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
           const order = ['weapon', 'armor', 'accessory', 'soul', 'material'];
           return order.indexOf(a.equipment.type) - order.indexOf(b.equipment.type);
         }
-        return a.equipment.name.localeCompare(b.equipment.name);
+        return (a.equipment.listnum || 0) - (b.equipment.listnum || 0);
       });
   }, []);
 

@@ -129,6 +129,8 @@ interface GameStore {
   autoAllocateEnabled: boolean;
   bonus: BonusState;
   currentMap: number;
+  lastBossId: number | null;
+  lastMapId: number | null;
   purchaseCounts: Record<string, number>;
   peakSnapshot: PeakSnapshot | null;
   setPlayer: (player: Player) => void;
@@ -611,6 +613,8 @@ export const useGameStore = create<GameStore>()(
         currentBonus: null,
       },
       currentMap: 1,
+      lastBossId: null,
+      lastMapId: null,
       purchaseCounts: storedData?.purchaseCounts || {},
       peakSnapshot: storedData?.peakSnapshot || null,
       setPlayer: (player) => set({ player }),
@@ -2322,6 +2326,8 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
+        set({ lastBossId: bossId });
+        
         const hardmode = get().hardmode || 0;
         const boss = getBossById(bossId, hardmode);
         if (!boss) {
@@ -3402,7 +3408,7 @@ export const useGameStore = create<GameStore>()(
       teleportToMap: (mapId) => {
         const map = MAP_LIST.find(m => m.id === mapId);
         if (!map) return;
-        set({ currentMap: mapId });
+        set({ currentMap: mapId, lastMapId: mapId });
       },
       unlockAccessorySlot: (slotIndex?: number) => {
         const { player } = get();

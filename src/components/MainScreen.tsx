@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { MenuOverlay } from './MenuOverlay';
 import { BonusOverlay } from './BonusOverlay';
@@ -8,18 +8,38 @@ import { BOSS_DATA } from '@/data/bossData';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, lastBossId, lastMapId } = useGameStore();
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBonus, setShowBonus] = useState(false);
   const [showTeleport, setShowTeleport] = useState(false);
   const [showBoss, setShowBoss] = useState(false);
+  const bossListRef = useRef<HTMLDivElement>(null);
+  const mapListRef = useRef<HTMLDivElement>(null);
   
   const expPercent = player.expToNextLevel > 0 ? (player.exp / player.expToNextLevel) * 100 : 0;
   
   const currentMapData = MAP_LIST.find(m => m.id === currentMap) || MAP_LIST[0];
   const mapEnemies = getMapEnemies(currentMap);
+  
+  useEffect(() => {
+    if (showBoss && lastBossId !== null) {
+      const bossBtn = document.getElementById(`boss-${lastBossId}`);
+      if (bossBtn && bossListRef.current) {
+        bossBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [showBoss, lastBossId]);
+  
+  useEffect(() => {
+    if (showTeleport && lastMapId !== null) {
+      const mapBtn = document.getElementById(`map-${lastMapId}`);
+      if (mapBtn && mapListRef.current) {
+        mapBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [showTeleport, lastMapId]);
   
   // 动态获取 bonus 显示文本
   const getBonusText = () => {
@@ -209,12 +229,14 @@ export const MainScreen = () => {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowTeleport(false)}>
           <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择地图')}</h3>
-            <div className="space-y-2">
+            <div className="space-y-2" ref={mapListRef}>
               {MAP_LIST.map(map => {
                 const isCurrent = map.id === currentMap;
+                const isLastMap = map.id === lastMapId;
                 return (
                   <button
                     key={map.id}
+                    id={`map-${map.id}`}
                     onClick={() => {
                       teleportToMap(map.id);
                       setShowTeleport(false);
@@ -222,7 +244,9 @@ export const MainScreen = () => {
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
                       isCurrent
                         ? 'border-yellow-500 bg-[#3d2b6e]'
-                        : 'border-[#5a3c8a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
+                        : isLastMap
+                          ? 'border-blue-500 bg-[#3d2b6e]/50'
+                          : 'border-[#5a3c8a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -263,15 +287,17 @@ export const MainScreen = () => {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={() => setShowBoss(false)}>
           <div className="bg-[#2d1b4e] border-2 border-[#8a2a4a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择BOSS')}</h3>
-            <div className="space-y-2">
+            <div className="space-y-2" ref={bossListRef}>
               {[...BOSS_DATA]
               .filter(boss => boss.difficulty === 0 && !boss.name.startsWith('?'))
               .sort((a, b) => a.level - b.level)
               .map((boss) => {
                 const isDefeated = defeatedBosses.includes(boss.bossId);
+                const isLastBoss = boss.bossId === lastBossId;
                 return (
                   <button
                     key={`boss-${boss.bossId}`}
+                    id={`boss-${boss.bossId}`}
                     onClick={() => {
                       if (!isDefeated) {
                         startBossBattle(boss.bossId);
@@ -281,7 +307,9 @@ export const MainScreen = () => {
                     disabled={isDefeated}
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
                       !isDefeated
-                        ? 'border-[#8a2a4a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
+                        ? isLastBoss
+                          ? 'border-blue-500 bg-[#3d2b6e]'
+                          : 'border-[#8a2a4a] bg-[#2d1b4e] hover:bg-[#3d2b6e]'
                         : 'border-gray-700 bg-gray-900/50 opacity-40 cursor-not-allowed'
                     }`}
                   >

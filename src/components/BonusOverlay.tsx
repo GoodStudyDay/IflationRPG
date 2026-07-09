@@ -31,8 +31,8 @@ export const BonusOverlay = ({ onClose }: BonusOverlayProps) => {
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl">{bonusInfo.icon}</span>
               <div>
-                <div className={`font-bold ${bonusInfo.color}`}>{bonusInfo.name}</div>
-                <div className="text-gray-400 text-xs">{bonusInfo.description}</div>
+                <div className={`font-bold ${bonusInfo.color}`}>{t(bonusInfo.name)}</div>
+                <div className="text-gray-400 text-xs">{t(bonusInfo.description)}</div>
               </div>
             </div>
             {bonus.currentBonus && (
