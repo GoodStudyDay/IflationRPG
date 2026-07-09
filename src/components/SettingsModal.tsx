@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { getSupabase } from '@/lib/supabase';
-import { getMemoryCacheSize, clearCache } from '@/utils/imageCache';
+import { clearCache, getCacheSize, formatCacheSize } from '@/utils/imageCache';
 import { ChangelogModal } from './ChangelogModal';
 import { DropGuideModal } from './DropGuideModal';
 import { LANGUAGES } from '@/data/languageData';
@@ -48,22 +48,21 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     return { userId, displayName };
   };
   
-  const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-  
   useEffect(() => {
     if (isOpen) {
-      setCacheSize(formatSize(getMemoryCacheSize()));
+      const updateCacheSize = async () => {
+        const size = await getCacheSize();
+        setCacheSize(formatCacheSize(size));
+      };
+      updateCacheSize();
       setActiveSection('main');
     }
   }, [isOpen]);
   
-  const handleClearCache = () => {
-    clearCache();
-    setCacheSize(formatSize(getMemoryCacheSize()));
+  const handleClearCache = async () => {
+    await clearCache();
+    const size = await getCacheSize();
+    setCacheSize(formatCacheSize(size));
     setShowConfirmClear(false);
     setImportMsg(t('缓存已清除！'));
     setTimeout(() => setImportMsg(null), 2000);

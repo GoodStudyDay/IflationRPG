@@ -1,3 +1,5 @@
+import * as db from './imageCacheDB';
+
 const memoryCache = new Map<string, string>();
 
 export const cacheImage = async (url: string): Promise<string> => {
@@ -5,20 +7,28 @@ export const cacheImage = async (url: string): Promise<string> => {
     return memoryCache.get(url)!;
   }
 
+  const cachedFromDB = await db.getCachedImage(url);
+  if (cachedFromDB) {
+    memoryCache.set(url, cachedFromDB);
+    return cachedFromDB;
+  }
+
   try {
     const response = await fetch(url);
     const blob = await response.blob();
     const reader = new FileReader();
     
-    return new Promise((resolve, reject) => {
-      reader.onloadend = () => {
+    return new Promise((resolve) => {
+      reader.onloadend = async () => {
         const base64Data = reader.result as string;
         memoryCache.set(url, base64Data);
+        await db.cacheImage(url, base64Data);
+        await db.deleteOldCache(200);
         resolve(base64Data);
       };
       reader.onerror = () => {
         memoryCache.set(url, url);
-        reject(new Error(`Failed to load image: ${url}`));
+        resolve(url);
       };
       reader.readAsDataURL(blob);
     });
@@ -28,16 +38,23 @@ export const cacheImage = async (url: string): Promise<string> => {
   }
 };
 
-export const getCachedImage = (url: string): string | null => {
+export const getCachedImage = async (url: string): Promise<string | null> => {
   if (memoryCache.has(url)) {
     const cached = memoryCache.get(url)!;
     return cached !== url ? cached : null;
   }
+
+  const cachedFromDB = await db.getCachedImage(url);
+  if (cachedFromDB) {
+    memoryCache.set(url, cachedFromDB);
+    return cachedFromDB;
+  }
+
   return null;
 };
 
 export const getOrCacheImage = async (url: string): Promise<string> => {
-  const cached = getCachedImage(url);
+  const cached = await getCachedImage(url);
   if (cached) {
     return cached;
   }
@@ -58,8 +75,9 @@ export const preloadImages = async (urls: string[], onProgress?: (loaded: number
   }));
 };
 
-export const clearCache = (): void => {
+export const clearCache = async (): Promise<void> => {
   memoryCache.clear();
+  await db.clearCache();
 };
 
 export const getMemoryCacheSize = (): number => {
@@ -68,4 +86,14 @@ export const getMemoryCacheSize = (): number => {
     size += data.length * 2;
   }
   return size;
+};
+
+export const getCacheSize = async (): Promise<number> => {
+  return await db.getCacheSize();
+};
+
+export const formatCacheSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };

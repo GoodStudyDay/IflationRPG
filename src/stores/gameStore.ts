@@ -297,6 +297,10 @@ const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Pl
     fixedPlayer.stPt = 0;
   }
   
+  if (!fixedPlayer.stPtAllocate || typeof fixedPlayer.stPtAllocate !== 'object') {
+    fixedPlayer.stPtAllocate = { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
+  }
+  
   if (fixedPlayer.equippedWeapon) {
     const weapon = getEquipmentById(fixedPlayer.equippedWeapon.id);
     if (weapon) {
@@ -505,8 +509,13 @@ export const useGameStore = create<GameStore>()(
     (set, get) => {
       const { fixedPlayer, unequippedAccessories } = fixStoredPlayerEquipment(storedData?.player);
       
-      // 从 saveData 恢复 stPt（属性点），解决刷新后属性点丢失的问题
-      if (fixedPlayer && (fixedPlayer.stPt === undefined || fixedPlayer.stPt === 0) && saveData.stPt > 0) {
+      // 迁移旧数据：从 saveData.stPtAllocate 迁移到 player.stPtAllocate
+      if (saveData.stPtAllocate && (!fixedPlayer.stPtAllocate || Object.values(fixedPlayer.stPtAllocate).every(v => v === 0))) {
+        fixedPlayer.stPtAllocate = { ...saveData.stPtAllocate };
+      }
+      
+      // 迁移旧数据：从 saveData.stPt 迁移到 player.stPt
+      if ((fixedPlayer.stPt === undefined || fixedPlayer.stPt === 0) && saveData.stPt > 0) {
         fixedPlayer.stPt = saveData.stPt;
       }
       
@@ -3389,9 +3398,6 @@ export const useGameStore = create<GameStore>()(
           currentMap: 1,
           debugKill: false,
         });
-        // 新游戏时重置 saveData 中的 stPt
-        saveData.stPt = 0;
-        saveSaveData(saveData);
       },
       incrementWinBattle: () => {
         const { winbattle, Highlv, player, hardmodeUnlock, hellmodeUnlock } = get();
@@ -3737,22 +3743,15 @@ export const useGameStore = create<GameStore>()(
             break;
         }
         
+        newPlayer.stPtAllocate = { ...newPlayer.stPtAllocate };
+        newPlayer.stPtAllocate[statType] += amount;
+        
         set({ player: newPlayer });
-        const stPtData = loadSaveData();
-        stPtData.stPt = newPlayer.stPt;
-        if (!stPtData.stPtAllocate) {
-          stPtData.stPtAllocate = { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
-        }
-        stPtData.stPtAllocate[statType] += amount;
-        saveSaveData(stPtData);
       },
       addStPt: (amount) => {
         const { player } = get();
         const newStPt = (player.stPt || 0) + amount;
         set({ player: { ...player, stPt: newStPt } });
-        const stPtData = loadSaveData();
-        stPtData.stPt = newStPt;
-        saveSaveData(stPtData);
       },
     };
   },
@@ -3848,50 +3847,52 @@ export const useGameStore = create<GameStore>()(
           const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a?.luckBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
           
+          // Calculate gem bonuses first
+          let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
+          const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
+          for (const gem of braveGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            gemHp += _loc2_;
+            gemAtk += _loc2_;
+            gemDef += _loc2_;
+            gemAgi += _loc2_;
+            gemLuc += _loc2_;
+          }
+          const warGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 41);
+          for (const gem of warGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            gemAtk += _loc2_;
+            gemDef += _loc2_;
+            gemAgi += _loc2_;
+          }
+          const fourGodGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 42);
+          for (const gem of fourGodGems) {
+            const _loc2_ = (gem as any).t2 || 0;
+            gemHp += _loc2_;
+            gemAtk += _loc2_;
+            gemDef += _loc2_;
+            gemAgi += _loc2_;
+          }
+          
           const baseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp);
           const baseAtk = Math.ceil(initialPlayer.attack + lvlBonus.attack);
           const baseDef = Math.ceil(initialPlayer.defense + lvlBonus.defense);
           const baseAgi = Math.ceil(initialPlayer.agility + lvlBonus.agility);
           const baseLuc = Math.ceil(initialPlayer.luck + lvlBonus.luck);
           
-          const hpStPtBonus = Math.max(0, (state.player.maxHp || baseHp) - baseHp - armorHpContrib - accHp);
-          const atkStPtBonus = Math.max(0, (state.player.attack || baseAtk) - baseAtk - weaponAtkContrib - accAtk);
-          const defStPtBonus = Math.max(0, (state.player.defense || baseDef) - baseDef - armorDefContrib - accDef);
-          const agiStPtBonus = Math.max(0, (state.player.agility || baseAgi) - baseAgi - accAgi);
-          const lucStPtBonus = Math.max(0, (state.player.luck || baseLuc) - baseLuc - accLuc);
+          // Extract stPt bonus, subtracting ALL non-stPt contributions including gems
+          const hpStPtBonus = Math.max(0, (state.player.maxHp || baseHp) - baseHp - armorHpContrib - accHp - gemHp);
+          const atkStPtBonus = Math.max(0, (state.player.attack || baseAtk) - baseAtk - weaponAtkContrib - accAtk - gemAtk);
+          const defStPtBonus = Math.max(0, (state.player.defense || baseDef) - baseDef - armorDefContrib - accDef - gemDef);
+          const agiStPtBonus = Math.max(0, (state.player.agility || baseAgi) - baseAgi - accAgi - gemAgi);
+          const lucStPtBonus = Math.max(0, (state.player.luck || baseLuc) - baseLuc - accLuc - gemLuc);
           
-          state.player.attack = Math.ceil(initialPlayer.attack + lvlBonus.attack + weaponAtkContrib + accAtk) + atkStPtBonus;
-          state.player.defense = Math.ceil(initialPlayer.defense + lvlBonus.defense + armorDefContrib + accDef) + defStPtBonus;
-          state.player.maxHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + armorHpContrib + accHp) + hpStPtBonus;
-          state.player.agility = Math.ceil(initialPlayer.agility + lvlBonus.agility + accAgi) + agiStPtBonus;
-          state.player.luck = Math.ceil(initialPlayer.luck + lvlBonus.luck + accLuc) + lucStPtBonus;
-          
-          const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
-          for (const gem of braveGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            state.player.maxHp += _loc2_;
-            state.player.attack += _loc2_;
-            state.player.defense += _loc2_;
-            state.player.agility += _loc2_;
-            state.player.luck += _loc2_;
-          }
-          
-          const warGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 41);
-          for (const gem of warGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            state.player.attack += _loc2_;
-            state.player.defense += _loc2_;
-            state.player.agility += _loc2_;
-          }
-          
-          const fourGodGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 42);
-          for (const gem of fourGodGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            state.player.maxHp += _loc2_;
-            state.player.attack += _loc2_;
-            state.player.defense += _loc2_;
-            state.player.agility += _loc2_;
-          }
+          // Reconstruct player stats
+          state.player.attack = Math.ceil(initialPlayer.attack + lvlBonus.attack + weaponAtkContrib + accAtk) + atkStPtBonus + gemAtk;
+          state.player.defense = Math.ceil(initialPlayer.defense + lvlBonus.defense + armorDefContrib + accDef) + defStPtBonus + gemDef;
+          state.player.maxHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + armorHpContrib + accHp) + hpStPtBonus + gemHp;
+          state.player.agility = Math.ceil(initialPlayer.agility + lvlBonus.agility + accAgi) + agiStPtBonus + gemAgi;
+          state.player.luck = Math.ceil(initialPlayer.luck + lvlBonus.luck + accLuc) + lucStPtBonus + gemLuc;
         }
         
         return persistedState;

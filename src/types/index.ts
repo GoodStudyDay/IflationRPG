@@ -109,6 +109,8 @@ export interface Player {
   maxAccessorySlots: number;
   /** 属性点 */
   stPt: number;
+  /** 已分配的属性点记录 */
+  stPtAllocate: { hp: number; atk: number; def: number; agi: number; luc: number };
   /** 角色ID (0-15) */
   heroId: number;
 }
