@@ -132,13 +132,16 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                         {equipment.hardmode === 1 && (
                           <span className="text-[10px] font-bold text-red-400">Hard</span>
                         )}
-                        {equipment.hardmode === 2 && (
+                        {equipment.hardmode === 2 && equipment.type !== 'accessory' && (
                           <span className="text-[10px] font-bold text-pink-400">Hell</span>
                         )}
-                        {(equipment.mixbase1 !== undefined || equipment.mixbase2 !== undefined || equipment.mixbase3 !== undefined || equipment.mixbase4 !== undefined) && (
+                        {equipment.hardmode === 2 && equipment.type === 'accessory' && (
+                          <span className="text-[10px] font-bold text-yellow-400">Matl</span>
+                        )}
+                        {equipment.hardmode === 3 && (
                           <span className="text-[10px] font-bold text-purple-400">Mix</span>
                         )}
-                        {equipment.passive && (
+                        {equipment.hardmode === 4 && (
                           <span className="text-[10px] font-bold text-green-400">Pasv</span>
                         )}
                       </div>

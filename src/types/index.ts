@@ -156,6 +156,8 @@ export interface BattleState {
   _loopMode: number;
   _loopTick: number;
   _loopComboCount: number;
+  /** 恢复费用部分支付标记 */
+  _recvCost?: boolean;
   /** 触发战斗的特殊 bonus 类型 (12=¡, 13=¡¡¡, etc) */
   specialBonusType: number | null;
 }

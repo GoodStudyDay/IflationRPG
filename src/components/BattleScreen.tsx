@@ -37,7 +37,11 @@ export const BattleScreen = () => {
     hardmode,
   } = useGameStore();
   
-  const canRecover = !battle.recoverUsed && player.hp < player.maxHp;
+  const recoveryCost = Math.floor(player.maxHp * 0.2);
+  const currentGold = player.gold || 0;
+  const canRecover = !battle.recoverUsed && player.hp < player.maxHp && 
+    (currentGold >= recoveryCost || (currentGold / recoveryCost >= 0.6));
+  const isPartialPay = canRecover && currentGold < recoveryCost;
   
   const scrollRef = useRef<HTMLDivElement>(null);
   
@@ -353,12 +357,19 @@ export const BattleScreen = () => {
                   onClick={handleHeal}
                   disabled={!canRecover}
                   className={`w-full font-bold py-3 rounded-lg transition-colors text-base sm:text-lg ${
-                    canRecover 
+                    canRecover && !isPartialPay
                       ? 'bg-green-700 hover:bg-green-600 text-white' 
+                      : canRecover && isPartialPay
+                      ? 'bg-yellow-700 hover:bg-yellow-600 text-white opacity-75'
                       : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {player.hp >= player.maxHp ? t('HP已满') : t('恢复')}
+                  {player.hp >= player.maxHp 
+                    ? t('HP已满') 
+                    : battle.recoverUsed 
+                    ? t('下次回合恢复')
+                    : `${recoveryCost.toLocaleString()}G ` + t('恢复')
+                  }
                 </button>
                 <button
                   onClick={tryEscape}

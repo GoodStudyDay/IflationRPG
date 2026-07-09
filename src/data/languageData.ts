@@ -455,6 +455,7 @@ export const translations: Record<string, TranslationKey> = {
   '掉落': { ja: 'ドロップ', en: 'Drops', 'zh-Hant': '掉落', 'zh-Hans': '掉落', ko: '드롭', es: 'Botín', id: 'Drop' },
   '战斗暂停': { ja: '戦闘一時停止', en: 'Battle Paused', 'zh-Hant': '戰鬥暫停', 'zh-Hans': '战斗暂停', ko: '전투 일시정지', es: 'Combate pausado', id: 'Pertempuran Dijeda' },
   'HP已满': { ja: 'HP満タン', en: 'HP Full', 'zh-Hant': 'HP已滿', 'zh-Hans': 'HP已满', ko: 'HP 가득 참', es: 'HP llena', id: 'HP Penuh' },
+  '下次回合恢复': { ja: '次ターン全回復', en: 'Recover next turn', 'zh-Hant': '下次回合恢復', 'zh-Hans': '下次回合恢复', ko: '다음 턴 회복', es: 'Recuperar próximo turno', id: 'Pulih giliran berikutnya' },
   '恢复': { ja: '回復', en: 'Recover', 'zh-Hant': '恢復', 'zh-Hans': '恢复', ko: '회복', es: 'Recuperar', id: 'Pulihkan' },
   '逃跑': { ja: '逃走', en: 'Escape', 'zh-Hant': '逃跑', 'zh-Hans': '逃跑', ko: '도망', es: 'Escapar', id: 'Kabur' },
   '返回战斗': { ja: '戦闘に戻る', en: 'Return to Battle', 'zh-Hant': '返回戰鬥', 'zh-Hans': '返回战斗', ko: '전투로 돌아가기', es: 'Volver al combate', id: 'Kembali Bertempur' },

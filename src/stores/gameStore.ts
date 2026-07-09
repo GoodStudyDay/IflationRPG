@@ -2775,15 +2775,38 @@ export const useGameStore = create<GameStore>()(
         set((state) => ({ battle: { ...state.battle, status: 'paused' } }));
       },
       setRecoverNextTurn: (value) => {
-        const { battle } = get();
+        const { battle, player } = get();
         if (value && battle.recoverUsed) return;
+        
+        // 计算恢复费用 = maxHP * 0.2
+        const recoveryCost = Math.floor(player.maxHp * 0.2);
+        const currentGold = player.gold || 0;
+        let recvCost = false;
+        
+        if (currentGold < recoveryCost) {
+          // 不够费用但 >= 60% 时允许部分支付
+          if (currentGold / recoveryCost >= 0.6) {
+            recvCost = true;
+          } else {
+            return; // 不够60%无法恢复
+          }
+        }
+        
         set((state) => ({ 
           battle: { 
             ...state.battle, 
             recoverNextTurn: value,
-            recoverUsed: value ? true : state.battle.recoverUsed 
+            recoverUsed: value ? true : state.battle.recoverUsed,
+            _recvCost: recvCost,
           } 
         }));
+        
+        // 扣除恢复费用
+        if (value) {
+          const cost = recvCost ? currentGold : recoveryCost;
+          const newGold = currentGold - cost;
+          set({ player: { ...player, gold: Math.max(0, newGold) } });
+        }
       },
       startBattleLoop: () => {
         const { battleInterval, battle } = get();
@@ -3100,10 +3123,9 @@ export const useGameStore = create<GameStore>()(
         if (battle.status !== 'paused' || !battle.enemy) return;
         
         addBattleLog('成功逃跑了！');
-        setTimeout(() => {
-          resetEncounterRate();
-          setCurrentScene('world');
-          set({
+        resetEncounterRate();
+        setCurrentScene('world');
+        set({
           battle: {
             enemy: null,
             status: 'idle',
@@ -3137,7 +3159,6 @@ export const useGameStore = create<GameStore>()(
             specialBonusType: null,
           },
         });
-        }, 1000);
       },
       addBattleLog: (message) => {
         const { battle } = get();

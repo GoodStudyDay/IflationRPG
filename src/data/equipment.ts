@@ -131,7 +131,7 @@ function ItemAkusesaripush(
   setumei: string,
   t2: number = 0,
   rank: number = -1,
-  passive: number = 0,
+  hardmode: number = 0,
   image: number = 0,
   mixbase1: number = -1,
   mixbase2: number = -1,
@@ -151,7 +151,7 @@ function ItemAkusesaripush(
     setumei,
     t2,
     rank: rank === -1 ? undefined : rank,
-    hardmode: 0,
+    hardmode,
     image,
     mixbase1: mixbase1 === -1 ? undefined : mixbase1,
     mixbase2: mixbase2 === -1 ? undefined : mixbase2,
@@ -167,7 +167,7 @@ function ItemAkusesaripush(
 
     maxQuantity: 3,
     attributeRate: 100,
-    passive: passive > 0,
+    passive: hardmode === 4,
   };
   itemDataMana.ItemuAKUSE[index] = equipment;
 }
