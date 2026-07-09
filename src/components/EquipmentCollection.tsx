@@ -127,17 +127,22 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative text-gray-400 text-sm font-bold w-6">
-                      {equipment.hardmode === 1 && (
-                        <span className="absolute -top-3 -left-1 text-[10px] font-bold text-red-400">Hard</span>
-                      )}
-                      {equipment.hardmode === 2 && (
-                        <span className="absolute -top-3 -left-1 text-[10px] font-bold text-pink-400">Hell</span>
-                      )}
-                      {(equipment.mixbase1 !== undefined || equipment.mixbase2 !== undefined || equipment.mixbase3 !== undefined || equipment.mixbase4 !== undefined) && (
-                        <span className="absolute -top-3 -left-1 text-[10px] font-bold text-purple-400">Mix</span>
-                      )}
-                      {index + 1}
+                    <div className="relative text-gray-400 text-sm font-bold w-6 opacity-100">
+                      <div className="absolute -top-1 left-0 flex flex-col items-start gap-0 leading-none">
+                        {equipment.hardmode === 1 && (
+                          <span className="text-[10px] font-bold text-red-400">Hard</span>
+                        )}
+                        {equipment.hardmode === 2 && (
+                          <span className="text-[10px] font-bold text-pink-400">Hell</span>
+                        )}
+                        {(equipment.mixbase1 !== undefined || equipment.mixbase2 !== undefined || equipment.mixbase3 !== undefined || equipment.mixbase4 !== undefined) && (
+                          <span className="text-[10px] font-bold text-purple-400">Mix</span>
+                        )}
+                        {equipment.passive && (
+                          <span className="text-[10px] font-bold text-green-400">Pasv</span>
+                        )}
+                      </div>
+                      <span style={{ opacity: showInfo ? 1 : 0.5 }}>{index + 1}</span>
                     </div>
                     <div className="flex-shrink-0 w-10 h-10 bg-[#2d1b4e] rounded flex items-center justify-center overflow-hidden">
                       {showInfo && equipment.x !== undefined && equipment.y !== undefined ? (

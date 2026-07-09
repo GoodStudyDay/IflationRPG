@@ -35,6 +35,8 @@ export interface Equipment {
   soulType?: number;
   soulPlus?: number;
   soulPerPlus?: number;
+  /** 被动效果（属性型饰品） */
+  passive?: boolean;
 }
 
 export interface InventoryItem {

@@ -501,6 +501,11 @@ export const useGameStore = create<GameStore>()(
     (set, get) => {
       const { fixedPlayer, unequippedAccessories } = fixStoredPlayerEquipment(storedData?.player);
       
+      // 从 saveData 恢复 stPt（属性点），解决刷新后属性点丢失的问题
+      if (fixedPlayer && (fixedPlayer.stPt === undefined || fixedPlayer.stPt === 0) && saveData.stPt > 0) {
+        fixedPlayer.stPt = saveData.stPt;
+      }
+      
       // 将因星级不匹配被卸下的饰品放回背包
       let initialInv = storedData?.inventory || (collectionData.length > 0 ? collectionData : initialInventory);
       if (unequippedAccessories.length > 0) {
@@ -608,7 +613,7 @@ export const useGameStore = create<GameStore>()(
       currentEquipSetSlotIndex: 0,
       hardmodeUnlock: saveData.hardmodeUnlock,
       hellmodeUnlock: saveData.hellmodeUnlock,
-      hardmode: 0,
+      hardmode: saveData.hardmode || 0,
       playerid: saveData.playerid,
       DropRate: saveData.DropRate,
       language: (saveData.language || 'zh-Hans') as LanguageCode,
@@ -852,6 +857,9 @@ export const useGameStore = create<GameStore>()(
           };
           set(afterSet);
           autoAllocateStPt();
+          const stPtData = loadSaveData();
+          stPtData.stPt = 0;
+          saveSaveData(stPtData);
           return;
         }
         
@@ -872,6 +880,9 @@ export const useGameStore = create<GameStore>()(
             expToNextLevel: expToNext,
           },
         });
+        const stPtData = loadSaveData();
+        stPtData.stPt = finalStPt;
+        saveSaveData(stPtData);
       },
       addToInventory: (equipmentId, quantity) => {
         const { inventory } = get();
@@ -1765,6 +1776,9 @@ export const useGameStore = create<GameStore>()(
       setHardmode: (hardmode) => {
         const maxBP = hardmode === 1 ? 15 : 30;
         set({ hardmode, maxBattlePoints: maxBP, battlePoints: maxBP });
+        const data = loadSaveData();
+        data.hardmode = hardmode;
+        saveSaveData(data);
       },
       setLanguage: (language) => {
         set({ language });
@@ -3300,6 +3314,9 @@ export const useGameStore = create<GameStore>()(
           currentMap: 1,
           debugKill: false,
         });
+        // 新游戏时重置 saveData 中的 stPt
+        saveData.stPt = 0;
+        saveSaveData(saveData);
       },
       incrementWinBattle: () => {
         const { winbattle, Highlv, player, hardmodeUnlock, hellmodeUnlock } = get();
@@ -3630,10 +3647,17 @@ export const useGameStore = create<GameStore>()(
         }
         
         set({ player: newPlayer });
+        const stPtData = loadSaveData();
+        stPtData.stPt = newPlayer.stPt;
+        saveSaveData(stPtData);
       },
       addStPt: (amount) => {
         const { player } = get();
-        set({ player: { ...player, stPt: (player.stPt || 0) + amount } });
+        const newStPt = (player.stPt || 0) + amount;
+        set({ player: { ...player, stPt: newStPt } });
+        const stPtData = loadSaveData();
+        stPtData.stPt = newStPt;
+        saveSaveData(stPtData);
       },
     };
   },

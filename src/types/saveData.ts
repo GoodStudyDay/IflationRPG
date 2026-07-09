@@ -14,6 +14,7 @@ export interface GameSaveData {
   equipSets: EquipSet[];
   hardmodeUnlock: number;
   hellmodeUnlock: number;
+  hardmode: number;
   hmDragonDefeat: number;
   playerid: number;
   playername: string;
@@ -24,6 +25,7 @@ export interface GameSaveData {
   presetNum: number;
   presets: number[][];
   autoAllocateEnabled: boolean;
+  stPt: number;
   apurihyouka: number;
   apurihyouka2: number;
   tweetcount: number;
@@ -59,6 +61,7 @@ export const initialGameSaveData: GameSaveData = {
   equipSets: [],
   hardmodeUnlock: 0,
   hellmodeUnlock: 0,
+  hardmode: 0,
   hmDragonDefeat: 0,
   playerid: 0,
   playername: '',
@@ -75,6 +78,7 @@ export const initialGameSaveData: GameSaveData = {
     [0, 0, 0, 0, 0],
   ],
   autoAllocateEnabled: false,
+  stPt: 0,
   apurihyouka: 0,
   apurihyouka2: 0,
   tweetcount: 0,

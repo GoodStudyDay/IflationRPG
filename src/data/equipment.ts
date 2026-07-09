@@ -69,6 +69,7 @@ function ItemBUKIpush(
     icon: '⚔️',
     maxQuantity: 10,
     attributeRate: multi + 100,
+    passive: false,
   };
   itemDataMana.ItemuBUKI[index] = equipment;
 }
@@ -115,6 +116,7 @@ function ItemBOUGUpush(
 
     maxQuantity: 10,
     attributeRate: multi + 100,
+    passive: false,
   };
   itemDataMana.ItemuBOUGU[index] = equipment;
 }
@@ -165,6 +167,7 @@ function ItemAkusesaripush(
 
     maxQuantity: 3,
     attributeRate: 100,
+    passive: [30, 31, 32, 33, 34, 35, 40, 41, 42, 43].includes(t1),
   };
   itemDataMana.ItemuAKUSE[index] = equipment;
 }
@@ -218,6 +221,7 @@ export function ItemSoulpush(
     soulType: t1 === 14 ? 14 : t1 === 15 ? 15 : undefined,
     soulPlus: t1,
     soulPerPlus: t2,
+    passive: false,
   };
   itemDataMana.ItemuSOUL[index] = equipment;
 }
@@ -259,6 +263,7 @@ export function ItemMaterialpush(
     icon: '💠',
     maxQuantity: 10,
     attributeRate: 100,
+    passive: false,
   };
   itemDataMana.ItemuMATERIAL[index] = equipment;
 }
