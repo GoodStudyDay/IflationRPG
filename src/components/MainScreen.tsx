@@ -289,7 +289,7 @@ export const MainScreen = () => {
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择BOSS')}</h3>
             <div className="space-y-2" ref={bossListRef}>
               {[...BOSS_DATA]
-              .filter(boss => boss.difficulty === 0 && !boss.name.startsWith('?'))
+              .filter(boss => boss.difficulty === 0 && !boss.name.startsWith('?') && !boss.name.includes('神秘Boss'))
               .sort((a, b) => a.level - b.level)
               .map((boss) => {
                 const isDefeated = defeatedBosses.includes(boss.bossId);

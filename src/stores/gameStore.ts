@@ -2375,7 +2375,7 @@ export const useGameStore = create<GameStore>()(
         });
       },
       startBossBattle: (bossId: number) => {
-        const { player, battlePoints, inventory, Highlv, dropNum, defeatedBosses } = get();
+        const { player, battlePoints, inventory, Highlv, dropNum, defeatedBosses, bonus } = get();
         
         if (battlePoints <= 0) {
           return;
@@ -2494,6 +2494,11 @@ export const useGameStore = create<GameStore>()(
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
           : null;
         
+        // 记录触发战斗的特殊 bonus 类型（12=i, 13=iii 用于隐藏地图传送）
+        const specialBonusType = bonus.currentBonus && bonus.currentBonus.bonusType >= 12
+          ? bonus.currentBonus.bonusType
+          : null;
+        
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2529,7 +2534,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
-            specialBonusType: null,
+            specialBonusType,
           },
         });
       },
