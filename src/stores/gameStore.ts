@@ -315,11 +315,12 @@ const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Pl
 
   if (fixedPlayer.equippedAccessories) {
     fixedPlayer.equippedAccessories = fixedPlayer.equippedAccessories
+      .filter(acc => acc !== null)
       .map(acc => {
-        const found = getEquipmentById(acc.id);
+        const found = getEquipmentById(acc!.id);
         return found || acc;
       })
-      .filter(acc => getEquipmentById(acc.id));
+      .filter(acc => getEquipmentById(acc.id)) as Equipment[];
     
     // 检测星级不匹配的饰品：将不符合槽位星级限制的饰品取消装备
     const getSlotMaxRank = (slotIndex: number): number => {
@@ -2893,7 +2894,7 @@ export const useGameStore = create<GameStore>()(
                 }));
                 
                 const healAccessories = player.equippedAccessories?.filter(acc => 
-                  acc.t1 === 1200 || acc.t1 === 1201 || acc.t1 === 1202 || acc.t1 === 1203
+                  acc && (acc.t1 === 1200 || acc.t1 === 1201 || acc.t1 === 1202 || acc.t1 === 1203)
                 ) || [];
                 if (healAccessories.length > 0) {
                   const maxHealRate = Math.max(...healAccessories.map(acc => acc.t2 || 0));
