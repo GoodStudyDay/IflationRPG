@@ -1291,7 +1291,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
       
       {showGoldError && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-lg z-50 text-sm font-bold">
-          金币不足！
+          {t('金币不足！')}
         </div>
       )}
 

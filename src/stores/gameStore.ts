@@ -2236,7 +2236,6 @@ export const useGameStore = create<GameStore>()(
         const slot1 = dropSlots[0] || null;
         const slot2 = dropSlots[1] || null;
         const slot3 = dropSlots[2] || null;
-        
         const battleVarResult = battleVarInit(
           {
             hp: player.hp,
@@ -2421,6 +2420,24 @@ export const useGameStore = create<GameStore>()(
         modifiedBoss.attack = Math.floor(boss.attack * multiplier.attack);
         modifiedBoss.expReward = Math.floor(boss.expReward * multiplier.exp);
         modifiedBoss.goldReward = Math.floor(boss.goldReward * multiplier.gold);
+        
+        // 应用地图奖励效果到 Boss
+        if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
+          switch (bonus.currentBonus.bonusType) {
+            case 0: // 敌HP半减
+              modifiedBoss.hp = Math.floor(modifiedBoss.maxHp * 0.5);
+              break;
+            case 1: // 敌攻击力半减
+              modifiedBoss.attack = Math.floor(modifiedBoss.attack * 0.5);
+              break;
+            case 7: // 经验1.5倍
+              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 1.5);
+              break;
+            case 8: // 经验2倍
+              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 2);
+              break;
+          }
+        }
         
         const normalDrops = boss.drops.slice(0, 3);
         const hardDrops = boss.drops.slice(3, 6);
