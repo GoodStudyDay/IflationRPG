@@ -12,7 +12,6 @@ const changelog = [
       '修复weapon1/weapon3/weapon4/weapon5/material精灵表尺寸与实际图片不符的问题',
       'Legendary Astra改回使用buki32png精灵表（原buki2png资产缺失）',
       '添加合成材料、合成、合成成功、材料不足的7语言翻译',
-      'gamedebug新增+kill命令：开启后每次战斗一击必杀',
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { equipmentData } from '@/data/equipment';
+import { equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
 import { enemiesData } from '@/data/enemies';
 import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { BOSS_DATA } from '@/data/bossData';
@@ -8,6 +8,7 @@ import type { Equipment } from '@/types';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
 import { useNames } from '@/hooks/useNames';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useGameStore } from '@/stores/gameStore';
 import { equipmentNameTranslations } from '@/data/equipmentNames';
 import { bossNameTranslations, mapNameTranslations } from '@/data/names';
 
@@ -32,6 +33,7 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
   const { getEquipName } = useEquipmentName();
   const { translateBossName, translateMapName } = useNames();
   const { t } = useTranslation();
+  const { inventory } = useGameStore();
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -280,6 +282,41 @@ export const DropGuideModal = ({ isOpen, onClose }: DropGuideModalProps) => {
                         </div>
                       </div>
                     ))}
+
+                    {(() => {
+                      const typeMap: Record<string, string> = {
+                        weapon: 'weapon', armor: 'armor', accessory: 'accessory',
+                        soul: 'soul', material: 'material',
+                      };
+                      const recipe = getRecipeForEquipment(
+                        typeMap[entry.equipment.type] || 'material',
+                        entry.equipment.listnum || 0
+                      );
+                      if (!recipe) return null;
+
+                      return (
+                        <div className="px-3 py-2 border-t border-[#4a2c7a]">
+                          <div className="text-game-secondary font-bold text-xs mb-1">{t('合成材料')}</div>
+                          <div className="bg-[#1a0a2e] rounded p-1.5 space-y-0.5">
+                            {recipe.materials.map((m, idx) => {
+                              const matEq = getEquipmentByTypeAndListnum(m.type, m.listnum);
+                              const owned = matEq ? inventory.find(i => i.equipmentId === matEq.id)?.quantity || 0 : 0;
+                              const hasEnough = owned >= m.quantity;
+                              return (
+                                <div key={idx} className="flex items-center justify-between text-xs">
+                                  <span className={hasEnough ? 'text-gray-300' : 'text-red-400'}>
+                                    {matEq ? getEquipName(matEq.name) : '???'}
+                                  </span>
+                                  <span className={hasEnough ? 'text-gray-400' : 'text-red-400'}>
+                                    {owned}/{m.quantity}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
