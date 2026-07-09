@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { CharacterSprite } from './CharacterSprite';
 import { BattleResult } from './BattleResult';
+import { BattleEffect } from './BattleEffect';
 import { SpriteIcon } from './SpriteIcon';
 import { getEquipmentById } from '@/data/equipment';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -35,6 +36,7 @@ export const BattleScreen = () => {
     tryEscape,
     setRecoverNextTurn,
     hardmode,
+    clearBattleEffect,
   } = useGameStore();
   
   const recoveryCost = Math.floor(player.maxHp * 0.2);
@@ -213,11 +215,15 @@ export const BattleScreen = () => {
             ) : null}
             <div className={`w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-[#3d2b6e] rounded-lg border-2 border-red-500 flex items-center justify-center mx-auto ${battle.enemy.imageUrl ? 'hidden' : ''}`}>
               {battle.enemy.icon ? (
-                <img 
-                  src={battle.enemy.icon} 
-                  alt={battle.enemy.name}
-                  className="w-full h-full object-contain rounded-lg"
-                />
+                battle.enemy.icon.startsWith('/') || battle.enemy.icon.startsWith('http') || battle.enemy.icon.startsWith('data:') ? (
+                  <img 
+                    src={battle.enemy.icon} 
+                    alt={battle.enemy.name}
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <span className="text-3xl sm:text-5xl md:text-6xl">{battle.enemy.icon}</span>
+                )
               ) : (
                 <span className="text-3xl sm:text-5xl md:text-6xl">?</span>
               )}
@@ -386,6 +392,14 @@ export const BattleScreen = () => {
               </div>
             </div>
           </div>
+        )}
+        
+        {battle.activeEffect && (
+          <BattleEffect 
+            effectId={battle.activeEffect.effectId}
+            position={battle.activeEffect.position}
+            onComplete={clearBattleEffect}
+          />
         )}
         
         <BattleResult />
