@@ -9,11 +9,13 @@ export interface BattleEffect {
   blendMode: 'normal' | 'add';
 }
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 export const battleEffects: BattleEffect[] = [
   {
     index: 0,
     name: 'ef_kougeki1',
-    imagePath: '/images/eef/257_ef_kougeki1.png',
+    imagePath: `${BASE_URL}images/eef/257_ef_kougeki1.png`,
     framesPerRow: 9,
     rows: 1,
     frameCount: 9,
@@ -23,7 +25,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 1,
     name: 'ef_kougeki2',
-    imagePath: '/images/eef/258_ef_kougeki2.png',
+    imagePath: `${BASE_URL}images/eef/258_ef_kougeki2.png`,
     framesPerRow: 9,
     rows: 1,
     frameCount: 9,
@@ -33,7 +35,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 2,
     name: 'ef_kougeki3',
-    imagePath: '/images/eef/259_ef_kougeki3.png',
+    imagePath: `${BASE_URL}images/eef/259_ef_kougeki3.png`,
     framesPerRow: 9,
     rows: 1,
     frameCount: 9,
@@ -43,7 +45,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 3,
     name: 'ef_kougeki4',
-    imagePath: '/images/eef/260_ef_kougeki4.png',
+    imagePath: `${BASE_URL}images/eef/260_ef_kougeki4.png`,
     framesPerRow: 9,
     rows: 1,
     frameCount: 9,
@@ -53,7 +55,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 4,
     name: 'ef_kaihuku',
-    imagePath: '/images/eef/256_ef_kaihuku.png',
+    imagePath: `${BASE_URL}images/eef/256_ef_kaihuku.png`,
     framesPerRow: 12,
     rows: 1,
     frameCount: 12,
@@ -63,7 +65,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 5,
     name: 'ef_Skougeki1',
-    imagePath: '/images/eef/250_ef_Skougeki1.png',
+    imagePath: `${BASE_URL}images/eef/250_ef_Skougeki1.png`,
     framesPerRow: 5,
     rows: 3,
     frameCount: 14,
@@ -73,7 +75,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 6,
     name: 'ef_Skougeki2',
-    imagePath: '/images/eef/251_ef_Skougeki2.png',
+    imagePath: `${BASE_URL}images/eef/251_ef_Skougeki2.png`,
     framesPerRow: 5,
     rows: 3,
     frameCount: 13,
@@ -83,7 +85,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 7,
     name: 'ef_Skougeki3',
-    imagePath: '/images/eef/252_ef_Skougeki3.png',
+    imagePath: `${BASE_URL}images/eef/252_ef_Skougeki3.png`,
     framesPerRow: 5,
     rows: 6,
     frameCount: 29,
@@ -93,7 +95,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 8,
     name: 'ef_Skougeki4',
-    imagePath: '/images/eef/253_ef_Skougeki4.png',
+    imagePath: `${BASE_URL}images/eef/253_ef_Skougeki4.png`,
     framesPerRow: 5,
     rows: 6,
     frameCount: 27,
@@ -103,7 +105,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 9,
     name: 'ef_Skougeki5',
-    imagePath: '/images/eef/254_ef_Skougeki5.png',
+    imagePath: `${BASE_URL}images/eef/254_ef_Skougeki5.png`,
     framesPerRow: 5,
     rows: 6,
     frameCount: 27,
@@ -113,7 +115,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 10,
     name: 'ef_Skougeki6',
-    imagePath: '/images/eef/255_ef_Skougeki6.png',
+    imagePath: `${BASE_URL}images/eef/255_ef_Skougeki6.png`,
     framesPerRow: 5,
     rows: 6,
     frameCount: 25,
@@ -123,7 +125,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 11,
     name: 'buff_Shield1',
-    imagePath: '/images/eef/257_ef_kougeki1.png',
+    imagePath: `${BASE_URL}images/eef/257_ef_kougeki1.png`,
     framesPerRow: 5,
     rows: 4,
     frameCount: 19,
@@ -133,7 +135,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 12,
     name: 'buff_Condenced1',
-    imagePath: '/images/eef/257_ef_kougeki1.png',
+    imagePath: `${BASE_URL}images/eef/257_ef_kougeki1.png`,
     framesPerRow: 5,
     rows: 6,
     frameCount: 3,
@@ -143,7 +145,7 @@ export const battleEffects: BattleEffect[] = [
   {
     index: 13,
     name: 'ef_Enekougeki1',
-    imagePath: '/images/eef/249_ef_Enekougeki1.png',
+    imagePath: `${BASE_URL}images/eef/249_ef_Enekougeki1.png`,
     framesPerRow: 7,
     rows: 1,
     frameCount: 7,
