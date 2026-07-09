@@ -1073,6 +1073,22 @@ export const translations: Record<string, TranslationKey> = {
 '龙人法师': { ja: 'ドラゴニュートメイジ', en: 'Dragonoid Mage', 'zh-Hant': '龍人法師', 'zh-Hans': '龙人法师', ko: '드래고노이드 메이지', es: 'Mago Dragonoide', id: 'Penyihir Dragonoid' },
 '龙谷守卫者': { ja: '竜谷の守護者', en: 'Dragon Valley Guardian', 'zh-Hant': '龍谷守護者', 'zh-Hans': '龙谷守卫者', ko: '용곡의 수호자', es: 'Guardián del Valle del Dragón', id: 'Penjaga Lembah Naga' },
 '史莱姆': { ja: 'スライム', en: 'Slime', 'zh-Hant': '史萊姆', 'zh-Hans': '史莱姆', ko: '슬라임', es: 'Slime', id: 'Slime' },
+'战士': { ja: '戦士', en: 'Warrior', 'zh-Hant': '戰士', 'zh-Hans': '战士', ko: '전사', es: 'Guerrero', id: 'Prajurit' },
+'勇者': { ja: '勇者', en: 'Hero', 'zh-Hant': '勇者', 'zh-Hans': '勇者', ko: '영웅', es: 'Héroe', id: 'Pahlawan' },
+'游侠': { ja: 'レンジャー', en: 'Ranger', 'zh-Hant': '遊俠', 'zh-Hans': '游侠', ko: '레인저', es: 'Arquero', id: 'Penjelajah' },
+'刺客': { ja: 'アサシン', en: 'Assassin', 'zh-Hant': '刺客', 'zh-Hans': '刺客', ko: '암살자', es: 'Asesino', id: 'Pembunuh' },
+'法师': { ja: '魔法使い', en: 'Mage', 'zh-Hant': '法師', 'zh-Hans': '法师', ko: '마법사', es: 'Mago', id: 'Penyihir' },
+'神官': { ja: '神官', en: 'Priest', 'zh-Hant': '神官', 'zh-Hans': '神官', ko: '성관', es: 'Sacerdote', id: 'Pendeta' },
+'贤者': { ja: '賢者', en: 'Sage', 'zh-Hant': '賢者', 'zh-Hans': '贤者', ko: '현자', es: 'Sabio', id: 'Bijaksana' },
+'召唤师': { ja: '召喚士', en: 'Summoner', 'zh-Hant': '召喚師', 'zh-Hans': '召唤师', ko: '소환사', es: 'Invocador', id: 'Penghibur' },
+'守卫': { ja: 'ガード', en: 'Guard', 'zh-Hant': '守衛', 'zh-Hans': '守卫', ko: '가드', es: 'Guardia', id: 'Pengawal' },
+'骑士': { ja: '騎士', en: 'Knight', 'zh-Hant': '騎士', 'zh-Hans': '骑士', ko: '기사', es: 'Caballero', id: 'Ksatria' },
+'圣骑士': { ja: 'パラディン', en: 'Paladin', 'zh-Hant': '聖騎士', 'zh-Hans': '圣骑士', ko: '팔라딘', es: 'Paladín', id: 'Paladin' },
+'暗骑士': { ja: 'ダークナイト', en: 'Dark Knight', 'zh-Hant': '暗騎士', 'zh-Hans': '暗骑士', ko: '다크 나이트', es: 'Caballero Oscuro', id: 'Ksatria Gelap' },
+'忍者': { ja: '忍者', en: 'Ninja', 'zh-Hant': '忍者', 'zh-Hans': '忍者', ko: '닌자', es: 'Ninja', id: 'Ninja' },
+'武僧': { ja: '武僧', en: 'Monk', 'zh-Hant': '武僧', 'zh-Hans': '武僧', ko: '무승', es: 'Monje', id: 'Buddha' },
+'格斗家': { ja: '格闘家', en: 'Fighter', 'zh-Hant': '格鬥家', 'zh-Hans': '格斗家', ko: '격투가', es: 'Luchador', id: 'Petarung' },
+'狂战士': { ja: 'バーサーカー', en: 'Berserker', 'zh-Hant': '狂戰士', 'zh-Hans': '狂战士', ko: '버서커', es: 'Berserker', id: 'Berserker' },
 };
 export const getTranslation = (key: string, lang: LanguageCode): string => {
   const translation = translations[key];

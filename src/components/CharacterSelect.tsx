@@ -190,7 +190,7 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-black/60 rounded-b-lg py-1">
                   <div className="text-center text-[8px] sm:text-[10px] text-white font-bold truncate px-1">
-                    {hero.name}
+                    {t(hero.name)}
                   </div>
                   <div className="text-center text-[6px] sm:text-[8px] text-gray-400 truncate px-1">
                     {getStatDescription(hero)}

@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { loadSaveData } from '@/utils/saveDataStorage';
 import { getkyaraLv, getkyaraLvMaxExp, SEIGEN_KYARA_LV } from '@/utils/kyaraLevel';
-import { Inventory } from './Inventory';
 import { Leaderboard } from './Leaderboard';
+import { MenuOverlay } from './MenuOverlay';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const GameoverScreen = () => {
   const { player, kyarakutaKozinExp, goToTitle } = useGameStore();
   const { t } = useTranslation();
-  const [showCollection, setShowCollection] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const saveData = loadSaveData();
 
@@ -83,7 +83,7 @@ export const GameoverScreen = () => {
         <div className="mt-6 flex justify-center max-w-2xl mx-auto w-full">
           <div className="flex flex-col gap-3 w-full lg:w-auto">
             <button
-              onClick={() => setShowCollection(true)}
+              onClick={() => setShowMenu(true)}
               className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg"
             >
               {t('菜单')} / {t('装备')}
@@ -106,8 +106,8 @@ export const GameoverScreen = () => {
         </div>
       </div>
 
-      {showCollection && (
-        <Inventory onClose={() => setShowCollection(false)} />
+      {showMenu && (
+        <MenuOverlay onClose={() => setShowMenu(false)} />
       )}
       
       {showLeaderboard && (
