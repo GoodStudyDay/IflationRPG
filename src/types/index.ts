@@ -158,8 +158,10 @@ export interface BattleState {
   _loopComboCount: number;
   /** 恢复费用部分支付标记 */
   _recvCost?: boolean;
-  /** 触发战斗的特殊 bonus 类型 (12=¡, 13=¡¡¡, etc) */
+  /** 触发战斗的特殊 bonus 类型 (12=i, 13=iii, etc) */
   specialBonusType: number | null;
+  /** 当前播放的战斗特效 */
+  activeEffect: { effectId: number; position: 'player' | 'enemy' } | null;
 }
 
 // 奖励类型

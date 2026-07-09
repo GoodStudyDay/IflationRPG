@@ -26,6 +26,7 @@ export interface GameSaveData {
   presets: number[][];
   autoAllocateEnabled: boolean;
   stPt: number;
+  stPtAllocate: { hp: number; atk: number; def: number; agi: number; luc: number };
   apurihyouka: number;
   apurihyouka2: number;
   tweetcount: number;
@@ -79,6 +80,7 @@ export const initialGameSaveData: GameSaveData = {
   ],
   autoAllocateEnabled: false,
   stPt: 0,
+  stPtAllocate: { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 },
   apurihyouka: 0,
   apurihyouka2: 0,
   tweetcount: 0,
