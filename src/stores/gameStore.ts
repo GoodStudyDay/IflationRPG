@@ -167,6 +167,7 @@ interface GameStore {
   updateHighDamage: (damage: number) => void;
   updateHighLv: (level: number) => void;
   addMapBonus: () => void;
+  setMapBonus: (bonusType: number, count?: number) => void;
   exportSaveData: () => string;
   importSaveData: (data: string) => void;
   clearMapBonus: () => void;
@@ -1953,12 +1954,178 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
+        const hardmode = get().hardmode || 0;
         const currentMap = get().currentMap;
         const mapEnemies = getMapEnemies(currentMap);
         const randomIndex = Math.floor(Math.random() * mapEnemies.length);
-        const enemy = { ...mapEnemies[randomIndex] };
         
-        const hardmode = get().hardmode || 0;
+        let enemy: ReturnType<typeof getMapEnemies>[0] = { ...mapEnemies[randomIndex] };
+        const bonus = get().bonus;
+        
+        if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
+          const bonusType = bonus.currentBonus.bonusType;
+          let bossId: number | null = null;
+          const tekiseilv = mapEnemies[0]?.level || 0;
+          const defeatedBosses = get().defeatedBosses || [];
+          const totalWeaponCount = inventory.filter(item => item.equipmentId.startsWith('weapon-')).reduce((sum, item) => sum + (item.quantity || 0), 0);
+          const totalArmorCount = inventory.filter(item => item.equipmentId.startsWith('armor-')).reduce((sum, item) => sum + (item.quantity || 0), 0);
+          
+          const getRandomBoss = (ids: number[]): number => {
+            return ids[Math.floor(Math.random() * ids.length)];
+          };
+          
+          switch (bonusType) {
+            case 9:
+              if (Math.random() <= 0.52) {
+                bossId = getRandomBoss([32, 33, 34, 35]);
+              }
+              break;
+            case 10:
+              if (Math.random() <= 0.47) {
+                if (hardmode === 0) {
+                  bossId = getRandomBoss([40, 41, 42]);
+                } else {
+                  bossId = getRandomBoss([436, 437, 438, 439]);
+                }
+              }
+              break;
+            case 11:
+              if (Math.random() <= 0.52) {
+                let weights: number[];
+                if (tekiseilv < 3000) {
+                  weights = [10, 10, 10];
+                } else if (tekiseilv < 8000) {
+                  weights = [12, 12, 12, 9, 7, 7];
+                } else {
+                  weights = [10, 10, 10, 9, 7, 7];
+                }
+                const totalWeight = weights.reduce((sum, v) => sum + v, 0);
+                let random = Math.random() * totalWeight;
+                for (let i = 0; i < weights.length; i++) {
+                  random -= weights[i];
+                  if (random <= 0) {
+                    bossId = 48 + i;
+                    break;
+                  }
+                }
+              }
+              break;
+            case 12:
+              if (Math.random() <= 0.48) {
+                bossId = 61;
+                if (hardmode === 0) {
+                  if (defeatedBosses.includes(60)) {
+                    bossId = 60;
+                  }
+                } else if (defeatedBosses.includes(62)) {
+                  bossId = 62;
+                }
+                if (bossId === 61) {
+                  const weaponThreshold = hardmode === 0 ? 44 : 71;
+                  if (totalWeaponCount >= weaponThreshold) {
+                    bossId = hardmode === 0 ? 60 : 62;
+                  }
+                }
+              }
+              break;
+            case 13:
+              if (Math.random() <= 0.47) {
+                bossId = 67;
+                if (hardmode === 0) {
+                  if (defeatedBosses.includes(66)) {
+                    bossId = 66;
+                  }
+                } else if (defeatedBosses.includes(68)) {
+                  bossId = 68;
+                }
+                if (bossId === 67) {
+                  const weaponThreshold = hardmode === 0 ? 31 : 56;
+                  if (totalWeaponCount >= weaponThreshold) {
+                    bossId = hardmode === 0 ? 66 : 68;
+                  }
+                }
+                if (bossId === 67) {
+                  const armorThreshold = hardmode === 0 ? 12 : 28;
+                  if (totalArmorCount >= armorThreshold) {
+                    bossId = hardmode === 0 ? 66 : 68;
+                  }
+                }
+              }
+              break;
+            case 14:
+              if (Math.random() <= 0.48) {
+                bossId = 61;
+                if (hardmode === 0) {
+                  if (defeatedBosses.includes(60)) {
+                    bossId = 60;
+                  }
+                } else if (defeatedBosses.includes(62)) {
+                  bossId = 62;
+                }
+                if (bossId === 61) {
+                  const weaponThreshold = hardmode === 0 ? 44 : 71;
+                  if (totalWeaponCount >= weaponThreshold) {
+                    bossId = hardmode === 0 ? 60 : 62;
+                  }
+                }
+              }
+              break;
+            case 15:
+              if (Math.random() <= 0.47) {
+                bossId = 67;
+                if (hardmode === 0) {
+                  if (defeatedBosses.includes(66)) {
+                    bossId = 66;
+                  }
+                } else if (defeatedBosses.includes(68)) {
+                  bossId = 68;
+                }
+                if (bossId === 67) {
+                  const weaponThreshold = hardmode === 0 ? 31 : 56;
+                  if (totalWeaponCount >= weaponThreshold) {
+                    bossId = hardmode === 0 ? 66 : 68;
+                  }
+                }
+                if (bossId === 67) {
+                  const armorThreshold = hardmode === 0 ? 12 : 28;
+                  if (totalArmorCount >= armorThreshold) {
+                    bossId = hardmode === 0 ? 66 : 68;
+                  }
+                }
+              }
+              break;
+            case 16:
+              bossId = 90;
+              break;
+            case 17:
+              if (Math.random() <= 0.68) {
+                bossId = 104;
+                if (hardmode === 0 && totalWeaponCount >= 80) {
+                  bossId = 103;
+                } else if (hardmode === 1 && totalWeaponCount >= 100) {
+                  bossId = 105;
+                }
+              }
+              break;
+            case 18:
+              if (Math.random() <= 0.68) {
+                bossId = 104;
+                if (hardmode === 0 && totalWeaponCount >= 80) {
+                  bossId = 103;
+                } else if (hardmode === 1 && totalWeaponCount >= 100) {
+                  bossId = 105;
+                }
+              }
+              break;
+          }
+          
+          if (bossId !== null) {
+            const boss = getBossById(bossId, hardmode);
+            if (boss) {
+              enemy = { ...boss };
+            }
+          }
+        }
         
         const difficultyMultipliers = [
           { hp: 1, attack: 1, exp: 1, gold: 1 },
@@ -2061,7 +2228,6 @@ export const useGameStore = create<GameStore>()(
           : null;
         
         // 应用地图奖励效果
-        const bonus = get().bonus;
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
           switch (bonus.currentBonus.bonusType) {
             case 0: // 敌HP半减
@@ -2433,9 +2599,9 @@ export const useGameStore = create<GameStore>()(
 
         // 胜利后如果没有 bonus，40% 概率生成新 bonus
         if (victory) {
-          const { bonus: currentBonus } = get();
+          const { bonus: currentBonus, hardmode } = get();
           if (!currentBonus.currentBonus && Math.random() < 0.4) {
-            const newBonusType = getRandomBonusType(player.level * 100);
+            const newBonusType = getRandomBonusType(player.level * 100, hardmode);
             const bonusCount = Math.floor(Math.random() * 5) + 1; // 1-5 次
             console.log('[Bonus] Auto-generated after victory: type=', newBonusType, 'count=', bonusCount);
             set((s) => ({
@@ -3185,16 +3351,31 @@ export const useGameStore = create<GameStore>()(
       },
       // 奖励系统
       addMapBonus: () => {
-        const { bonus, player } = get();
+        const { bonus, player, hardmode } = get();
         if (bonus.addUsesLeft <= 0) return;
         
-        const bonusType = getRandomBonusType(player.level * 100);
+        const bonusType = getRandomBonusType(player.level * 100, hardmode);
         const count = Math.floor(Math.random() * 3) + 1;
         
         set((s) => ({
           bonus: {
             ...s.bonus,
             addUsesLeft: s.bonus.addUsesLeft - 1,
+            currentBonus: {
+              bonusType,
+              remainingCount: count,
+            },
+          },
+        }));
+      },
+      setMapBonus: (bonusType: number, count: number = 5) => {
+        if (bonusType < 0 || bonusType > 18) {
+          console.warn(`Bonus 类型 ${bonusType} 无效，有效范围: 0-18`);
+          return;
+        }
+        set((s) => ({
+          bonus: {
+            ...s.bonus,
             currentBonus: {
               bonusType,
               remainingCount: count,

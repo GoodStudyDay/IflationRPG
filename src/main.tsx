@@ -18,6 +18,7 @@ declare global {
       addGold: (amount: number) => void;
       addExp: (amount: number) => void;
       listEquipment: (keyword?: string) => void;
+      setMapBonus: (bonusType: number, count?: number) => void;
     };
   }
 }
@@ -53,5 +54,17 @@ window.gameDebug = {
       const eq = getEquipmentById(item.equipmentId);
       console.log(`  ${eq?.name || item.equipmentId}: ${item.quantity}`);
     });
+  },
+  setMapBonus: (bonusType: number, count = 5) => {
+    const bonusList = [
+      '敌HP半减', '敌攻击力半减', '会心连続率上昇',
+      '金币2倍', '金币3倍', '金币4倍', '金币7倍',
+      '经验值1.5倍', '经验值2倍',
+      '?A?', '?B?', '?C?',
+      '¡', '¡¡¡', '¡', '¡¡¡', '!?', '○★○', '○★○',
+    ];
+    const name = bonusList[bonusType] || `未知(${bonusType})`;
+    useGameStore.getState().setMapBonus(bonusType, count);
+    console.log(`已设置地图 Bonus: ${name} (类型=${bonusType}, 次数=${count})`);
   },
 };

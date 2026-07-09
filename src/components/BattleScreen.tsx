@@ -7,6 +7,23 @@ import { getEquipmentById } from '@/data/equipment';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
 
+// 星空背景粒子
+const Star = ({ x, y, size, delay, color }: { x: number; y: number; size: number; delay: number; color?: string }) => (
+  <div
+    className="absolute rounded-full animate-pulse"
+    style={{
+      left: `${x}%`,
+      top: `${y}%`,
+      width: `${size}px`,
+      height: `${size}px`,
+      backgroundColor: color || 'rgba(255,255,255,0.8)',
+      animationDuration: `${2 + ((x * 7 + y * 13) % 3)}s`,
+      animationDelay: `${delay}s`,
+      boxShadow: `0 0 ${size * 2}px ${size}px ${color || 'rgba(255,255,255,0.3)'}`,
+    }}
+  />
+);
+
 export const BattleScreen = () => {
   const { t } = useTranslation();
   const { getEquipName } = useEquipmentName();
@@ -83,11 +100,61 @@ export const BattleScreen = () => {
       }}
     >
       <div className="flex-1 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2d5a2d] to-[#1a3a1a]">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-green-500 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-green-600 rounded-full blur-3xl" />
+        {/* 战斗背景 - 星空主题 */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* 深空基底层 */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020010] via-[#0a0520] to-[#060018]" />
+          
+          {/* 星云光晕 */}
+          <div className="absolute top-[10%] left-[15%] w-[60%] h-[40%] bg-purple-600/10 rounded-full blur-[100px]" />
+          <div className="absolute top-[40%] right-[10%] w-[40%] h-[30%] bg-blue-500/8 rounded-full blur-[80px]" />
+          <div className="absolute bottom-[10%] left-[20%] w-[50%] h-[35%] bg-indigo-500/10 rounded-full blur-[90px]" />
+          <div className="absolute top-[20%] right-[30%] w-[30%] h-[25%] bg-pink-600/6 rounded-full blur-[70px]" />
+          
+          {/* 星空点阵 */}
+          <div className="absolute inset-0">
+            {/* 大星 */}
+            <Star x={8} y={12} size={3} delay={0} />
+            <Star x={22} y={8} size={2.5} delay={1.2} />
+            <Star x={45} y={5} size={2} delay={0.6} />
+            <Star x={65} y={15} size={3} delay={2.0} />
+            <Star x={78} y={8} size={2} delay={1.5} />
+            <Star x={85} y={22} size={2.5} delay={0.3} />
+            <Star x={15} y={28} size={2} delay={1.8} />
+            <Star x={35} y={18} size={3} delay={0.9} />
+            <Star x={55} y={25} size={2} delay={2.2} />
+            <Star x={72} y={35} size={2.5} delay={1.1} />
+            <Star x={5} y={45} size={2} delay={0.7} />
+            <Star x={28} y={50} size={3} delay={1.4} />
+            <Star x={48} y={55} size={2} delay={2.5} />
+            <Star x={62} y={48} size={2.5} delay={0.4} />
+            <Star x={80} y={52} size={2} delay={1.9} />
+            <Star x={18} y={65} size={2} delay={2.1} />
+            <Star x={38} y={72} size={2.5} delay={0.8} />
+            <Star x={58} y={68} size={2} delay={1.6} />
+            <Star x={75} y={75} size={3} delay={0.2} />
+            <Star x={90} y={60} size={2} delay={1.3} />
+            
+            {/* 小星群 */}
+             <Star x={12} y={20} size={1} delay={1.7} color="rgba(147,197,253,0.8)" />
+             <Star x={30} y={35} size={1} delay={0.5} color="rgba(147,197,253,0.8)" />
+             <Star x={50} y={12} size={1} delay={2.3} color="rgba(147,197,253,0.8)" />
+             <Star x={68} y={20} size={1} delay={0.1} color="rgba(147,197,253,0.8)" />
+             <Star x={82} y={40} size={1} delay={1.0} color="rgba(147,197,253,0.8)" />
+             <Star x={25} y={60} size={1} delay={2.4} color="rgba(147,197,253,0.8)" />
+             <Star x={42} y={80} size={1} delay={0.3} color="rgba(147,197,253,0.8)" />
+             <Star x={55} y={40} size={1} delay={1.9} color="rgba(147,197,253,0.8)" />
+             <Star x={70} y={58} size={1} delay={2.1} color="rgba(147,197,253,0.8)" />
+             <Star x={10} y={75} size={1} delay={1.1} color="rgba(147,197,253,0.8)" />
+             <Star x={88} y={10} size={1} delay={0.6} color="rgba(147,197,253,0.8)" />
+             <Star x={33} y={45} size={1} delay={2.0} color="rgba(147,197,253,0.8)" />
           </div>
+          
+          {/* 底部地平线暗影 */}
+          <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          
+          {/* Vignette 暗角 */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_50%,_rgba(0,0,0,0.55)_100%)]" />
         </div>
         
         <div className="hidden sm:block absolute top-0 left-0 w-8 h-full border-l-2 border-blue-500/50" />

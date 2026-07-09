@@ -9,6 +9,16 @@
  * 6: 获得金币7倍 (Gold x7)
  * 7: 经验值1.5倍 (Exp x1.5)
  * 8: 经验值2倍 (Exp x2)
+ * 9: ?A? - 特殊Boss 32-35
+ * 10: ?B? - 特殊Boss 40-42 (普通模式) / 436-439 (困难模式)
+ * 11: ?C? - 特殊Boss 48-53
+ * 12: ¡ - 单感叹号 Boss 67
+ * 13: ¡¡¡ - 三感叹号 Boss 90
+ * 14: ¡ - 单感叹号 Boss 67
+ * 15: ¡¡¡ - 三感叹号 Boss 104
+ * 16: !? - 问号 Boss 90
+ * 17: ○★○ - 星星 Boss (困难模式)
+ * 18: ○★○ - 星星 Boss (困难模式)
  */
 
 export interface BonusInfo {
@@ -29,26 +39,65 @@ export const BONUS_LIST: BonusInfo[] = [
   { type: 6, name: '金币7倍', description: '获得金币x7', icon: '💰', color: 'text-yellow-300' },
   { type: 7, name: '经验值1.5倍', description: '获得经验x1.5', icon: '⭐', color: 'text-green-400' },
   { type: 8, name: '经验值2倍', description: '获得经验x2', icon: '⭐', color: 'text-green-400' },
+  { type: 9, name: '?A?', description: '特殊Boss战', icon: '👑', color: 'text-purple-400' },
+  { type: 10, name: '?B?', description: '特殊Boss战', icon: '💀', color: 'text-orange-400' },
+  { type: 11, name: '?C?', description: '特殊Boss战', icon: '⚙️', color: 'text-cyan-400' },
+  { type: 12, name: '¡', description: '特殊Boss战', icon: '🔥', color: 'text-red-500' },
+  { type: 13, name: '¡¡¡', description: '特殊Boss战', icon: '💥', color: 'text-red-600' },
+  { type: 14, name: '¡', description: '特殊Boss战', icon: '🔥', color: 'text-red-500' },
+  { type: 15, name: '¡¡¡', description: '特殊Boss战', icon: '💥', color: 'text-red-600' },
+  { type: 16, name: '!?', description: '特殊Boss战', icon: '❓', color: 'text-yellow-500' },
+  { type: 17, name: '○★○', description: '特殊Boss战', icon: '⭐', color: 'text-yellow-400' },
+  { type: 18, name: '○★○', description: '特殊Boss战', icon: '⭐', color: 'text-yellow-400' },
 ];
 
 /**
  * 根据适正等级随机生成奖励类型
+ * 普通模式(BonasTxt 索引 0-18)：
+ *   0-8: 普通奖励
+ *   9: ?A?
+ *   10: ?B?
+ *   11: ?C?
+ *   12: ¡
+ *   13: ¡¡¡
+ *   14: ¡
+ *   15: ¡¡¡
+ *   16: !?
+ *   17: ○★○
+ *   18: ○★○
+ * 困难模式(BonasTxt 索引 0-16)：
+ *   0-8: 普通奖励(经验值2倍替换为3倍)
+ *   9: ?A?
+ *   10: ?B?
+ *   11: ?C?
+ *   12: ¡
+ *   13: ¡¡¡
+ *   14: ¡
+ *   15: ¡¡¡
+ *   16: !?
  */
-export function getRandomBonusType(monsterLevel: number): number {
-  const weights = [
-    [4, 4, 20, 10, 12, 14, 20, 8, 30],
-  ];
+export function getRandomBonusType(monsterLevel: number, hardmode: number = 0): number {
+  const maxBonusType = hardmode === 0 ? 18 : 16;
+  
+  const weights = {
+    normal: [4, 4, 20, 10, 12, 14, 20, 8, 30, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4],
+    lvl1000: [4, 4, 16, 7, 12, 12, 12, 4, 16, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3],
+    lvl2500: [4, 4, 16, 5, 10, 12, 12, 3, 18, 5, 5, 5, 5, 5, 5, 5, 5, 3, 3],
+    lvl10000: [4, 4, 16, 5, 5, 12, 12, 3, 18, 5, 5, 5, 5, 5, 5, 5, 5, 2, 2],
+  };
 
-  let w = [...weights[0]];
-  if (monsterLevel >= 1000) {
-    w = [4, 4, 16, 7, 12, 12, 12, 4, 16];
-  }
-  if (monsterLevel >= 2500) {
-    w = [4, 4, 16, 5, 10, 12, 12, 3, 18];
-  }
+  let w: number[];
   if (monsterLevel >= 10000) {
-    w = [4, 4, 16, 5, 5, 12, 12, 3, 18];
+    w = [...weights.lvl10000];
+  } else if (monsterLevel >= 2500) {
+    w = [...weights.lvl2500];
+  } else if (monsterLevel >= 1000) {
+    w = [...weights.lvl1000];
+  } else {
+    w = [...weights.normal];
   }
+
+  w = w.slice(0, maxBonusType + 1);
 
   const totalWeight = w.reduce((sum, v) => sum + v, 0);
   let random = Math.random() * totalWeight;
@@ -65,6 +114,7 @@ export function getRandomBonusType(monsterLevel: number): number {
 
 /**
  * 应用奖励效果到战斗
+ * 类型 9-18 是特殊Boss奖励，不直接修改战斗参数，而是在战斗开始时决定出现的怪物
  */
 export function applyBonusEffect(
   bonusType: number,
@@ -74,7 +124,8 @@ export function applyBonusEffect(
   critRate: number,
   comboRate: number,
   goldMultiplier: number,
-  expMultiplier: number
+  expMultiplier: number,
+  hardmode: number = 0
 ): {
   enemyHp: number;
   enemyAtk: number;
@@ -119,7 +170,18 @@ export function applyBonusEffect(
       result.expMultiplier *= 1.5;
       break;
     case 8:
-      result.expMultiplier *= 2;
+      result.expMultiplier *= hardmode === 0 ? 2 : 3;
+      break;
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
       break;
   }
 
