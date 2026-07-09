@@ -154,6 +154,8 @@ export interface BattleState {
   _loopMode: number;
   _loopTick: number;
   _loopComboCount: number;
+  /** 触发战斗的特殊 bonus 类型 (12=¡, 13=¡¡¡, etc) */
+  specialBonusType: number | null;
 }
 
 // 奖励类型

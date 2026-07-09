@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.54',
+    date: '2026-07-09 18:00:00',
+    changes: [
+      '隐藏地图系统：地图13(魔王城)和14(恶魔深渊)改为隐藏地图，普通传送列表不再显示',
+      '隐藏地图入口：遇到i或iii Bonus击败对应Boss后自动传送到隐藏地图，随机生成1-5次战斗次数',
+      '隐藏地图规则：次数耗尽自动返回原地图，隐藏地图内不会遇到Boss',
+      '添加gamedebug命令：获取全部武器/防具/饰品(+allweapons/+allarmor/+allaccessories)，清除存档(+clearsave)',
+      '修复史莱姆缺少多语言翻译的问题',
+      '修复装备格子不足时出售装备可能导致装备丢失的问题：出售前优先填充空格子',
+    ],
+  },
+  {
     version: 'v0.0.53',
     date: '2026-07-09 12:00:00',
     changes: [

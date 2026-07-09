@@ -131,6 +131,8 @@ interface GameStore {
   currentMap: number;
   lastBossId: number | null;
   lastMapId: number | null;
+  originalMap: number;
+  hiddenMapBonusCount: number;
   purchaseCounts: Record<string, number>;
   peakSnapshot: PeakSnapshot | null;
   setPlayer: (player: Player) => void;
@@ -176,6 +178,10 @@ interface GameStore {
   getBonusInfo: () => { type: number; name: string; description: string; icon: string; color: string } | null;
   /** 传送到指定地图 */
   teleportToMap: (mapId: number) => void;
+  /** 进入隐藏地图 */
+  enterHiddenMap: (mapId: number, bonusType: number) => void;
+  /** 退出隐藏地图 */
+  exitHiddenMap: () => void;
   /** 解锁饰品栏位 */
   unlockAccessorySlot: (slotIndex?: number) => boolean;
   /** 检查装备饰品数量是否超过库存，超过则清空对应栏位 */
@@ -547,6 +553,7 @@ export const useGameStore = create<GameStore>()(
           _loopMode: 3,
           _loopTick: 0,
           _loopComboCount: 1,
+        specialBonusType: null,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -615,6 +622,8 @@ export const useGameStore = create<GameStore>()(
       currentMap: 1,
       lastBossId: null,
       lastMapId: null,
+      originalMap: 1,
+      hiddenMapBonusCount: 0,
       purchaseCounts: storedData?.purchaseCounts || {},
       peakSnapshot: storedData?.peakSnapshot || null,
       setPlayer: (player) => set({ player }),
@@ -1924,6 +1933,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            specialBonusType: null,
           },
         });
         get().checkZeroEquips();
@@ -1967,6 +1977,7 @@ export const useGameStore = create<GameStore>()(
         const bonus = get().bonus;
         
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
+          const isHiddenMap = get().currentMap === 13 || get().currentMap === 14;
           const bonusType = bonus.currentBonus.bonusType;
           let bossId: number | null = null;
           const tekiseilv = mapEnemies[0]?.level || 0;
@@ -2123,7 +2134,7 @@ export const useGameStore = create<GameStore>()(
               break;
           }
           
-          if (bossId !== null) {
+          if (bossId !== null && !isHiddenMap) {
             const boss = getBossById(bossId, hardmode);
             if (boss) {
               enemy = { ...boss };
@@ -2231,6 +2242,8 @@ export const useGameStore = create<GameStore>()(
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
           : null;
         
+        
+        
         // 应用地图奖励效果
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
           switch (bonus.currentBonus.bonusType) {
@@ -2277,6 +2290,11 @@ export const useGameStore = create<GameStore>()(
           }));
         }
         
+        // 记录触发战斗的特殊 bonus 类型（12=i, 13=iii 等用于隐藏地图传送）
+        const specialBonusType = bonus.currentBonus && bonus.currentBonus.bonusType >= 12
+          ? bonus.currentBonus.bonusType
+          : null;
+        
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2285,6 +2303,7 @@ export const useGameStore = create<GameStore>()(
           battle: {
             enemy,
             status: 'idle',
+            specialBonusType,
             battleLog: ['敌人出现了！', '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
             comboCount: 0,
             comboRate: battleVarResult.comboRate * 100,
@@ -2470,6 +2489,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            specialBonusType: null,
           },
         });
       },
@@ -2587,9 +2607,14 @@ export const useGameStore = create<GameStore>()(
           return;
         }
         
+        const { currentMap: map, hiddenMapBonusCount: bonusCount } = get();
+        const isHiddenMap = map === 13 || map === 14;
+        const newHiddenMapBonusCount = isHiddenMap ? bonusCount - 1 : bonusCount;
+        
         set({
           battlePoints: newBattlePoints,
           defeatedBosses: newDefeatedBosses,
+          hiddenMapBonusCount: newHiddenMapBonusCount,
           battle: {
             ...battle,
             status: 'idle',
@@ -2603,10 +2628,31 @@ export const useGameStore = create<GameStore>()(
           },
         });
 
+        // 如果隐藏地图 bonus 次数耗尽，退出隐藏地图
+        if (isHiddenMap && newHiddenMapBonusCount <= 0) {
+          setTimeout(() => {
+            const { exitHiddenMap } = get();
+            exitHiddenMap();
+          }, 100);
+        }
+
         // 胜利后如果没有 bonus，40% 概率生成新 bonus
         if (victory) {
-          const { bonus: currentBonus, hardmode } = get();
-          if (!currentBonus.currentBonus && Math.random() < 0.4) {
+          const { bonus: currentBonus, hardmode, enterHiddenMap } = get();
+          
+          // 检查是否击败了特殊Boss，触发隐藏地图传送
+          const enemy = battle.enemy as any;
+          const bossId = enemy?.bossId;
+          const spType = battle.specialBonusType;
+          if (bossId && spType) {
+            if (spType === 12 && (bossId === 60 || bossId === 61)) {
+              enterHiddenMap(13, 12);
+            } else if (spType === 13 && (bossId === 66 || bossId === 67)) {
+              enterHiddenMap(14, 13);
+            }
+          }
+          
+          if (!currentBonus.currentBonus && Math.random() < 0.4 && !isHiddenMap) {
             const newBonusType = getRandomBonusType(player.level * 100, hardmode);
             const bonusCount = Math.floor(Math.random() * 5) + 1; // 1-5 次
             console.log('[Bonus] Auto-generated after victory: type=', newBonusType, 'count=', bonusCount);
@@ -3009,6 +3055,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            specialBonusType: null,
           },
         });
         }, 1000);
@@ -3180,6 +3227,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            specialBonusType: null,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
@@ -3408,7 +3456,36 @@ export const useGameStore = create<GameStore>()(
       teleportToMap: (mapId) => {
         const map = MAP_LIST.find(m => m.id === mapId);
         if (!map) return;
+        if (map.hidden) return;
         set({ currentMap: mapId, lastMapId: mapId });
+      },
+      enterHiddenMap: (mapId: number, bonusType: number) => {
+        const { currentMap } = get();
+        const bonusCount = Math.floor(Math.random() * 5) + 1;
+        set({
+          originalMap: currentMap,
+          currentMap: mapId,
+          hiddenMapBonusCount: bonusCount,
+          bonus: {
+            addUsesLeft: 5,
+            clearUsesLeft: 5,
+            currentBonus: {
+              bonusType,
+              remainingCount: bonusCount,
+            },
+          },
+        });
+        console.log(`[HiddenMap] Entered map ${mapId}, bonusType: ${bonusType}, bonusCount: ${bonusCount}, original map: ${currentMap}`);
+      },
+      exitHiddenMap: () => {
+        const { originalMap } = get();
+        set({
+          currentMap: originalMap,
+          hiddenMapBonusCount: 0,
+          currentScene: 'world',
+          encounterRate: 0,
+        });
+        console.log(`[HiddenMap] Exited, returned to map ${originalMap}`);
       },
       unlockAccessorySlot: (slotIndex?: number) => {
         const { player } = get();

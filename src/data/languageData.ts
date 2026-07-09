@@ -1067,7 +1067,9 @@ export const translations: Record<string, TranslationKey> = {
 '黑沼泽之主': { ja: '黒沼の主', en: 'Lord of Black Swamp', 'zh-Hant': '黑沼澤之主', 'zh-Hans': '黑沼泽之主', ko: '흑늪의 주인', es: 'Señor del Pantano Negro', id: 'Penguasa Rawa Hitam' },
 '龙人战士': { ja: 'ドラゴニュートウォリアー', en: 'Dragonoid Warrior', 'zh-Hant': '龍人戰士', 'zh-Hans': '龙人战士', ko: '드래고노이드 워리어', es: 'Guerrero Dragonoide', id: 'Prajurit Dragonoid' },
 '龙人法师': { ja: 'ドラゴニュートメイジ', en: 'Dragonoid Mage', 'zh-Hant': '龍人法師', 'zh-Hans': '龙人法师', ko: '드래고노이드 메이지', es: 'Mago Dragonoide', id: 'Penyihir Dragonoid' },
-'龙谷守卫者': { ja: '竜谷の守護者', en: 'Dragon Valley Guardian', 'zh-Hant': '龍谷守護者', 'zh-Hans': '龙谷守卫者', ko: '용곡의 수호자', es: 'Guardián del Valle del Dragón', id: 'Penjaga Lembah Naga' },};
+'龙谷守卫者': { ja: '竜谷の守護者', en: 'Dragon Valley Guardian', 'zh-Hant': '龍谷守護者', 'zh-Hans': '龙谷守卫者', ko: '용곡의 수호자', es: 'Guardián del Valle del Dragón', id: 'Penjaga Lembah Naga' },
+'史莱姆': { ja: 'スライム', en: 'Slime', 'zh-Hant': '史萊姆', 'zh-Hans': '史莱姆', ko: '슬라임', es: 'Slime', id: 'Slime' },
+};
 export const getTranslation = (key: string, lang: LanguageCode): string => {
   const translation = translations[key];
   if (!translation) {

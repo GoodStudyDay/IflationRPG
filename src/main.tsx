@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { useGameStore } from './stores/gameStore'
-import { getEquipmentById } from './data/equipment'
+import { getEquipmentById, equipmentData } from './data/equipment'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +19,10 @@ declare global {
       addExp: (amount: number) => void;
       listEquipment: (keyword?: string) => void;
       setMapBonus: (bonusType: number, count?: number) => void;
+      addAllWeapons: () => void;
+      addAllArmor: () => void;
+      addAllAccessories: () => void;
+      clearSave: () => void;
     };
   }
 }
@@ -66,5 +70,27 @@ window.gameDebug = {
     const name = bonusList[bonusType] || `未知(${bonusType})`;
     useGameStore.getState().setMapBonus(bonusType, count);
     console.log(`已设置地图 Bonus: ${name} (类型=${bonusType}, 次数=${count})`);
+  },
+  addAllWeapons: () => {
+    const store = useGameStore.getState();
+    const weapons = equipmentData.filter(e => e.type === 'weapon');
+    weapons.forEach(w => store.addToInventory(w.id, 1));
+    console.log(`已添加全部武器 (${weapons.length} 件)`);
+  },
+  addAllArmor: () => {
+    const store = useGameStore.getState();
+    const armors = equipmentData.filter(e => e.type === 'armor');
+    armors.forEach(a => store.addToInventory(a.id, 1));
+    console.log(`已添加全部防具 (${armors.length} 件)`);
+  },
+  addAllAccessories: () => {
+    const store = useGameStore.getState();
+    const accessories = equipmentData.filter(e => e.type === 'accessory');
+    accessories.forEach(a => store.addToInventory(a.id, 1));
+    console.log(`已添加全部饰品 (${accessories.length} 件)`);
+  },
+  clearSave: () => {
+    useGameStore.getState().resetGame();
+    console.log('存档已清除');
   },
 };

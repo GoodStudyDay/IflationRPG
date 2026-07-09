@@ -230,7 +230,7 @@ export const MainScreen = () => {
           <div className="bg-[#2d1b4e] border-2 border-[#5a3c8a] rounded-lg p-3 sm:p-4 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-bold text-base sm:text-lg mb-3 text-center">{t('选择地图')}</h3>
             <div className="space-y-2" ref={mapListRef}>
-              {MAP_LIST.map(map => {
+              {MAP_LIST.filter(map => !map.hidden).map(map => {
                 const isCurrent = map.id === currentMap;
                 const isLastMap = map.id === lastMapId;
                 return (
