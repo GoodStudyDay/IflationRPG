@@ -83,17 +83,27 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
     const armors = equipmentData.filter(e => e.type === 'armor');
     const accessories = equipmentData.filter(e => e.type === 'accessory');
 
-    const collectedWeapons = collection.filter(i => i.equipmentId.startsWith('weapon-')).length;
-    const collectedArmors = collection.filter(i => i.equipmentId.startsWith('armor-')).length;
-    const collectedAccessories = collection.filter(i => i.equipmentId.startsWith('accessory-')).length;
+    const weaponTotal = weapons.reduce((sum, w) => sum + (w.maxQuantity || 10), 0);
+    const armorTotal = armors.reduce((sum, a) => sum + (a.maxQuantity || 10), 0);
+    const accessoryTotal = accessories.reduce((sum, acc) => sum + (acc.maxQuantity || 3), 0);
+
+    const collectedWeaponCount = collection
+      .filter(i => i.equipmentId.startsWith('weapon-'))
+      .reduce((sum, i) => sum + i.quantity, 0);
+    const collectedArmorCount = collection
+      .filter(i => i.equipmentId.startsWith('armor-'))
+      .reduce((sum, i) => sum + i.quantity, 0);
+    const collectedAccessoryCount = collection
+      .filter(i => i.equipmentId.startsWith('accessory-'))
+      .reduce((sum, i) => sum + i.quantity, 0);
 
     return {
-      weaponTotal: weapons.length,
-      armorTotal: armors.length,
-      accessoryTotal: accessories.length,
-      collectedWeaponCount: collectedWeapons,
-      collectedArmorCount: collectedArmors,
-      collectedAccessoryCount: collectedAccessories,
+      weaponTotal,
+      armorTotal,
+      accessoryTotal,
+      collectedWeaponCount,
+      collectedArmorCount,
+      collectedAccessoryCount,
     };
   }, [collection]);
 

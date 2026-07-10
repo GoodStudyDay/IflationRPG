@@ -60,7 +60,7 @@ function computeOldSpecialAdditive(
       let itemCount2 = 0;
       for (const item of inventory) {
         const eq = getEquipmentById(item.equipmentId);
-        if (eq && eq.y >= 1 && eq.y <= 2 && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+        if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
           itemCount1 += item.quantity;
         }
       }
@@ -468,7 +468,7 @@ const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, access
   }
   
   if (earthPower) {
-    damage *= (1 - (earthPower.t2 || 0) / 100);
+    damage *= (1 - 25 / 100);
   }
   
   let threshold = enemyAttack * 0.5;
@@ -752,10 +752,8 @@ export const useGameStore = create<GameStore>()(
           let itemCount1 = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2) {
-              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
-                itemCount1 += item.quantity;
-              }
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount1 += item.quantity;
             }
           }
           
@@ -1136,15 +1134,13 @@ export const useGameStore = create<GameStore>()(
         }
         
         const protectionStone = accessories.filter(acc => acc && acc.t1 === 1111);
-        for (const gem of protectionStone) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp += _loc2_ * 100;
+        for (const _gem of protectionStone) {
+          newPlayer.maxHp += 1500000;
         }
         
         const powerStone = accessories.filter(acc => acc && acc.t1 === 2222);
-        for (const gem of powerStone) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.attack += _loc2_ * 50;
+        for (const _gem of powerStone) {
+          newPlayer.attack += 800000;
         }
         
         const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
@@ -1154,7 +1150,7 @@ export const useGameStore = create<GameStore>()(
           let itemCount1 = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2 && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
               itemCount1 += item.quantity;
             }
           }
@@ -1190,9 +1186,8 @@ export const useGameStore = create<GameStore>()(
         }
         
         const earthPower = accessories.filter(acc => acc && acc.t1 === 4003);
-        for (const gem of earthPower) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
+        for (const _gem of earthPower) {
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * 2);
         }
         
         const duskCrystal = accessories.filter(acc => acc && acc.t1 === 15);
@@ -1524,15 +1519,13 @@ export const useGameStore = create<GameStore>()(
         }
         
         const protectionStone = accessories.filter(acc => acc && acc.t1 === 1111);
-        for (const gem of protectionStone) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp += _loc2_ * 100;
+        for (const _gem of protectionStone) {
+          newPlayer.maxHp += 1500000;
         }
         
         const powerStone = accessories.filter(acc => acc && acc.t1 === 2222);
-        for (const gem of powerStone) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.attack += _loc2_ * 50;
+        for (const _gem of powerStone) {
+          newPlayer.attack += 800000;
         }
         
         for (const gem of accessories.filter(acc => acc && acc.t1 === 35)) {
@@ -1541,7 +1534,7 @@ export const useGameStore = create<GameStore>()(
           let itemCount1 = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2 && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
               itemCount1 += item.quantity;
             }
           }
@@ -1577,9 +1570,8 @@ export const useGameStore = create<GameStore>()(
         }
         
         const earthPower = accessories.filter(acc => acc && acc.t1 === 4003);
-        for (const gem of earthPower) {
-          const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * (1 + _loc2_ / 100));
+        for (const _gem of earthPower) {
+          newPlayer.maxHp = Math.ceil(newPlayer.maxHp * 2);
         }
         
         // [DEBUG] loadEquipSet final
@@ -1897,10 +1889,8 @@ export const useGameStore = create<GameStore>()(
           let itemCount1 = 0;
           for (const item of finalInventory) {
             const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2) {
-              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
-                itemCount1 += item.quantity;
-              }
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount1 += item.quantity;
             }
           }
           
@@ -3276,10 +3266,8 @@ export const useGameStore = create<GameStore>()(
           let itemCount1 = 0;
           for (const item of savedInventory) {
             const eq = getEquipmentById(item.equipmentId);
-            if (eq && eq.y >= 1 && eq.y <= 2) {
-              if (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor') {
-                itemCount1 += item.quantity;
-              }
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount1 += item.quantity;
             }
           }
           

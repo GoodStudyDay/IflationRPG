@@ -23,10 +23,10 @@ const COLS = 3;
 const ROWS = 4;
 
 export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
-  const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp } = useGameStore();
+  const { kyarakutalv, player, hardmodeUnlock, hellmodeUnlock, setHardmode, kyarakutaKozinExp, hardmode } = useGameStore();
   const { t } = useTranslation();
   const [frames, setFrames] = useState<Record<number, number>>({});
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(0);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(hardmode as Difficulty);
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
