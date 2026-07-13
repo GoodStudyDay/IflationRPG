@@ -25,6 +25,7 @@ export const initialPlayer: Player = {
   stPt: 0,
   stPtAllocate: { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 },
   heroId: 0,
+  lvC2: 0.5,
 };
 
 export const initialInventory: InventoryItem[] = [

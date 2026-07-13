@@ -113,6 +113,8 @@ export interface Player {
   stPtAllocate: { hp: number; atk: number; def: number; agi: number; luc: number };
   /** 角色ID (0-15) */
   heroId: number;
+  /** 等级平方值 (lvC2) */
+  lvC2: number;
 }
 
 export type GameScene = 'title' | 'world' | 'battle' | 'gameover';
@@ -164,6 +166,10 @@ export interface BattleState {
   specialBonusType: number | null;
   /** 当前播放的战斗特效 */
   activeEffect: { effectId: number; position: 'player' | 'enemy' } | null;
+  /** 复活剩余次数（resCount=0表示无复活能力） */
+  resCount: number;
+  /** 复活后属性倍率 */
+  resStatUP: number;
 }
 
 // 奖励类型

@@ -84,6 +84,12 @@ function applyEquipmentBonuses(
   possiveDeftoAtk: boolean;
   envelope: boolean;
   missrate: number;
+  // getDecreasedHPRate/getDecreasedATKRate
+  hpReduceRate: number;
+  atkReduceRate: number;
+  // 复活相关（resCount=0表示无复活能力）
+  resCount: number;
+  resStatUP: number;
 } {
   let epHp = 0, epAtk = 0, epDef = 0, epAgi = 0, epLuc = 0;
   let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
@@ -106,6 +112,8 @@ function applyEquipmentBonuses(
   let possiveDeftoAtk = false;
   let envelope = false;
   let missrate = 0;
+  let resCount = 0;
+  let resStatUP = 0;
 
   for (const acc of accessories) {
     if (!acc) continue;
@@ -226,10 +234,16 @@ function applyEquipmentBonuses(
         expMultiplier += 0.8;
       }
     } else if (t1 === 4000) {
+      resCount = 2;
+      resStatUP = 1.03;
     } else if (t1 === 4004) {
+      resCount = 1;
+      resStatUP = 1.03;
     } else if (t1 === 4006) {
       DamageReduced = 33;
       addMaxHP += 1.5;
+      resCount = 2;
+      resStatUP = 1.06;
     }
     
     // passiveUpdate 效果（基于装备ID）
@@ -269,6 +283,14 @@ function applyEquipmentBonuses(
       MoveSpeed = 22;
     }
   }
+  
+  // getDecreasedHPRate (t1=96): HP减少率 -5% per item
+  const hpReduceItems = accessories.filter(acc => acc && acc.t1 === 96);
+  const hpReduceRate = hpReduceItems.length * 0.05;
+  
+  // getDecreasedATKRate (t1=97): ATK减少率 -5% per item  
+  const atkReduceItems = accessories.filter(acc => acc && acc.t1 === 97);
+  const atkReduceRate = atkReduceItems.length * 0.05;
 
   return {
     epHp, epAtk, epDef, epAgi, epLuc,
@@ -276,7 +298,9 @@ function applyEquipmentBonuses(
     addMaxHP, addMaxATK, addMaxDEF, addMaxAGI, addMaxLUC,
     AllstatPer, expMultiplier, GetPlusStPt, DamageReduced, DamageIncreased,
     crihPlusKakuritu, crihplusdamage, renzokuPlusKakuritu, MoveSpeed, SokusiKaihiKakuritu,
-    redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate
+    redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate,
+    hpReduceRate, atkReduceRate,
+    resCount, resStatUP,
   };
 }
 
@@ -765,6 +789,8 @@ export const useGameStore = create<GameStore>()(
           _loopComboCount: 1,
         specialBonusType: null,
         activeEffect: null,
+        resCount: 0,
+        resStatUP: 1,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -865,7 +891,7 @@ export const useGameStore = create<GameStore>()(
         set({ player: { ...player, gold: player.gold + amount } });
       },
       addExp: (amount) => {
-        const { player, updateHighLv, inventory } = get();
+        const { player, updateHighLv, inventory, speedNum } = get();
         
         // battle.txt 升级公式
         // getExpNokori = existing exp + gained exp (行 817)
@@ -881,37 +907,76 @@ export const useGameStore = create<GameStore>()(
         }, 0);
         const maxLevel = 35000000 + dragonForceCount * 5000000;
         
-        // 循环处理升级批次（模拟逐帧升级动画）
-        while (getExpNokori >= expToNext && newLevel < maxLevel) {
-          // _loc11_ = floor(getExpNokori / onenextexp) (行 985)
-          const _loc11_ = Math.floor(getExpNokori / expToNext);
-          
-          // _loc18_ = pow(_loc11_, 0.48) * 0.5, capped 40 (行 988-992)
-          let _loc18_ = Math.pow(_loc11_, 0.48) * 0.5;
-          if (_loc18_ > 40) _loc18_ = 40;
-          
-          // _loc12_ = levels per batch (行 993)
-          let levelsInBatch = 1 + Math.floor(
-            (_loc11_ * 1.22 + lvupsitanum * 0.3) / (76 + _loc18_)
-          );
-          // cap: _loc12_ <= lv * 100 (行 994-996)
-          if (levelsInBatch > newLevel * 100) levelsInBatch = newLevel * 100;
-          if (levelsInBatch < 1) levelsInBatch = 1;
-          
-          // 处理此批次中的每个等级
-          let processed = 0;
-          while (processed < levelsInBatch && getExpNokori >= expToNext && newLevel < maxLevel) {
-            // 减去当前等级所需经验
-            getExpNokori -= expToNext;
-            newLevel++;
-            lvupsitanum++;
-            processed++;
-            // lvUpdata 重新计算 onenextexp
-            expToNext = getExpToNextLevel(newLevel);
+        // battle.txt 中的升级逻辑：
+        // 正常模式 (speedNum == 0): 逐级升级，调用 lvupFunc()
+        // 快速模式 (speedNum != 0): 当等级 >= 125000 时，优先调用 lvupFunc100() 一次性升100级
+        if (speedNum === 0) {
+          // 正常模式：逐级升级
+          while (getExpNokori >= expToNext && newLevel < maxLevel) {
+            // _loc11_ = floor(getExpNokori / onenextexp) (行 985)
+            const _loc11_ = Math.floor(getExpNokori / expToNext);
+            
+            // _loc18_ = pow(_loc11_, 0.48) * 0.5, capped 40 (行 988-992)
+            let _loc18_ = Math.pow(_loc11_, 0.48) * 0.5;
+            if (_loc18_ > 40) _loc18_ = 40;
+            
+            // _loc12_ = levels per batch (行 993)
+            let levelsInBatch = 1 + Math.floor(
+              (_loc11_ * 1.22 + lvupsitanum * 0.3) / (76 + _loc18_)
+            );
+            // cap: _loc12_ <= lv * 100 (行 994-996)
+            if (levelsInBatch > newLevel * 100) levelsInBatch = newLevel * 100;
+            if (levelsInBatch < 1) levelsInBatch = 1;
+            
+            // 处理此批次中的每个等级
+            let processed = 0;
+            while (processed < levelsInBatch && getExpNokori >= expToNext && newLevel < maxLevel) {
+              // 减去当前等级所需经验
+              getExpNokori -= expToNext;
+              newLevel++;
+              lvupsitanum++;
+              processed++;
+              // lvUpdata 重新计算 onenextexp
+              expToNext = getExpToNextLevel(newLevel);
+            }
+            
+            if (processed === 0) break;
           }
-          
-          if (processed === 0) break;
+        } else {
+          // 快速模式：优先使用 lvupFunc100()
+          while (getExpNokori >= expToNext && newLevel < maxLevel) {
+            // 当等级 >= 125000 时，优先尝试一次性升100级
+            if (newLevel >= 125000) {
+              // Get100LevelAfterExp(ga.gdata.lv - 1) 计算升100级所需经验
+              let expFor100Levels = 0;
+              for (let i = 0; i < 100; i++) {
+                expFor100Levels += getExpToNextLevel(newLevel + i);
+              }
+              
+              if (getExpNokori >= expFor100Levels) {
+                // 调用 lvupFunc100(): 一次性升100级
+                getExpNokori -= expFor100Levels;
+                newLevel += 100;
+                lvupsitanum += 100;
+                // lvUpdata 重新计算 onenextexp
+                expToNext = getExpToNextLevel(newLevel);
+              } else {
+                // 经验不足，转为逐级升级
+                break;
+              }
+            } else {
+              // 等级 < 125000，逐级升级
+              getExpNokori -= expToNext;
+              newLevel++;
+              lvupsitanum++;
+              expToNext = getExpToNextLevel(newLevel);
+            }
+          }
         }
+        
+        // 更新 lvC2（遵循gdata.txt中的lvupFunc()）
+        const lvC2Increase = lvupsitanum * 0.5;
+        const newLvC2 = (player.lvC2 || 0.5) + lvC2Increase;
         
         // 计算最终属性加成（包含装备和存货加成）
         const bonus = getLevelBonus(newLevel);
@@ -981,17 +1046,13 @@ export const useGameStore = create<GameStore>()(
         
         // 使用已分配的属性点（stPtAllocate），不再从当前属性中提取
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
-        const hpStPtBonus = stPtAllocate.hp;
-        const atkStPtBonus = stPtAllocate.atk;
-        const defStPtBonus = stPtAllocate.def;
-        const agiStPtBonus = stPtAllocate.agi;
-        const lucStPtBonus = stPtAllocate.luc;
+        const hpStPtBonus = stPtAllocate.hp * 5;
+        const atkStPtBonus = stPtAllocate.atk * 3;
+        const defStPtBonus = stPtAllocate.def * 3;
+        const agiStPtBonus = stPtAllocate.agi * 2;
+        const lucStPtBonus = stPtAllocate.luc * 1;
         
         updateHighLv(newLevel);
-        
-        const attrCrystal = accessories.find(acc => acc && (acc.t1 === 700 || acc.t1 === 701 || acc.t1 === 2701));
-        const stPtPerLevel = attrCrystal ? (attrCrystal.t2 || 5) : 4;
-        const stPtIncrease = lvupsitanum * stPtPerLevel;
         
         const braveProof = accessories.find(acc => acc && acc.t1 === 820);
         if (braveProof) {
@@ -1021,6 +1082,19 @@ export const useGameStore = create<GameStore>()(
           agiInc = Math.ceil(agiInc * (1 + bonus));
         }
         
+        const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
+        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
+        
+        // 根据 gdata.txt 中的 lvupFunc()，每级属性点 = 4 + GetPlusStPt
+        const stPtPerLevel = 4 + bonuses.GetPlusStPt;
+        const stPtIncrease = lvupsitanum * stPtPerLevel;
+        
+        const finalHp = Math.floor((hpInc + hpStPtBonus + bonuses.epHp) * (1 + bonuses.ebHp + bonuses.addMaxHP + bonuses.AllstatPer));
+        const finalAtk = Math.floor((atkInc + atkStPtBonus + bonuses.epAtk) * (1 + bonuses.ebAtk + bonuses.addMaxATK + bonuses.AllstatPer));
+        const finalDef = Math.floor((defInc + defStPtBonus + bonuses.epDef) * (1 + bonuses.ebDef + bonuses.addMaxDEF + bonuses.AllstatPer));
+        const finalAgi = Math.floor((agiInc + agiStPtBonus + bonuses.epAgi) * (1 + bonuses.ebAgi + bonuses.addMaxAGI + bonuses.AllstatPer));
+        const finalLuc = Math.floor((lucInc + lucStPtBonus + bonuses.epLuc) * (1 + bonuses.ebLuc + bonuses.addMaxLUC + bonuses.AllstatPer));
+        
         const { autoAllocateEnabled, autoAllocateStPt } = get();
         
         let finalStPt = (player.stPt || 0) + stPtIncrease;
@@ -1030,17 +1104,18 @@ export const useGameStore = create<GameStore>()(
             player: {
               ...player,
               level: newLevel,
-              maxHp: hpInc + hpStPtBonus,
-              hp: hpInc + hpStPtBonus,
-              attack: atkInc + atkStPtBonus,
-              defense: defInc + defStPtBonus,
-              agility: agiInc + agiStPtBonus,
-              luck: lucInc + lucStPtBonus,
+              maxHp: finalHp,
+              hp: finalHp,
+              attack: finalAtk,
+              defense: finalDef,
+              agility: finalAgi,
+              luck: finalLuc,
               maxMana: initialPlayer.maxMana + bonus.mana,
               mana: initialPlayer.maxMana + bonus.mana,
               stPt: finalStPt,
               exp: getExpNokori,
               expToNextLevel: expToNext,
+              lvC2: newLvC2,
             },
           };
           set(afterSet);
@@ -1055,17 +1130,18 @@ export const useGameStore = create<GameStore>()(
           player: {
             ...player,
             level: newLevel,
-            maxHp: hpInc + hpStPtBonus,
-            hp: hpInc + hpStPtBonus,
-            attack: atkInc + atkStPtBonus,
-            defense: defInc + defStPtBonus,
-            agility: agiInc + agiStPtBonus,
-            luck: lucInc + lucStPtBonus,
+            maxHp: finalHp,
+            hp: finalHp,
+            attack: finalAtk,
+            defense: finalDef,
+            agility: finalAgi,
+            luck: finalLuc,
             maxMana: initialPlayer.maxMana + bonus.mana,
             mana: initialPlayer.maxMana + bonus.mana,
             stPt: finalStPt,
             exp: getExpNokori,
             expToNextLevel: expToNext,
+            lvC2: newLvC2,
           },
         });
         const stPtData = loadSaveData();
@@ -1268,11 +1344,11 @@ export const useGameStore = create<GameStore>()(
         }
         
         // 应用加性属性加成
-        const finalBaseHp = baseHp + stPtHp + bonuses.epHp;
-        const finalBaseAtk = baseAtk + stPtAtk + bonuses.epAtk;
-        const finalBaseDef = baseDef + stPtDef + bonuses.epDef;
-        const finalBaseAgi = baseAgi + stPtAgi + bonuses.epAgi;
-        const finalBaseLuc = baseLuc + stPtLuc + bonuses.epLuc;
+        const finalBaseHp = baseHp + stPtHp * 5 + bonuses.epHp;
+        const finalBaseAtk = baseAtk + stPtAtk * 3 + bonuses.epAtk;
+        const finalBaseDef = baseDef + stPtDef * 3 + bonuses.epDef;
+        const finalBaseAgi = baseAgi + stPtAgi * 2 + bonuses.epAgi;
+        const finalBaseLuc = baseLuc + stPtLuc * 1 + bonuses.epLuc;
         
         // 应用乘性属性加成（遵循 EqStUpdate 的最终公式）
         newPlayer.maxHp = Math.floor((finalBaseHp + finalBaseHp * bonuses.ebHp) * (1 + bonuses.addMaxHP + bonuses.AllstatPer));
@@ -1560,11 +1636,11 @@ export const useGameStore = create<GameStore>()(
         console.log('使用 stPtAllocate:', {hp: stPtHp, atk: stPtAtk, def: stPtDef, agi: stPtAgi, luc: stPtLuc});
         
         // 应用加性属性加成
-        const finalBaseHp = baseHp + stPtHp + bonuses.epHp;
-        const finalBaseAtk = baseAtk + stPtAtk + bonuses.epAtk;
-        const finalBaseDef = baseDef + stPtDef + bonuses.epDef;
-        const finalBaseAgi = baseAgi + stPtAgi + bonuses.epAgi;
-        const finalBaseLuc = baseLuc + stPtLuc + bonuses.epLuc;
+        const finalBaseHp = baseHp + stPtHp * 5 + bonuses.epHp;
+        const finalBaseAtk = baseAtk + stPtAtk * 3 + bonuses.epAtk;
+        const finalBaseDef = baseDef + stPtDef * 3 + bonuses.epDef;
+        const finalBaseAgi = baseAgi + stPtAgi * 2 + bonuses.epAgi;
+        const finalBaseLuc = baseLuc + stPtLuc * 1 + bonuses.epLuc;
         
         // 应用乘性属性加成（遵循 EqStUpdate 的最终公式）
         const newPlayer = {
@@ -1900,7 +1976,7 @@ export const useGameStore = create<GameStore>()(
         
         newMaxHp = Math.floor((newMaxHp + newMaxHp * bonuses.ebHp) * (1 + bonuses.addMaxHP + bonuses.AllstatPer));
         newAtk = Math.floor((newAtk + newAtk * bonuses.ebAtk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer));
-        newDef = Math.floor((newDef + newDef * bonuses.ebDef) * (1 + bonuses.addMaxDEF + bonuses.AllstatPer)) - newDef;
+        newDef = Math.floor((newDef + newDef * bonuses.ebDef) * (1 + bonuses.addMaxDEF + bonuses.AllstatPer));
         newAgi = Math.floor((newAgi + newAgi * bonuses.ebAgi) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
         newLuc = Math.floor((newLuc + newLuc * bonuses.ebLuc) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
         
@@ -1959,6 +2035,8 @@ export const useGameStore = create<GameStore>()(
             _loopComboCount: 1,
             specialBonusType: null,
             activeEffect: null,
+            resCount: bonuses.resCount,
+            resStatUP: bonuses.resStatUP,
           },
         });
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
@@ -2326,6 +2404,11 @@ export const useGameStore = create<GameStore>()(
           ? bonus.currentBonus.bonusType
           : null;
         
+        // 计算复活参数
+        const eqBonuses = applyEquipmentBonuses(
+          accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
+        );
+        
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2363,6 +2446,8 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             activeEffect: null,
+            resCount: eqBonuses.resCount,
+            resStatUP: eqBonuses.resStatUP,
           },
         });
       },
@@ -2515,6 +2600,11 @@ export const useGameStore = create<GameStore>()(
           ? bonus.currentBonus.bonusType
           : null;
         
+        // 计算复活参数
+        const eqBonuses2 = applyEquipmentBonuses(
+          accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
+        );
+        
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2552,6 +2642,8 @@ export const useGameStore = create<GameStore>()(
             _loopComboCount: 1,
             specialBonusType,
             activeEffect: null,
+            resCount: eqBonuses2.resCount,
+            resStatUP: eqBonuses2.resStatUP,
           },
         });
       },
@@ -2997,51 +3089,28 @@ export const useGameStore = create<GameStore>()(
                   },
                 }));
                 
-                const { player: newPlayer } = get();
+                const { player: newPlayer, battle: currentBattle } = get();
                 if (newPlayer.hp <= 0) {
-                  const accessories = newPlayer.equippedAccessories || [];
-                  const resurrectionNecklace = accessories.find(acc => acc && (acc.t1 === 1210 || acc.t1 === 1211));
-                  const immortalPower = accessories.find(acc => acc && acc.t1 === 4000);
-                  
-                  let shouldResurrect = false;
-                  let resurrectMessage = '';
-                  
-                  if (resurrectionNecklace) {
-                    const chance = resurrectionNecklace.t1 === 1211 ? 0.5 : 0.3;
-                    if (Math.random() < chance) {
-                      shouldResurrect = true;
-                      resurrectMessage = '起死回生！';
-                      set((s) => ({
-                        player: {
-                          ...s.player,
-                          hp: Math.floor(s.player.maxHp * 0.1),
-                        },
-                      }));
-                    }
-                  }
-                  
-                  if (!shouldResurrect && immortalPower) {
-                    const chance = (immortalPower.t2 || 2) / 100;
-                    if (Math.random() < chance) {
-                      shouldResurrect = true;
-                      resurrectMessage = '不灭之力！';
-                      const statBonus = 0.03;
-                      set((s) => ({
-                        player: {
-                          ...s.player,
-                          hp: Math.floor(s.player.maxHp * 0.1),
-                          maxHp: Math.floor(s.player.maxHp * (1 + statBonus)),
-                          attack: Math.floor(s.player.attack * (1 + statBonus)),
-                          defense: Math.floor(s.player.defense * (1 + statBonus)),
-                          agility: Math.floor(s.player.agility * (1 + statBonus)),
-                          luck: Math.floor(s.player.luck * (1 + statBonus)),
-                        },
-                      }));
-                    }
-                  }
-                  
-                  if (shouldResurrect) {
-                    addBattleLog(resurrectMessage);
+                  // battle.txt 复活逻辑：检查 resCount
+                  if (currentBattle.resCount > 0) {
+                    // 复活：增加属性，减少复活次数
+                    const { resStatUP } = currentBattle;
+                    const oldCount = currentBattle.resCount;
+                    
+                    set((s) => ({
+                      player: {
+                        ...s.player,
+                        hp: Math.floor(s.player.maxHp * resStatUP),
+                        maxHp: Math.floor(s.player.maxHp * resStatUP),
+                        attack: Math.floor(s.player.attack * resStatUP),
+                      },
+                      battle: {
+                        ...s.battle,
+                        resCount: oldCount - 1,
+                      },
+                    }));
+                    
+                    addBattleLog(`不灭之力发动！复活 (剩余${oldCount - 1}次)`);
                     eefi = 0;
                     mode = 5;
                     isProcessing = false;
@@ -3165,6 +3234,8 @@ export const useGameStore = create<GameStore>()(
             _loopComboCount: 1,
             specialBonusType: null,
             activeEffect: null,
+            resCount: 0,
+            resStatUP: 1,
           },
         });
       },
@@ -3335,6 +3406,8 @@ export const useGameStore = create<GameStore>()(
             _loopComboCount: 1,
             specialBonusType: null,
             activeEffect: null,
+            resCount: 0,
+            resStatUP: 1,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
