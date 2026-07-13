@@ -167,25 +167,25 @@ export const computeFinalStats = (
   const ebspeed = bonuses.ebAgi + heroBonuses.KPspeed * heroLevel * 0.075;
   const ebluk = bonuses.ebLuc + heroBonuses.KPluk * heroLevel * 0.08;
   
-  // HP: (ephp + (ephp + hp) * ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer)
+  // HP: (hp + ephp) * (1 + ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer)
   const ephp = equip.epHp + bonuses.epHp;
-  const hp = Math.floor((ephp + (ephp + baseHp) * ebhp) * (1 + bonuses.addMaxHP + bonuses.redEyeEffect + bonuses.AllstatPer));
+  const hp = Math.floor((baseHp + ephp) * (1 + ebhp) * (1 + bonuses.addMaxHP + bonuses.redEyeEffect + bonuses.AllstatPer));
   
-  // ATK: (epatk + (epatk + atk) * ebatk) * (1 + addMaxATK + AllstatPer + blueEyeEffect)
+  // ATK: (atk + epatk) * (1 + ebatk) * (1 + addMaxATK + AllstatPer + blueEyeEffect)
   const epatk = equip.epAtk + bonuses.epAtk;
-  const atk = Math.floor((epatk + (epatk + baseAtk) * ebatk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer + bonuses.blueEyeEffect));
+  const atk = Math.floor((baseAtk + epatk) * (1 + ebatk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer + bonuses.blueEyeEffect));
   
-  // DEF: (epdef + def) * (1 + ebdef) * (1 + AllstatPer + greenEyeEffect + addMaxDEF) - def
+  // DEF: (def + epdef) * (1 + ebdef) * (1 + AllstatPer + greenEyeEffect + addMaxDEF)
   const epdef = equip.epDef + bonuses.epDef;
-  const def = Math.floor((epdef + baseDef) * (1 + ebdef) * (1 + bonuses.AllstatPer + bonuses.greenEyeEffect + bonuses.addMaxDEF) - baseDef);
+  const def = Math.floor((baseDef + epdef) * (1 + ebdef) * (1 + bonuses.AllstatPer + bonuses.greenEyeEffect + bonuses.addMaxDEF));
   
-  // AGI: (epspeed + (epspeed + speed) * ebspeed) * (1 + addMaxAGI + AllstatPer)
+  // AGI: (agi + epspeed) * (1 + ebspeed) * (1 + addMaxAGI + AllstatPer)
   const epspeed = bonuses.epAgi;
-  const agi = Math.floor((epspeed + (epspeed + baseAgi) * ebspeed) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
+  const agi = Math.floor((baseAgi + epspeed) * (1 + ebspeed) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
   
-  // LUC: (epluk + (epluk + luk) * ebluk) * (1 + addMaxLUC + AllstatPer)
+  // LUC: (luc + epluk) * (1 + ebluk) * (1 + addMaxLUC + AllstatPer)
   const epluk = bonuses.epLuc;
-  const luc = Math.floor((epluk + (epluk + baseLuc) * ebluk) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
+  const luc = Math.floor((baseLuc + epluk) * (1 + ebluk) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
   
   return { hp, atk, def, agi, luc };
 };

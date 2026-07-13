@@ -4,7 +4,7 @@ import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, E
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
 import { getEquipmentById, equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
-import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution, getEquipComponents, computeFinalStats, computeHeroBonuses, WinBossGetBattlePoint } from '@/utils/helpers';
+import { getExpToNextLevel, getLevelBonus, clamp, getEquipComponents, computeFinalStats, computeHeroBonuses, WinBossGetBattlePoint } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
 import type { LanguageCode } from '@/data/languageData';
@@ -1276,65 +1276,42 @@ export const useGameStore = create<GameStore>()(
         // 计算武器贡献（含存货加成和倍率）
         const weaponObj = newPlayer.equippedWeapon;
         const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, newPlayer.weaponSoul) : 0;
         
         // 计算防具贡献（含存货加成和倍率）
         const armorObj = newPlayer.equippedArmor;
         const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, newPlayer.armorSoul) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, newPlayer.armorSoul) : 0;
         
         const accessories = newPlayer.equippedAccessories || [];
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
         
-        // 使用统一的 applyEquipmentBonuses 函数计算饰品加成
-        const { kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
-        
-        // [DEBUG] equipItem - only log for accessory type
-        if (equipment.type === 'accessory') {
-          console.group('%c🔧 equipItem: 替换饰品', 'color: orange; font-weight: bold');
-          console.log('装备:', equipment.name, `(t1=${equipment.t1}, t2=${equipment.t2})`);
-          console.log('新饰品:', accessories.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', '));
-        }
-        
-        // 计算新装备的基础属性（base + level + equip 不含饰品t1/t2加成）
-        const baseAtk = Math.ceil(initialPlayer.attack + getLevelBonus(newPlayer.level).attack + weaponAtkContrib + accessoryAtkBonus);
-        const baseDef = Math.ceil(initialPlayer.defense + getLevelBonus(newPlayer.level).defense + armorDefContrib + accessoryDefBonus);
-        const baseHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + armorHpContrib + accessoryHpBonus);
-        const baseAgi = Math.ceil(initialPlayer.agility + getLevelBonus(newPlayer.level).agility + accessoryAgiBonus);
-        const baseLuc = Math.ceil(initialPlayer.luck + getLevelBonus(newPlayer.level).luck + accessoryLucBonus);
-        
-        // 使用已分配的属性点（stPtAllocate），不再从旧属性中提取
+        // 使用已分配的属性点
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
-        const stPtHp = stPtAllocate.hp;
-        const stPtAtk = stPtAllocate.atk;
-        const stPtDef = stPtAllocate.def;
-        const stPtAgi = stPtAllocate.agi;
-        const stPtLuc = stPtAllocate.luc;
         
-        // [DEBUG] show stPt
-        if (equipment.type === 'accessory') {
-          console.log('使用 stPtAllocate:', {hp: stPtHp, atk: stPtAtk, def: stPtDef, agi: stPtAgi, luc: stPtLuc});
-        }
+        // 基础属性 = 初始值 + 等级加成 + 属性点加成
+        const baseHp_calc = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + stPtAllocate.hp * 5;
+        const baseAtk_calc = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + stPtAllocate.atk * 3;
+        const baseDef_calc = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + stPtAllocate.def * 3;
+        const baseAgi_calc = initialPlayer.agility + getLevelBonus(newPlayer.level).agility + stPtAllocate.agi * 2;
+        const baseLuc_calc = initialPlayer.luck + getLevelBonus(newPlayer.level).luck + stPtAllocate.luc * 1;
         
-        // 应用加性属性加成
-        const finalBaseHp = baseHp + stPtHp * 5 + bonuses.epHp;
-        const finalBaseAtk = baseAtk + stPtAtk * 3 + bonuses.epAtk;
-        const finalBaseDef = baseDef + stPtDef * 3 + bonuses.epDef;
-        const finalBaseAgi = baseAgi + stPtAgi * 2 + bonuses.epAgi;
-        const finalBaseLuc = baseLuc + stPtLuc * 1 + bonuses.epLuc;
+        // 饰品加成
+        const { kyarakutalv, kyarakutaKozinExp } = get();
+        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
         
-        // 应用乘性属性加成（遵循 EqStUpdate 的最终公式）
-        newPlayer.maxHp = Math.floor((finalBaseHp + finalBaseHp * bonuses.ebHp) * (1 + bonuses.addMaxHP + bonuses.AllstatPer));
-        newPlayer.attack = Math.floor((finalBaseAtk + finalBaseAtk * bonuses.ebAtk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer));
-        newPlayer.defense = Math.floor((finalBaseDef + finalBaseDef * bonuses.ebDef) * (1 + bonuses.addMaxDEF + bonuses.AllstatPer)) - baseDef;
-        newPlayer.agility = Math.floor((finalBaseAgi + finalBaseAgi * bonuses.ebAgi) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
-        newPlayer.luck = Math.floor((finalBaseLuc + finalBaseLuc * bonuses.ebLuc) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
+        // 武器/防具贡献分量
+        const equip1 = getEquipComponents(weaponObj, weaponQty, newPlayer.weaponSoul, armorObj, armorQty, newPlayer.armorSoul, baseHp_calc);
+        
+        // 英雄加成
+        const heroBonuses1 = computeHeroBonuses(player.heroId || 0);
+        const currentKyaraLv1 = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
+        const kyaraLv1 = ((kyarakutalv + currentKyaraLv1) * 0.25 + 0.75);
+        
+        const stats1 = computeFinalStats(baseHp_calc, baseAtk_calc, baseDef_calc, baseAgi_calc, baseLuc_calc, equip1, bonuses1, heroBonuses1, kyaraLv1);
+        
+        newPlayer.maxHp = stats1.hp;
+        newPlayer.attack = stats1.atk;
+        newPlayer.defense = stats1.def;
+        newPlayer.agility = stats1.agi;
+        newPlayer.luck = stats1.luc;
         
         const duskCrystal = accessories.filter(acc => acc && acc.t1 === 15);
         if (duskCrystal.length > 0) {
@@ -1358,8 +1335,8 @@ export const useGameStore = create<GameStore>()(
         const newEquipSets = currentSets.map(s =>
           s.slotIndex === currentSlot ? {
             ...s,
-            weaponId: newPlayer.equippedWeapon?.id || null,
-            armorId: newPlayer.equippedArmor?.id || null,
+            weaponId: newPlayer.equippedWeapon?.id ?? null,
+            armorId: newPlayer.equippedArmor?.id ?? null,
             accessoryIds: (newPlayer.equippedAccessories || []).map(acc => acc?.id || null),
           } : s
         );
@@ -1534,8 +1511,8 @@ export const useGameStore = create<GameStore>()(
         const newSet: EquipSet = {
           id: `set-${Date.now()}`,
           name,
-          weaponId: player.equippedWeapon?.id || null,
-          armorId: player.equippedArmor?.id || null,
+          weaponId: player.equippedWeapon?.id ?? null,
+          armorId: player.equippedArmor?.id ?? null,
           accessoryIds: player.equippedAccessories.map(acc => acc?.id || null),
           weaponSoulId: player.weaponSoul?.id || null,
           armorSoulId: player.armorSoul?.id || null,
@@ -1560,16 +1537,16 @@ export const useGameStore = create<GameStore>()(
         let updatedSets = equipSets.map(set =>
           set.slotIndex === currentEquipSetSlotIndex ? {
             ...set,
-            weaponId: player.equippedWeapon?.id || null,
-            armorId: player.equippedArmor?.id || null,
+            weaponId: player.equippedWeapon?.id ?? null,
+            armorId: player.equippedArmor?.id ?? null,
             accessoryIds: (player.equippedAccessories || []).map(acc => acc?.id || null),
             weaponSoulId: player.weaponSoul?.id || null,
             armorSoulId: player.armorSoul?.id || null,
           } : set
         );
         
-        const weapon = equipSet.weaponId ? equipmentData.find(e => e.id === equipSet.weaponId) || null : null;
-        const armor = equipSet.armorId ? equipmentData.find(e => e.id === equipSet.armorId) || null : null;
+        const weapon = equipSet.weaponId != null ? equipmentData.find(e => String(e.id) === String(equipSet.weaponId)) || null : null;
+        const armor = equipSet.armorId != null ? equipmentData.find(e => String(e.id) === String(equipSet.armorId)) || null : null;
         const accessories = (equipSet.accessoryIds || []).map(id => id ? equipmentData.find(e => e.id === id) || null : null).filter(Boolean) as Equipment[];
         const targetWeaponSoul = equipSet.weaponSoulId ? equipmentData.find(e => e.id === equipSet.weaponSoulId) || null : null;
         const targetArmorSoul = equipSet.armorSoulId ? equipmentData.find(e => e.id === equipSet.armorSoulId) || null : null;
@@ -1580,48 +1557,32 @@ export const useGameStore = create<GameStore>()(
         console.log('旧属性:', {hp: player.maxHp, atk: player.attack, def: player.defense, agi: player.agility, luc: player.luck});
         
         // 使用统一的 applyEquipmentBonuses 函数计算饰品加成
-        const { kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
+        const { kyarakutalv: kclv, kyarakutaKozinExp: kcexp } = get();
+        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kclv || 0, kcexp || [], player.heroId || 0);
         
-        // Calculate new equipment bonuses
-        const weaponQty = weapon ? (inventory.find(i => i.equipmentId === weapon.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weapon ? getWeaponAtkContribution(weapon, weaponQty, targetWeaponSoul) : 0;
-        
-        const armorQty = armor ? (inventory.find(i => i.equipmentId === armor.id)?.quantity || 1) : 1;
-        const armorDefContrib = armor ? getArmorDefContribution(armor, armorQty, targetArmorSoul) : 0;
-        const armorHpContrib = armor ? getArmorHpContribution(armor, armorQty, targetArmorSoul) : 0;
-        
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
-        
-        // 计算基础属性（base + level + equip 不含饰品t1/t2加成）
-        const baseAtk = Math.ceil(initialPlayer.attack + getLevelBonus(player.level).attack + weaponAtkContrib + accessoryAtkBonus);
-        const baseDef = Math.ceil(initialPlayer.defense + getLevelBonus(player.level).defense + armorDefContrib + accessoryDefBonus);
-        const baseHp = Math.ceil(initialPlayer.maxHp + getLevelBonus(player.level).hp + armorHpContrib + accessoryHpBonus);
-        const baseAgi = Math.ceil(initialPlayer.agility + getLevelBonus(player.level).agility + accessoryAgiBonus);
-        const baseLuc = Math.ceil(initialPlayer.luck + getLevelBonus(player.level).luck + accessoryLucBonus);
-        
-        // 使用已分配的属性点（stPtAllocate），不再从旧属性中提取
+        // 使用已分配的属性点
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
-        const stPtHp = stPtAllocate.hp;
-        const stPtAtk = stPtAllocate.atk;
-        const stPtDef = stPtAllocate.def;
-        const stPtAgi = stPtAllocate.agi;
-        const stPtLuc = stPtAllocate.luc;
         
-        console.log('使用 stPtAllocate:', {hp: stPtHp, atk: stPtAtk, def: stPtDef, agi: stPtAgi, luc: stPtLuc});
+        // 基础属性
+        const baseHp2 = initialPlayer.maxHp + getLevelBonus(player.level).hp + stPtAllocate.hp * 5;
+        const baseAtk2 = initialPlayer.attack + getLevelBonus(player.level).attack + stPtAllocate.atk * 3;
+        const baseDef2 = initialPlayer.defense + getLevelBonus(player.level).defense + stPtAllocate.def * 3;
+        const baseAgi2 = initialPlayer.agility + getLevelBonus(player.level).agility + stPtAllocate.agi * 2;
+        const baseLuc2 = initialPlayer.luck + getLevelBonus(player.level).luck + stPtAllocate.luc * 1;
         
-        // 应用加性属性加成
-        const finalBaseHp = baseHp + stPtHp * 5 + bonuses.epHp;
-        const finalBaseAtk = baseAtk + stPtAtk * 3 + bonuses.epAtk;
-        const finalBaseDef = baseDef + stPtDef * 3 + bonuses.epDef;
-        const finalBaseAgi = baseAgi + stPtAgi * 2 + bonuses.epAgi;
-        const finalBaseLuc = baseLuc + stPtLuc * 1 + bonuses.epLuc;
+        // 武器/防具贡献分量
+        const weaponQty2 = weapon ? (inventory.find(i => i.equipmentId === weapon.id)?.quantity || 1) : 1;
+        const armorQty2 = armor ? (inventory.find(i => i.equipmentId === armor.id)?.quantity || 1) : 1;
+        const equip2 = getEquipComponents(weapon, weaponQty2, targetWeaponSoul, armor, armorQty2, targetArmorSoul, baseHp2);
         
-        // 应用乘性属性加成（遵循 EqStUpdate 的最终公式）
+        // 英雄加成
+        const heroBonuses2 = computeHeroBonuses(player.heroId || 0);
+        const currentKyaraLv2 = getCurrentKyaraLv(kcexp, player.heroId);
+        const kyaraLv2 = ((kclv + currentKyaraLv2) * 0.25 + 0.75);
+        
+        // gdata.txt hwMode 公式
+        const stats2 = computeFinalStats(baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2, equip2, bonuses, heroBonuses2, kyaraLv2);
+        
         const newPlayer = {
           ...player,
           equippedWeapon: weapon,
@@ -1629,11 +1590,11 @@ export const useGameStore = create<GameStore>()(
           equippedAccessories: accessories,
           weaponSoul: targetWeaponSoul,
           armorSoul: targetArmorSoul,
-          maxHp: Math.floor((finalBaseHp + finalBaseHp * bonuses.ebHp) * (1 + bonuses.addMaxHP + bonuses.AllstatPer)),
-          attack: Math.floor((finalBaseAtk + finalBaseAtk * bonuses.ebAtk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer)),
-          defense: Math.floor((finalBaseDef + finalBaseDef * bonuses.ebDef) * (1 + bonuses.addMaxDEF + bonuses.AllstatPer)) - baseDef,
-          agility: Math.floor((finalBaseAgi + finalBaseAgi * bonuses.ebAgi) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer)),
-          luck: Math.floor((finalBaseLuc + finalBaseLuc * bonuses.ebLuc) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer)),
+          maxHp: stats2.hp,
+          attack: stats2.atk,
+          defense: stats2.def,
+          agility: stats2.agi,
+          luck: stats2.luc,
         };
         
         // [DEBUG] loadEquipSet final
@@ -1693,8 +1654,8 @@ export const useGameStore = create<GameStore>()(
         const newSet: EquipSet = {
           id: `set-${Date.now()}`,
           name: `背包${slotIndex + 1}`,
-          weaponId: null,
-          armorId: null,
+          weaponId: '0' as any,
+          armorId: '0' as any,
           accessoryIds: [],
           weaponSoulId: null,
           armorSoulId: null,
@@ -1736,8 +1697,8 @@ export const useGameStore = create<GameStore>()(
         const updatedSets = equipSets.map(set => 
           set.id === firstUnlocked.id ? {
             ...set,
-            weaponId: player.equippedWeapon?.id || null,
-            armorId: player.equippedArmor?.id || null,
+            weaponId: player.equippedWeapon?.id ?? null,
+            armorId: player.equippedArmor?.id ?? null,
             accessoryIds: player.equippedAccessories.map(acc => acc?.id || null),
             weaponSoulId: player.weaponSoul?.id || null,
             armorSoulId: player.armorSoul?.id || null,
@@ -3225,38 +3186,30 @@ export const useGameStore = create<GameStore>()(
         const weaponSoul = currentPlayer.weaponSoul;
         const armorSoul = currentPlayer.armorSoul;
         
-        // 重新计算带装备加成和存货加成的属性
+        // 重新计算带装备加成和存货加成的属性 - 使用 gdata.txt hwMode 公式
         const weaponQty = equippedWeapon ? (savedInventory.find((i: InventoryItem) => i.equipmentId === equippedWeapon.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = equippedWeapon ? getWeaponAtkContribution(equippedWeapon, weaponQty, weaponSoul) : 0;
-        
         const armorQty = equippedArmor ? (savedInventory.find((i: InventoryItem) => i.equipmentId === equippedArmor.id)?.quantity || 1) : 1;
-        const armorDefContrib = equippedArmor ? getArmorDefContribution(equippedArmor, armorQty, armorSoul) : 0;
-        const armorHpContrib = equippedArmor ? getArmorHpContribution(equippedArmor, armorQty, armorSoul) : 0;
         
-        const accessoryAtkBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
-        const accessoryDefBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
-        const accessoryHpBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
-        const accessoryAgiBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
-        const accessoryLucBonus = equippedAccessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
-        
+        const stPtAlloc = initialPlayer.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
         const levelBonus = getLevelBonus(initialPlayer.level);
         
-        const newPlayer = {
-          ...initialPlayer,
-          attack: Math.ceil(initialPlayer.attack + levelBonus.attack + weaponAtkContrib + accessoryAtkBonus),
-          defense: Math.ceil(initialPlayer.defense + levelBonus.defense + armorDefContrib + accessoryDefBonus),
-          maxHp: Math.ceil(initialPlayer.maxHp + levelBonus.hp + armorHpContrib + accessoryHpBonus),
-          agility: Math.ceil(initialPlayer.agility + levelBonus.agility + accessoryAgiBonus),
-          luck: Math.ceil(initialPlayer.luck + levelBonus.luck + accessoryLucBonus),
-          equippedWeapon,
-          equippedArmor,
-          equippedAccessories,
-          weaponSoul,
-          armorSoul,
-          maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
-        };
+        const baseResetHp = initialPlayer.maxHp + levelBonus.hp + stPtAlloc.hp * 5;
+        const baseResetAtk = initialPlayer.attack + levelBonus.attack + stPtAlloc.atk * 3;
+        const baseResetDef = initialPlayer.defense + levelBonus.defense + stPtAlloc.def * 3;
+        const baseResetAgi = initialPlayer.agility + levelBonus.agility + stPtAlloc.agi * 2;
+        const baseResetLuc = initialPlayer.luck + levelBonus.luck + stPtAlloc.luc * 1;
         
+        const equipR = getEquipComponents(equippedWeapon, weaponQty, weaponSoul, equippedArmor, armorQty, armorSoul, baseResetHp);
+        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], initialPlayer.heroId || 0);
+        const heroBonusesR = computeHeroBonuses(initialPlayer.heroId || 0);
+        const currentKyaraLvR = getCurrentKyaraLv(get().kyarakutaKozinExp, initialPlayer.heroId);
+        const kyaraLvR = ((get().kyarakutalv + currentKyaraLvR) * 0.25 + 0.75);
+        
+        const statsR = computeFinalStats(baseResetHp, baseResetAtk, baseResetDef, baseResetAgi, baseResetLuc, equipR, bonusesR, heroBonusesR, kyaraLvR);
+        
+        // 处理 PlayerGems (t1=35) 固定加成
         const playerGems = equippedAccessories.filter(acc => acc && acc.t1 === 35);
+        let gemBonusHp = 0, gemBonusAtk = 0, gemBonusDef = 0, gemBonusAgi = 0, gemBonusLuc = 0;
         for (const gem of playerGems) {
           const gemLevel = gem.y || 0;
           const _loc2_ = gemLevel + 1;
@@ -3275,39 +3228,44 @@ export const useGameStore = create<GameStore>()(
             itemCount1 = 1000;
           }
           
-          newPlayer.maxHp += itemCount1 * _loc2_;
-          newPlayer.attack += itemCount1 * _loc2_;
-          newPlayer.defense += itemCount1 * _loc2_;
-          newPlayer.agility += itemCount1 * _loc2_;
-          newPlayer.luck += itemCount2 * (_loc2_ * 4);
+          gemBonusHp += itemCount1 * _loc2_;
+          gemBonusAtk += itemCount1 * _loc2_;
+          gemBonusDef += itemCount1 * _loc2_;
+          gemBonusAgi += itemCount1 * _loc2_;
+          gemBonusLuc += itemCount2 * (_loc2_ * 4);
         }
         
+        // 处理 Brave/War/FourGod Gems 固定加成
         const braveGems = equippedAccessories.filter(acc => acc && acc.t1 === 40);
         for (const gem of braveGems) {
           const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp += _loc2_;
-          newPlayer.attack += _loc2_;
-          newPlayer.defense += _loc2_;
-          newPlayer.agility += _loc2_;
-          newPlayer.luck += _loc2_;
+          gemBonusHp += _loc2_; gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_; gemBonusLuc += _loc2_;
         }
-        
         const warGems = equippedAccessories.filter(acc => acc && acc.t1 === 41);
         for (const gem of warGems) {
           const _loc2_ = gem.t2 || 0;
-          newPlayer.attack += _loc2_;
-          newPlayer.defense += _loc2_;
-          newPlayer.agility += _loc2_;
+          gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_;
         }
-        
         const fourGodGems = equippedAccessories.filter(acc => acc && acc.t1 === 42);
         for (const gem of fourGodGems) {
           const _loc2_ = gem.t2 || 0;
-          newPlayer.maxHp += _loc2_;
-          newPlayer.attack += _loc2_;
-          newPlayer.defense += _loc2_;
-          newPlayer.agility += _loc2_;
+          gemBonusHp += _loc2_; gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_;
         }
+        
+        const newPlayer = {
+          ...initialPlayer,
+          maxHp: statsR.hp + gemBonusHp,
+          attack: statsR.atk + gemBonusAtk,
+          defense: statsR.def + gemBonusDef,
+          agility: statsR.agi + gemBonusAgi,
+          luck: statsR.luc + gemBonusLuc,
+          equippedWeapon,
+          equippedArmor,
+          equippedAccessories,
+          weaponSoul,
+          armorSoul,
+          maxAccessorySlots: currentPlayer.maxAccessorySlots || 3,
+        };
         
         newPlayer.hp = newPlayer.maxHp;
         
@@ -3828,68 +3786,52 @@ export const useGameStore = create<GameStore>()(
           const inventory = (state.inventory || []) as InventoryItem[];
           
           const weaponQty = weapon ? (inventory.find((i: InventoryItem) => i.equipmentId === weapon.id)?.quantity || 1) : 1;
-          const weaponAtkContrib = weapon ? getWeaponAtkContribution(weapon, weaponQty, state.player.weaponSoul) : 0;
           
           const armorQty = armor ? (inventory.find((i: InventoryItem) => i.equipmentId === armor.id)?.quantity || 1) : 1;
-          const armorDefContrib = armor ? getArmorDefContribution(armor, armorQty, state.player.armorSoul) : 0;
-          const armorHpContrib = armor ? getArmorHpContribution(armor, armorQty, state.player.armorSoul) : 0;
           
-          const accAtk = accessories.reduce((sum: number, a: Equipment) => sum + (a?.attackBonus || 0), 0);
-          const accDef = accessories.reduce((sum: number, a: Equipment) => sum + (a?.defenseBonus || 0), 0);
-          const accHp = accessories.reduce((sum: number, a: Equipment) => sum + (a?.hpBonus || 0), 0);
-          const accAgi = accessories.reduce((sum: number, a: Equipment) => sum + (a?.agilityBonus || 0), 0);
-          const accLuc = accessories.reduce((sum: number, a: Equipment) => sum + (a?.luckBonus || 0), 0);
           const lvlBonus = getLevelBonus(state.player.level || 1);
+          const stPtAllocM = state.player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
           
-          // Calculate gem bonuses first
+          const baseMergeHp = initialPlayer.maxHp + lvlBonus.hp + stPtAllocM.hp * 5;
+          const baseMergeAtk = initialPlayer.attack + lvlBonus.attack + stPtAllocM.atk * 3;
+          const baseMergeDef = initialPlayer.defense + lvlBonus.defense + stPtAllocM.def * 3;
+          const baseMergeAgi = initialPlayer.agility + lvlBonus.agility + stPtAllocM.agi * 2;
+          const baseMergeLuc = initialPlayer.luck + lvlBonus.luck + stPtAllocM.luc * 1;
+          
+          const equipM = getEquipComponents(weapon, weaponQty, state.player.weaponSoul, armor, armorQty, state.player.armorSoul, baseMergeHp);
+          const globalState = useGameStore.getState();
+          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0, globalState.kyarakutalv || 0, globalState.kyarakutaKozinExp || [], state.player.heroId || 0);
+          const heroBonusesM = computeHeroBonuses(state.player.heroId || 0);
+          const currentKyaraLvM = getCurrentKyaraLv(globalState.kyarakutaKozinExp, state.player.heroId);
+          const kyaraLvM = ((globalState.kyarakutalv + currentKyaraLvM) * 0.25 + 0.75);
+          
+          const statsM = computeFinalStats(baseMergeHp, baseMergeAtk, baseMergeDef, baseMergeAgi, baseMergeLuc, equipM, bonusesM, heroBonusesM, kyaraLvM);
+          
+          // Gem 固定加成
           let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
           const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
           for (const gem of braveGems) {
             const _loc2_ = (gem as any).t2 || 0;
-            gemHp += _loc2_;
-            gemAtk += _loc2_;
-            gemDef += _loc2_;
-            gemAgi += _loc2_;
-            gemLuc += _loc2_;
+            gemHp += _loc2_; gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_; gemLuc += _loc2_;
           }
           const warGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 41);
           for (const gem of warGems) {
             const _loc2_ = (gem as any).t2 || 0;
-            gemAtk += _loc2_;
-            gemDef += _loc2_;
-            gemAgi += _loc2_;
+            gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_;
           }
           const fourGodGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 42);
           for (const gem of fourGodGems) {
             const _loc2_ = (gem as any).t2 || 0;
-            gemHp += _loc2_;
-            gemAtk += _loc2_;
-            gemDef += _loc2_;
-            gemAgi += _loc2_;
+            gemHp += _loc2_; gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_;
           }
           
-          const baseHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp);
-          const baseAtk = Math.ceil(initialPlayer.attack + lvlBonus.attack);
-          const baseDef = Math.ceil(initialPlayer.defense + lvlBonus.defense);
-          const baseAgi = Math.ceil(initialPlayer.agility + lvlBonus.agility);
-          const baseLuc = Math.ceil(initialPlayer.luck + lvlBonus.luck);
-          
-          // Extract stPt bonus, subtracting ALL non-stPt contributions including gems
-          const hpStPtBonus = Math.max(0, (state.player.maxHp || baseHp) - baseHp - armorHpContrib - accHp - gemHp);
-          const atkStPtBonus = Math.max(0, (state.player.attack || baseAtk) - baseAtk - weaponAtkContrib - accAtk - gemAtk);
-          const defStPtBonus = Math.max(0, (state.player.defense || baseDef) - baseDef - armorDefContrib - accDef - gemDef);
-          const agiStPtBonus = Math.max(0, (state.player.agility || baseAgi) - baseAgi - accAgi - gemAgi);
-          const lucStPtBonus = Math.max(0, (state.player.luck || baseLuc) - baseLuc - accLuc - gemLuc);
-          
-          // Reconstruct player stats
-          state.player.attack = Math.ceil(initialPlayer.attack + lvlBonus.attack + weaponAtkContrib + accAtk) + atkStPtBonus + gemAtk;
-          state.player.defense = Math.ceil(initialPlayer.defense + lvlBonus.defense + armorDefContrib + accDef) + defStPtBonus + gemDef;
-          state.player.maxHp = Math.ceil(initialPlayer.maxHp + lvlBonus.hp + armorHpContrib + accHp) + hpStPtBonus + gemHp;
-          state.player.agility = Math.ceil(initialPlayer.agility + lvlBonus.agility + accAgi) + agiStPtBonus + gemAgi;
-          state.player.luck = Math.ceil(initialPlayer.luck + lvlBonus.luck + accLuc) + lucStPtBonus + gemLuc;
+          state.player.attack = statsM.atk + gemAtk;
+          state.player.defense = statsM.def + gemDef;
+          state.player.maxHp = statsM.hp + gemHp;
+          state.player.agility = statsM.agi + gemAgi;
+          state.player.luck = statsM.luc + gemLuc;
           
           console.log('[merge] After recalculation - player stats:', { maxHp: state.player.maxHp, attack: state.player.attack, defense: state.player.defense, agility: state.player.agility, luck: state.player.luck });
-          console.log('[merge] stPt bonuses:', { hpStPtBonus, atkStPtBonus, defStPtBonus, agiStPtBonus, lucStPtBonus });
         }
         
         return persistedState;
