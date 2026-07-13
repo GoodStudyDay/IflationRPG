@@ -2000,7 +2000,7 @@ export const useGameStore = create<GameStore>()(
         const bonus = get().bonus;
         
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
-          const isHiddenMap = get().currentMap === 13 || get().currentMap === 14;
+          const isHiddenMap = get().currentMap === 13 || get().currentMap === 14 || get().currentMap === 124;
           const bonusType = bonus.currentBonus.bonusType;
           let bossId: number | null = null;
           const tekiseilv = mapEnemies[0]?.level || 0;
@@ -2683,7 +2683,7 @@ export const useGameStore = create<GameStore>()(
         }
         
         const { currentMap: map, hiddenMapBonusCount: bonusCount } = get();
-        const isHiddenMap = map === 13 || map === 14;
+        const isHiddenMap = map === 13 || map === 14 || map === 124;
         const newHiddenMapBonusCount = isHiddenMap ? bonusCount - 1 : bonusCount;
         
         set({
@@ -2720,15 +2720,20 @@ export const useGameStore = create<GameStore>()(
           const bossId = enemy?.bossId;
           const spType = battle.specialBonusType;
           if (bossId && spType) {
-            if (spType === 12 && (bossId === 60 || bossId === 61)) {
+            if (spType === 12 && bossId === 60) {
               const map13 = MAP_LIST.find(m => m.id === 13);
               if (map13 && player.level >= map13.unlockLevel) {
                 enterHiddenMap(13, 12);
               }
-            } else if (spType === 13 && (bossId === 66 || bossId === 67)) {
+            } else if (spType === 13 && bossId === 66) {
               const map14 = MAP_LIST.find(m => m.id === 14);
               if (map14 && player.level >= map14.unlockLevel) {
                 enterHiddenMap(14, 13);
+              }
+            } else if (bossId === 103) {
+              const map124 = MAP_LIST.find(m => m.id === 124);
+              if (map124) {
+                enterHiddenMap(124, spType);
               }
             }
           }

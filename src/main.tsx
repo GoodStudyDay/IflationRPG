@@ -91,8 +91,22 @@ window.gameDebug = {
     console.log(`已添加全部饰品 (${accessories.length} 件)`);
   },
   clearSave: () => {
+    // 清除所有 localStorage
+    localStorage.removeItem('inflation-rpg-storage');
+    localStorage.removeItem('inflation-rpg-savedata');
+    localStorage.removeItem('inflation-rpg-itemcounts');
+    localStorage.removeItem('inflation-rpg-collection');
+    // 清除 IndexedDB 图片缓存
+    const deleteRequest = indexedDB.deleteDatabase('InflationRPG_ImageCache');
+    deleteRequest.onsuccess = () => {
+      console.log('图像缓存 IndexedDB 已删除');
+    };
+    // 重置内存状态并刷新页面
     useGameStore.getState().resetGame();
-    console.log('存档已清除');
+    console.log('所有存档和缓存已清除，页面即将刷新...');
+    setTimeout(() => {
+      window.location.reload();
+    }, 200);
   },
   kill: (enable?: boolean) => {
     const store = useGameStore.getState();

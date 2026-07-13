@@ -28,8 +28,8 @@ export const MAP_LIST: MapInfo[] = [
   { id: 10, name: '终焉之境',     unlockLevel: 400,   description: '一切的终结之地', icon: '💀' },
   { id: 11, name: '暗影之森',     unlockLevel: 560,   description: '被暗影笼罩的神秘森林', icon: '🌑' },
   { id: 12, name: '暗黑战场',     unlockLevel: 750,   description: '暗黑力量的聚集地', icon: '⚔️' },
-  { id: 13, name: '魔王城',       unlockLevel: 1000,   description: '隐藏地图', icon: '👑' },
-  { id: 14, name: '恶魔深渊',     unlockLevel: 1200,   description: '隐藏地图', icon: '😈' },
+  { id: 13, name: '魔王城',       unlockLevel: 1000,   description: '隐藏地图', icon: '👑', hidden: true },
+  { id: 14, name: '恶魔深渊',     unlockLevel: 1200,   description: '隐藏地图', icon: '😈', hidden: true },
   { id: 15, name: '亡灵国度',     unlockLevel: 1650,  description: '亡灵横行的死亡国度', icon: '💀' },
   { id: 16, name: '死灵禁地',     unlockLevel: 2000,  description: '死灵法师的禁地', icon: '⚰️' },
   { id: 17, name: '深渊之门',     unlockLevel: 2400,  description: '通往深渊的神秘之门', icon: '🚪' },
@@ -81,6 +81,7 @@ export const MAP_LIST: MapInfo[] = [
   { id: 63, name: '混沌终极',     unlockLevel: 64000, description: '混沌的终极挑战', icon: '🌀' },
   { id: 64, name: '暗影终极',     unlockLevel: 64500, description: '暗影的终极挑战', icon: '🌑' },
   { id: 65, name: '世界尽头',     unlockLevel: 65000, description: '世界的尽头', icon: '🚪' },
+  { id: 124, name: '神秘领域',    unlockLevel: 0,    description: '隐藏地图', icon: '🔮', hidden: true },
 ];
 
 /**
@@ -261,6 +262,12 @@ const ENEMY_DATA_146 = [
   { id:'m146-0', name:'深渊终极守卫', hp:66000000000, maxHp:66000000000, attack:508000000, defense:0, expReward:0, goldReward:11111, icon:'🟢', lv:0, tekiseiLvBai:100, expBonus:0, drops:[] },
   { id:'m146-1', name:'深渊终极法师', hp:69300000000, maxHp:69300000000, attack:533400000, defense:0, expReward:0, goldReward:11111, icon:'🐀', lv:0, tekiseiLvBai:100, expBonus:0, drops:[] },
   { id:'m146-2', name:'深渊终极领主', hp:72600000000, maxHp:72600000000, attack:558800000, defense:0, expReward:0, goldReward:11111, icon:'🐝', lv:0, tekiseiLvBai:100, expBonus:0, drops:[] },
+];
+
+const ENEMY_DATA_124 = [
+  { id:'m124-0', name:'神秘生物A', hp:3750000000000, maxHp:3750000000000, attack:4900000000, defense:0, expReward:13500000000000, goldReward:25000, icon:'👾', lv:0, tekiseiLvBai:-2, expBonus:0, drops:[{type:2, index:122, rate:0.015}] },
+  { id:'m124-1', name:'神秘生物B', hp:1750000000000, maxHp:1750000000000, attack:5900000000, defense:0, expReward:13500000000000, goldReward:25000, icon:'👽', lv:0, tekiseiLvBai:-2, expBonus:0, drops:[{type:2, index:96, rate:0.019},{type:2, index:126, rate:0.012}] },
+  { id:'m124-2', name:'神秘生物C', hp:4750000000000, maxHp:4750000000000, attack:3900000000, defense:0, expReward:13500000000000, goldReward:25000, icon:'👻', lv:0, tekiseiLvBai:-2, expBonus:0, drops:[{type:2, index:97, rate:0.017}] },
 ];
 
 const MAP_ENEMIES_RAW: Record<number, any[]> = {
@@ -945,6 +952,7 @@ const MAP_ENEMIES_RAW: Record<number, any[]> = {
   65: [
     { id:'m150-0', name:'世界尽头守卫', hp:660000000000, maxHp:660000000000, attack:5080000000, defense:0, expReward:0, goldReward:11111, icon:'🌟', lv:0, tekiseiLvBai:1000, expBonus:0, drops:[] },
   ],
+  124: ENEMY_DATA_124,
 };
 
 /**
