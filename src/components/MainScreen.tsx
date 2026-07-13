@@ -135,8 +135,8 @@ export const MainScreen = () => {
         
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-white font-bold text-lg">{currentMapData.icon} {currentMapData.name}</div>
-            <div className="text-gray-300 text-sm">{t('解锁等级')}: {currentMapData.unlockLevel}</div>
+            <div className="text-white font-bold text-lg">{currentMapData.icon} {t(currentMapData.name)}</div>
+        <div className="text-gray-300 text-sm">{t('解锁等级')}: {currentMapData.unlockLevel}</div>
             {bonusText && (
               <div className="text-yellow-400 text-sm mt-1">{t('奖励')}: {bonusText}</div>
             )}
@@ -167,7 +167,7 @@ export const MainScreen = () => {
           <div className="flex-1">
                 <div className="text-[10px] sm:text-xs text-gray-500 mb-1">{t('现在的地图信息')}</div>
                 <div className="text-[10px] sm:text-xs text-white">
-                  {currentMapData.icon} {currentMapData.name}
+                  {currentMapData.icon} {t(currentMapData.name)}
                   {bonusText ? ` , ${t('奖励')}: ${bonusText}` : ''}
                 </div>
               </div>
@@ -252,7 +252,7 @@ export const MainScreen = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-lg mr-2">{map.icon}</span>
-                        <span className="text-white font-bold">{map.name}</span>
+                        <span className="text-white font-bold">{t(map.name)}</span>
                       </div>
                       <div className="text-xs">
                         {isCurrent ? (
@@ -263,7 +263,7 @@ export const MainScreen = () => {
                       </div>
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
-                      {map.description}
+                      {t(map.description)}
                     </div>
                   </button>
                 );
