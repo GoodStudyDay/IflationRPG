@@ -28,6 +28,7 @@ import { MAP_LIST, getMapEnemies } from '@/data/mapData';
 import { getBossById } from '@/data/bossData';
 import { getHeroById } from '@/data/heroData';
 import { getCurrentKyaraLv, addExpKyarakutaKozinExp } from '@/utils/kyaraLevel';
+import { getTranslation } from '@/data/languageData';
 
 // 统计背包中物品数量（武器+防具+饰品）
 function getItemCount(inventory: InventoryItem[]): number {
@@ -2324,6 +2325,7 @@ export const useGameStore = create<GameStore>()(
           accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
         );
         
+        const lang = get().language;
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2333,7 +2335,12 @@ export const useGameStore = create<GameStore>()(
             enemy,
             status: 'idle',
             specialBonusType,
-            battleLog: ['敌人出现了！', '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
+            battleLog: [
+              getTranslation('敌人出现了！', lang),
+              getTranslation('点击画面开始战斗', lang),
+              getTranslation('战斗会自动进行', lang),
+              getTranslation('点击画面可以暂停游戏', lang),
+            ],
             comboCount: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
@@ -2520,6 +2527,7 @@ export const useGameStore = create<GameStore>()(
           accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
         );
         
+        const lang = get().language;
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2528,7 +2536,13 @@ export const useGameStore = create<GameStore>()(
           battle: {
             enemy: modifiedBoss,
             status: 'idle',
-            battleLog: ['BOSS出现了！', `${boss.name}降临！`, '点击画面开始战斗', '战斗会自动进行', '点击画面可以暂停游戏'],
+            battleLog: [
+              getTranslation('BOSS出现了！', lang),
+              `${boss.name}${getTranslation('降临！', lang)}`,
+              getTranslation('点击画面开始战斗', lang),
+              getTranslation('战斗会自动进行', lang),
+              getTranslation('点击画面可以暂停游戏', lang),
+            ],
             comboCount: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
