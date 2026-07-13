@@ -31,8 +31,7 @@ import { getCurrentKyaraLv, addExpKyarakutaKozinExp } from '@/utils/kyaraLevel';
 
 // 计算饰品的特殊效果加成（加性部分），用于 stPt 提取时剔除旧饰品效果
 function computeOldSpecialAdditive(
-  accessories: (Equipment | null)[],
-  inventory: InventoryItem[]
+  accessories: (Equipment | null)[]
 ): { hp: number; atk: number; def: number; agi: number; luc: number } {
   let hp = 0, atk = 0, def = 0, agi = 0, luc = 0;
 
@@ -53,7 +52,36 @@ function computeOldSpecialAdditive(
       hp += t2 * 100;
     } else if (t1 === 2222) {
       atk += t2 * 50;
-    } else if (t1 === 35) {
+    }
+  }
+
+  return { hp, atk, def, agi, luc };
+}
+
+// 反转饰品乘性效果，得到去除乘性效果前的属性值
+function reverseOldMultipliers(
+  accessories: (Equipment | null)[],
+  hp: number,
+  atk: number,
+  def: number,
+  agi: number,
+  inventory: InventoryItem[]
+): { hp: number; atk: number; def: number; agi: number } {
+  let resultHp = hp;
+  let resultAtk = atk;
+  let resultDef = def;
+  let resultAgi = agi;
+  
+  for (const acc of accessories) {
+    if (!acc) continue;
+    const t1 = acc.t1;
+    if (t1 === 4003) {
+      resultHp = Math.ceil(resultHp / 2);
+    }
+    if (t1 === 3333) {
+      resultHp = Math.ceil(resultHp / 1.15);
+    }
+    if (t1 === 35) {
       const bonusPercent = acc.t2 || 0;
       let itemCount = 0;
       for (const item of inventory) {
@@ -64,34 +92,13 @@ function computeOldSpecialAdditive(
       }
       const completionRate = Math.min(itemCount, 1000) / 1000;
       const bonus = bonusPercent * completionRate / 100;
-      hp = Math.floor(hp * (1 + bonus));
-      atk = Math.floor(atk * (1 + bonus));
-      def = Math.floor(def * (1 + bonus));
-      agi = Math.floor(agi * (1 + bonus));
+      resultHp = Math.ceil(resultHp / (1 + bonus));
+      resultAtk = Math.ceil(resultAtk / (1 + bonus));
+      resultDef = Math.ceil(resultDef / (1 + bonus));
+      resultAgi = Math.ceil(resultAgi / (1 + bonus));
     }
   }
-
-  return { hp, atk, def, agi, luc };
-}
-
-// 反转饰品乘性效果，得到去除乘性效果前的属性值
-function reverseOldMultipliers(
-  accessories: (Equipment | null)[],
-  hp: number
-): number {
-  let result = hp;
-  // 乘性效果最后应用，所以反转时先处理
-  for (const acc of accessories) {
-    if (!acc) continue;
-    const t1 = acc.t1;
-    if (t1 === 4003) {
-      result = Math.ceil(result / 2);
-    }
-    if (t1 === 3333) {
-      result = Math.ceil(result / 1.15);
-    }
-  }
-  return result;
+  return { hp: resultHp, atk: resultAtk, def: resultDef, agi: resultAgi };
 }
 
 interface GameStore {
@@ -1052,7 +1059,7 @@ export const useGameStore = create<GameStore>()(
         // 保存 stPt 已经分配的属性加成（旧装备下的 stPt 贡献）
         // 关键修复：先剔除旧饰品的特殊效果（加性+乘性），再提取 stPt，防止切换装备时属性叠加
         const oldAccs = player.equippedAccessories || [];
-        const oldSpecialAdd = computeOldSpecialAdditive(oldAccs, inventory);
+        const oldSpecialAdd = computeOldSpecialAdditive(oldAccs);
         
         // [DEBUG] equipItem - only log for accessory type
         if (equipment.type === 'accessory') {
@@ -1064,10 +1071,11 @@ export const useGameStore = create<GameStore>()(
         }
         
         // 临时去除旧饰品特殊效果，得到纯净的 (base+equip+stPt)
-        const cleanHp = reverseOldMultipliers(oldAccs, player.maxHp) - oldSpecialAdd.hp;
-        const cleanAtk = player.attack - oldSpecialAdd.atk;
-        const cleanDef = player.defense - oldSpecialAdd.def;
-        const cleanAgi = player.agility - oldSpecialAdd.agi;
+        const reversed = reverseOldMultipliers(oldAccs, player.maxHp, player.attack, player.defense, player.agility, inventory);
+        const cleanHp = reversed.hp - oldSpecialAdd.hp;
+        const cleanAtk = reversed.atk - oldSpecialAdd.atk;
+        const cleanDef = reversed.def - oldSpecialAdd.def;
+        const cleanAgi = reversed.agi - oldSpecialAdd.agi;
         const cleanLuc = player.luck - oldSpecialAdd.luc;
         
         const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
@@ -1422,7 +1430,7 @@ export const useGameStore = create<GameStore>()(
         // Calculate old equipment stPt allocation
         // 关键修复：先剔除旧饰品的特殊效果（加性+乘性），再提取 stPt，防止切换背包时属性叠加
         const oldAccs = player.equippedAccessories || [];
-        const oldSpecialAdd = computeOldSpecialAdditive(oldAccs, inventory);
+        const oldSpecialAdd = computeOldSpecialAdditive(oldAccs);
         
         // [DEBUG] loadEquipSet
         console.group('%c📦 loadEquipSet: 切换背包', 'color: blue; font-weight: bold');
@@ -1431,10 +1439,11 @@ export const useGameStore = create<GameStore>()(
         console.log('剥离旧特殊效果:', oldSpecialAdd);
         
         // 临时去除旧饰品特殊效果，得到纯净的 (base+equip+stPt)
-        const cleanHp = reverseOldMultipliers(oldAccs, player.maxHp) - oldSpecialAdd.hp;
-        const cleanAtk = player.attack - oldSpecialAdd.atk;
-        const cleanDef = player.defense - oldSpecialAdd.def;
-        const cleanAgi = player.agility - oldSpecialAdd.agi;
+        const reversed = reverseOldMultipliers(oldAccs, player.maxHp, player.attack, player.defense, player.agility, inventory);
+        const cleanHp = reversed.hp - oldSpecialAdd.hp;
+        const cleanAtk = reversed.atk - oldSpecialAdd.atk;
+        const cleanDef = reversed.def - oldSpecialAdd.def;
+        const cleanAgi = reversed.agi - oldSpecialAdd.agi;
         const cleanLuc = player.luck - oldSpecialAdd.luc;
         
         const oldWeaponAtk = player.equippedWeapon ? getWeaponAtkContribution(player.equippedWeapon, (inventory.find(i => i.equipmentId === player.equippedWeapon!.id)?.quantity || 1), player.weaponSoul) : 0;
