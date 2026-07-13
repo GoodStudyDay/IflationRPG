@@ -249,7 +249,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                  <div className="w-16 h-16 bg-[#4a6fa5] rounded flex items-center justify-center flex-shrink-0">
                     <SpriteIcon type="weapon" x={weapon.x} y={weapon.y} size="large" bit32={weapon.bit32} />
                   </div>
                   <div className="flex-1">
@@ -348,7 +348,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 bg-[#4a6fa5] rounded flex items-center justify-center">
+                  <div className="w-16 h-16 bg-[#4a6fa5] rounded flex items-center justify-center flex-shrink-0">
                     <SpriteIcon type="armor" x={armor.x} y={armor.y} size="large" bit32={armor.bougu32png} />
                   </div>
                   <div className="flex-1">

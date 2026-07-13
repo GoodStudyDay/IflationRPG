@@ -4,7 +4,7 @@ import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, E
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
 import { getEquipmentById, equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
-import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution, WinBossGetBattlePoint } from '@/utils/helpers';
+import { getExpToNextLevel, getLevelBonus, clamp, getWeaponAtkContribution, getArmorDefContribution, getArmorHpContribution, getEquipComponents, computeFinalStats, computeHeroBonuses, WinBossGetBattlePoint } from '@/utils/helpers';
 import { saveCollection, getCollection } from '@/utils/collectionStorage';
 import { loadSaveData, saveSaveData } from '@/utils/saveDataStorage';
 import type { LanguageCode } from '@/data/languageData';
@@ -983,68 +983,13 @@ export const useGameStore = create<GameStore>()(
         
         const weaponObj = player.equippedWeapon;
         const weaponQty = weaponObj ? (inventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, player.weaponSoul) : 0;
         
         const armorObj = player.equippedArmor;
         const armorQty = armorObj ? (inventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, player.armorSoul) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, player.armorSoul) : 0;
         
         const accessories = player.equippedAccessories || [];
-        const accAtk = accessories.reduce((sum, a) => sum + (a?.attackBonus || 0), 0);
-        const accDef = accessories.reduce((sum, a) => sum + (a?.defenseBonus || 0), 0);
-        const accHp = accessories.reduce((sum, a) => sum + (a?.hpBonus || 0), 0);
-        const accAgi = accessories.reduce((sum, a) => sum + (a?.agilityBonus || 0), 0);
-        const accLuc = accessories.reduce((sum, a) => sum + (a?.luckBonus || 0), 0);
         
-        let hpInc = Math.ceil(initialPlayer.maxHp + bonus.hp + armorHpContrib + accHp);
-        let atkInc = Math.ceil(initialPlayer.attack + bonus.attack + weaponAtkContrib + accAtk);
-        let defInc = Math.ceil(initialPlayer.defense + bonus.defense + armorDefContrib + accDef);
-        let agiInc = Math.ceil(initialPlayer.agility + bonus.agility + accAgi);
-        let lucInc = Math.ceil(initialPlayer.luck + bonus.luck + accLuc);
-        
-        let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
-        
-        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
-        for (const gem of braveGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemHp += _loc2_;
-          gemAtk += _loc2_;
-          gemDef += _loc2_;
-          gemAgi += _loc2_;
-          gemLuc += _loc2_;
-          hpInc += _loc2_;
-          atkInc += _loc2_;
-          defInc += _loc2_;
-          agiInc += _loc2_;
-          lucInc += _loc2_;
-        }
-        
-        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
-        for (const gem of warGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemAtk += _loc2_;
-          gemDef += _loc2_;
-          gemAgi += _loc2_;
-          atkInc += _loc2_;
-          defInc += _loc2_;
-          agiInc += _loc2_;
-        }
-        
-        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
-        for (const gem of fourGodGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemHp += _loc2_;
-          gemAtk += _loc2_;
-          gemDef += _loc2_;
-          gemAgi += _loc2_;
-          hpInc += _loc2_;
-          atkInc += _loc2_;
-          defInc += _loc2_;
-          agiInc += _loc2_;
-        }
-        
-        // 使用已分配的属性点（stPtAllocate），不再从当前属性中提取
+        // 属性点加成
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
         const hpStPtBonus = stPtAllocate.hp * 5;
         const atkStPtBonus = stPtAllocate.atk * 3;
@@ -1052,16 +997,41 @@ export const useGameStore = create<GameStore>()(
         const agiStPtBonus = stPtAllocate.agi * 2;
         const lucStPtBonus = stPtAllocate.luc * 1;
         
+        // 基础属性
+        let baseHp = initialPlayer.maxHp + bonus.hp + hpStPtBonus;
+        let baseAtk = initialPlayer.attack + bonus.attack + atkStPtBonus;
+        let baseDef = initialPlayer.defense + bonus.defense + defStPtBonus;
+        let baseAgi = initialPlayer.agility + bonus.agility + agiStPtBonus;
+        let baseLuc = initialPlayer.luck + bonus.luck + lucStPtBonus;
+        
+        // 处理 Gem 饰品固定加成（Brave/War/FourGod Gems）
+        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
+        for (const gem of braveGems) {
+          const val = gem.t2 || 0;
+          baseHp += val; baseAtk += val; baseDef += val; baseAgi += val; baseLuc += val;
+        }
+        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
+        for (const gem of warGems) {
+          const val = gem.t2 || 0;
+          baseAtk += val; baseDef += val; baseAgi += val;
+        }
+        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
+        for (const gem of fourGodGems) {
+          const val = gem.t2 || 0;
+          baseHp += val; baseAtk += val; baseDef += val; baseAgi += val;
+        }
+        
         updateHighLv(newLevel);
         
+        // 勇敢证明 (820) 和能力宝石 (35) 额外倍率
         const braveProof = accessories.find(acc => acc && acc.t1 === 820);
         if (braveProof) {
-          const bonusRate = (braveProof.t2 || 30) / 100;
-          hpInc = Math.ceil(hpInc * (1 + bonusRate));
-          atkInc = Math.ceil(atkInc * (1 + bonusRate));
-          defInc = Math.ceil(defInc * (1 + bonusRate));
-          agiInc = Math.ceil(agiInc * (1 + bonusRate));
-          lucInc = Math.ceil(lucInc * (1 + bonusRate));
+          const rate = (braveProof.t2 || 30) / 100;
+          baseHp = Math.ceil(baseHp * (1 + rate));
+          baseAtk = Math.ceil(baseAtk * (1 + rate));
+          baseDef = Math.ceil(baseDef * (1 + rate));
+          baseAgi = Math.ceil(baseAgi * (1 + rate));
+          baseLuc = Math.ceil(baseLuc * (1 + rate));
         }
         
         const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
@@ -1074,12 +1044,11 @@ export const useGameStore = create<GameStore>()(
               itemCount += item.quantity;
             }
           }
-          const completionRate = Math.min(itemCount, 1000) / 1000;
-          const bonus = bonusPercent * completionRate / 100;
-          hpInc = Math.ceil(hpInc * (1 + bonus));
-          atkInc = Math.ceil(atkInc * (1 + bonus));
-          defInc = Math.ceil(defInc * (1 + bonus));
-          agiInc = Math.ceil(agiInc * (1 + bonus));
+          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
+          baseHp = Math.ceil(baseHp * (1 + rate));
+          baseAtk = Math.ceil(baseAtk * (1 + rate));
+          baseDef = Math.ceil(baseDef * (1 + rate));
+          baseAgi = Math.ceil(baseAgi * (1 + rate));
         }
         
         const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
@@ -1089,11 +1058,21 @@ export const useGameStore = create<GameStore>()(
         const stPtPerLevel = 4 + bonuses.GetPlusStPt;
         const stPtIncrease = lvupsitanum * stPtPerLevel;
         
-        const finalHp = Math.floor((hpInc + hpStPtBonus + bonuses.epHp) * (1 + bonuses.ebHp + bonuses.addMaxHP + bonuses.AllstatPer));
-        const finalAtk = Math.floor((atkInc + atkStPtBonus + bonuses.epAtk) * (1 + bonuses.ebAtk + bonuses.addMaxATK + bonuses.AllstatPer));
-        const finalDef = Math.floor((defInc + defStPtBonus + bonuses.epDef) * (1 + bonuses.ebDef + bonuses.addMaxDEF + bonuses.AllstatPer));
-        const finalAgi = Math.floor((agiInc + agiStPtBonus + bonuses.epAgi) * (1 + bonuses.ebAgi + bonuses.addMaxAGI + bonuses.AllstatPer));
-        const finalLuc = Math.floor((lucInc + lucStPtBonus + bonuses.epLuc) * (1 + bonuses.ebLuc + bonuses.addMaxLUC + bonuses.AllstatPer));
+        // 武器/防具贡献分量
+        const equip = getEquipComponents(weaponObj, weaponQty, player.weaponSoul, armorObj, armorQty, player.armorSoul, baseHp);
+        
+        // 英雄加成
+        const heroBonuses = computeHeroBonuses(player.heroId || 0);
+        const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
+        const kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75);
+        
+        // gdata.txt hwMode 公式
+        const stats = computeFinalStats(baseHp, baseAtk, baseDef, baseAgi, baseLuc, equip, bonuses, heroBonuses, kyaraLv);
+        const finalHp = stats.hp;
+        const finalAtk = stats.atk;
+        const finalDef = stats.def;
+        const finalAgi = stats.agi;
+        const finalLuc = stats.luc;
         
         const { autoAllocateEnabled, autoAllocateStPt } = get();
         
@@ -1920,65 +1899,40 @@ export const useGameStore = create<GameStore>()(
         
         const weaponObj = finalEquippedWeapon;
         const weaponQty = weaponObj ? (finalInventory.find(i => i.equipmentId === weaponObj.id)?.quantity || 1) : 1;
-        const weaponAtkContrib = weaponObj ? getWeaponAtkContribution(weaponObj, weaponQty, finalWeaponSoul) : 0;
         
         const armorObj = finalEquippedArmor;
         const armorQty = armorObj ? (finalInventory.find(i => i.equipmentId === armorObj.id)?.quantity || 1) : 1;
-        const armorDefContrib = armorObj ? getArmorDefContribution(armorObj, armorQty, finalArmorSoul) : 0;
-        const armorHpContrib = armorObj ? getArmorHpContribution(armorObj, armorQty, finalArmorSoul) : 0;
         
         const accessories = finalEquippedAccessories || [];
-        const accessoryAtkBonus = accessories.reduce((sum, acc) => sum + (acc?.attackBonus || 0), 0);
-        const accessoryDefBonus = accessories.reduce((sum, acc) => sum + (acc?.defenseBonus || 0), 0);
-        const accessoryHpBonus = accessories.reduce((sum, acc) => sum + (acc?.hpBonus || 0), 0);
-        const accessoryAgiBonus = accessories.reduce((sum, acc) => sum + (acc?.agilityBonus || 0), 0);
-        const accessoryLucBonus = accessories.reduce((sum, acc) => sum + (acc?.luckBonus || 0), 0);
-        
-        let newMaxHp = Math.ceil(initialPlayer.maxHp + (levelBonus.hp || 0) + (armorHpContrib || 0) + (accessoryHpBonus || 0));
-        let newAtk = Math.ceil(initialPlayer.attack + (levelBonus.attack || 0) + (weaponAtkContrib || 0) + (accessoryAtkBonus || 0));
-        let newDef = Math.ceil(initialPlayer.defense + (levelBonus.defense || 0) + (armorDefContrib || 0) + (accessoryDefBonus || 0));
-        let newAgi = Math.ceil(initialPlayer.agility + (levelBonus.agility || 0) + (accessoryAgiBonus || 0));
-        let newLuc = Math.ceil(initialPlayer.luck + (levelBonus.luck || 0) + (accessoryLucBonus || 0));
         
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
-        newMaxHp += stPtAllocate.hp * 5;
-        newAtk += stPtAllocate.atk * 3;
-        newDef += stPtAllocate.def * 3;
-        newAgi += stPtAllocate.agi * 2;
-        newLuc += stPtAllocate.luc * 1;
         
-        const hero = getHeroById(player.heroId || 0);
-        if (hero) {
-          const { kyarakutalv, kyarakutaKozinExp } = get();
-          const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
-          const kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75);
-          
-          const hpBonus = hero.hpBonus * kyaraLv * 0.06;
-          const atkBonus = hero.atkBonus * kyaraLv * 0.07;
-          const defBonus = hero.defBonus * kyaraLv * 0.07;
-          const agiBonus = hero.agiBonus * kyaraLv * 0.075;
-          const lucBonus = hero.lucBonus * kyaraLv * 0.08;
-          
-          newMaxHp = Math.floor(newMaxHp * (1 + hpBonus));
-          newAtk = Math.floor(newAtk * (1 + atkBonus));
-          newDef = Math.floor(newDef * (1 + defBonus));
-          newAgi = Math.floor(newAgi * (1 + agiBonus));
-          newLuc = Math.floor(newLuc * (1 + lucBonus));
-        }
+        // 基础属性 = 初始值 + 等级加成 + 属性点加成
+        const baseHp = initialPlayer.maxHp + (levelBonus.hp || 0) + stPtAllocate.hp * 5;
+        const baseAtk = initialPlayer.attack + (levelBonus.attack || 0) + stPtAllocate.atk * 3;
+        const baseDef = initialPlayer.defense + (levelBonus.defense || 0) + stPtAllocate.def * 3;
+        const baseAgi = initialPlayer.agility + (levelBonus.agility || 0) + stPtAllocate.agi * 2;
+        const baseLuc = initialPlayer.luck + (levelBonus.luck || 0) + stPtAllocate.luc * 1;
         
+        // 武器/防具贡献分量
+        const equip = getEquipComponents(weaponObj, weaponQty, finalWeaponSoul, armorObj, armorQty, finalArmorSoul, baseHp);
+        
+        // 饰品加成
         const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
         
-        newMaxHp += bonuses.epHp;
-        newAtk += bonuses.epAtk;
-        newDef += bonuses.epDef;
-        newAgi += bonuses.epAgi;
-        newLuc += bonuses.epLuc;
+        // 英雄加成
+        const heroBonuses = computeHeroBonuses(player.heroId || 0);
+        const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
+        const kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75);
         
-        newMaxHp = Math.floor((newMaxHp + newMaxHp * bonuses.ebHp) * (1 + bonuses.addMaxHP + bonuses.AllstatPer));
-        newAtk = Math.floor((newAtk + newAtk * bonuses.ebAtk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer));
-        newDef = Math.floor((newDef + newDef * bonuses.ebDef) * (1 + bonuses.addMaxDEF + bonuses.AllstatPer));
-        newAgi = Math.floor((newAgi + newAgi * bonuses.ebAgi) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
-        newLuc = Math.floor((newLuc + newLuc * bonuses.ebLuc) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
+        // gdata.txt hwMode 公式计算最终属性
+        const finalStats = computeFinalStats(baseHp, baseAtk, baseDef, baseAgi, baseLuc, equip, bonuses, heroBonuses, kyaraLv);
+        
+        const newMaxHp = finalStats.hp;
+        const newAtk = finalStats.atk;
+        const newDef = finalStats.def;
+        const newAgi = finalStats.agi;
+        const newLuc = finalStats.luc;
         
         set({
           player: {
