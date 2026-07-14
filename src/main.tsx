@@ -22,6 +22,8 @@ declare global {
       addAllWeapons: () => void;
       addAllArmor: () => void;
       addAllAccessories: () => void;
+      addAllSouls: () => void;
+      addAllMaterials: () => void;
       clearSave: () => void;
       kill: (enable?: boolean) => void;
     };
@@ -89,6 +91,18 @@ window.gameDebug = {
     const accessories = equipmentData.filter(e => e.type === 'accessory');
     accessories.forEach(a => store.addToInventory(a.id, 1));
     console.log(`已添加全部饰品 (${accessories.length} 件)`);
+  },
+  addAllSouls: () => {
+    const store = useGameStore.getState();
+    const souls = equipmentData.filter(e => e.type === 'soul');
+    souls.forEach(s => store.addToInventory(s.id, 1));
+    console.log(`已添加全部魂 (${souls.length} 个)`);
+  },
+  addAllMaterials: () => {
+    const store = useGameStore.getState();
+    const materials = equipmentData.filter(e => e.type === 'material');
+    materials.forEach(m => store.addToInventory(m.id, 1));
+    console.log(`已添加全部材料 (${materials.length} 个)`);
   },
   clearSave: () => {
     // 清除所有 localStorage

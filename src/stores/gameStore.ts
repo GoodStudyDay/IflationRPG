@@ -1438,11 +1438,40 @@ export const useGameStore = create<GameStore>()(
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
         
         // 基础属性 = 初始值 + 等级加成 + 属性点加成
-        const baseHp_calc = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + stPtAllocate.hp * 5;
-        const baseAtk_calc = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + stPtAllocate.atk * 3;
-        const baseDef_calc = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + stPtAllocate.def * 3;
-        const baseAgi_calc = initialPlayer.agility + getLevelBonus(newPlayer.level).agility + stPtAllocate.agi * 2;
-        const baseLuc_calc = initialPlayer.luck + getLevelBonus(newPlayer.level).luck + stPtAllocate.luc * 1;
+        let baseHp_calc = initialPlayer.maxHp + getLevelBonus(newPlayer.level).hp + stPtAllocate.hp * 5;
+        let baseAtk_calc = initialPlayer.attack + getLevelBonus(newPlayer.level).attack + stPtAllocate.atk * 3;
+        let baseDef_calc = initialPlayer.defense + getLevelBonus(newPlayer.level).defense + stPtAllocate.def * 3;
+        let baseAgi_calc = initialPlayer.agility + getLevelBonus(newPlayer.level).agility + stPtAllocate.agi * 2;
+        let baseLuc_calc = initialPlayer.luck + getLevelBonus(newPlayer.level).luck + stPtAllocate.luc * 1;
+        
+        // 勇者の証明 (t1=820) 加成 - 角色能力效果增加t2%
+        const braveProof1 = accessories.find(acc => acc && acc.t1 === 820);
+        if (braveProof1) {
+          const rate = (braveProof1.t2 || 30) / 100;
+          baseHp_calc = Math.ceil(baseHp_calc * (1 + rate));
+          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + rate));
+          baseDef_calc = Math.ceil(baseDef_calc * (1 + rate));
+          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + rate));
+          baseLuc_calc = Math.ceil(baseLuc_calc * (1 + rate));
+        }
+        
+        // 能力宝石 (t1=35) 加成
+        const playerGems1 = accessories.filter(acc => acc && acc.t1 === 35);
+        for (const gem of playerGems1) {
+          const bonusPercent = gem.t2 || 0;
+          let itemCount = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount += item.quantity;
+            }
+          }
+          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
+          baseHp_calc = Math.ceil(baseHp_calc * (1 + rate));
+          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + rate));
+          baseDef_calc = Math.ceil(baseDef_calc * (1 + rate));
+          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + rate));
+        }
         
         // 饰品加成
         const { kyarakutalv, kyarakutaKozinExp } = get();
@@ -1726,24 +1755,70 @@ export const useGameStore = create<GameStore>()(
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
         
         // 基础属性
-        const baseHp2 = initialPlayer.maxHp + getLevelBonus(player.level).hp + stPtAllocate.hp * 5;
-        const baseAtk2 = initialPlayer.attack + getLevelBonus(player.level).attack + stPtAllocate.atk * 3;
-        const baseDef2 = initialPlayer.defense + getLevelBonus(player.level).defense + stPtAllocate.def * 3;
-        const baseAgi2 = initialPlayer.agility + getLevelBonus(player.level).agility + stPtAllocate.agi * 2;
-        const baseLuc2 = initialPlayer.luck + getLevelBonus(player.level).luck + stPtAllocate.luc * 1;
+        let baseHp2 = initialPlayer.maxHp + getLevelBonus(player.level).hp + stPtAllocate.hp * 5;
+        let baseAtk2 = initialPlayer.attack + getLevelBonus(player.level).attack + stPtAllocate.atk * 3;
+        let baseDef2 = initialPlayer.defense + getLevelBonus(player.level).defense + stPtAllocate.def * 3;
+        let baseAgi2 = initialPlayer.agility + getLevelBonus(player.level).agility + stPtAllocate.agi * 2;
+        let baseLuc2 = initialPlayer.luck + getLevelBonus(player.level).luck + stPtAllocate.luc * 1;
+        
+        console.log('🔍 [loadEquipSet] 基础属性(原始):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
+        console.log('🔍 [loadEquipSet] stPtAllocate:', stPtAllocate);
+        console.log('🔍 [loadEquipSet] level bonus:', getLevelBonus(player.level));
+        
+        // 勇者の証明 (t1=820) 加成 - 角色能力效果增加t2%
+        const braveProof = accessories.find(acc => acc && acc.t1 === 820);
+        if (braveProof) {
+          const rate = (braveProof.t2 || 30) / 100;
+          console.log('🔍 [loadEquipSet] 勇者の証明 found:', braveProof.name, 't2=', braveProof.t2, 'rate=', rate);
+          baseHp2 = Math.ceil(baseHp2 * (1 + rate));
+          baseAtk2 = Math.ceil(baseAtk2 * (1 + rate));
+          baseDef2 = Math.ceil(baseDef2 * (1 + rate));
+          baseAgi2 = Math.ceil(baseAgi2 * (1 + rate));
+          baseLuc2 = Math.ceil(baseLuc2 * (1 + rate));
+          console.log('🔍 [loadEquipSet] 基础属性(勇者の証明后):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
+        } else {
+          console.log('🔍 [loadEquipSet] 无勇者の証明');
+        }
+        
+        // 能力宝石 (t1=35) 加成
+        const playerGems2 = accessories.filter(acc => acc && acc.t1 === 35);
+        for (const gem of playerGems2) {
+          const bonusPercent = gem.t2 || 0;
+          let itemCount = 0;
+          for (const item of inventory) {
+            const eq = getEquipmentById(item.equipmentId);
+            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+              itemCount += item.quantity;
+            }
+          }
+          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
+          baseHp2 = Math.ceil(baseHp2 * (1 + rate));
+          baseAtk2 = Math.ceil(baseAtk2 * (1 + rate));
+          baseDef2 = Math.ceil(baseDef2 * (1 + rate));
+          baseAgi2 = Math.ceil(baseAgi2 * (1 + rate));
+        }
+        console.log('🔍 [loadEquipSet] 基础属性(最终):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
         
         // 武器/防具贡献分量
         const weaponQty2 = weapon ? (inventory.find(i => i.equipmentId === weapon.id)?.quantity || 1) : 1;
         const armorQty2 = armor ? (inventory.find(i => i.equipmentId === armor.id)?.quantity || 1) : 1;
         const equip2 = getEquipComponents(weapon, weaponQty2, targetWeaponSoul, armor, armorQty2, targetArmorSoul, baseHp2);
+        console.log('🔍 [loadEquipSet] equip2:', equip2);
+        console.log('🔍 [loadEquipSet] weapon:', weapon?.name, 'qty=', weaponQty2, ', armor:', armor?.name, 'qty=', armorQty2);
         
         // 英雄加成
         const heroBonuses2 = computeHeroBonuses(player.heroId || 0);
         const currentKyaraLv2 = getCurrentKyaraLv(kcexp, player.heroId);
         const kyaraLv2 = ((kclv + currentKyaraLv2) * 0.25 + 0.75);
+        console.log('🔍 [loadEquipSet] heroBonuses2:', heroBonuses2, 'kyaraLv2:', kyaraLv2);
         
         // gdata.txt hwMode 公式
         const stats2 = computeFinalStats(baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2, equip2, bonuses, heroBonuses2, kyaraLv2);
+        console.log('🔍 [loadEquipSet] bonuses:', { 
+          epHp: bonuses.epHp, ebHp: bonuses.ebHp, addMaxHP: bonuses.addMaxHP,
+          kyarakutaNouryokuUp: bonuses.kyarakutaNouryokuUp, AllstatPer: bonuses.AllstatPer,
+          epAtk: bonuses.epAtk, ebAtk: bonuses.ebAtk
+        });
         
         const newPlayer = {
           ...player,
@@ -1757,6 +1832,7 @@ export const useGameStore = create<GameStore>()(
           defense: stats2.def,
           agility: stats2.agi,
           luck: stats2.luc,
+          hp: Math.min(Math.floor(player.hp * stats2.hp / player.maxHp), stats2.hp),
         };
         
         // [DEBUG] loadEquipSet final
@@ -1908,6 +1984,13 @@ export const useGameStore = create<GameStore>()(
           lucAdd = remaining;
         }
         
+        const newStPtAllocate = { ...player.stPtAllocate } as { hp: number; atk: number; def: number; agi: number; luc: number };
+        if (hpAdd > 0) newStPtAllocate.hp = (newStPtAllocate.hp || 0) + hpAdd;
+        if (atkAdd > 0) newStPtAllocate.atk = (newStPtAllocate.atk || 0) + atkAdd;
+        if (defAdd > 0) newStPtAllocate.def = (newStPtAllocate.def || 0) + defAdd;
+        if (agiAdd > 0) newStPtAllocate.agi = (newStPtAllocate.agi || 0) + agiAdd;
+        if (lucAdd > 0) newStPtAllocate.luc = (newStPtAllocate.luc || 0) + lucAdd;
+        
         set({
           player: {
             ...player,
@@ -1918,6 +2001,7 @@ export const useGameStore = create<GameStore>()(
             agility: player.agility + agiAdd * 2,
             luck: player.luck + lucAdd * 1,
             stPt: 0,
+            stPtAllocate: newStPtAllocate,
           },
         });
       },
@@ -3027,6 +3111,13 @@ export const useGameStore = create<GameStore>()(
         let tdame = 0;
         let battleEnded = false;
         
+        const lang = get().language;
+        const t = (key: string, ...args: (string | number)[]) => {
+          let msg = getTranslation(key, lang);
+          args.forEach((a, i) => { msg = msg.replace(`{${i}}`, String(a)); });
+          return msg;
+        };
+        
         const interval = window.setInterval(() => {
           const state = get();
           const { battle, player, updatePlayerHp, endBattle, addBattleLog, updateHighDamage } = state;
@@ -3046,7 +3137,7 @@ export const useGameStore = create<GameStore>()(
             if (whichTurn === 0) {
               if (battle.recoverNextTurn) {
                 updatePlayerHp(player.maxHp);
-                addBattleLog('全部恢复了');
+                addBattleLog(t('全部恢复了'));
                 set((s) => ({
                   battle: { ...s.battle, recoverNextTurn: false },
                 }));
@@ -3094,12 +3185,12 @@ export const useGameStore = create<GameStore>()(
               }
               updateHighDamage(damage);
               
-              let logMessage = `攻击 ${Math.floor(damage)}伤害！`;
+              let logMessage = t('攻击 {0}伤害！', Math.floor(damage));
               if (currentComboCount >= 2) {
-                logMessage += ` ${currentComboCount} 连击！`;
+                logMessage += t(' {0} 连击！', currentComboCount);
               }
               if (isCrit) {
-                logMessage += ' 暴击！';
+                logMessage += t(' 暴击！');
               }
               addBattleLog(logMessage);
               
@@ -3185,7 +3276,7 @@ export const useGameStore = create<GameStore>()(
                         hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
                       },
                     }));
-                    addBattleLog(`回复项链效果：回复 ${healAmount} HP！`);
+                    addBattleLog(t('回复项链效果：回复 {0} HP！', healAmount));
                   }
                 }
                 
@@ -3199,9 +3290,9 @@ export const useGameStore = create<GameStore>()(
                       hpRate: (updatedEnemyHp / s.battle.enemy!.maxHp) * 100,
                     },
                   }));
-                  addBattleLog(`火焰秘钥效果：扣除敌人3%HP！(${secretKeyDamage}伤害)`);
+                  addBattleLog(t('火焰秘钥效果：扣除敌人3%HP！({0}伤害)', secretKeyDamage));
                   if (updatedEnemyHp <= 0) {
-                    addBattleLog('战斗胜利！');
+                    addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
                     setTimeout(() => {
@@ -3221,9 +3312,9 @@ export const useGameStore = create<GameStore>()(
                       hpRate: (updatedEnemyHp / s.battle.enemy!.maxHp) * 100,
                     },
                   }));
-                  addBattleLog(`秘钥效果：扣除敌人5%HP！(${secretKeyDamage}伤害)`);
+                  addBattleLog(t('秘钥效果：扣除敌人5%HP！({0}伤害)', secretKeyDamage));
                   if (updatedEnemyHp <= 0) {
-                    addBattleLog('战斗胜利！');
+                    addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
                     setTimeout(() => {
@@ -3242,7 +3333,7 @@ export const useGameStore = create<GameStore>()(
                         hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
                       },
                     }));
-                    addBattleLog(`圣树之叶效果：回复最大HP的9%！(${healAmount} HP)`);
+                    addBattleLog(t('圣树之叶效果：回复最大HP的9%！({0} HP)', healAmount));
                   }
                 }
                 
@@ -3255,8 +3346,8 @@ export const useGameStore = create<GameStore>()(
                         hpRate: 0,
                       },
                     }));
-                    addBattleLog('闪光沙漏1效果：直接斩杀！');
-                    addBattleLog('战斗胜利！');
+                    addBattleLog(t('闪光沙漏1效果：直接斩杀！'));
+                    addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
                     setTimeout(() => {
@@ -3267,7 +3358,7 @@ export const useGameStore = create<GameStore>()(
                 }
                 
                 if (newEnemyHp <= 0) {
-                  addBattleLog('战斗胜利！');
+                  addBattleLog(t('战斗胜利！'));
                   battleEnded = true;
                   set((s) => ({ battle: { ...s.battle, _ending: true } }));
                   setTimeout(() => {
@@ -3277,7 +3368,7 @@ export const useGameStore = create<GameStore>()(
                 }
               } else {
                 updatePlayerHp(-tdame);
-                addBattleLog(`敌人攻击 受到${Math.floor(tdame)}伤害`);
+                addBattleLog(t('敌人攻击 受到{0}伤害', Math.floor(tdame)));
                 
                 if (battle.reflection > 0) {
                   const reflectDamage = Math.floor(tdame * battle.reflection);
@@ -3289,7 +3380,7 @@ export const useGameStore = create<GameStore>()(
                       hpRate: (newEnemyHp / s.battle.enemy!.maxHp) * 100,
                     },
                   }));
-                  addBattleLog(`反射之镜效果：反射 ${reflectDamage} 伤害！`);
+                  addBattleLog(t('反射之镜效果：反射 {0} 伤害！', reflectDamage));
                   if (battle.refHealOn) {
                     const healAmount = Math.floor(reflectDamage * 0.5);
                     if (healAmount > 0) {
@@ -3299,11 +3390,11 @@ export const useGameStore = create<GameStore>()(
                           hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
                         },
                       }));
-                      addBattleLog(`反射回复效果：回复 ${healAmount} HP！`);
+                      addBattleLog(t('反射回复效果：回复 {0} HP！', healAmount));
                     }
                   }
                   if (newEnemyHp <= 0) {
-                    addBattleLog('战斗胜利！');
+                    addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
                     setTimeout(() => {
@@ -3342,14 +3433,14 @@ export const useGameStore = create<GameStore>()(
                       },
                     }));
                     
-                    addBattleLog(`不灭之力发动！复活 (剩余${oldCount - 1}次)`);
+                    addBattleLog(t('不灭之力发动！复活 (剩余{0}次)', oldCount - 1));
                     eefi = 0;
                     mode = 5;
                     isProcessing = false;
                     return;
                   }
                   
-                  addBattleLog('战斗失败了');
+                  addBattleLog(t('战斗失败了'));
                   battleEnded = true;
                   set((s) => ({ battle: { ...s.battle, _ending: true } }));
                   setTimeout(() => {
@@ -3430,7 +3521,7 @@ export const useGameStore = create<GameStore>()(
         
         if (battle.status !== 'paused' || !battle.enemy) return;
         
-        addBattleLog('成功逃跑了！');
+        addBattleLog(getTranslation('成功逃跑了！', get().language));
         resetEncounterRate();
         setCurrentScene('world');
         set({

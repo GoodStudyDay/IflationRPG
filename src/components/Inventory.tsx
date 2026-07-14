@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGameStore, isPassiveEffectItem } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
-import { getStockBonus } from '@/utils/helpers';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
 import { useEquipmentDescription } from '@/hooks/useEquipmentDescription';
@@ -231,7 +230,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           {weapons.map(weapon => {
             const isEquipped = player.equippedWeapon?.id === weapon.id;
             const isOwned = weapon.quantity > 0;
-            const stockMult = getStockBonus(weapon.quantity);
             
             return (
               <div 
@@ -263,7 +261,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                     {isOwned && (
                       <>
-                        <div className="text-red-300 text-sm mt-1">ATK +{Math.floor(weapon.attackBonus * stockMult)}</div>
+                        <div className="text-red-300 text-sm mt-1">ATK +{weapon.attackBonus}</div>
                         <div className="text-gray-300 text-xs mt-0.5">
                           {t('数量')}: {weapon.quantity}
                           {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
@@ -274,7 +272,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-gray-400">{t('倍率')}: {Math.floor(weapon.attributeRate * stockMult)}%</div>
+                        <div className="text-xs text-gray-400">{t('倍率')}: {weapon.attributeRate}%</div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(weapon); }}
@@ -330,7 +328,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           {armors.map(armor => {
             const isEquipped = player.equippedArmor?.id === armor.id;
             const isOwned = armor.quantity > 0;
-            const stockMult = getStockBonus(armor.quantity);
             
             return (
               <div 
@@ -363,9 +360,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                     {isOwned && (
                       <>
-                        <div className="text-blue-300 text-sm mt-1">DEF +{Math.floor(armor.defenseBonus * stockMult)}</div>
+                        <div className="text-blue-300 text-sm mt-1">DEF +{armor.defenseBonus}</div>
                         {armor.hpBonus > 0 && (
-                          <div className="text-green-300 text-xs">HP +{Math.floor(armor.hpBonus * stockMult)}</div>
+                          <div className="text-green-300 text-xs">HP +{armor.hpBonus}</div>
                         )}
                         <div className="text-gray-300 text-xs mt-0.5">
                           {t('数量')}: {armor.quantity}
@@ -377,7 +374,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-gray-400">{t('倍率')}: {Math.floor(armor.attributeRate * stockMult)}%</div>
+                        <div className="text-xs text-gray-400">{t('倍率')}: {armor.attributeRate}%</div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(armor); }}
@@ -822,7 +819,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     {player.equippedWeapon && (
                       <>
                         <div className="text-red-300 text-xs mt-1">
-                          ATK {totalAttack} (+{bonuses.atkBonus})
+                          ATK +{player.equippedWeapon.attackBonus}
                         </div>
                         <div className="text-red-300 text-xs">
                           ATK x {(player.equippedWeapon.attributeRate || 100)}%
@@ -868,7 +865,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     {player.equippedArmor && (
                       <>
                         <div className="text-blue-300 text-xs mt-1">
-                          DEF {totalDefense} (+{bonuses.defBonus})
+                          DEF +{player.equippedArmor.defenseBonus}
                         </div>
                         <div className="text-blue-300 text-xs">
                           DEF x {(player.equippedArmor.attributeRate || 100)}%

@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.67',
+    date: '2026-07-14 20:00:00',
+    changes: [
+      '修复背包中武器/防具/饰品显示原始属性而非计算后的最终属性',
+      '修复切换背包时 HP 比例异常变化的问题（按比例保留当前 HP）',
+      '修复自动分配属性点时 stPtAllocate 未保存，导致切换背包后属性点加成丢失',
+      '修复勇者の証明/勇者の証明+1 装备后对 HP/ATK/DEF 无加成的问题',
+      '修复能力宝石(t1=35)在 equipItem/loadEquipSet 中未生效的问题',
+      '修复 loadEquipSet 中基础属性计算缺少勇者の証明和能力宝石加成',
+    ],
+  },
+  {
     version: 'v0.0.65',
     date: '2026-07-14 16:00:00',
     changes: [
