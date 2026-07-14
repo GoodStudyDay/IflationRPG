@@ -4,6 +4,19 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.65',
+    date: '2026-07-14 16:00:00',
+    changes: [
+      '修复天使之羽（accessory-84）掉落：暗黑使者A（boss-84）掉落率 1%',
+      '修复御の羽（accessory-92）掉落：深渊五王B（boss-92）掉落率 8%',
+      '修复勇者的证明效果：改为 kyarakutaNouryokuUp 累加，正确提升角色能力效果',
+      '修复剩余战斗戒指：取下时自动扣回增加的战斗次数',
+      '实现恶魔之魂效果：每5次攻击触发双倍伤害',
+      '实现诅咒铜币效果：每战伤害增加20%',
+      '修复魂描述属性值和百分比显示反了的问题',
+    ],
+  },
+  {
     version: 'v0.0.64',
     date: '2026-07-14 12:00:00',
     changes: [

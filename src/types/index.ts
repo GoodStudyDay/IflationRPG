@@ -162,6 +162,8 @@ export interface BattleState {
   _loopMode: number;
   _loopTick: number;
   _loopComboCount: number;
+  /** 攻击计数（用于恶魔之魂效果） */
+  attackCount: number;
   /** 恢复费用部分支付标记 */
   _recvCost?: boolean;
   /** 触发战斗的特殊 bonus 类型 (12=i, 13=iii, etc) */

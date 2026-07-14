@@ -55,10 +55,7 @@ export function isPassiveEffectItem(eqId: string): boolean {
 function applyEquipmentBonuses(
   accessories: (Equipment | null)[],
   inventory: InventoryItem[],
-  hardmode: number,
-  kyarakutaLevel: number,
-  kyarakutaKozinExp: number[],
-  heroId: number
+  hardmode: number
 ): {
   epHp: number;
   epAtk: number;
@@ -76,6 +73,7 @@ function applyEquipmentBonuses(
   addMaxAGI: number;
   addMaxLUC: number;
   AllstatPer: number;
+  kyarakutaNouryokuUp: number;
   expMultiplier: number;
   GetPlusStPt: number;
   DamageReduced: number;
@@ -115,6 +113,7 @@ function applyEquipmentBonuses(
   let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
   let addMaxHP = 0, addMaxATK = 0, addMaxDEF = 0, addMaxAGI = 0, addMaxLUC = 0;
   let AllstatPer = 0;
+  let kyarakutaNouryokuUp = 0;
   let expMultiplier = 1;
   let GetPlusStPt = 0;
   let DamageReduced = 0;
@@ -184,6 +183,8 @@ function applyEquipmentBonuses(
       epHp += t2 * 10;
       epDef += t2 * 10;
       epAgi += t2;
+    } else if (t1 === 2) {
+      DamageIncreased += 0.2;
     } else if (t1 === 60) {
       expMultiplier += t2 / 100;
     } else if (t1 === 1111) {
@@ -204,13 +205,7 @@ function applyEquipmentBonuses(
     } else if (t1 === 889 && hardmode === 2) {
       AllstatPer += 0.4;
     } else if (t1 === 820) {
-      const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, heroId);
-      const kyarakutaBonus = ((kyarakutaLevel + currentKyaraLv) * 0.25 + 0.75) * (1 + t2 / 100);
-      ebHp += (initialPlayer.maxHp * 0.06) * kyarakutaBonus;
-      ebAtk += (initialPlayer.attack * 0.07) * kyarakutaBonus;
-      ebDef += (initialPlayer.defense * 0.07) * kyarakutaBonus;
-      ebAgi += (initialPlayer.agility * 0.075) * kyarakutaBonus;
-      ebLuc += (initialPlayer.luck * 0.08) * kyarakutaBonus;
+      kyarakutaNouryokuUp += t2;
     } else if (t1 === 3333) {
       addMaxHP += 0.15;
       expMultiplier += 1.05;
@@ -382,7 +377,7 @@ function applyEquipmentBonuses(
     epHp, epAtk, epDef, epAgi, epLuc,
     ebHp, ebAtk, ebDef, ebAgi, ebLuc,
     addMaxHP, addMaxATK, addMaxDEF, addMaxAGI, addMaxLUC,
-    AllstatPer, expMultiplier, GetPlusStPt, DamageReduced, DamageIncreased,
+    AllstatPer, kyarakutaNouryokuUp, expMultiplier, GetPlusStPt, DamageReduced, DamageIncreased,
     crihPlusKakuritu, crihplusdamage, renzokuPlusKakuritu, MoveSpeed, SokusiKaihiKakuritu,
     redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate,
     hpReduceRate, atkReduceRate,
@@ -696,7 +691,8 @@ const calculatePlayerDamage = (
   isCrit: boolean,
   comboCount: number,
   accessories: Equipment[],
-  playerLevel: number
+  playerLevel: number,
+  attackCount: number = 0
 ): { damage: number; isCrit: boolean } => {
   let damage: number;
   
@@ -704,6 +700,7 @@ const calculatePlayerDamage = (
   const skyPower = accessories.find(acc => acc && acc.t1 === 4002);
   const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
   const powerStone = accessories.find(acc => acc && acc.t1 === 2222);
+  const demonSoul = accessories.find(acc => acc && acc.t1 === 5);
   
   if (isCrit) {
     const critBonus = Math.random() * 1.2;
@@ -718,6 +715,10 @@ const calculatePlayerDamage = (
   
   if (powerStone) {
     damage *= (1 + (powerStone.t2 || 20) / 100);
+  }
+  
+  if (demonSoul && (attackCount + 1) % 5 === 0) {
+    damage *= 2;
   }
   
   let defense = enemyDefense;
@@ -876,6 +877,7 @@ export const useGameStore = create<GameStore>()(
           _loopMode: 3,
           _loopTick: 0,
           _loopComboCount: 1,
+          attackCount: 0,
         specialBonusType: null,
         activeEffect: null,
         resCount: 0,
@@ -1146,7 +1148,7 @@ export const useGameStore = create<GameStore>()(
         }
         
         const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
+        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0);
         
         // 根据 gdata.txt 中的 lvupFunc()，每级属性点 = 4 + GetPlusStPt
         const stPtPerLevel = 4 + bonuses.GetPlusStPt;
@@ -1393,7 +1395,7 @@ export const useGameStore = create<GameStore>()(
         
         // 饰品加成
         const { kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
+        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0);
         
         // 武器/防具贡献分量
         const equip1 = getEquipComponents(weaponObj, weaponQty, newPlayer.weaponSoul, armorObj, armorQty, newPlayer.armorSoul, baseHp_calc);
@@ -1427,6 +1429,16 @@ export const useGameStore = create<GameStore>()(
           battlePointsChange += equipment.t2 || 0;
         }
         
+        const battleRingBonus = accessories.reduce((sum, acc) => {
+          if (acc && acc.t1 === 6) {
+            return sum + (acc.t2 || 0);
+          }
+          return sum;
+        }, 0);
+        
+        const baseMaxBP = get().hardmode === 1 ? 15 : 30;
+        const newMaxBattlePoints = baseMaxBP + battleRingBonus;
+        
         // 更新当前激活背包的装备数据
         const currentSets = get().equipSets;
         const currentSlot = get().currentEquipSetSlotIndex;
@@ -1458,6 +1470,7 @@ export const useGameStore = create<GameStore>()(
           player: newPlayer,
           equipSets: newEquipSets,
           battlePoints: get().battlePoints + battlePointsChange,
+          maxBattlePoints: newMaxBattlePoints,
         });
         
         // 持久化保存
@@ -1656,7 +1669,7 @@ export const useGameStore = create<GameStore>()(
         
         // 使用统一的 applyEquipmentBonuses 函数计算饰品加成
         const { kyarakutalv: kclv, kyarakutaKozinExp: kcexp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, kclv || 0, kcexp || [], player.heroId || 0);
+        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0);
         
         // 使用已分配的属性点
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
@@ -1977,7 +1990,7 @@ export const useGameStore = create<GameStore>()(
         const equip = getEquipComponents(weaponObj, weaponQty, finalWeaponSoul, armorObj, armorQty, finalArmorSoul, baseHp);
         
         // 饰品加成
-        const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode, kyarakutalv || 0, kyarakutaKozinExp || [], player.heroId || 0);
+        const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode);
         
         // 英雄加成
         const heroBonuses = computeHeroBonuses(player.heroId || 0);
@@ -2046,6 +2059,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            attackCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: bonuses.resCount,
@@ -2424,7 +2438,7 @@ export const useGameStore = create<GameStore>()(
         
         // 计算复活参数
         const eqBonuses = applyEquipmentBonuses(
-          accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
+          accessories, inventory, hardmode
         );
         
         const lang = get().language;
@@ -2469,6 +2483,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            attackCount: 0,
             activeEffect: null,
             resCount: eqBonuses.resCount,
             resStatUP: eqBonuses.resStatUP,
@@ -2631,7 +2646,7 @@ export const useGameStore = create<GameStore>()(
         
         // 计算复活参数
         const eqBonuses2 = applyEquipmentBonuses(
-          accessories, inventory, hardmode, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], player.heroId || 0
+          accessories, inventory, hardmode
         );
         
         const lang = get().language;
@@ -2676,6 +2691,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            attackCount: 0,
             specialBonusType,
             activeEffect: null,
             resCount: eqBonuses2.resCount,
@@ -3011,8 +3027,16 @@ export const useGameStore = create<GameStore>()(
                 isCrit,
                 currentComboCount,
                 accessories,
-                player.level
+                player.level,
+                battle.attackCount
               );
+              
+              set((s) => ({
+                battle: {
+                  ...s.battle,
+                  attackCount: s.battle.attackCount + 1,
+                },
+              }));
               
               tdame = damage;
               if (state.debugKill) {
@@ -3356,6 +3380,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            attackCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: 0,
@@ -3414,7 +3439,7 @@ export const useGameStore = create<GameStore>()(
         const baseResetLuc = initialPlayer.luck + levelBonus.luck + stPtAlloc.luc * 1;
         
         const equipR = getEquipComponents(equippedWeapon, weaponQty, weaponSoul, equippedArmor, armorQty, armorSoul, baseResetHp);
-        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0, get().kyarakutalv || 0, get().kyarakutaKozinExp || [], initialPlayer.heroId || 0);
+        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0);
         const heroBonusesR = computeHeroBonuses(initialPlayer.heroId || 0);
         const currentKyaraLvR = getCurrentKyaraLv(get().kyarakutaKozinExp, initialPlayer.heroId);
         const kyaraLvR = ((get().kyarakutalv + currentKyaraLvR) * 0.25 + 0.75);
@@ -3530,6 +3555,7 @@ export const useGameStore = create<GameStore>()(
             _loopMode: 3,
             _loopTick: 0,
             _loopComboCount: 1,
+            attackCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: 0,
@@ -4019,7 +4045,7 @@ export const useGameStore = create<GameStore>()(
           
           const equipM = getEquipComponents(weapon, weaponQty, state.player.weaponSoul, armor, armorQty, state.player.armorSoul, baseMergeHp);
           const globalState = useGameStore.getState();
-          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0, globalState.kyarakutalv || 0, globalState.kyarakutaKozinExp || [], state.player.heroId || 0);
+          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0);
           const heroBonusesM = computeHeroBonuses(state.player.heroId || 0);
           const currentKyaraLvM = getCurrentKyaraLv(globalState.kyarakutaKozinExp, state.player.heroId);
           const kyaraLvM = ((globalState.kyarakutalv + currentKyaraLvM) * 0.25 + 0.75);

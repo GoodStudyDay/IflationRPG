@@ -153,19 +153,21 @@ export const computeFinalStats = (
     epHp: number; epAtk: number; epDef: number; epAgi: number; epLuc: number;
     addMaxHP: number; addMaxATK: number; addMaxDEF: number; addMaxAGI: number; addMaxLUC: number;
     AllstatPer: number;
+    kyarakutaNouryokuUp: number;
     redEyeEffect: number; blueEyeEffect: number; greenEyeEffect: number;
   },
   heroBonuses: HeroBonuses,
   heroLevel: number
 ): { hp: number; atk: number; def: number; agi: number; luc: number } => {
+  const kyaraUpMultiplier = 1 + bonuses.kyarakutaNouryokuUp / 100;
   // gdata.txt hwMode: ebhp += KPhp * _loc6_ * 0.06
-  const ebhp = bonuses.ebHp + heroBonuses.KPhp * heroLevel * 0.06;
+  const ebhp = bonuses.ebHp + heroBonuses.KPhp * heroLevel * kyaraUpMultiplier * 0.06;
   // 武器 ebAtk + 饰品 ebAtk + 英雄 KPatk
-  const ebatk = equip.ebAtk + bonuses.ebAtk + heroBonuses.KPatk * heroLevel * 0.07;
+  const ebatk = equip.ebAtk + bonuses.ebAtk + heroBonuses.KPatk * heroLevel * kyaraUpMultiplier * 0.07;
   // 防具 ebDef + 饰品 ebDef + 英雄 KPdef
-  const ebdef = equip.ebDef + bonuses.ebDef + heroBonuses.KPdef * heroLevel * 0.07;
-  const ebspeed = bonuses.ebAgi + heroBonuses.KPspeed * heroLevel * 0.075;
-  const ebluk = bonuses.ebLuc + heroBonuses.KPluk * heroLevel * 0.08;
+  const ebdef = equip.ebDef + bonuses.ebDef + heroBonuses.KPdef * heroLevel * kyaraUpMultiplier * 0.07;
+  const ebspeed = bonuses.ebAgi + heroBonuses.KPspeed * heroLevel * kyaraUpMultiplier * 0.075;
+  const ebluk = bonuses.ebLuc + heroBonuses.KPluk * heroLevel * kyaraUpMultiplier * 0.08;
   
   // HP: (hp + ephp) * (1 + ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer)
   const ephp = equip.epHp + bonuses.epHp;
