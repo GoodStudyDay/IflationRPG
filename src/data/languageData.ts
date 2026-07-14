@@ -533,6 +533,7 @@ export const translations: Record<string, TranslationKey> = {
   '武器列表': { ja: '武器リスト', en: 'Weapon List', 'zh-Hant': '武器列表', 'zh-Hans': '武器列表', ko: '무기 목록', es: 'Lista de Armas', id: 'Daftar Senjata' },
   '防具列表': { ja: '防具リスト', en: 'Armor List', 'zh-Hant': '防具列表', 'zh-Hans': '防具列表', ko: '방어구 목록', es: 'Lista de Armaduras', id: 'Daftar Tameng' },
   '饰品列表': { ja: 'アクセサリーリスト', en: 'Accessory List', 'zh-Hant': '飾品列表', 'zh-Hans': '饰品列表', ko: '액세서리 목록', es: 'Lista de Accesorios', id: 'Daftar Aksesoris' },
+  '搜索': { ja: '検索', en: 'Search', 'zh-Hant': '搜尋', 'zh-Hans': '搜索', ko: '검색', es: 'Buscar', id: 'Cari' },
   '魂列表': { ja: 'ソウルリスト', en: 'Soul List', 'zh-Hant': '魂列表', 'zh-Hans': '魂列表', ko: '소울 목록', es: 'Lista de Almas', id: 'Daftar Soul' },
   '材料列表': { ja: '素材リスト', en: 'Material List', 'zh-Hant': '材料列表', 'zh-Hans': '材料列表', ko: '재료 목록', es: 'Lista de Materiales', id: 'Daftar Bahan' },
   '当前装备': { ja: '現在装備中', en: 'Equipped', 'zh-Hant': '當前裝備', 'zh-Hans': '当前装备', ko: '현재 장비', es: 'Equipado', id: 'Dipasang' },

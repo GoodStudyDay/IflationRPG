@@ -4,6 +4,19 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.68',
+    date: '2026-07-14 22:00:00',
+    changes: [
+      '武器/防具/饰品列表新增搜索框，支持按名称搜索装备',
+      '修复搜索框挤压列表布局的问题',
+      '修复 kaihuku 帧动画特效不显示的问题（实现 mode 6 动画流程）',
+      '修复 Heart of the four gods 中文翻译为四神之力',
+      '实现 Heart of the four gods 组合效果：根据同时装备的不灭/岚/天空/圣树数量递增加成',
+      '修复回复/复活时特效不在角色身上且不播放的问题',
+      '添加"搜索"多语言翻译',
+    ],
+  },
+  {
     version: 'v0.0.67',
     date: '2026-07-14 20:00:00',
     changes: [

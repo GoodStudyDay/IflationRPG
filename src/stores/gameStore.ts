@@ -272,6 +272,28 @@ function applyEquipmentBonuses(
       resStatUP = 1.03;
       renzoDamageUP = 1.5;
       renzokuPlusKakuritu = 0.15;
+      
+      const mixItems = [acc.mixbase1, acc.mixbase2, acc.mixbase3, acc.mixbase4].filter(Boolean);
+      let matchedCount = 0;
+      for (const mixItemId of mixItems) {
+        const hasItem = inventory.some(i => i.equipmentId === `accessory-${mixItemId}` && i.quantity > 0);
+        if (hasItem) {
+          matchedCount++;
+        }
+      }
+      
+      if (matchedCount >= 2) {
+        renzoDamageUP += 0.5;
+      }
+      if (matchedCount >= 3) {
+        renzoDamageUP += 0.5;
+        renzokuPlusKakuritu += 0.1;
+      }
+      if (matchedCount >= 4) {
+        renzoDamageUP += 0.5;
+        renzokuPlusKakuritu += 0.1;
+        AllstatPer += 0.3;
+      }
     } else if (t1 === 1889) {
       fireSecretKeyOn = true;
     } else if (t1 === 4006) {
@@ -3135,17 +3157,6 @@ export const useGameStore = create<GameStore>()(
             }));
             
             if (whichTurn === 0) {
-              if (battle.recoverNextTurn) {
-                updatePlayerHp(player.maxHp);
-                addBattleLog(t('全部恢复了'));
-                set((s) => ({
-                  battle: { ...s.battle, recoverNextTurn: false },
-                }));
-                whichTurn = 1;
-                isProcessing = false;
-                return;
-              }
-              
               const totalAttack = player.attack;
               const hpPercent = player.hp / player.maxHp;
               const accessories = player.equippedAccessories || [];
@@ -3414,26 +3425,7 @@ export const useGameStore = create<GameStore>()(
                 
                 const { player: newPlayer, battle: currentBattle } = get();
                 if (newPlayer.hp <= 0) {
-                  // battle.txt 复活逻辑：检查 resCount
                   if (currentBattle.resCount > 0) {
-                    // 复活：增加属性，减少复活次数
-                    const { resStatUP } = currentBattle;
-                    const oldCount = currentBattle.resCount;
-                    
-                    set((s) => ({
-                      player: {
-                        ...s.player,
-                        hp: Math.floor(s.player.maxHp * resStatUP),
-                        maxHp: Math.floor(s.player.maxHp * resStatUP),
-                        attack: Math.floor(s.player.attack * resStatUP),
-                      },
-                      battle: {
-                        ...s.battle,
-                        resCount: oldCount - 1,
-                      },
-                    }));
-                    
-                    addBattleLog(t('不灭之力发动！复活 (剩余{0}次)', oldCount - 1));
                     eefi = 0;
                     mode = 5;
                     isProcessing = false;
@@ -3491,7 +3483,53 @@ export const useGameStore = create<GameStore>()(
                 whichTurn = 0;
               }
               
-              mode = 3;
+              if (battle.recoverNextTurn) {
+                mode = 6;
+                eefi = 0;
+              } else if (player.hp <= 0 && battle.resCount > 0) {
+                mode = 6;
+                eefi = 0;
+              } else {
+                mode = 3;
+              }
+            }
+          } else if (mode === 6) {
+            eefi++;
+            
+            if (eefi === 1) {
+              set((s) => ({
+                battle: {
+                  ...s.battle,
+                  activeEffect: { effectId: 4, position: 'player' as const },
+                },
+              }));
+            }
+            
+            if (eefi >= 18) {
+              if (battle.recoverNextTurn) {
+                updatePlayerHp(player.maxHp);
+                addBattleLog(t('全部恢复了'));
+                set((s) => ({
+                  battle: { ...s.battle, recoverNextTurn: false },
+                }));
+              } else if (player.hp <= 0 && battle.resCount > 0) {
+                const resStatUP = battle.resStatUP || 1.03;
+                set((s) => ({
+                  player: {
+                    ...s.player,
+                    hp: Math.floor(s.player.maxHp * resStatUP),
+                    maxHp: Math.floor(s.player.maxHp * resStatUP),
+                    attack: Math.floor(s.player.attack * resStatUP),
+                  },
+                  battle: {
+                    ...s.battle,
+                    resCount: s.battle.resCount - 1,
+                  },
+                }));
+                addBattleLog(t('不灭之力发动！复活 (剩余{0}次)', battle.resCount - 1));
+              }
+              mode = 5;
+              eefi = 0;
             }
           }
           

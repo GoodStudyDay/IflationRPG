@@ -166,6 +166,7 @@ export const equipmentNameTranslations: Record<string, Record<LanguageCode, stri
   '嵐の力': { ja: '嵐の力', en: 'Storm Power', 'zh-Hant': '暴風之力', 'zh-Hans': '暴风之力', ko: '폭풍의 힘', es: 'Poder de la Tormenta', id: 'Kekuatan Badai' },
   '天空の力': { ja: '天空の力', en: 'Sky Power', 'zh-Hant': '天空之力', 'zh-Hans': '天空之力', ko: '하늘의 힘', es: 'Poder del Cielo', id: 'Kekuatan Langit' },
   '大地の力': { ja: '大地の力', en: 'Earth Power', 'zh-Hant': '大地之力', 'zh-Hans': '大地之力', ko: '대지의 힘', es: 'Poder de la Tierra', id: 'Kekuatan Bumi' },
+  'Heart of the four gods': { ja: '四神の心', en: 'Heart of the four gods', 'zh-Hant': '四神之力', 'zh-Hans': '四神之力', ko: '사신의 힘', es: 'Corazón de los Cuatro Dioses', id: 'Hati Empat Dewa' },
   '加速砂時計': { ja: '加速砂時計', en: 'Accel Hourglass', 'zh-Hant': '加速沙漏', 'zh-Hans': '加速沙漏', ko: '가속 모래시계', es: 'Reloj de Arena Acelerador', id: 'Jam Pasir Akselerasi' },
   '燃える本': { ja: '燃える本', en: 'Burning Book', 'zh-Hant': '燃燒之書', 'zh-Hans': '燃烧之书', ko: '불타는 책', es: 'Libro Ardiente', id: 'Buku Membara' },
   '城堡紫水晶珠宝': { ja: 'Castle/Amethyst Jewel', en: 'Castle/Amethyst Jewel', 'zh-Hant': '城堡紫水晶珠寶', 'zh-Hans': '城堡紫水晶珠宝', ko: '성 암흑자수 보석', es: 'Joyas de Amatista del Castillo', id: 'Permata Amethyst Kastil' },

@@ -170,7 +170,7 @@ export const BattleEffect = ({ effectId, position, onComplete }: BattleEffectPro
   const getPositionStyle = () => {
     if (position === 'player') {
       return {
-        top: '60%',
+        top: '70%',
         left: '50%',
       };
     }
@@ -185,18 +185,27 @@ export const BattleEffect = ({ effectId, position, onComplete }: BattleEffectPro
   const SCALE = 2;
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute z-30 pointer-events-none"
+    <div
+      className="absolute z-50 pointer-events-none overflow-hidden"
       style={{
         ...getPositionStyle(),
         transform: 'translate(-50%, -50%)',
         width: framePixelWidth * SCALE,
         height: framePixelHeight * SCALE,
-        imageRendering: 'pixelated',
-        display: imageLoaded ? 'block' : 'none',
+        zIndex: 100,
       }}
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0"
+        style={{
+          width: framePixelWidth * SCALE,
+          height: framePixelHeight * SCALE,
+          imageRendering: 'pixelated',
+          display: imageLoaded ? 'block' : 'none',
+        }}
+      />
+    </div>
   );
 };
 

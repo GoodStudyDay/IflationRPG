@@ -22,6 +22,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const [confirmEquipment, setConfirmEquipment] = useState<typeof equipmentData[0] | null>(null);
   const [detailEquipment, setDetailEquipment] = useState<(typeof equipmentData[0] & { quantity?: number }) | null>(null);
   const [unlockingSlotIndex, setUnlockingSlotIndex] = useState<number>(0);
+  const [weaponSearch, setWeaponSearch] = useState('');
+  const [armorSearch, setArmorSearch] = useState('');
+  const [accessorySearch, setAccessorySearch] = useState('');
   const player = useGameStore(state => state.player);
   const inventory = useGameStore(state => state.inventory);
   const equipItem = useGameStore(state => state.equipItem);
@@ -216,18 +219,31 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
-        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">{t('武器列表')}</span>
-          <button 
-            onClick={() => setViewMode('main')}
-            className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
-          >
-            {t('返回')}
-          </button>
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center shrink-0">
+          <span className="text-white font-bold text-lg flex-shrink-0">{t('武器列表')}</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={weaponSearch}
+              onChange={(e) => setWeaponSearch(e.target.value)}
+              placeholder={t('搜索')}
+              className="bg-[#4a6fa5] text-white placeholder-gray-400 px-2 py-1 rounded text-sm w-24"
+            />
+            <button 
+              onClick={() => setViewMode('main')}
+              className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors flex-shrink-0"
+            >
+              {t('返回')}
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {weapons.map(weapon => {
+          {weapons.filter(weapon => {
+            if (!weaponSearch) return true;
+            const searchLower = weaponSearch.toLowerCase();
+            return getEquipName(weapon.name).toLowerCase().includes(searchLower);
+          }).map(weapon => {
             const isEquipped = player.equippedWeapon?.id === weapon.id;
             const isOwned = weapon.quantity > 0;
             
@@ -314,18 +330,31 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
-        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">{t('防具列表')}</span>
-          <button 
-            onClick={() => setViewMode('main')}
-            className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
-          >
-            {t('返回')}
-          </button>
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center shrink-0">
+          <span className="text-white font-bold text-lg flex-shrink-0">{t('防具列表')}</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={armorSearch}
+              onChange={(e) => setArmorSearch(e.target.value)}
+              placeholder={t('搜索')}
+              className="bg-[#4a6fa5] text-white placeholder-gray-400 px-2 py-1 rounded text-sm w-24"
+            />
+            <button 
+              onClick={() => setViewMode('main')}
+              className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors flex-shrink-0"
+            >
+              {t('返回')}
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {armors.map(armor => {
+          {armors.filter(armor => {
+            if (!armorSearch) return true;
+            const searchLower = armorSearch.toLowerCase();
+            return getEquipName(armor.name).toLowerCase().includes(searchLower);
+          }).map(armor => {
             const isEquipped = player.equippedArmor?.id === armor.id;
             const isOwned = armor.quantity > 0;
             
@@ -430,18 +459,31 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     
     return (
       <div className="bg-[#87a4c7] border-4 border-[#4a6fa5] rounded-lg w-[95%] max-w-md h-[min(750px,92vh)] flex flex-col">
-        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center">
-          <span className="text-white font-bold text-lg">{t('饰品列表')}</span>
-          <button 
-            onClick={() => setViewMode('main')}
-            className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors"
-          >
-            {t('返回')}
-          </button>
+        <div className="bg-[#5a7aa5] px-4 py-2 border-b-2 border-[#4a6fa5] flex justify-between items-center shrink-0">
+          <span className="text-white font-bold text-lg flex-shrink-0">{t('饰品列表')}</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={accessorySearch}
+              onChange={(e) => setAccessorySearch(e.target.value)}
+              placeholder={t('搜索')}
+              className="bg-[#4a6fa5] text-white placeholder-gray-400 px-2 py-1 rounded text-sm w-24"
+            />
+            <button 
+              onClick={() => setViewMode('main')}
+              className="bg-[#4a6fa5] text-white font-bold py-1 px-4 rounded hover:bg-[#3a5a95] transition-colors flex-shrink-0"
+            >
+              {t('返回')}
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {accessories.map(accessory => {
+          {accessories.filter(accessory => {
+            if (!accessorySearch) return true;
+            const searchLower = accessorySearch.toLowerCase();
+            return getEquipName(accessory.name).toLowerCase().includes(searchLower);
+          }).map(accessory => {
             const isEquipped = equippedAccs.some(acc => acc && acc.id === accessory.id);
             const isOwned = accessory.quantity > 0;
             const availableQty = getAvailableQuantity(accessory.id, accessory.quantity);
