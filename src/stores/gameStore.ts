@@ -44,6 +44,14 @@ function getItemCount(inventory: InventoryItem[]): number {
 
 // 统一计算饰品加成效果，遵循 gdata.txt 中 EqStUpdate 和 passiveUpdate 的模式
 // 返回加性属性加成和乘性属性加成
+// 被动效果饰品ID列表（无需装备即可生效）
+const PASSIVE_ACCESSORY_IDS = new Set([95, 103, 104, 106, 110, 116, 117, 119, 123, 125, 130]);
+
+export function isPassiveEffectItem(eqId: string): boolean {
+  const eqNum = parseInt(eqId.split('-')[1]) || 0;
+  return PASSIVE_ACCESSORY_IDS.has(eqNum);
+}
+
 function applyEquipmentBonuses(
   accessories: (Equipment | null)[],
   inventory: InventoryItem[],
@@ -91,6 +99,17 @@ function applyEquipmentBonuses(
   // 复活相关（resCount=0表示无复活能力）
   resCount: number;
   resStatUP: number;
+  // Heart of the four gods 专属效果
+  trueDamage: number;
+  renzoDamageUP: number;
+  // 火焰秘钥效果
+  fireSecretKeyOn: boolean;
+  // 闪光沙漏1效果 (攻击累加ATK, 45次后斩杀)
+  sandHourglassOn: boolean;
+  // 圣树之叶效果 (每次攻击回复9%HP)
+  healOnAttackOn: boolean;
+  // 战神之刃效果 (击杀10w敌人ATK+10%)
+  warGodBladeOn: boolean;
 } {
   let epHp = 0, epAtk = 0, epDef = 0, epAgi = 0, epLuc = 0;
   let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
@@ -111,10 +130,16 @@ function applyEquipmentBonuses(
   let greenEyeEffect = 0;
   let secretKeyOn = false;
   let possiveDeftoAtk = false;
+  let sandHourglassOn = false;
+  let healOnAttackOn = false;
+  let warGodBladeOn = false;
   let envelope = false;
   let missrate = 0;
   let resCount = 0;
   let resStatUP = 0;
+  let trueDamage = 0;
+  let renzoDamageUP = 1;
+  let fireSecretKeyOn = false;
 
   for (const acc of accessories) {
     if (!acc) continue;
@@ -209,8 +234,6 @@ function applyEquipmentBonuses(
       crihplusdamage += 3;
     } else if (t1 === 250) {
       renzokuPlusKakuritu = 0.09;
-    } else if (t1 === 10) {
-      expMultiplier -= 0.15;
     } else if (t1 === 100) {
       MoveSpeed += t2 / 100;
     } else if (t1 === 1210) {
@@ -240,6 +263,10 @@ function applyEquipmentBonuses(
     } else if (t1 === 4004) {
       resCount = 1;
       resStatUP = 1.03;
+      renzoDamageUP = 1.5;
+      renzokuPlusKakuritu = 0.15;
+    } else if (t1 === 1889) {
+      fireSecretKeyOn = true;
     } else if (t1 === 4006) {
       DamageReduced = 33;
       addMaxHP += 1.5;
@@ -282,6 +309,64 @@ function applyEquipmentBonuses(
       missrate += 0.2;
     } else if (eqNum === 125) {
       MoveSpeed = 22;
+    } else if (eqNum === 105) {
+      warGodBladeOn = true;
+    } else if (eqNum === 108) {
+      healOnAttackOn = true;
+    } else if (eqNum === 120) {
+      sandHourglassOn = true;
+    }
+  }
+  
+  // 从背包中扫描被动饰品（无需装备即可生效）
+  const equippedIds = new Set(accessories.filter(Boolean).map(acc => acc!.id));
+  for (const invItem of inventory) {
+    if (invItem.quantity <= 0) continue;
+    if (equippedIds.has(invItem.equipmentId)) continue; // 已装备的跳过（已在上面处理）
+    if (!isPassiveEffectItem(invItem.equipmentId)) continue;
+    
+    const eqData = equipmentData.find(e => e.id === invItem.equipmentId);
+    if (!eqData) continue;
+    
+    const eqNum = parseInt(eqData.id.split('-')[1]) || 0;
+    
+    if (eqNum === 106) {
+      redEyeEffect += 0.1;
+    } else if (eqNum === 130) {
+      redEyeEffect += 0.2;
+    } else if (eqNum === 95) {
+      epHp += 750000;
+      epAtk += 750000;
+      epDef += 750000;
+      epAgi += 750000;
+      epLuc += 750000;
+    } else if (eqNum === 104) {
+      epHp += 1500000;
+      epAtk += 1500000;
+      epDef += 1500000;
+      epAgi += 1500000;
+      epLuc += 1500000;
+    } else if (eqNum === 116) {
+      blueEyeEffect += 0.1;
+    } else if (eqNum === 117) {
+      greenEyeEffect += 0.1;
+    } else if (eqNum === 119) {
+      secretKeyOn = true;
+    } else if (eqNum === 110) {
+      possiveDeftoAtk = true;
+    } else if (eqNum === 123) {
+      envelope = true;
+    } else if (eqNum === 103) {
+      crihPlusKakuritu += 0.2;
+      missrate += 0.2;
+    } else if (eqNum === 125) {
+      MoveSpeed = 22;
+    } else if (eqNum === 105) {
+      warGodBladeOn = true;
+    } else if (eqNum === 108) {
+      healOnAttackOn = true;
+    } else if (eqNum === 120) {
+      sandHourglassOn = true;
     }
   }
   
@@ -302,6 +387,9 @@ function applyEquipmentBonuses(
     redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate,
     hpReduceRate, atkReduceRate,
     resCount, resStatUP,
+    trueDamage, renzoDamageUP,
+    fireSecretKeyOn,
+    sandHourglassOn, healOnAttackOn, warGodBladeOn,
   };
 }
 
@@ -792,6 +880,11 @@ export const useGameStore = create<GameStore>()(
         activeEffect: null,
         resCount: 0,
         resStatUP: 1,
+        fireSecretKeyOn: false,
+        secretKeyOn: false,
+        sandHourglassOn: false,
+        healOnAttackOn: false,
+        warGodBladeOn: false,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -1070,10 +1163,14 @@ export const useGameStore = create<GameStore>()(
         // gdata.txt hwMode 公式
         const stats = computeFinalStats(baseHp, baseAtk, baseDef, baseAgi, baseLuc, equip, bonuses, heroBonuses, kyaraLv);
         const finalHp = stats.hp;
-        const finalAtk = stats.atk;
+        let finalAtk = stats.atk;
         const finalDef = stats.def;
         const finalAgi = stats.agi;
         const finalLuc = stats.luc;
+        
+        if (bonuses.warGodBladeOn && player.killCount >= 100000) {
+          finalAtk = Math.floor(finalAtk * 1.1);
+        }
         
         const { autoAllocateEnabled, autoAllocateStPt } = get();
         
@@ -1953,6 +2050,11 @@ export const useGameStore = create<GameStore>()(
             activeEffect: null,
             resCount: bonuses.resCount,
             resStatUP: bonuses.resStatUP,
+            fireSecretKeyOn: bonuses.fireSecretKeyOn,
+            secretKeyOn: bonuses.secretKeyOn,
+            sandHourglassOn: bonuses.sandHourglassOn,
+            healOnAttackOn: bonuses.healOnAttackOn,
+            warGodBladeOn: bonuses.warGodBladeOn,
           },
         });
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
@@ -2370,6 +2472,11 @@ export const useGameStore = create<GameStore>()(
             activeEffect: null,
             resCount: eqBonuses.resCount,
             resStatUP: eqBonuses.resStatUP,
+            fireSecretKeyOn: eqBonuses.fireSecretKeyOn,
+            secretKeyOn: eqBonuses.secretKeyOn,
+            sandHourglassOn: eqBonuses.sandHourglassOn,
+            healOnAttackOn: eqBonuses.healOnAttackOn,
+            warGodBladeOn: eqBonuses.warGodBladeOn,
           },
         });
       },
@@ -2573,6 +2680,11 @@ export const useGameStore = create<GameStore>()(
             activeEffect: null,
             resCount: eqBonuses2.resCount,
             resStatUP: eqBonuses2.resStatUP,
+            fireSecretKeyOn: eqBonuses2.fireSecretKeyOn,
+            secretKeyOn: eqBonuses2.secretKeyOn,
+            sandHourglassOn: eqBonuses2.sandHourglassOn,
+            healOnAttackOn: eqBonuses2.healOnAttackOn,
+            warGodBladeOn: eqBonuses2.warGodBladeOn,
           },
         });
       },
@@ -2635,6 +2747,7 @@ export const useGameStore = create<GameStore>()(
           
           incrementWinBattle();
           updateHighCombo(comboCount);
+          set({ player: { ...get().player, killCount: get().player.killCount + 1 } });
           
           if ((battle.enemy as any).bossId !== undefined) {
             battlePointsChange = WinBossGetBattlePoint((battle.enemy as any).bossId);
@@ -3002,6 +3115,83 @@ export const useGameStore = create<GameStore>()(
                   }
                 }
                 
+                if (battle.fireSecretKeyOn && Math.random() < 0.2) {
+                  const secretKeyDamage = Math.floor(newEnemyHp * 0.03);
+                  const updatedEnemyHp = Math.max(0, newEnemyHp - secretKeyDamage);
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      enemy: { ...s.battle.enemy!, hp: updatedEnemyHp },
+                      hpRate: (updatedEnemyHp / s.battle.enemy!.maxHp) * 100,
+                    },
+                  }));
+                  addBattleLog(`火焰秘钥效果：扣除敌人3%HP！(${secretKeyDamage}伤害)`);
+                  if (updatedEnemyHp <= 0) {
+                    addBattleLog('战斗胜利！');
+                    battleEnded = true;
+                    set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                    setTimeout(() => {
+                      endBattle(true);
+                    }, 500);
+                    return;
+                  }
+                }
+                
+                if (battle.secretKeyOn && Math.random() < 0.2) {
+                  const secretKeyDamage = Math.floor(newEnemyHp * 0.05);
+                  const updatedEnemyHp = Math.max(0, newEnemyHp - secretKeyDamage);
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      enemy: { ...s.battle.enemy!, hp: updatedEnemyHp },
+                      hpRate: (updatedEnemyHp / s.battle.enemy!.maxHp) * 100,
+                    },
+                  }));
+                  addBattleLog(`秘钥效果：扣除敌人5%HP！(${secretKeyDamage}伤害)`);
+                  if (updatedEnemyHp <= 0) {
+                    addBattleLog('战斗胜利！');
+                    battleEnded = true;
+                    set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                    setTimeout(() => {
+                      endBattle(true);
+                    }, 500);
+                    return;
+                  }
+                }
+                
+                if (battle.healOnAttackOn) {
+                  const healAmount = Math.floor(player.maxHp * 0.09);
+                  if (healAmount > 0) {
+                    set((s) => ({
+                      player: {
+                        ...s.player,
+                        hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
+                      },
+                    }));
+                    addBattleLog(`圣树之叶效果：回复最大HP的9%！(${healAmount} HP)`);
+                  }
+                }
+                
+                if (battle.sandHourglassOn) {
+                  if (battle.turnCount >= 45 && newEnemyHp < battle.enemy!.maxHp * 0.4) {
+                    set((s) => ({
+                      battle: {
+                        ...s.battle,
+                        enemy: { ...s.battle.enemy!, hp: 0 },
+                        hpRate: 0,
+                      },
+                    }));
+                    addBattleLog('闪光沙漏1效果：直接斩杀！');
+                    addBattleLog('战斗胜利！');
+                    battleEnded = true;
+                    set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                    setTimeout(() => {
+                      endBattle(true);
+                    }, 500);
+                    return;
+                  }
+                }
+                
                 if (newEnemyHp <= 0) {
                   addBattleLog('战斗胜利！');
                   battleEnded = true;
@@ -3170,6 +3360,11 @@ export const useGameStore = create<GameStore>()(
             activeEffect: null,
             resCount: 0,
             resStatUP: 1,
+            fireSecretKeyOn: false,
+            secretKeyOn: false,
+            sandHourglassOn: false,
+            healOnAttackOn: false,
+            warGodBladeOn: false,
           },
         });
       },
@@ -3339,6 +3534,11 @@ export const useGameStore = create<GameStore>()(
             activeEffect: null,
             resCount: 0,
             resStatUP: 1,
+            fireSecretKeyOn: false,
+            secretKeyOn: false,
+            sandHourglassOn: false,
+            healOnAttackOn: false,
+            warGodBladeOn: false,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,

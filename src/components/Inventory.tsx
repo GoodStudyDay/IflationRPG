@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGameStore } from '@/stores/gameStore';
+import { useGameStore, isPassiveEffectItem } from '@/stores/gameStore';
 import { equipmentData } from '@/data/equipment';
 import { getStockBonus } from '@/utils/helpers';
 import { SpriteIcon } from './SpriteIcon';
@@ -162,7 +162,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const getFullAccessoryList = () => {
     const slotRank = selectedAccessorySlot !== null ? getSlotMaxRank(selectedAccessorySlot) : 3;
     return equipmentData
-      .filter(e => e.type === 'accessory' && (e.rank ?? -1) <= slotRank)
+      .filter(e => e.type === 'accessory' && (e.rank ?? -1) <= slotRank && !isPassiveEffectItem(e.id))
       .map(e => {
         const invItem = inventory.find(item => item.equipmentId === e.id);
         return { ...e, quantity: invItem?.quantity || 0 };
@@ -612,8 +612,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t1}</span>
-                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t2}%</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t2}</span>
+                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t1}%</span>
                         </div>
                       </div>
                     )}
@@ -623,8 +623,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(soul.setumei, soul.t1, soul.t2)}</div>
                         )}
                         <div className="flex gap-1 mt-1">
-                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t1}</span>
-                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t2}%</span>
+                          <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">{t('属性值')} +{soul.t2}</span>
+                          <span className="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-xs">{t('百分比')} +{soul.t1}%</span>
                         </div>
                         <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {soul.quantity}</div>
                       </>
@@ -1239,8 +1239,8 @@ export const Inventory = ({ onClose }: InventoryProps) => {
               )}
               {detailEquipment.type === 'soul' && (
                 <>
-                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('属性值')}</span><span className="text-yellow-300">+{detailEquipment.t1}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('百分比')}</span><span className="text-purple-300">+{detailEquipment.t2}%</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('属性值')}</span><span className="text-yellow-300">+{detailEquipment.t2}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-gray-400">{t('百分比')}</span><span className="text-purple-300">+{detailEquipment.t1}%</span></div>
                 </>
               )}
             </div>

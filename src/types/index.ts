@@ -115,6 +115,8 @@ export interface Player {
   heroId: number;
   /** 等级平方值 (lvC2) */
   lvC2: number;
+  /** 击杀敌人总数 */
+  killCount: number;
 }
 
 export type GameScene = 'title' | 'world' | 'battle' | 'gameover';
@@ -170,6 +172,16 @@ export interface BattleState {
   resCount: number;
   /** 复活后属性倍率 */
   resStatUP: number;
+  /** 火焰秘钥效果开启 */
+  fireSecretKeyOn: boolean;
+  /** 秘钥效果开启 (20%概率扣敌人5%HP) */
+  secretKeyOn: boolean;
+  /** 闪光沙漏1效果开启 */
+  sandHourglassOn: boolean;
+  /** 圣树之叶效果开启 */
+  healOnAttackOn: boolean;
+  /** 战神之刃效果开启 */
+  warGodBladeOn: boolean;
 }
 
 // 奖励类型
