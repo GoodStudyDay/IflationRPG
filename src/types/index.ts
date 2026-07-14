@@ -184,6 +184,14 @@ export interface BattleState {
   healOnAttackOn: boolean;
   /** 战神之刃效果开启 */
   warGodBladeOn: boolean;
+  /** 反射之镜效果 */
+  reflection: number;
+  /** 反射回复效果开启 */
+  refHealOn: boolean;
+  /** 闪光沙漏效果开启 */
+  hourgclassOn: boolean;
+  /** 闪光沙漏1效果开启 */
+  hourgclassOn1: boolean;
 }
 
 // 奖励类型

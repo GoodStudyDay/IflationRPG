@@ -810,7 +810,9 @@ export const BOSS_DATA: BossData[] = [
     icon: '👑',
     level: 325,
     difficulty: 0,
-    drops: [{ equipmentId: 'accessory-25', dropRate: 0.08 }],
+    drops: [
+      { equipmentId: 'accessory-25', dropRate: 0.08 },
+    ],
   },
   {
     id: 'boss-33',
@@ -825,7 +827,9 @@ export const BOSS_DATA: BossData[] = [
     icon: '💀',
     level: 335,
     difficulty: 0,
-    drops: [{ equipmentId: 'accessory-30', dropRate: 0.1 }],
+    drops: [
+      { equipmentId: 'accessory-30', dropRate: 0.1 },
+    ],
   },
   {
     id: 'boss-34',
@@ -840,7 +844,9 @@ export const BOSS_DATA: BossData[] = [
     icon: '🦹',
     level: 345,
     difficulty: 0,
-    drops: [{ equipmentId: 'accessory-28', dropRate: 0.08 }],
+    drops: [
+      { equipmentId: 'accessory-28', dropRate: 0.08 },
+    ],
   },
   {
     id: 'boss-35',
@@ -855,7 +861,9 @@ export const BOSS_DATA: BossData[] = [
     icon: '🐉',
     level: 355,
     difficulty: 0,
-    drops: [{ equipmentId: 'accessory-29', dropRate: 0.1 }],
+    drops: [
+      { equipmentId: 'accessory-29', dropRate: 0.1 },
+    ],
   },
   {
     id: 'boss-40',
@@ -915,7 +923,10 @@ export const BOSS_DATA: BossData[] = [
     icon: '⚙️',
     level: 485,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'weapon-28', dropRate: 0.07 },
+      { equipmentId: 'armor-13', dropRate: 0.07 },
+    ],
   },
   {
     id: 'boss-49',
@@ -930,7 +941,10 @@ export const BOSS_DATA: BossData[] = [
     icon: '🏛️',
     level: 495,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'weapon-29', dropRate: 0.07 },
+      { equipmentId: 'armor-13', dropRate: 0.07 },
+    ],
   },
   {
     id: 'boss-50',
@@ -945,7 +959,10 @@ export const BOSS_DATA: BossData[] = [
     icon: '🕳️',
     level: 505,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'weapon-30', dropRate: 0.07 },
+      { equipmentId: 'armor-13', dropRate: 0.07 },
+    ],
   },
   {
     id: 'boss-51',
@@ -960,7 +977,11 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 515,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'accessory-26', dropRate: 0.07 },
+      { equipmentId: 'accessory-27', dropRate: 0.07 },
+      { equipmentId: 'accessory-32', dropRate: 0.05 },
+    ],
   },
   {
     id: 'boss-52',
@@ -975,7 +996,11 @@ export const BOSS_DATA: BossData[] = [
     icon: '⚔️',
     level: 525,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'weapon-31', dropRate: 0.06 },
+      { equipmentId: 'armor-14', dropRate: 0.06 },
+      { equipmentId: 'accessory-32', dropRate: 0.03 },
+    ],
   },
   {
     id: 'boss-53',
@@ -990,7 +1015,11 @@ export const BOSS_DATA: BossData[] = [
     icon: '🛡️',
     level: 535,
     difficulty: 0,
-    drops: [],
+    drops: [
+      { equipmentId: 'weapon-32', dropRate: 0.06 },
+      { equipmentId: 'armor-14', dropRate: 0.06 },
+      { equipmentId: 'accessory-32', dropRate: 0.03 },
+    ],
   },
   {
     id: 'boss-54',
@@ -1921,492 +1950,6 @@ export const BOSS_DATA: BossData[] = [
     difficulty: 0,
     drops: [{ equipmentId: 'weapon-102', dropRate: 0.012 }],
   },
-  {
-    id: 'boss-419',
-    name: '魔王·硬',
-    bossId: 419,
-    hp: 8049999,
-    maxHp: 8049999,
-    attack: 169499,
-    defense: 0,
-    expReward: 7000000000,
-    goldReward: 9999,
-    icon: '😈',
-    level: 195,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-45', dropRate: 0.05 },
-      { equipmentId: 'accessory-64', dropRate: 0.066 },
-      null,
-      { equipmentId: 'accessory-51', dropRate: 0.034 },
-      { equipmentId: 'accessory-65', dropRate: 0.034 },
-      { equipmentId: 'accessory-69', dropRate: 0.051 },
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-420',
-    name: '恶魔领主·硬',
-    bossId: 420,
-    hp: 3000000,
-    maxHp: 3000000,
-    attack: 77000,
-    defense: 0,
-    expReward: 2000000000,
-    goldReward: 30000,
-    icon: '🔥',
-    level: 205,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-23', dropRate: 0.08 },
-      { equipmentId: 'accessory-52', dropRate: 0.09 },
-      null,
-      { equipmentId: 'accessory-52', dropRate: 0.13 },
-      { equipmentId: 'accessory-72', dropRate: 0.07 },
-      { equipmentId: 'accessory-73', dropRate: 0.081 },
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-425',
-    name: '天空守护者·硬',
-    bossId: 425,
-    hp: 40000000,
-    maxHp: 40000000,
-    attack: 1032000,
-    defense: 0,
-    expReward: 0,
-    goldReward: 20000,
-    icon: '☁️',
-    level: 255,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-70', dropRate: 0.028 },
-      { equipmentId: 'accessory-70', dropRate: 0.078 },
-      null,
-      { equipmentId: 'accessory-71', dropRate: 0.02 },
-      { equipmentId: 'accessory-71', dropRate: 0.054 },
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-432',
-    name: '新界吸血',
-    bossId: 432,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '👑',
-    level: 325,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-433',
-    name: '新界吸血',
-    bossId: 433,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '💀',
-    level: 335,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-434',
-    name: '新界吸血',
-    bossId: 434,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '🦹',
-    level: 345,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-435',
-    name: '新界吸血',
-    bossId: 435,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 31800000,
-    defense: 0,
-    expReward: 24000000000000,
-    goldReward: 50000,
-    icon: '🐉',
-    level: 355,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-83', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'accessory-128', dropRate: 0.005 },
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-436',
-    name: '?B?1',
-    bossId: 436,
-    hp: 960000,
-    maxHp: 960000,
-    attack: 55555,
-    defense: 0,
-    expReward: 2400000,
-    goldReward: 30000,
-    icon: '👑',
-    level: 325,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-56', dropRate: 0.045 },
-      { equipmentId: 'accessory-57', dropRate: 0.03 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  {
-    id: 'boss-437',
-    name: '?B?2',
-    bossId: 437,
-    hp: 1380000,
-    maxHp: 1380000,
-    attack: 44444,
-    defense: 0,
-    expReward: 2400000,
-    goldReward: 30000,
-    icon: '💀',
-    level: 335,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-58', dropRate: 0.038 }],
-  },
-  {
-    id: 'boss-438',
-    name: '?B?3',
-    bossId: 438,
-    hp: 1050000,
-    maxHp: 1050000,
-    attack: 44444,
-    defense: 0,
-    expReward: 2700000,
-    goldReward: 30000,
-    icon: '🦹',
-    level: 345,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-28', dropRate: 0.08 }],
-  },
-  {
-    id: 'boss-439',
-    name: '?B?4',
-    bossId: 439,
-    hp: 1200000,
-    maxHp: 1200000,
-    attack: 55555,
-    defense: 0,
-    expReward: 3000000,
-    goldReward: 30000,
-    icon: '🐉',
-    level: 355,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-29', dropRate: 0.1 }],
-  },
-  {
-    id: 'boss-440',
-    name: '深渊领主·硬',
-    bossId: 440,
-    hp: 4500000,
-    maxHp: 4500000,
-    attack: 100000,
-    defense: 0,
-    expReward: 1000000,
-    goldReward: 111111,
-    icon: '👿',
-    level: 405,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-79', dropRate: 0.021 }],
-  },
-  {
-    id: 'boss-441',
-    name: '深渊领主·硬',
-    bossId: 441,
-    hp: 1500000,
-    maxHp: 1500000,
-    attack: 45000,
-    defense: 0,
-    expReward: 1000000,
-    goldReward: 50000,
-    icon: '👿',
-    level: 405,
-    difficulty: 0,
-    drops: [],
-  },
-  {
-    id: 'boss-442',
-    name: '终焉之王·硬',
-    bossId: 442,
-    hp: 12000000,
-    maxHp: 12000000,
-    attack: 175000,
-    defense: 0,
-    expReward: 10000000,
-    goldReward: 333333,
-    icon: '💀',
-    level: 415,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-79', dropRate: 0.028 }],
-  },
-  {
-    id: 'boss-443',
-    name: '终焉之王·硬',
-    bossId: 443,
-    hp: 5000000,
-    maxHp: 5000000,
-    attack: 80000,
-    defense: 0,
-    expReward: 10000000,
-    goldReward: 100000,
-    icon: '💀',
-    level: 415,
-    difficulty: 0,
-    drops: [],
-  },
-  {
-    id: 'boss-444',
-    name: '暗影魔王·硬',
-    bossId: 444,
-    hp: 32000000,
-    maxHp: 32000000,
-    attack: 320000,
-    defense: 0,
-    expReward: 100000000,
-    goldReward: 777777,
-    icon: '🌑',
-    level: 425,
-    difficulty: 0,
-    drops: [{ equipmentId: 'accessory-79', dropRate: 0.04 }],
-  },
-  {
-    id: 'boss-445',
-    name: '暗影魔王·硬',
-    bossId: 445,
-    hp: 15000000,
-    maxHp: 15000000,
-    attack: 140000,
-    defense: 0,
-    expReward: 100000000,
-    goldReward: 200000,
-    icon: '🌑',
-    level: 425,
-    difficulty: 0,
-    drops: [],
-  },
-  {
-    id: 'boss-448',
-    name: '机械霸主·硬',
-    bossId: 448,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 56000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '⚙️',
-    level: 485,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-28', dropRate: 0.07 },
-      { equipmentId: 'armor-13', dropRate: 0.07 },
-      null,
-      { equipmentId: 'weapon-83', dropRate: 0.043 },
-      { equipmentId: 'armor-29', dropRate: 0.043 },
-    ],
-  },
-  {
-    id: 'boss-449',
-    name: '远古泰坦·硬',
-    bossId: 449,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 60000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '🏛️',
-    level: 495,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-29', dropRate: 0.07 },
-      { equipmentId: 'armor-13', dropRate: 0.07 },
-      null,
-      { equipmentId: 'weapon-84', dropRate: 0.043 },
-      { equipmentId: 'armor-29', dropRate: 0.043 },
-    ],
-  },
-  {
-    id: 'boss-450',
-    name: '深渊魔神·硬',
-    bossId: 450,
-    hp: 2000000,
-    maxHp: 2000000,
-    attack: 60000,
-    defense: 0,
-    expReward: 42000000,
-    goldReward: 40000,
-    icon: '🕳️',
-    level: 505,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-30', dropRate: 0.07 },
-      { equipmentId: 'armor-13', dropRate: 0.07 },
-      null,
-      { equipmentId: 'weapon-85', dropRate: 0.043 },
-      { equipmentId: 'armor-29', dropRate: 0.043 },
-    ],
-  },
-  {
-    id: 'boss-451',
-    name: '精英首领·硬',
-    bossId: 451,
-    hp: 3400000,
-    maxHp: 3400000,
-    attack: 72000,
-    defense: 0,
-    expReward: 54000000,
-    goldReward: 40000,
-    icon: '⭐',
-    level: 515,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'accessory-26', dropRate: 0.07 },
-      { equipmentId: 'accessory-27', dropRate: 0.07 },
-      { equipmentId: 'accessory-32', dropRate: 0.12 },
-    ],
-  },
-  {
-    id: 'boss-452',
-    name: '精锐统帅·硬',
-    bossId: 452,
-    hp: 11200000,
-    maxHp: 11200000,
-    attack: 84000,
-    defense: 0,
-    expReward: 96000000,
-    goldReward: 50000,
-    icon: '⚔️',
-    level: 525,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-31', dropRate: 0.06 },
-      { equipmentId: 'armor-14', dropRate: 0.06 },
-      null,
-      { equipmentId: 'weapon-86', dropRate: 0.033 },
-      { equipmentId: 'armor-38', dropRate: 0.033 },
-      { equipmentId: 'accessory-32', dropRate: 0.08 },
-    ],
-  },
-  {
-    id: 'boss-453',
-    name: '高级统领·硬',
-    bossId: 453,
-    hp: 8000000,
-    maxHp: 8000000,
-    attack: 112000,
-    defense: 0,
-    expReward: 96000000,
-    goldReward: 50000,
-    icon: '🛡️',
-    level: 535,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-32', dropRate: 0.06 },
-      { equipmentId: 'armor-14', dropRate: 0.06 },
-      null,
-      { equipmentId: 'weapon-87', dropRate: 0.033 },
-      { equipmentId: 'armor-38', dropRate: 0.033 },
-      { equipmentId: 'accessory-32', dropRate: 0.08 },
-    ],
-  },
-  {
-    id: 'boss-454',
-    name: '弓女',
-    bossId: 454,
-    hp: 3000000000,
-    maxHp: 3000000000,
-    attack: 22000000,
-    defense: 0,
-    expReward: 7000000000000,
-    goldReward: 177777,
-    icon: '💎',
-    level: 545,
-    difficulty: 0,
-    drops: [
-      { equipmentId: 'weapon-97', dropRate: 0.02 },
-      null,
-      null,
-      null,
-      null,
-      null,
-      { equipmentId: 'weapon-103', dropRate: 0.008 },
-      { equipmentId: 'soul-26', dropRate: 0.008 },
-      null,
-    ],
-  },
 ];
 
 // 将所有BOSS的icon替换为实际图片URL
@@ -2419,7 +1962,8 @@ BOSS_DATA.forEach((boss) => {
 
 export const getBossById = (
   bossId: number,
-  hardmode: number = 0
+  hardmode: number = 0,
+  mapId: number = 0
 ): BossData | undefined => {
   const bossWithDifficulty = BOSS_DATA.find(
     (boss) => boss.bossId === bossId && boss.difficulty === hardmode
@@ -2427,11 +1971,276 @@ export const getBossById = (
   const boss = bossWithDifficulty || BOSS_DATA.find((boss) => boss.bossId === bossId);
   if (boss) {
     const imageUrl = getBossImageUrl(bossId, hardmode);
-    return {
+    let modifiedBoss = {
       ...boss,
       imageUrl,
       icon: imageUrl || boss.icon,
     };
+    
+    if (bossId === 32) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 3000000000;
+        modifiedBoss.maxHp = 3000000000;
+        modifiedBoss.attack = 31800000;
+        modifiedBoss.expReward = 24000000000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-83', dropRate: 0.03 },
+          null,
+          null,
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-128', dropRate: 0.005 },
+          null,
+          null,
+        ];
+      } else if (hardmode !== 0) {
+        modifiedBoss.hp = 960000;
+        modifiedBoss.maxHp = 960000;
+        modifiedBoss.attack = 55555;
+        modifiedBoss.expReward = 2400000;
+        modifiedBoss.goldReward = 30000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-56', dropRate: 0.045 },
+          { equipmentId: 'accessory-57', dropRate: 0.03 },
+        ];
+      }
+    } else if (bossId === 33) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 3000000000;
+        modifiedBoss.maxHp = 3000000000;
+        modifiedBoss.attack = 31800000;
+        modifiedBoss.expReward = 24000000000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-83', dropRate: 0.03 },
+          null,
+          null,
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-128', dropRate: 0.005 },
+          null,
+          null,
+        ];
+      } else if (hardmode !== 0) {
+        modifiedBoss.hp = 1380000;
+        modifiedBoss.maxHp = 1380000;
+        modifiedBoss.attack = 44444;
+        modifiedBoss.expReward = 2400000;
+        modifiedBoss.goldReward = 30000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-58', dropRate: 0.038 },
+        ];
+      }
+    } else if (bossId === 34) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 3000000000;
+        modifiedBoss.maxHp = 3000000000;
+        modifiedBoss.attack = 31800000;
+        modifiedBoss.expReward = 24000000000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-83', dropRate: 0.03 },
+          null,
+          null,
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-128', dropRate: 0.005 },
+          null,
+          null,
+        ];
+      } else if (hardmode !== 0) {
+        modifiedBoss.hp = 1050000;
+        modifiedBoss.maxHp = 1050000;
+        modifiedBoss.attack = 44444;
+        modifiedBoss.expReward = 2700000;
+        modifiedBoss.goldReward = 30000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-28', dropRate: 0.08 },
+        ];
+      }
+    } else if (bossId === 35) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 3000000000;
+        modifiedBoss.maxHp = 3000000000;
+        modifiedBoss.attack = 31800000;
+        modifiedBoss.expReward = 24000000000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-83', dropRate: 0.03 },
+          null,
+          null,
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-128', dropRate: 0.005 },
+          null,
+          null,
+        ];
+      } else if (hardmode !== 0) {
+        modifiedBoss.hp = 1200000;
+        modifiedBoss.maxHp = 1200000;
+        modifiedBoss.attack = 55555;
+        modifiedBoss.expReward = 3000000;
+        modifiedBoss.goldReward = 30000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-29', dropRate: 0.1 },
+        ];
+      }
+    } else if (bossId === 40) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 4500000;
+        modifiedBoss.maxHp = 4500000;
+        modifiedBoss.attack = 100000;
+        modifiedBoss.expReward = 1000000;
+        modifiedBoss.goldReward = 111111;
+        modifiedBoss.drops = [
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-79', dropRate: 0.021 },
+        ];
+      } else {
+        modifiedBoss.hp = 1500000;
+        modifiedBoss.maxHp = 1500000;
+        modifiedBoss.attack = 45000;
+        modifiedBoss.expReward = 1000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [];
+      }
+    } else if (bossId === 41) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 12000000;
+        modifiedBoss.maxHp = 12000000;
+        modifiedBoss.attack = 175000;
+        modifiedBoss.expReward = 10000000;
+        modifiedBoss.goldReward = 333333;
+        modifiedBoss.drops = [
+          null,
+          null,
+          null,
+          { equipmentId: 'accessory-79', dropRate: 0.028 },
+        ];
+      } else {
+        modifiedBoss.hp = 5000000;
+        modifiedBoss.maxHp = 5000000;
+        modifiedBoss.attack = 80000;
+        modifiedBoss.expReward = 10000000;
+        modifiedBoss.goldReward = 100000;
+        modifiedBoss.drops = [];
+      }
+    } else if (bossId === 42) {
+      if (mapId > 60) {
+        modifiedBoss.hp = 32000000;
+        modifiedBoss.maxHp = 32000000;
+        modifiedBoss.attack = 320000;
+        modifiedBoss.expReward = 100000000;
+        modifiedBoss.goldReward = 777777;
+        modifiedBoss.drops = [{ equipmentId: 'accessory-79', dropRate: 0.04 }];
+      } else {
+        modifiedBoss.hp = 15000000;
+        modifiedBoss.maxHp = 15000000;
+        modifiedBoss.attack = 140000;
+        modifiedBoss.expReward = 100000000;
+        modifiedBoss.goldReward = 200000;
+        modifiedBoss.drops = [];
+      }
+    } else if (bossId === 48) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 2000000;
+        modifiedBoss.maxHp = 2000000;
+        modifiedBoss.attack = 56000;
+        modifiedBoss.expReward = 42000000;
+        modifiedBoss.goldReward = 40000;
+        modifiedBoss.drops = [
+          { equipmentId: 'weapon-28', dropRate: 0.07 },
+          { equipmentId: 'armor-13', dropRate: 0.07 },
+          null,
+          { equipmentId: 'weapon-83', dropRate: 0.043 },
+          { equipmentId: 'armor-29', dropRate: 0.043 },
+        ];
+      }
+    } else if (bossId === 49) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 2000000;
+        modifiedBoss.maxHp = 2000000;
+        modifiedBoss.attack = 60000;
+        modifiedBoss.expReward = 42000000;
+        modifiedBoss.goldReward = 40000;
+        modifiedBoss.drops = [
+          { equipmentId: 'weapon-29', dropRate: 0.07 },
+          { equipmentId: 'armor-13', dropRate: 0.07 },
+          null,
+          { equipmentId: 'weapon-84', dropRate: 0.043 },
+          { equipmentId: 'armor-29', dropRate: 0.043 },
+        ];
+      }
+    } else if (bossId === 50) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 2000000;
+        modifiedBoss.maxHp = 2000000;
+        modifiedBoss.attack = 60000;
+        modifiedBoss.expReward = 42000000;
+        modifiedBoss.goldReward = 40000;
+        modifiedBoss.drops = [
+          { equipmentId: 'weapon-30', dropRate: 0.07 },
+          { equipmentId: 'armor-13', dropRate: 0.07 },
+          null,
+          { equipmentId: 'weapon-85', dropRate: 0.043 },
+          { equipmentId: 'armor-29', dropRate: 0.043 },
+        ];
+      }
+    } else if (bossId === 51) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 3400000;
+        modifiedBoss.maxHp = 3400000;
+        modifiedBoss.attack = 72000;
+        modifiedBoss.expReward = 54000000;
+        modifiedBoss.goldReward = 40000;
+        modifiedBoss.drops = [
+          { equipmentId: 'accessory-26', dropRate: 0.07 },
+          { equipmentId: 'accessory-27', dropRate: 0.07 },
+          { equipmentId: 'accessory-32', dropRate: 0.12 },
+        ];
+      }
+    } else if (bossId === 52) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 11200000;
+        modifiedBoss.maxHp = 11200000;
+        modifiedBoss.attack = 84000;
+        modifiedBoss.expReward = 96000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'weapon-31', dropRate: 0.06 },
+          { equipmentId: 'armor-14', dropRate: 0.06 },
+          null,
+          { equipmentId: 'weapon-86', dropRate: 0.033 },
+          { equipmentId: 'armor-38', dropRate: 0.033 },
+          { equipmentId: 'accessory-32', dropRate: 0.08 },
+        ];
+      }
+    } else if (bossId === 53) {
+      if (hardmode !== 0) {
+        modifiedBoss.hp = 8000000;
+        modifiedBoss.maxHp = 8000000;
+        modifiedBoss.attack = 112000;
+        modifiedBoss.expReward = 96000000;
+        modifiedBoss.goldReward = 50000;
+        modifiedBoss.drops = [
+          { equipmentId: 'weapon-32', dropRate: 0.06 },
+          { equipmentId: 'armor-14', dropRate: 0.06 },
+          null,
+          { equipmentId: 'weapon-87', dropRate: 0.033 },
+          { equipmentId: 'armor-38', dropRate: 0.033 },
+          { equipmentId: 'accessory-32', dropRate: 0.08 },
+        ];
+      }
+    }
+    
+    return modifiedBoss;
   }
   return undefined;
 };

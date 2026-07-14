@@ -125,6 +125,15 @@ export const bossNameTranslations: Record<string, Record<LanguageCode, string>> 
   '毁灭魔王C': { ja: '破壊魔王C', en: 'Destruction Demon King C', 'zh-Hant': '毀滅魔王C', 'zh-Hans': '毁灭魔王C', ko: '파괴 마왕C', es: 'Rey Demonio de la Destrucción C', id: 'Raja Iblis Penghancur C' },
 };
 
+export const enemyNameTranslations: Record<string, Record<LanguageCode, string>> = {
+  '史莱姆': { ja: 'スライム', en: 'Slime', 'zh-Hant': '史萊姆', 'zh-Hans': '史莱姆', ko: '슬라임', es: 'Slime', id: 'Slime' },
+  '哥布林': { ja: 'ゴブリン', en: 'Goblin', 'zh-Hant': '哥布林', 'zh-Hans': '哥布林', ko: '고블린', es: 'Goblin', id: 'Goblin' },
+  '骷髅兵': { ja: 'スケルトン', en: 'Skeleton', 'zh-Hant': '骷髏兵', 'zh-Hans': '骷髅兵', ko: '스켈레톤', es: 'Esqueleto', id: 'Kerangka' },
+  '兽人': { ja: 'オーク', en: 'Orc', 'zh-Hant': '獸人', 'zh-Hans': '兽人', ko: '오크', es: 'Orco', id: 'Ork' },
+  '石像鬼': { ja: 'ガーゴイル', en: 'Gargoyle', 'zh-Hant': '石像鬼', 'zh-Hans': '石像鬼', ko: '가고일', es: 'Gárgola', id: 'Gargoyle' },
+  '黄金骷髅': { ja: 'ゴールドスケルトン', en: 'Gold Skeleton', 'zh-Hant': '黃金骷髏', 'zh-Hans': '黄金骷髅', ko: '골드 스켈레톤', es: 'Esqueleto de Oro', id: 'Kerangka Emas' },
+};
+
 export const mapNameTranslations: Record<string, Record<LanguageCode, string>> = {
   '新手草原': { ja: '初心者草原', en: 'Beginner Grassland', 'zh-Hant': '新手草原', 'zh-Hans': '新手草原', ko: '초심자 초원', es: 'Pradera para Principiantes', id: 'Padang Rumput Pemula' },
   '初级森林': { ja: '初级森林', en: 'Beginner Forest', 'zh-Hant': '初級森林', 'zh-Hans': '初级森林', ko: '초급 숲', es: 'Bosque para Principiantes', id: 'Hutan Pemula' },
@@ -136,12 +145,18 @@ export const mapNameTranslations: Record<string, Record<LanguageCode, string>> =
   '天空神殿': { ja: '天空神殿', en: 'Sky Temple', 'zh-Hant': '天空神殿', 'zh-Hans': '天空神殿', ko: '하늘 신전', es: 'Templo del Cielo', id: 'Kuil Langit' },
   '深渊地狱': { ja: '深淵地獄', en: 'Abyss Hell', 'zh-Hant': '深淵地獄', 'zh-Hans': '深渊地狱', ko: '심연 지옥', es: 'Infierno del Abismo', id: 'Neraka Abyss' },
   '终焉之境': { ja: '終焉の境', en: 'Realm of End', 'zh-Hant': '終焉之境', 'zh-Hans': '终焉之境', ko: '종언의 경계', es: 'Reino del Fin', id: 'Dunia Akhir' },
+  '魔王城': { ja: '魔王城', en: 'Demon King Castle', 'zh-Hant': '魔王城', 'zh-Hans': '魔王城', ko: '마왕성', es: 'Castillo del Rey Demonio', id: 'Istana Raja Iblis' },
+  '恶魔深渊': { ja: '悪魔の深淵', en: 'Demon Abyss', 'zh-Hant': '惡魔深淵', 'zh-Hans': '恶魔深渊', ko: '악마의 심연', es: 'Abismo Demónico', id: 'Abyss Iblis' },
   '通用遭遇': { ja: '一般遭遇', en: 'General Encounter', 'zh-Hant': '通用遭遇', 'zh-Hans': '通用遭遇', ko: '일반 조우', es: 'Encuentro General', id: 'Pertemuan Umum' },
   'Boss战': { ja: 'ボス戦', en: 'Boss Battle', 'zh-Hant': 'Boss戰', 'zh-Hans': 'Boss战', ko: '보스 전투', es: 'Batalla de Jefe', id: 'Pertarungan Bos' },
 };
 
 export const getBossName = (name: string, language: LanguageCode): string => {
   return bossNameTranslations[name]?.[language] || name;
+};
+
+export const getEnemyName = (name: string, language: LanguageCode): string => {
+  return enemyNameTranslations[name]?.[language] || name;
 };
 
 export const getMapName = (name: string, language: LanguageCode): string => {

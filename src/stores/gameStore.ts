@@ -55,7 +55,8 @@ export function isPassiveEffectItem(eqId: string): boolean {
 function applyEquipmentBonuses(
   accessories: (Equipment | null)[],
   inventory: InventoryItem[],
-  hardmode: number
+  hardmode: number,
+  gold: number = 0
 ): {
   epHp: number;
   epAtk: number;
@@ -94,6 +95,7 @@ function applyEquipmentBonuses(
   // getDecreasedHPRate/getDecreasedATKRate
   hpReduceRate: number;
   atkReduceRate: number;
+  donyokuRing: boolean;
   // 复活相关（resCount=0表示无复活能力）
   resCount: number;
   resStatUP: number;
@@ -108,6 +110,12 @@ function applyEquipmentBonuses(
   healOnAttackOn: boolean;
   // 战神之刃效果 (击杀10w敌人ATK+10%)
   warGodBladeOn: boolean;
+  // 反射之镜效果
+  reflection: number;
+  refHealOn: boolean;
+  // 闪光沙漏效果
+  hourgclassOn: boolean;
+  hourgclassOn1: boolean;
 } {
   let epHp = 0, epAtk = 0, epDef = 0, epAgi = 0, epLuc = 0;
   let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
@@ -139,6 +147,10 @@ function applyEquipmentBonuses(
   let trueDamage = 0;
   let renzoDamageUP = 1;
   let fireSecretKeyOn = false;
+  let reflection = 0;
+  let refHealOn = false;
+  let hourgclassOn = false;
+  let hourgclassOn1 = false;
 
   for (const acc of accessories) {
     if (!acc) continue;
@@ -267,6 +279,31 @@ function applyEquipmentBonuses(
       addMaxHP += 1.5;
       resCount = 2;
       resStatUP = 1.06;
+    } else if (t1 === 78) {
+      if (gold > 300000) {
+        DamageIncreased = 40;
+      }
+    } else if (t1 === 899 && hardmode === 2) {
+      AllstatPer += 0.4;
+    } else if (t1 === 1888) {
+      possiveDeftoAtk = true;
+    } else if (t1 === 2424) {
+      const t2 = acc.t2 || 0;
+      const newReflection = t2 / 100;
+      if (newReflection > (reflection || 0)) {
+        reflection = newReflection;
+      }
+    } else if (t1 === 2425) {
+      const t2 = acc.t2 || 0;
+      const newReflection = t2 / 100;
+      if (newReflection > (reflection || 0)) {
+        reflection = newReflection;
+      }
+      refHealOn = true;
+    } else if (t1 === 2777) {
+      hourgclassOn = true;
+    } else if (t1 === 2778) {
+      hourgclassOn1 = true;
     }
     
     // passiveUpdate 效果（基于装备ID）
@@ -372,6 +409,9 @@ function applyEquipmentBonuses(
   // getDecreasedATKRate (t1=97): ATK减少率 -5% per item  
   const atkReduceItems = accessories.filter(acc => acc && acc.t1 === 97);
   const atkReduceRate = atkReduceItems.length * 0.05;
+  
+  // 強欲リング (t1=12): 统计减半
+  const donyokuRing = accessories.some(acc => acc && acc.t1 === 12);
 
   return {
     epHp, epAtk, epDef, epAgi, epLuc,
@@ -381,10 +421,12 @@ function applyEquipmentBonuses(
     crihPlusKakuritu, crihplusdamage, renzokuPlusKakuritu, MoveSpeed, SokusiKaihiKakuritu,
     redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate,
     hpReduceRate, atkReduceRate,
+    donyokuRing,
     resCount, resStatUP,
     trueDamage, renzoDamageUP,
     fireSecretKeyOn,
     sandHourglassOn, healOnAttackOn, warGodBladeOn,
+    reflection, refHealOn, hourgclassOn, hourgclassOn1,
   };
 }
 
@@ -701,6 +743,7 @@ const calculatePlayerDamage = (
   const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
   const powerStone = accessories.find(acc => acc && acc.t1 === 2222);
   const demonSoul = accessories.find(acc => acc && acc.t1 === 5);
+  const curseCoin = accessories.find(acc => acc && acc.t1 === 78);
   
   if (isCrit) {
     const critBonus = Math.random() * 1.2;
@@ -752,6 +795,10 @@ const calculatePlayerDamage = (
   
   if (skyPower) {
     damage += playerLevel * (skyPower.t2 || 50);
+  }
+  
+  if (curseCoin) {
+    damage *= 1.4;
   }
   
   return { damage: Math.floor(damage), isCrit };
@@ -887,6 +934,10 @@ export const useGameStore = create<GameStore>()(
         sandHourglassOn: false,
         healOnAttackOn: false,
         warGodBladeOn: false,
+        reflection: 0,
+        refHealOn: false,
+        hourgclassOn: false,
+        hourgclassOn1: false,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || 30,
@@ -1148,7 +1199,7 @@ export const useGameStore = create<GameStore>()(
         }
         
         const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0);
+        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, player.gold);
         
         // 根据 gdata.txt 中的 lvupFunc()，每级属性点 = 4 + GetPlusStPt
         const stPtPerLevel = 4 + bonuses.GetPlusStPt;
@@ -1395,7 +1446,7 @@ export const useGameStore = create<GameStore>()(
         
         // 饰品加成
         const { kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0);
+        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, player.gold);
         
         // 武器/防具贡献分量
         const equip1 = getEquipComponents(weaponObj, weaponQty, newPlayer.weaponSoul, armorObj, armorQty, newPlayer.armorSoul, baseHp_calc);
@@ -1669,7 +1720,7 @@ export const useGameStore = create<GameStore>()(
         
         // 使用统一的 applyEquipmentBonuses 函数计算饰品加成
         const { kyarakutalv: kclv, kyarakutaKozinExp: kcexp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0);
+        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, player.gold);
         
         // 使用已分配的属性点
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
@@ -1990,7 +2041,7 @@ export const useGameStore = create<GameStore>()(
         const equip = getEquipComponents(weaponObj, weaponQty, finalWeaponSoul, armorObj, armorQty, finalArmorSoul, baseHp);
         
         // 饰品加成
-        const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode);
+        const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode, player.gold);
         
         // 英雄加成
         const heroBonuses = computeHeroBonuses(player.heroId || 0);
@@ -2069,6 +2120,10 @@ export const useGameStore = create<GameStore>()(
             sandHourglassOn: bonuses.sandHourglassOn,
             healOnAttackOn: bonuses.healOnAttackOn,
             warGodBladeOn: bonuses.warGodBladeOn,
+            reflection: bonuses.reflection || 0,
+            refHealOn: bonuses.refHealOn || false,
+            hourgclassOn: bonuses.hourgclassOn || false,
+            hourgclassOn1: bonuses.hourgclassOn1 || false,
           },
         });
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
@@ -2275,7 +2330,7 @@ export const useGameStore = create<GameStore>()(
           }
           
           if (bossId !== null && !isHiddenMap) {
-            const boss = getBossById(bossId, hardmode);
+            const boss = getBossById(bossId, hardmode, currentMap);
             if (boss) {
               enemy = { ...boss };
             }
@@ -2354,9 +2409,12 @@ export const useGameStore = create<GameStore>()(
           }
         );
         
+        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
+        
         const settings = {
-          donyokuOn: false,
-          goyokuOn: false,
+          donyokuOn: !!greedRing,
+          goyokuOn: !!greedPendant,
           twilightON: false,
           hardmode,
           dropBoost: 1,
@@ -2367,17 +2425,7 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
-        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
-        let greedBonus = 1;
-        if (greedRing) {
-          greedBonus *= 2;
-        }
-        if (greedPendant) {
-          greedBonus *= 1.4;
-        }
-        
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, greedBonus);
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
@@ -2492,6 +2540,10 @@ export const useGameStore = create<GameStore>()(
             sandHourglassOn: eqBonuses.sandHourglassOn,
             healOnAttackOn: eqBonuses.healOnAttackOn,
             warGodBladeOn: eqBonuses.warGodBladeOn,
+            reflection: eqBonuses.reflection || 0,
+            refHealOn: eqBonuses.refHealOn || false,
+            hourgclassOn: eqBonuses.hourgclassOn || false,
+            hourgclassOn1: eqBonuses.hourgclassOn1 || false,
           },
         });
       },
@@ -2513,7 +2565,8 @@ export const useGameStore = create<GameStore>()(
         set({ lastBossId: bossId });
         
         const hardmode = get().hardmode || 0;
-        const boss = getBossById(bossId, hardmode);
+        const currentMap = get().currentMap;
+        const boss = getBossById(bossId, hardmode, currentMap);
         if (!boss) {
           return;
         }
@@ -2610,9 +2663,12 @@ export const useGameStore = create<GameStore>()(
           }
         );
         
+        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
+        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
+        
         const settings = {
-          donyokuOn: false,
-          goyokuOn: false,
+          donyokuOn: !!greedRing,
+          goyokuOn: !!greedPendant,
           twilightON: false,
           hardmode,
           dropBoost: 1,
@@ -2623,17 +2679,7 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const greedRing = accessories.find(acc => acc && acc.t1 === 12);
-        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
-        let greedBonus = 1;
-        if (greedRing) {
-          greedBonus *= 2;
-        }
-        if (greedPendant) {
-          greedBonus *= 1.4;
-        }
-        
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, greedBonus);
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
@@ -2701,6 +2747,10 @@ export const useGameStore = create<GameStore>()(
             sandHourglassOn: eqBonuses2.sandHourglassOn,
             healOnAttackOn: eqBonuses2.healOnAttackOn,
             warGodBladeOn: eqBonuses2.warGodBladeOn,
+            reflection: eqBonuses2.reflection || 0,
+            refHealOn: eqBonuses2.refHealOn || false,
+            hourgclassOn: eqBonuses2.hourgclassOn || false,
+            hourgclassOn1: eqBonuses2.hourgclassOn1 || false,
           },
         });
       },
@@ -3229,6 +3279,40 @@ export const useGameStore = create<GameStore>()(
                 updatePlayerHp(-tdame);
                 addBattleLog(`敌人攻击 受到${Math.floor(tdame)}伤害`);
                 
+                if (battle.reflection > 0) {
+                  const reflectDamage = Math.floor(tdame * battle.reflection);
+                  const newEnemyHp = Math.max(0, battle.enemy!.hp - reflectDamage);
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      enemy: { ...s.battle.enemy!, hp: newEnemyHp },
+                      hpRate: (newEnemyHp / s.battle.enemy!.maxHp) * 100,
+                    },
+                  }));
+                  addBattleLog(`反射之镜效果：反射 ${reflectDamage} 伤害！`);
+                  if (battle.refHealOn) {
+                    const healAmount = Math.floor(reflectDamage * 0.5);
+                    if (healAmount > 0) {
+                      set((s) => ({
+                        player: {
+                          ...s.player,
+                          hp: Math.min(s.player.hp + healAmount, s.player.maxHp),
+                        },
+                      }));
+                      addBattleLog(`反射回复效果：回复 ${healAmount} HP！`);
+                    }
+                  }
+                  if (newEnemyHp <= 0) {
+                    addBattleLog('战斗胜利！');
+                    battleEnded = true;
+                    set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                    setTimeout(() => {
+                      endBattle(true);
+                    }, 500);
+                    return;
+                  }
+                }
+                
                 set((s) => ({
                   battle: {
                     ...s.battle,
@@ -3390,6 +3474,10 @@ export const useGameStore = create<GameStore>()(
             sandHourglassOn: false,
             healOnAttackOn: false,
             warGodBladeOn: false,
+            reflection: 0,
+            refHealOn: false,
+            hourgclassOn: false,
+            hourgclassOn1: false,
           },
         });
       },
@@ -3439,7 +3527,7 @@ export const useGameStore = create<GameStore>()(
         const baseResetLuc = initialPlayer.luck + levelBonus.luck + stPtAlloc.luc * 1;
         
         const equipR = getEquipComponents(equippedWeapon, weaponQty, weaponSoul, equippedArmor, armorQty, armorSoul, baseResetHp);
-        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0);
+        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0, currentPlayer.gold);
         const heroBonusesR = computeHeroBonuses(initialPlayer.heroId || 0);
         const currentKyaraLvR = getCurrentKyaraLv(get().kyarakutaKozinExp, initialPlayer.heroId);
         const kyaraLvR = ((get().kyarakutalv + currentKyaraLvR) * 0.25 + 0.75);
@@ -3565,6 +3653,10 @@ export const useGameStore = create<GameStore>()(
             sandHourglassOn: false,
             healOnAttackOn: false,
             warGodBladeOn: false,
+            reflection: 0,
+            refHealOn: false,
+            hourgclassOn: false,
+            hourgclassOn1: false,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
@@ -4045,7 +4137,7 @@ export const useGameStore = create<GameStore>()(
           
           const equipM = getEquipComponents(weapon, weaponQty, state.player.weaponSoul, armor, armorQty, state.player.armorSoul, baseMergeHp);
           const globalState = useGameStore.getState();
-          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0);
+          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0, state.player.gold);
           const heroBonusesM = computeHeroBonuses(state.player.heroId || 0);
           const currentKyaraLvM = getCurrentKyaraLv(globalState.kyarakutaKozinExp, state.player.heroId);
           const kyaraLvM = ((globalState.kyarakutalv + currentKyaraLvM) * 0.25 + 0.75);

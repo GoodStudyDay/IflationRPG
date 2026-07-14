@@ -154,12 +154,14 @@ export const computeFinalStats = (
     addMaxHP: number; addMaxATK: number; addMaxDEF: number; addMaxAGI: number; addMaxLUC: number;
     AllstatPer: number;
     kyarakutaNouryokuUp: number;
+    donyokuRing: boolean;
     redEyeEffect: number; blueEyeEffect: number; greenEyeEffect: number;
   },
   heroBonuses: HeroBonuses,
   heroLevel: number
 ): { hp: number; atk: number; def: number; agi: number; luc: number } => {
   const kyaraUpMultiplier = 1 + bonuses.kyarakutaNouryokuUp / 100;
+  const donyokuMultiplier = bonuses.donyokuRing ? 0.5 : 1;
   // gdata.txt hwMode: ebhp += KPhp * _loc6_ * 0.06
   const ebhp = bonuses.ebHp + heroBonuses.KPhp * heroLevel * kyaraUpMultiplier * 0.06;
   // 武器 ebAtk + 饰品 ebAtk + 英雄 KPatk
@@ -171,23 +173,23 @@ export const computeFinalStats = (
   
   // HP: (hp + ephp) * (1 + ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer)
   const ephp = equip.epHp + bonuses.epHp;
-  const hp = Math.floor((baseHp + ephp) * (1 + ebhp) * (1 + bonuses.addMaxHP + bonuses.redEyeEffect + bonuses.AllstatPer));
+  const hp = Math.floor((baseHp + ephp) * (1 + ebhp) * (1 + bonuses.addMaxHP + bonuses.redEyeEffect + bonuses.AllstatPer) * donyokuMultiplier);
   
   // ATK: (atk + epatk) * (1 + ebatk) * (1 + addMaxATK + AllstatPer + blueEyeEffect)
   const epatk = equip.epAtk + bonuses.epAtk;
-  const atk = Math.floor((baseAtk + epatk) * (1 + ebatk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer + bonuses.blueEyeEffect));
+  const atk = Math.floor((baseAtk + epatk) * (1 + ebatk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer + bonuses.blueEyeEffect) * donyokuMultiplier);
   
   // DEF: (def + epdef) * (1 + ebdef) * (1 + AllstatPer + greenEyeEffect + addMaxDEF)
   const epdef = equip.epDef + bonuses.epDef;
-  const def = Math.floor((baseDef + epdef) * (1 + ebdef) * (1 + bonuses.AllstatPer + bonuses.greenEyeEffect + bonuses.addMaxDEF));
+  const def = Math.floor((baseDef + epdef) * (1 + ebdef) * (1 + bonuses.AllstatPer + bonuses.greenEyeEffect + bonuses.addMaxDEF) * donyokuMultiplier);
   
   // AGI: (agi + epspeed) * (1 + ebspeed) * (1 + addMaxAGI + AllstatPer)
   const epspeed = bonuses.epAgi;
-  const agi = Math.floor((baseAgi + epspeed) * (1 + ebspeed) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer));
+  const agi = Math.floor((baseAgi + epspeed) * (1 + ebspeed) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer) * donyokuMultiplier);
   
   // LUC: (luc + epluk) * (1 + ebluk) * (1 + addMaxLUC + AllstatPer)
   const epluk = bonuses.epLuc;
-  const luc = Math.floor((baseLuc + epluk) * (1 + ebluk) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer));
+  const luc = Math.floor((baseLuc + epluk) * (1 + ebluk) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer) * donyokuMultiplier);
   
   return { hp, atk, def, agi, luc };
 };
