@@ -223,6 +223,8 @@ export const battleVarInit = (
     hourGlassON: false,
     hourGlassON1: false,
     expbairitu: 1,
+    missrate: 0,
+    enemissrate: 0,
   }
 ): BattleVarResult => {
   const hasDrop1 = dropCount >= 1;
@@ -277,6 +279,8 @@ export const battleVarInit = (
   }
 
   return {
+    missrate: settings.missrate || 0,
+    enemissrate: settings.enemissrate || 0,
     comboRate,
     critRate,
     itemDropRate: itemKakuritu,

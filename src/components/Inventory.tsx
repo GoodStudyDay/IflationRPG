@@ -108,7 +108,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const totalAttack = player.attack + bonuses.atkBonus;
   const totalDefense = player.defense + bonuses.defBonus;
 
-  const totalAccessorySlots = player.maxAccessorySlots || 3;
+  const unlockedSlots = player.unlockedAccessorySlots || [true, true, true, false, false, false, false, false, false, false, false, false];
 
   
 
@@ -946,7 +946,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="grid grid-cols-2 gap-2">
             {[0, 1, 2, 3, 4, 5].map(slotIndex => {
               const accessory = (player.equippedAccessories || [])[slotIndex];
-              const isUnlocked = slotIndex < totalAccessorySlots;
+              const isUnlocked = unlockedSlots[slotIndex] || false;
               
               return (
               <div key={`big-${slotIndex}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-2">
@@ -1016,7 +1016,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="grid grid-cols-6 gap-1">
             {[6, 7, 8, 9, 10, 11].map(slotIndex => {
               const accessory = (player.equippedAccessories || [])[slotIndex];
-              const isUnlocked = slotIndex < totalAccessorySlots;
+              const isUnlocked = unlockedSlots[slotIndex] || false;
               
               return (
               <div key={`small-${slotIndex}`} className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded p-1">

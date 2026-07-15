@@ -15,12 +15,17 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
   const { t } = useTranslation();
   const { getEquipName } = useEquipmentName();
   const { getEquipDescription } = useEquipmentDescription();
-  const { inventory, player, buyEquipment, synthesizeEquipment } = useGameStore();
+  const { inventory, player, buyEquipment, synthesizeEquipment, purchaseCounts } = useGameStore();
   type CategoryType = EquipmentType | 'all' | 'soul' | 'material';
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
   const [buySuccessMsg, setBuySuccessMsg] = useState<string | null>(null);
   const [buyErrorMsg, setBuyErrorMsg] = useState<string | null>(null);
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+
+  const getCurrentPrice = (equipment: typeof equipmentData[0]) => {
+    const count = purchaseCounts[equipment.id] || 0;
+    return Math.ceil(equipment.price * (1 + count * 0.1));
+  };
 
   const handleBuy = (equipmentId: string) => {
     const success = buyEquipment(equipmentId);
@@ -209,12 +214,12 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                         <button
                           onClick={() => handleBuy(equipment.id)}
                           className={`text-xs font-bold py-1 px-3 rounded transition-colors ${
-                            player.gold >= equipment.price
+                            player.gold >= getCurrentPrice(equipment)
                               ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
                               : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                           }`}
                         >
-                          {equipment.price.toLocaleString()}G
+                          {getCurrentPrice(equipment).toLocaleString()}G
                         </button>
                       )}
                       <div className={`text-lg font-bold mt-0.5 ${

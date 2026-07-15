@@ -24,9 +24,15 @@ export interface BattleVarSettings {
   hourGlassON: boolean;
   hourGlassON1: boolean;
   expbairitu: number;
+  /** 玩家闪避率 (0-1) */
+  missrate: number;
+  /** 敌人闪避率 (仅地图109-118生效) */
+  enemissrate: number;
 }
 
 export interface BattleVarResult {
+  missrate: number;
+  enemissrate: number;
   comboRate: number;
   critRate: number;
   itemDropRate: number;

@@ -4,7 +4,7 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
-    version: 'v0.0.70',
+    version: 'v0.0.71',
     date: '2026-07-15 12:00:00',
     changes: [
       '修复连击率/暴击率计算逻辑：基础值改用 battlevar 的 speed/luck 综合计算，不再固定 5%',

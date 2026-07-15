@@ -22,6 +22,7 @@ export const initialPlayer: Player = {
   weaponSoul: null,
   armorSoul: null,
   maxAccessorySlots: 3,
+  unlockedAccessorySlots: [true, true, true, false, false, false, false, false, false, false, false, false],
   stPt: 0,
   stPtAllocate: { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 },
   heroId: 0,

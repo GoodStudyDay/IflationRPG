@@ -107,6 +107,8 @@ export interface Player {
   armorSoul: Equipment | null;
   /** 已解锁的饰品栏位数 (默认3, 最大12) */
   maxAccessorySlots: number;
+  /** 已解锁的饰品栏位索引数组 */
+  unlockedAccessorySlots?: boolean[];
   /** 属性点 */
   stPt: number;
   /** 已分配的属性点记录 */
@@ -142,6 +144,9 @@ export interface BattleState {
   baseComboRate: number;
   /** 基础暴击率（battlevar 计算值，不含 HP 奖励，0-1） */
   baseCritRate: number;
+  missrate: number;
+  isMiss: boolean;
+  missPosition: "player" | "enemy" | null;
   /** Boss 类型 ID，普通敌人为 -1 */
   bossType: number;
   hpRate: number;

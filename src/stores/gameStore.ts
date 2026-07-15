@@ -651,6 +651,13 @@ const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Pl
   if (typeof fixedPlayer.maxAccessorySlots !== 'number' || fixedPlayer.maxAccessorySlots < 1) {
     fixedPlayer.maxAccessorySlots = 3;
   }
+  if (!fixedPlayer.unlockedAccessorySlots || !Array.isArray(fixedPlayer.unlockedAccessorySlots)) {
+    const slots = [true, true, true, false, false, false, false, false, false, false, false, false];
+    for (let i = 0; i < fixedPlayer.maxAccessorySlots && i < 12; i++) {
+      slots[i] = true;
+    }
+    fixedPlayer.unlockedAccessorySlots = slots;
+  }
   if (typeof fixedPlayer.stPt !== 'number' || Number.isNaN(fixedPlayer.stPt)) {
     fixedPlayer.stPt = 0;
   }
@@ -918,6 +925,9 @@ export const useGameStore = create<GameStore>()(
           critRate: 5,
           baseComboRate: 0.05,
           baseCritRate: 0.05,
+            missrate: 0,
+            isMiss: false,
+            missPosition: null,
           bossType: -1,
           hpRate: 100,
           dropRate: 0,
@@ -2190,6 +2200,9 @@ export const useGameStore = create<GameStore>()(
             critRate: 5,
             baseComboRate: 0.05,
             baseCritRate: 0.05,
+            missrate: 0,
+            isMiss: false,
+            missPosition: null,
             bossType: -1,
             hpRate: 100,
             dropRate: 0,
@@ -2513,6 +2526,8 @@ export const useGameStore = create<GameStore>()(
             lukwariai: 0,
             hourGlassON: false,
             hourGlassON1: false,
+            missrate: eqBonuses.missrate,
+            enemissrate: 0,
             expbairitu: 1,
           }
         );
@@ -2613,6 +2628,9 @@ export const useGameStore = create<GameStore>()(
             critRate: battleVarResult.critRate * 100,
             baseComboRate: battleVarResult.comboRate,
             baseCritRate: battleVarResult.critRate,
+            missrate: battleVarResult.missrate,
+            isMiss: false,
+            missPosition: null,
             bossType: -1,
             hpRate: 100,
             dropRate: dropResult.getItemDropRate * 100,
@@ -2749,6 +2767,8 @@ export const useGameStore = create<GameStore>()(
             lukwariai: 0,
             hourGlassON: false,
             hourGlassON1: false,
+            missrate: eqBonuses2.missrate,
+            enemissrate: 0,
             expbairitu: 1,
           }
         );
@@ -2846,6 +2866,9 @@ export const useGameStore = create<GameStore>()(
             critRate: battleVarResult.critRate * 100,
             baseComboRate: battleVarResult.comboRate,
             baseCritRate: battleVarResult.critRate,
+            missrate: battleVarResult.missrate,
+            isMiss: false,
+            missPosition: null,
             bossType: bossId,
             hpRate: 100,
             dropRate: dropResult.getItemDropRate * 100,
@@ -3257,31 +3280,57 @@ export const useGameStore = create<GameStore>()(
             mode = 4;
             isProcessing = false;
             } else {
-              const totalDefense = player.defense;
-              const accessories = player.equippedAccessories || [];
-              const enemyDamage = calculateEnemyDamage(
-                battle.enemy.attack,
-                totalDefense,
-                accessories
-              );
-              tdame = enemyDamage;
+              const isPlayerMiss = Math.random() < battle.missrate;
               
-              set((s) => ({
-                battle: {
-                  ...s.battle,
-                  playerAnimation: 'idle',
-                  enemyAnimation: 'attack',
-                  damageDisplay: enemyDamage,
-                  isCrit: false,
-                  isCombo: false,
-                  lastAttacker: 'enemy',
-                  activeEffect: { effectId: 13, position: 'player' },
-                },
-              }));
-              
-              eefi = 0;
-              mode = 4;
-              isProcessing = false;
+              if (isPlayerMiss) {
+                addBattleLog(t('你闪避了敌人的攻击！'));
+                set((s) => ({
+                  battle: {
+                    ...s.battle,
+                    playerAnimation: 'idle',
+                    enemyAnimation: 'attack',
+                    damageDisplay: null,
+                    isCrit: false,
+                    isCombo: false,
+                    isMiss: true,
+                    missPosition: 'player',
+                    lastAttacker: 'enemy',
+                    activeEffect: { effectId: 0, position: 'player' },
+                  },
+                }));
+                tdame = 0;
+                eefi = 0;
+                mode = 4;
+                isProcessing = false;
+              } else {
+                const totalDefense = player.defense;
+                const accessories = player.equippedAccessories || [];
+                const enemyDamage = calculateEnemyDamage(
+                  battle.enemy.attack,
+                  totalDefense,
+                  accessories
+                );
+                tdame = enemyDamage;
+                
+                set((s) => ({
+                  battle: {
+                    ...s.battle,
+                    playerAnimation: 'idle',
+                    enemyAnimation: 'attack',
+                    damageDisplay: enemyDamage,
+                    isCrit: false,
+                    isCombo: false,
+                    isMiss: false,
+                    missPosition: null,
+                    lastAttacker: 'enemy',
+                    activeEffect: { effectId: 13, position: 'player' },
+                  },
+                }));
+                
+                eefi = 0;
+                mode = 4;
+                isProcessing = false;
+              }
             }
           } else if (mode === 4) {
             eefi++;
@@ -3607,6 +3656,9 @@ export const useGameStore = create<GameStore>()(
             critRate: 5,
             baseComboRate: 0.05,
             baseCritRate: 0.05,
+            missrate: 0,
+            isMiss: false,
+            missPosition: null,
             bossType: -1,
             hpRate: 100,
             dropRate: 0,
@@ -3789,6 +3841,9 @@ export const useGameStore = create<GameStore>()(
             critRate: 5,
             baseComboRate: 0.05,
             baseCritRate: 0.05,
+            missrate: 0,
+            isMiss: false,
+            missPosition: null,
             bossType: -1,
             hpRate: 100,
             dropRate: 0,
@@ -4105,21 +4160,33 @@ export const useGameStore = create<GameStore>()(
       },
       unlockAccessorySlot: (slotIndex?: number) => {
         const { player } = get();
-        const currentSlots = player.maxAccessorySlots;
-        if (currentSlots >= MAX_ACCESSORY_SLOTS) return false;
+        const unlockedSlots = player.unlockedAccessorySlots || [true, true, true, false, false, false, false, false, false, false, false, false];
         
-        const targetIndex = slotIndex !== undefined ? slotIndex : currentSlots;
-        if (targetIndex < currentSlots) return false;
-        if (targetIndex >= MAX_ACCESSORY_SLOTS) return false;
+        let targetIndex;
+        if (slotIndex !== undefined) {
+          targetIndex = slotIndex;
+        } else {
+          targetIndex = unlockedSlots.findIndex(slot => !slot);
+          if (targetIndex === -1) return false;
+        }
+        
+        if (targetIndex < 0 || targetIndex >= MAX_ACCESSORY_SLOTS) return false;
+        if (unlockedSlots[targetIndex]) return false;
         
         const price = AKUSE_SLOT_LOCK_MONEY[targetIndex];
         if (player.gold < price) return false;
+        
+        const newUnlockedSlots = [...unlockedSlots];
+        newUnlockedSlots[targetIndex] = true;
+        
+        const newMaxSlots = Math.max(player.maxAccessorySlots, targetIndex + 1);
         
         set({
           player: {
             ...player,
             gold: player.gold - price,
-            maxAccessorySlots: targetIndex + 1,
+            unlockedAccessorySlots: newUnlockedSlots,
+            maxAccessorySlots: newMaxSlots,
           },
         });
         return true;
