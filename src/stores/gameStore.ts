@@ -2580,23 +2580,28 @@ export const useGameStore = create<GameStore>()(
         enemy.expReward = Math.floor(enemy.expReward * multiplier.exp);
         enemy.goldReward = Math.floor(enemy.goldReward * multiplier.gold);
         
-        const normalDrops = enemy.drops.slice(0, 3);
-        const hardDrops = enemy.drops.slice(3, 6);
-        const hellDrops = enemy.drops.slice(6, 9);
-        
+        // Boss 掉落按 3 档拆分（normal/hard/hell 各 3 个），普通敌人直接用全部掉落
+        const isBossEnemy = (enemy as any).bossId !== undefined;
         let activeDrops;
-        if (hardmode === 2) {
-          activeDrops = hellDrops;
-        } else if (hardmode === 1) {
-          activeDrops = hardDrops;
+        if (isBossEnemy) {
+          const normalDrops = enemy.drops.slice(0, 3);
+          const hardDrops = enemy.drops.slice(3, 6);
+          const hellDrops = enemy.drops.slice(6, 9);
+          if (hardmode === 2) {
+            activeDrops = hellDrops;
+          } else if (hardmode === 1) {
+            activeDrops = hardDrops;
+          } else {
+            activeDrops = normalDrops;
+          }
+          // 当对应难度掉落为空时，回退到普通掉落
+          const hasValidDrop = activeDrops.some((d: { equipmentId: string; dropRate: number } | null) => d !== null);
+          if (!hasValidDrop && activeDrops !== normalDrops) {
+            activeDrops = normalDrops;
+          }
         } else {
-          activeDrops = normalDrops;
-        }
-        
-        // 当对应难度掉落为空时，回退到普通掉落
-        const hasValidDrop = activeDrops.some((d: { equipmentId: string; dropRate: number } | null) => d !== null);
-        if (!hasValidDrop && activeDrops !== normalDrops) {
-          activeDrops = normalDrops;
+          // 地图普通敌人：drop 全部属于当前难度，直接使用
+          activeDrops = enemy.drops;
         }
         
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
