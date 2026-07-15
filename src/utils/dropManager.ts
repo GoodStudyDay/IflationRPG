@@ -211,13 +211,7 @@ export const dropItemList = (
   
   return state;
 };
-
-const getRandomSoulIndex = (): number => {
-  const souls = equipmentData.filter(e => e.type === 'soul');
-  if (souls.length === 0) return -1;
-  return Math.floor(Math.random() * souls.length);
-};
-
+  
 export const eneDropItemInit = (
   slot1: DropSlot | null,
   slot2: DropSlot | null,
