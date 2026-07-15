@@ -348,6 +348,11 @@ export const eneDropItemInit = (
     }
   }
   
+  console.log('[DropDebug] getItemType=', getItemType, 'getItemIndex=', getItemIndex,
+    'getItemDropType=', getItemDropType, 'getItemDropIndex=', getItemDropIndex,
+    'getItemDropRate=', getItemDropRate, 'slot1=', slot1?.itemType, slot1?.itemIndex,
+    'slot2=', slot2?.itemType, slot2?.itemIndex, 'slot3=', slot3?.itemType, slot3?.itemIndex);
+  
   if (getItemType !== -1 && getItemIndex !== -1 && getItemDropType === -1 && getItemDropIndex === -1) {
     getItemDropType = getItemType;
     getItemDropIndex = getItemIndex;
