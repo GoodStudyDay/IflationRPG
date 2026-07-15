@@ -138,6 +138,8 @@ export interface BattleState {
   status: BattleStatus;
   battleLog: string[];
   comboCount: number;
+  /** 每次连击递增，用于强制 React 重新挂载 combo 显示动画 */
+  comboDisplayKey: number;
   comboRate: number;
   critRate: number;
   /** 基础连击率（battlevar 计算值，不含 HP 奖励，0-1） */
@@ -203,6 +205,10 @@ export interface BattleState {
   hourgclassOn: boolean;
   /** 闪光沙漏1效果开启 */
   hourgclassOn1: boolean;
+  /** Sanctuary's Blessing 强制闪避回合数（t1=314） */
+  missrateOn: number;
+  /** 已过敌人回合计数（用于missrateOn判断） */
+  _missTurnCount: number;
 }
 
 // 奖励类型

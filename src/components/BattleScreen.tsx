@@ -59,6 +59,26 @@ export const BattleScreen = () => {
   
   const playerHpPercent = player.maxHp > 0 ? (player.hp / player.maxHp) * 100 : 0;
 
+  const renderMissDisplay = () => {
+    if (!battle.isMiss) return null;
+    
+    const isPlayerTarget = battle.missPosition === 'player';
+    const topPosition = isPlayerTarget 
+      ? 'bottom-36 sm:bottom-40 md:bottom-48' 
+      : 'top-1/4 sm:top-1/3';
+    
+    return (
+      <div 
+        className={`absolute ${topPosition} left-1/2 transform -translate-x-1/2 -translate-y-full text-center pointer-events-none z-20 animate-damage-float`}
+      >
+        <div className="text-gray-200 text-lg sm:text-2xl md:text-3xl font-black animate-pulse drop-shadow-[0_0_10px_rgba(200,200,200,0.6)]"
+             style={{ textShadow: '0 0 15px rgba(200,200,200,0.8), 0 2px 4px rgba(0,0,0,0.5)' }}>
+          MISS
+        </div>
+      </div>
+    );
+  };
+
   const renderDamageDisplay = () => {
     if (battle.damageDisplay === null) return null;
     
@@ -76,7 +96,7 @@ export const BattleScreen = () => {
             </div>
           )}
           {battle.isCombo && (
-            <div className="text-orange-400 text-xs sm:text-sm font-bold">
+            <div key={`combo-${battle.comboDisplayKey}`} className="text-orange-400 text-base sm:text-xl md:text-2xl font-bold">
               {t('{0}连击').replace('{0}', String(battle.comboCount))}
             </div>
           )}
@@ -233,6 +253,7 @@ export const BattleScreen = () => {
           <div className="text-red-400 font-bold text-xs sm:text-sm md:text-base mt-1">{t(battle.enemy.name)}</div>
           
           {battle.lastAttacker === 'player' && renderDamageDisplay()}
+          {battle.isMiss && battle.missPosition === 'enemy' && renderMissDisplay()}
           
           {(battle.enemy.drops && battle.enemy.drops.length > 0) && (
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
@@ -319,6 +340,7 @@ export const BattleScreen = () => {
           <div className="text-white font-bold text-[10px] sm:text-xs md:text-sm mt-1">{t(player.name)}</div>
           
           {battle.lastAttacker === 'enemy' && renderDamageDisplay()}
+          {battle.isMiss && battle.missPosition === 'player' && renderMissDisplay()}
         </div>
         
         <div className="absolute bottom-24 sm:bottom-28 md:bottom-36 left-1/2 transform -translate-x-1/2 w-28 sm:w-40 md:w-48">

@@ -45,7 +45,7 @@ function getItemCount(inventory: InventoryItem[]): number {
 // 统一计算饰品加成效果，遵循 gdata.txt 中 EqStUpdate 和 passiveUpdate 的模式
 // 返回加性属性加成和乘性属性加成
 // 被动效果饰品ID列表（无需装备即可生效）
-const PASSIVE_ACCESSORY_IDS = new Set([95, 103, 104, 106, 110, 116, 117, 119, 123, 125, 130]);
+const PASSIVE_ACCESSORY_IDS = new Set([95, 103, 104, 106, 110, 116, 117, 119, 123, 125, 131]);
 
 export function isPassiveEffectItem(eqId: string): boolean {
   const eqNum = parseInt(eqId.split('-')[1]) || 0;
@@ -116,6 +116,8 @@ function applyEquipmentBonuses(
   // 闪光沙漏效果
   hourgclassOn: boolean;
   hourgclassOn1: boolean;
+  // Sanctuary's Blessing (t1=314) 强制闪避回合数
+  missrateOn: number;
 } {
   let epHp = 0, epAtk = 0, epDef = 0, epAgi = 0, epLuc = 0;
   let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
@@ -151,6 +153,7 @@ function applyEquipmentBonuses(
   let refHealOn = false;
   let hourgclassOn = false;
   let hourgclassOn1 = false;
+  let missrateOn = 0;
 
   for (const acc of accessories) {
     if (!acc) continue;
@@ -329,6 +332,8 @@ function applyEquipmentBonuses(
       hourgclassOn = true;
     } else if (t1 === 2778) {
       hourgclassOn1 = true;
+    } else if (t1 === 314) {
+      missrateOn += 3;
     }
     
     // passiveUpdate 效果（基于装备ID）
@@ -337,7 +342,7 @@ function applyEquipmentBonuses(
     
     if (eqNum === 106) {
       redEyeEffect += 0.1;
-    } else if (eqNum === 130) {
+    } else if (eqNum === 131) {
       redEyeEffect += 0.2;
     } else if (eqNum === 95) {
       epHp += 750000;
@@ -389,7 +394,7 @@ function applyEquipmentBonuses(
     
     if (eqNum === 106) {
       redEyeEffect += 0.1;
-    } else if (eqNum === 130) {
+    } else if (eqNum === 131) {
       redEyeEffect += 0.2;
     } else if (eqNum === 95) {
       epHp += 750000;
@@ -452,6 +457,7 @@ function applyEquipmentBonuses(
     fireSecretKeyOn,
     sandHourglassOn, healOnAttackOn, warGodBladeOn,
     reflection, refHealOn, hourgclassOn, hourgclassOn1,
+    missrateOn,
   };
 }
 
@@ -870,6 +876,101 @@ const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, access
   return Math.floor(damage);
 };
 
+type PatternResult = {
+  skillUsed: boolean;
+  damage: number;
+  skillName: string;
+  effectType: 'damage' | 'heal' | 'buff' | 'debuff';
+} | null;
+
+const enePattern = (enemyNum: number, currentHp: number, maxHp: number, _turnCount: number, whichTurn: number): PatternResult => {
+  const hpPercent = (currentHp / maxHp) * 100;
+  
+  if (whichTurn === 0) {
+    if (enemyNum === 70 || enemyNum === 74) {
+      return suzakuPattern(hpPercent);
+    }
+    if (enemyNum === 76) {
+      return kouryuuPattern(hpPercent);
+    }
+  }
+  
+  if (enemyNum === 100 || enemyNum === 101 || enemyNum === 102) {
+    return twilightPattern(hpPercent);
+  }
+  
+  if (whichTurn === 1) {
+    if (enemyNum === 71 || enemyNum === 75 || enemyNum === 87) {
+      return genbuPattern();
+    }
+    if (enemyNum === 98 || enemyNum === 99) {
+      return angelPattern();
+    }
+    if (enemyNum === 72 || enemyNum === 86 || enemyNum === 87) {
+      return seiryuuPattern(enemyNum);
+    }
+  }
+  
+  if (enemyNum === 73 || enemyNum === 87) {
+    return byakkoPattern(hpPercent);
+  }
+  
+  return null;
+};
+
+const suzakuPattern = (hpPercent: number): PatternResult => {
+  if (hpPercent <= 30 && Math.random() < 0.3) {
+    return { skillUsed: true, damage: 0, skillName: '炎の加護', effectType: 'heal' };
+  }
+  return null;
+};
+
+const kouryuuPattern = (hpPercent: number): PatternResult => {
+  if (hpPercent <= 40 && Math.random() < 0.4) {
+    return { skillUsed: true, damage: 0, skillName: '雷の加護', effectType: 'heal' };
+  }
+  return null;
+};
+
+const twilightPattern = (hpPercent: number): PatternResult => {
+  if (hpPercent <= 60 && Math.random() < 0.35) {
+    return { skillUsed: true, damage: 0, skillName: '永遠の暗闇', effectType: 'debuff' };
+  }
+  return null;
+};
+
+const genbuPattern = (): PatternResult => {
+  if (Math.random() < 0.5) {
+    return { skillUsed: true, damage: 0, skillName: '岩の壁', effectType: 'buff' };
+  }
+  return null;
+};
+
+const angelPattern = (): PatternResult => {
+  if (Math.random() < 0.3) {
+    return { skillUsed: true, damage: 0, skillName: '天使の祝福', effectType: 'heal' };
+  }
+  return null;
+};
+
+const seiryuuPattern = (enemyNum: number): PatternResult => {
+  if (Math.random() < 0.4) {
+    let damage = 150000000;
+    if (enemyNum === 86) {
+      damage = 160000000;
+    }
+    return { skillUsed: true, damage: damage, skillName: '感電されて力が抜けた', effectType: 'damage' };
+  }
+  return null;
+};
+
+const byakkoPattern = (hpPercent: number): PatternResult => {
+  if (hpPercent < 40) {
+    return { skillUsed: true, damage: 0, skillName: '猛威', effectType: 'buff' };
+  }
+  return null;
+};
+
 const collectionData = getCollection();
 const saveData = loadSaveData();
 
@@ -921,6 +1022,7 @@ export const useGameStore = create<GameStore>()(
           status: 'idle',
           battleLog: [],
           comboCount: 0,
+          comboDisplayKey: 0,
           comboRate: 5,
           critRate: 5,
           baseComboRate: 0.05,
@@ -966,10 +1068,12 @@ export const useGameStore = create<GameStore>()(
         refHealOn: false,
         hourgclassOn: false,
         hourgclassOn1: false,
+        missrateOn: 0,
+        _missTurnCount: 0,
         },
       battleInterval: null,
-      battlePoints: storedData?.battlePoints || 30,
-      maxBattlePoints: saveData.hardmode === 1 ? 15 : 30,
+      battlePoints: storedData?.battlePoints || (saveData.hardmode === 2 ? 10 : (saveData.hardmode === 1 ? 15 : 30)),
+      maxBattlePoints: saveData.hardmode === 2 ? 10 : (saveData.hardmode === 1 ? 15 : 30),
       defeatedBosses: [] as number[],
       playTimes: saveData.playTimes,
       Highlv: saveData.Highlv,
@@ -2077,7 +2181,7 @@ export const useGameStore = create<GameStore>()(
       },
       setHardmode: (hardmode) => {
         console.log('[setHardmode] Called with hardmode:', hardmode);
-        const maxBP = hardmode === 1 ? 15 : 30;
+        const maxBP = hardmode === 2 ? 10 : (hardmode === 1 ? 15 : 30);
         set({ hardmode, maxBattlePoints: maxBP, battlePoints: maxBP });
         const data = loadSaveData();
         data.hardmode = hardmode;
@@ -2127,7 +2231,7 @@ export const useGameStore = create<GameStore>()(
           finalArmorSoul = null;
         }
         
-        const newBattlePoints = battlePoints <= 0 ? (hardmode === 1 ? 15 : maxBattlePoints) : battlePoints;
+        const newBattlePoints = battlePoints <= 0 ? (hardmode === 2 ? 10 : (hardmode === 1 ? 15 : maxBattlePoints)) : battlePoints;
         
         const levelBonus = getLevelBonus(player.level);
         
@@ -2196,6 +2300,7 @@ export const useGameStore = create<GameStore>()(
             status: 'idle',
             battleLog: [] as string[],
             comboCount: 0,
+            comboDisplayKey: 0,
             comboRate: 5,
             critRate: 5,
             baseComboRate: 0.05,
@@ -2241,6 +2346,8 @@ export const useGameStore = create<GameStore>()(
             refHealOn: bonuses.refHealOn || false,
             hourgclassOn: bonuses.hourgclassOn || false,
             hourgclassOn1: bonuses.hourgclassOn1 || false,
+            missrateOn: bonuses.missrateOn || 0,
+            _missTurnCount: 0,
           },
         });
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
@@ -2451,6 +2558,10 @@ export const useGameStore = create<GameStore>()(
             const boss = getBossById(bossId, hardmode, currentMap);
             if (boss) {
               enemy = { ...boss };
+              // i地图(bossId=62) / iii地图(bossId=68) Boss 调试日志
+              if (bossId === 62 || bossId === 68) {
+                console.log(`[BonusBattle] 遭遇 ${bossId === 62 ? 'i' : 'iii'}地图 Boss, bossId=${bossId}, hardmode=${hardmode}, hp=${boss.maxHp}, drops=${JSON.stringify(boss.drops)}`);
+              }
             }
           }
         }
@@ -2479,6 +2590,12 @@ export const useGameStore = create<GameStore>()(
         } else if (hardmode === 1) {
           activeDrops = hardDrops;
         } else {
+          activeDrops = normalDrops;
+        }
+        
+        // 当对应难度掉落为空时，回退到普通掉落
+        const hasValidDrop = activeDrops.some((d: { equipmentId: string; dropRate: number } | null) => d !== null);
+        if (!hasValidDrop && activeDrops !== normalDrops) {
           activeDrops = normalDrops;
         }
         
@@ -2624,6 +2741,7 @@ export const useGameStore = create<GameStore>()(
               getTranslation('点击画面可以暂停游戏', lang),
             ],
             comboCount: 0,
+            comboDisplayKey: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
             baseComboRate: battleVarResult.comboRate,
@@ -2668,6 +2786,8 @@ export const useGameStore = create<GameStore>()(
             refHealOn: eqBonuses.refHealOn || false,
             hourgclassOn: eqBonuses.hourgclassOn || false,
             hourgclassOn1: eqBonuses.hourgclassOn1 || false,
+            missrateOn: eqBonuses.missrateOn || 0,
+            _missTurnCount: 0,
           },
         });
       },
@@ -2687,6 +2807,11 @@ export const useGameStore = create<GameStore>()(
         const hourglassMultiplier = speedHourglass?.t1 === 4101 ? 3 : speedHourglass?.t1 === 4100 ? 2 : 1;
         
         set({ lastBossId: bossId });
+        
+        // i地图(bossId=62) / iii地图(bossId=68) Boss 调试日志
+        if (bossId === 62 || bossId === 68) {
+          console.log(`[BossBattle] 遭遇 ${bossId === 62 ? 'i' : 'iii'}地图 Boss, bossId=${bossId}, hardmode=${get().hardmode}`);
+        }
         
         const hardmode = get().hardmode || 0;
         const currentMap = get().currentMap;
@@ -2720,6 +2845,12 @@ export const useGameStore = create<GameStore>()(
         } else if (hardmode === 1) {
           activeDrops = hardDrops;
         } else {
+          activeDrops = normalDrops;
+        }
+        
+        // 当对应难度掉落为空时，回退到普通掉落
+        const hasValidDrop = activeDrops.some((d: { equipmentId: string; dropRate: number } | null) => d !== null);
+        if (!hasValidDrop && activeDrops !== normalDrops) {
           activeDrops = normalDrops;
         }
         
@@ -2862,6 +2993,7 @@ export const useGameStore = create<GameStore>()(
               getTranslation('点击画面可以暂停游戏', lang),
             ],
             comboCount: 0,
+            comboDisplayKey: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
             baseComboRate: battleVarResult.comboRate,
@@ -2907,6 +3039,8 @@ export const useGameStore = create<GameStore>()(
             refHealOn: eqBonuses2.refHealOn || false,
             hourgclassOn: eqBonuses2.hourgclassOn || false,
             hourgclassOn1: eqBonuses2.hourgclassOn1 || false,
+            missrateOn: eqBonuses2.missrateOn || 0,
+            _missTurnCount: 0,
           },
         });
       },
@@ -3071,11 +3205,13 @@ export const useGameStore = create<GameStore>()(
           if (bossId && spType) {
             if (spType === 12 && (bossId === 60 || bossId === 62)) {
               const map13 = MAP_LIST.find(m => m.id === 13);
+              console.log(`[Teleport] i地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map13Unlock=${map13?.unlockLevel}, eligible=${map13 && player.level >= map13.unlockLevel}`);
               if (map13 && player.level >= map13.unlockLevel) {
                 enterHiddenMap(13, 12);
               }
             } else if (spType === 13 && (bossId === 66 || bossId === 68)) {
               const map14 = MAP_LIST.find(m => m.id === 14);
+              console.log(`[Teleport] iii地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map14Unlock=${map14?.unlockLevel}, eligible=${map14 && player.level >= map14.unlockLevel}`);
               if (map14 && player.level >= map14.unlockLevel) {
                 enterHiddenMap(14, 13);
               }
@@ -3203,7 +3339,7 @@ export const useGameStore = create<GameStore>()(
             isProcessing = true;
             
             set((s) => ({
-              battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false },
+              battle: { ...s.battle, damageDisplay: null, isCrit: false, isCombo: false, isMiss: false, missPosition: null },
             }));
             
             if (whichTurn === 0) {
@@ -3271,6 +3407,7 @@ export const useGameStore = create<GameStore>()(
                 isCrit: isCrit,
                 isCombo: currentComboCount >= 2,
                 comboCount: currentComboCount,
+                comboDisplayKey: currentComboCount >= 2 ? (s.battle.comboDisplayKey || 0) + 1 : 0,
                 lastAttacker: 'player',
                 activeEffect: { effectId: attackEffectIndex, position: 'enemy' },
               },
@@ -3280,20 +3417,18 @@ export const useGameStore = create<GameStore>()(
             mode = 4;
             isProcessing = false;
             } else {
-              const isPlayerMiss = Math.random() < battle.missrate;
-              
-              if (isPlayerMiss) {
+              // Sanctuary's Blessing: 前X回合强制闪避
+              if (battle._missTurnCount < battle.missrateOn) {
                 addBattleLog(t('你闪避了敌人的攻击！'));
                 set((s) => ({
                   battle: {
                     ...s.battle,
-                    playerAnimation: 'idle',
                     enemyAnimation: 'attack',
                     damageDisplay: null,
-                    isCrit: false,
-                    isCombo: false,
                     isMiss: true,
                     missPosition: 'player',
+                    isCrit: false,
+                    isCombo: false,
                     lastAttacker: 'enemy',
                     activeEffect: { effectId: 0, position: 'player' },
                   },
@@ -3303,34 +3438,101 @@ export const useGameStore = create<GameStore>()(
                 mode = 4;
                 isProcessing = false;
               } else {
-                const totalDefense = player.defense;
-                const accessories = player.equippedAccessories || [];
-                const enemyDamage = calculateEnemyDamage(
-                  battle.enemy.attack,
-                  totalDefense,
-                  accessories
-                );
-                tdame = enemyDamage;
+                const enemyNum = battle.bossType;
+                let patternResult = enePattern(enemyNum, battle.enemy!.hp, battle.enemy!.maxHp, battle.turnCount, whichTurn);
+              
+              if (patternResult && patternResult.skillUsed) {
+                const { damage, skillName, effectType } = patternResult;
+                tdame = damage;
+                
+                if (effectType === 'damage') {
+                  addBattleLog(`${t(skillName)}！${Math.floor(damage)}伤害！`);
+                } else {
+                  addBattleLog(`${t(skillName)}！`);
+                }
                 
                 set((s) => ({
                   battle: {
                     ...s.battle,
-                    playerAnimation: 'idle',
+                    playerAnimation: effectType === 'heal' ? 'idle' : 'hurt',
                     enemyAnimation: 'attack',
-                    damageDisplay: enemyDamage,
+                    damageDisplay: effectType === 'damage' ? damage : null,
                     isCrit: false,
                     isCombo: false,
                     isMiss: false,
                     missPosition: null,
                     lastAttacker: 'enemy',
-                    activeEffect: { effectId: 13, position: 'player' },
+                    activeEffect: { effectId: effectType === 'heal' ? 4 : 13, position: effectType === 'heal' ? 'enemy' : 'player' },
                   },
                 }));
+                
+                if (effectType === 'heal' && battle.enemy) {
+                  const newEnemyHp = Math.min(battle.enemy.maxHp, battle.enemy.hp + damage);
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      enemy: s.battle.enemy ? { ...s.battle.enemy, hp: newEnemyHp } : null,
+                    },
+                  }));
+                }
                 
                 eefi = 0;
                 mode = 4;
                 isProcessing = false;
+              } else {
+                const isPlayerMiss = Math.random() < battle.missrate;
+              
+                if (isPlayerMiss) {
+                  addBattleLog(t('你闪避了敌人的攻击！'));
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      playerAnimation: 'idle',
+                      enemyAnimation: 'attack',
+                      damageDisplay: null,
+                      isCrit: false,
+                      isCombo: false,
+                      isMiss: true,
+                      missPosition: 'player',
+                      lastAttacker: 'enemy',
+                      activeEffect: { effectId: 0, position: 'player' },
+                    },
+                  }));
+                  tdame = 0;
+                  eefi = 0;
+                  mode = 4;
+                  isProcessing = false;
+                } else {
+                  const totalDefense = player.defense;
+                  const accessories = player.equippedAccessories || [];
+                  const enemyDamage = calculateEnemyDamage(
+                    battle.enemy!.attack,
+                    totalDefense,
+                    accessories
+                  );
+                  tdame = enemyDamage;
+                  
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      playerAnimation: 'idle',
+                      enemyAnimation: 'attack',
+                      damageDisplay: enemyDamage,
+                      isCrit: false,
+                      isCombo: false,
+                      isMiss: false,
+                      missPosition: null,
+                      lastAttacker: 'enemy',
+                      activeEffect: { effectId: 13, position: 'player' },
+                    },
+                  }));
+                  
+                  eefi = 0;
+                  mode = 4;
+                  isProcessing = false;
+                }
               }
+            }
             }
           } else if (mode === 4) {
             eefi++;
@@ -3565,6 +3767,9 @@ export const useGameStore = create<GameStore>()(
                 }
               } else {
                 whichTurn = 0;
+                set((s) => ({
+                  battle: { ...s.battle, _missTurnCount: s.battle._missTurnCount + 1 },
+                }));
               }
               
               if (battle.recoverNextTurn) {
@@ -3652,6 +3857,7 @@ export const useGameStore = create<GameStore>()(
             status: 'idle',
             battleLog: [],
             comboCount: 0,
+            comboDisplayKey: 0,
             comboRate: 5,
             critRate: 5,
             baseComboRate: 0.05,
@@ -3697,6 +3903,8 @@ export const useGameStore = create<GameStore>()(
             refHealOn: false,
             hourgclassOn: false,
             hourgclassOn1: false,
+            missrateOn: 0,
+            _missTurnCount: 0,
           },
         });
       },
@@ -3837,6 +4045,7 @@ export const useGameStore = create<GameStore>()(
             status: 'idle',
             battleLog: [],
             comboCount: 0,
+            comboDisplayKey: 0,
             comboRate: 5,
             critRate: 5,
             baseComboRate: 0.05,
@@ -3882,6 +4091,8 @@ export const useGameStore = create<GameStore>()(
             refHealOn: false,
             hourgclassOn: false,
             hourgclassOn1: false,
+            missrateOn: 0,
+            _missTurnCount: 0,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,

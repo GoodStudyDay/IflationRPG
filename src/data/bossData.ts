@@ -1214,7 +1214,7 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 625,
     difficulty: 0,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-3', dropRate: 0.2 }],
   },
   {
     id: 'boss-66',
@@ -1259,7 +1259,7 @@ export const BOSS_DATA: BossData[] = [
     icon: '⭐',
     level: 685,
     difficulty: 0,
-    drops: [],
+    drops: [{ equipmentId: 'accessory-3', dropRate: 0.15 }],
   },
   {
     id: 'boss-70',

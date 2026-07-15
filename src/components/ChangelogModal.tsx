@@ -4,6 +4,24 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.72',
+    date: '2026-07-15 18:00:00',
+    changes: [
+      '实现 battle.txt 中 enePattern() Boss技能系统：朱雀/黄龙/暮光/玄武/天使/青龙/白虎',
+      '新增 Sanctuary\'s Blessing(129) 饰品：3连闪避效果',
+      '新增 Red Eye +1(131) 饰品，修复被动生效引用错误的 listnum',
+      '战斗 MISS 文字显示在角色动画身上（类似 COMBO）',
+      '修复 Sanctuary\'s Blessing 闪避每回合都飘 MISS 文字',
+      '修复 COMBO 连击文字每次连击都重新显示动画',
+      '增大战斗页面 COMBO 字体（text-xs → text-base）',
+      'i/iii 地图困难模式 Boss(62/68) 补充掉落（accessory-3）',
+      '困难模式掉落为空时自动回退到普通掉落',
+      'Map13/Map14 隐藏地图解锁等级降为0，击败i/iii Boss直接传送',
+      '修复地狱模式初始 BP 为10点',
+      '补充翻译：你闪避了敌人的攻击！、Random Drop、Boss技能名称',
+    ],
+  },
+  {
     version: 'v0.0.71',
     date: '2026-07-15 12:00:00',
     changes: [
