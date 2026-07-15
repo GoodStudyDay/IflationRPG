@@ -592,9 +592,6 @@ interface GameStore {
 }
 
 const STORAGE_KEY = 'inflation-rpg-storage';
-const BASE_CRIT_RATE = 0.05;
-const BASE_COMBO_RATE = 0.05;
-
 /** game.txt AKUSESlotLockMONEY: 饰品栏位解锁价格 (索引0=第1栏位) */
 const AKUSE_SLOT_LOCK_MONEY = [0, 0, 0, 250000, 500000, 750000, 70000000, 70000000, 5000000, 5000000, 3500000, 3500000];
 const MAX_ACCESSORY_SLOTS = 12;
@@ -713,43 +710,36 @@ const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Pl
   return { fixedPlayer, unequippedAccessories };
 };
 
-const calculateCritRate = (hpPercent: number, accessories: Equipment[]): number => {
-  let rate = BASE_CRIT_RATE;
-  if (hpPercent <= 0.25) {
+const calculateCritRate = (baseRate: number, playerHpPercent: number, bossType: number = -1): number => {
+  let rate = baseRate;
+  // 原始 battle.txt: barMana.tmyhpbar <= 0.25 时，<= 0.5 恒为 true，固定 +0.05
+  if (playerHpPercent <= 0.25) {
     rate += 0.05;
-    if (hpPercent <= 0.15) rate += 0.04;
-    if (hpPercent <= 0.1) rate += 0.045;
-    if (hpPercent <= 0.05) rate += 0.03;
+    if (rate >= 0.7) {
+      rate = 0.7;
+    }
   }
-  
-  const critChanceRing = accessories.find(acc => acc && acc.t1 === 200);
-  if (critChanceRing) {
-    rate += 0.15;
+  // Boss 76: 连击率和暴击率都削减 30%
+  if (bossType === 76) {
+    rate *= 0.7;
   }
-  
-  return Math.min(rate, 0.7) * 100;
+  return Math.floor(rate * 100) / 100 * 100;
 };
 
-const calculateComboRate = (hpPercent: number, accessories: Equipment[]): number => {
-  let rate = BASE_COMBO_RATE;
-  if (hpPercent <= 0.25) {
-    rate += 0.08;
-    if (hpPercent <= 0.15) rate += 0.11;
-    if (hpPercent <= 0.1) rate += 0.13;
-    if (hpPercent <= 0.05) rate += 0.08;
+const calculateComboRate = (baseRate: number, playerHpPercent: number, bossType: number = -1): number => {
+  let rate = baseRate;
+  // 原始 battle.txt: barMana.tmyhpbar <= 0.25 时，<= 0.5 恒为 true，固定 +0.13
+  if (playerHpPercent <= 0.25) {
+    rate += 0.13;
+    if (rate >= 0.8) {
+      rate = 0.8;
+    }
   }
-  
-  const comboRateRing = accessories.find(acc => acc && acc.t1 === 250);
-  if (comboRateRing) {
-    rate += 0.15;
+  // Boss 76: 连击率削减 30%
+  if (bossType === 76) {
+    rate *= 0.7;
   }
-  
-  const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
-  if (stormPower) {
-    rate += (stormPower.t2 || 50) / 100;
-  }
-  
-  return Math.min(rate, 0.8) * 100;
+  return Math.floor(rate * 100) / 100 * 100;
 };
 
 const calculatePlayerDamage = (
@@ -926,6 +916,9 @@ export const useGameStore = create<GameStore>()(
           comboCount: 0,
           comboRate: 5,
           critRate: 5,
+          baseComboRate: 0.05,
+          baseCritRate: 0.05,
+          bossType: -1,
           hpRate: 100,
           dropRate: 0,
           dropItemName: '',
@@ -1041,9 +1034,8 @@ export const useGameStore = create<GameStore>()(
         const { player, battle } = get();
         const newHp = clamp(player.hp + amount, 0, player.maxHp);
         const hpPercent = newHp / player.maxHp;
-        const accessories = player.equippedAccessories || [];
-        const newCritRate = calculateCritRate(hpPercent, accessories);
-        const newComboRate = calculateComboRate(hpPercent, accessories);
+        const newCritRate = calculateCritRate(battle.baseCritRate, hpPercent, battle.bossType);
+        const newComboRate = calculateComboRate(battle.baseComboRate, hpPercent, battle.bossType);
         set({ 
           player: { ...player, hp: newHp },
           battle: { 
@@ -2196,6 +2188,9 @@ export const useGameStore = create<GameStore>()(
             comboCount: 0,
             comboRate: 5,
             critRate: 5,
+            baseComboRate: 0.05,
+            baseCritRate: 0.05,
+            bossType: -1,
             hpRate: 100,
             dropRate: 0,
             dropItemName: '',
@@ -2274,6 +2269,7 @@ export const useGameStore = create<GameStore>()(
         
         const hardmode = get().hardmode || 0;
         const currentMap = get().currentMap;
+        
         const mapEnemies = getMapEnemies(currentMap, hardmode);
         const randomIndex = Math.floor(Math.random() * mapEnemies.length);
         
@@ -2486,8 +2482,11 @@ export const useGameStore = create<GameStore>()(
         const slot1 = dropSlots[0] || null;
         const slot2 = dropSlots[1] || null;
         const slot3 = dropSlots[2] || null;
-        const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
-        const renzokuPlusKakuritu = stormPower ? 0.15 : 0;
+        
+        // 计算装备加成（包括连击率等）
+        const eqBonuses = applyEquipmentBonuses(
+          accessories, inventory, hardmode
+        );
         
         const battleVarResult = battleVarInit(
           {
@@ -2508,8 +2507,8 @@ export const useGameStore = create<GameStore>()(
           dropSlots.length,
           {
             hardmode,
-            renzokuPlusKakuritu,
-            crihPlusKakuritu: 0,
+            renzokuPlusKakuritu: eqBonuses.renzokuPlusKakuritu,
+            crihPlusKakuritu: eqBonuses.crihPlusKakuritu,
             speedwariai: 0,
             lukwariai: 0,
             hourGlassON: false,
@@ -2593,11 +2592,6 @@ export const useGameStore = create<GameStore>()(
           ? bonus.currentBonus.bonusType
           : null;
         
-        // 计算复活参数
-        const eqBonuses = applyEquipmentBonuses(
-          accessories, inventory, hardmode
-        );
-        
         const lang = get().language;
         set({
           player: { ...player, hp: player.maxHp },
@@ -2617,6 +2611,9 @@ export const useGameStore = create<GameStore>()(
             comboCount: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
+            baseComboRate: battleVarResult.comboRate,
+            baseCritRate: battleVarResult.critRate,
+            bossType: -1,
             hpRate: 100,
             dropRate: dropResult.getItemDropRate * 100,
             dropItemName: dropEquipment ? dropEquipment.name : '------',
@@ -2695,24 +2692,6 @@ export const useGameStore = create<GameStore>()(
         modifiedBoss.expReward = Math.floor(boss.expReward * multiplier.exp);
         modifiedBoss.goldReward = Math.floor(boss.goldReward * multiplier.gold);
         
-        // 应用地图奖励效果到 Boss
-        if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
-          switch (bonus.currentBonus.bonusType) {
-            case 0: // 敌HP半减
-              modifiedBoss.hp = Math.floor(modifiedBoss.maxHp * 0.5);
-              break;
-            case 1: // 敌攻击力半减
-              modifiedBoss.attack = Math.floor(modifiedBoss.attack * 0.5);
-              break;
-            case 7: // 经验1.5倍
-              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 1.5);
-              break;
-            case 8: // 经验2倍
-              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 2);
-              break;
-          }
-        }
-        
         const normalDrops = boss.drops.slice(0, 3);
         const hardDrops = boss.drops.slice(3, 6);
         const hellDrops = boss.drops.slice(6, 9);
@@ -2740,8 +2719,10 @@ export const useGameStore = create<GameStore>()(
         const slot2 = dropSlots[1] || null;
         const slot3 = dropSlots[2] || null;
         
-        const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
-        const renzokuPlusKakuritu = stormPower ? 0.15 : 0;
+        // 计算装备加成（包括连击率等）
+        const eqBonuses2 = applyEquipmentBonuses(
+          accessories, inventory, hardmode
+        );
         
         const battleVarResult = battleVarInit(
           {
@@ -2762,8 +2743,8 @@ export const useGameStore = create<GameStore>()(
           dropSlots.length,
           {
             hardmode,
-            renzokuPlusKakuritu,
-            crihPlusKakuritu: 0,
+            renzokuPlusKakuritu: eqBonuses2.renzokuPlusKakuritu,
+            crihPlusKakuritu: eqBonuses2.crihPlusKakuritu,
             speedwariai: 0,
             lukwariai: 0,
             hourGlassON: false,
@@ -2771,6 +2752,51 @@ export const useGameStore = create<GameStore>()(
             expbairitu: 1,
           }
         );
+        
+        // 应用地图奖励效果到 Boss
+        if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
+          switch (bonus.currentBonus.bonusType) {
+            case 0: // 敌HP半减
+              modifiedBoss.hp = Math.floor(modifiedBoss.maxHp * 0.5);
+              break;
+            case 1: // 敌攻击力半减
+              modifiedBoss.attack = Math.floor(modifiedBoss.attack * 0.5);
+              break;
+            case 2: // 会心连続率上昇
+              battleVarResult.critRate = Math.min(1, battleVarResult.critRate + 0.15);
+              battleVarResult.comboRate = Math.min(1, battleVarResult.comboRate + 0.15);
+              break;
+            case 3: // 金币2倍
+              battleVarResult.goldMultiplier *= 2;
+              break;
+            case 4: // 金币3倍
+              battleVarResult.goldMultiplier *= 3;
+              break;
+            case 5: // 金币4倍
+              battleVarResult.goldMultiplier *= 4;
+              break;
+            case 6: // 金币7倍
+              battleVarResult.goldMultiplier *= 7;
+              break;
+            case 7: // 经验1.5倍
+              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 1.5);
+              break;
+            case 8: // 经验2倍
+              modifiedBoss.expReward = Math.floor(modifiedBoss.expReward * 2);
+              break;
+          }
+          // Reduce bonus remaining count
+          const newRemaining = bonus.currentBonus.remainingCount - 1;
+          set((s) => ({
+            bonus: {
+              ...s.bonus,
+              currentBonus: newRemaining > 0 ? {
+                ...s.bonus.currentBonus!,
+                remainingCount: newRemaining,
+              } : null,
+            },
+          }));
+        }
         
         const greedRing = accessories.find(acc => acc && acc.t1 === 12);
         const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
@@ -2799,11 +2825,6 @@ export const useGameStore = create<GameStore>()(
           ? bonus.currentBonus.bonusType
           : null;
         
-        // 计算复活参数
-        const eqBonuses2 = applyEquipmentBonuses(
-          accessories, inventory, hardmode
-        );
-        
         const lang = get().language;
         set({
           player: { ...player, hp: player.maxHp },
@@ -2823,6 +2844,9 @@ export const useGameStore = create<GameStore>()(
             comboCount: 0,
             comboRate: battleVarResult.comboRate * 100,
             critRate: battleVarResult.critRate * 100,
+            baseComboRate: battleVarResult.comboRate,
+            baseCritRate: battleVarResult.critRate,
+            bossType: bossId,
             hpRate: 100,
             dropRate: dropResult.getItemDropRate * 100,
             dropItemName: dropEquipment ? dropEquipment.name : '------',
@@ -3163,7 +3187,7 @@ export const useGameStore = create<GameStore>()(
               const totalAttack = player.attack;
               const hpPercent = player.hp / player.maxHp;
               const accessories = player.equippedAccessories || [];
-              const critRate = calculateCritRate(hpPercent, accessories);
+              const critRate = calculateCritRate(battle.baseCritRate, hpPercent, battle.bossType);
               
               let isCrit = Math.random() * 100 < critRate;
               
@@ -3453,9 +3477,17 @@ export const useGameStore = create<GameStore>()(
             
             if (eefi >= 2) {
               if (whichTurn === 0) {
-                const currentHpPercent = battle.enemy.hp / battle.enemy.maxHp;
-                const accessories = player.equippedAccessories || [];
-                const comboCheckRate = calculateComboRate(1 - currentHpPercent, accessories);
+                const playerHpPercent = player.hp / player.maxHp;
+                const comboCheckRate = calculateComboRate(
+                  battle.baseComboRate,
+                  playerHpPercent,
+                  battle.bossType
+                );
+                const newCritRateVal = calculateCritRate(
+                  battle.baseCritRate,
+                  playerHpPercent,
+                  battle.bossType
+                );
                 const isCombo = Math.random() * 100 < comboCheckRate;
                 
                 if (isCombo) {
@@ -3466,7 +3498,7 @@ export const useGameStore = create<GameStore>()(
                       ...s.battle,
                       comboCount: renzokukaisu,
                       comboRate: comboCheckRate,
-                      critRate: calculateCritRate(1 - currentHpPercent, accessories),
+                      critRate: newCritRateVal,
                     },
                   }));
                 } else {
@@ -3478,7 +3510,7 @@ export const useGameStore = create<GameStore>()(
                       comboCount: 1,
                       turnCount: s.battle.turnCount + 1,
                       comboRate: comboCheckRate,
-                      critRate: calculateCritRate(1 - currentHpPercent, accessories),
+                      critRate: newCritRateVal,
                     },
                   }));
                 }
@@ -3573,6 +3605,9 @@ export const useGameStore = create<GameStore>()(
             comboCount: 0,
             comboRate: 5,
             critRate: 5,
+            baseComboRate: 0.05,
+            baseCritRate: 0.05,
+            bossType: -1,
             hpRate: 100,
             dropRate: 0,
             dropItemName: '',
@@ -3752,6 +3787,9 @@ export const useGameStore = create<GameStore>()(
             comboCount: 0,
             comboRate: 5,
             critRate: 5,
+            baseComboRate: 0.05,
+            baseCritRate: 0.05,
+            bossType: -1,
             hpRate: 100,
             dropRate: 0,
             dropItemName: '',

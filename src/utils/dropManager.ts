@@ -74,29 +74,23 @@ const dropRateChange = (dropRate: number, settings: GameSettings, saveSettings: 
   return dropRate;
 };
 
+type DropCallback = (itemType: number, itemIndex: number) => void;
+
 const randomDrop = (
   itemType: number,
   itemIndex: number,
   maxCount: number,
   dropRate: number,
-  inventory: any[]
+  inventory: any[],
+  callback?: DropCallback
 ): { getItemType: number; getItemIndex: number } => {
-  // itemIndex === -1 表示从该类装备中随机选一个（用于武器/防具的通用掉落）
   let actualIndex = itemIndex;
-  if (itemIndex === -1) {
-    const equipmentIds = equipmentData
-      .filter(e => (itemType === 0 ? e.type === 'weapon' : itemType === 1 ? e.type === 'armor' : false))
-      .map(e => e.id);
-    if (equipmentIds.length === 0) {
-      return { getItemType: -1, getItemIndex: -1 };
-    }
-    const randomId = equipmentIds[Math.floor(Math.random() * equipmentIds.length)];
-    const mapping = equipmentIdToItemTypeAndIndex(randomId);
-    actualIndex = mapping.itemIndex;
-  }
   
   const times = getItemTimes(itemType, actualIndex, inventory);
   if (times < maxCount && Math.random() < dropRate) {
+    if (callback) {
+      callback(itemType, actualIndex);
+    }
     return { getItemType: itemType, getItemIndex: actualIndex };
   }
   return { getItemType: -1, getItemIndex: -1 };
@@ -241,60 +235,36 @@ export const eneDropItemInit = (
   let getItemDropRate = 0;
   let getItemName = '';
   
-  const random1 = randomDrop(2, 117, 3, 0.008, inventory);
-  if (random1.getItemType !== -1) {
-    getItemType = random1.getItemType;
-    getItemIndex = random1.getItemIndex;
+  randomDrop(2, 118, 3, 0.008, inventory, (type, index) => {
+    getItemType = type;
+    getItemIndex = index;
+  });
+  
+  if (getItemType === -1) {
+    randomDrop(2, 105, 3, 0.012, inventory, (type, index) => {
+      getItemType = type;
+      getItemIndex = index;
+    });
   }
   
   if (getItemType === -1) {
-    const random2 = randomDrop(2, 104, 3, 0.012, inventory);
-    if (random2.getItemType !== -1) {
-      getItemType = random2.getItemType;
-      getItemIndex = random2.getItemIndex;
-    }
+    randomDrop(0, 0, 10, 0.012, inventory, (type, index) => {
+      getItemType = type;
+      getItemIndex = index;
+    });
   }
   
   if (getItemType === -1) {
-    const random3 = randomDrop(0, -1, 10, 0.012, inventory);
-    if (random3.getItemType !== -1) {
-      getItemType = random3.getItemType;
-      getItemIndex = random3.getItemIndex;
-    }
-  }
-  
-  if (getItemType === -1) {
-    const random4 = randomDrop(1, -1, 10, 0.012, inventory);
-    if (random4.getItemType !== -1) {
-      getItemType = random4.getItemType;
-      getItemIndex = random4.getItemIndex;
-    }
-  }
-  
-  if (getItemType === -1) {
-    let soulRate = 0.04;
-    const hasTwilightCrystal = inventory.some(i => 
-      i.equipmentId === 'accessory-78' && i.quantity > 0
-    );
-    if (hasTwilightCrystal) {
-      soulRate = 0.08;
-    }
-    
-    const soulIndex = getRandomSoulIndex();
-    if (soulIndex !== -1) {
-      const times = getItemTimes(3, soulIndex, inventory);
-      const maxCount = getItemMaxCount(3);
-      if (times < maxCount && Math.random() < soulRate) {
-        getItemType = 3;
-        getItemIndex = soulIndex;
-      }
-    }
+    randomDrop(1, 0, 10, 0.012, inventory, (type, index) => {
+      getItemType = type;
+      getItemIndex = index;
+    });
   }
   
   const listResult = dropItemList(slot1, slot2, slot3, difficultyRate, inventory, settings, saveSettings, greedBonus);
   getItemName = listResult.getItemName;
   
-  if (slot1 !== null || slot2 !== null || slot3 !== null) {
+  if (getItemType === -1 && (slot1 !== null || slot2 !== null || slot3 !== null)) {
     const slots = [slot1, slot2, slot3].filter(s => s !== null) as DropSlot[];
     
     const isSlotAvailable = (slot: DropSlot): boolean => {
@@ -382,6 +352,11 @@ export const eneDropItemInit = (
         }
       }
     }
+  }
+  
+  if (getItemType !== -1 && getItemIndex !== -1 && getItemDropType === -1 && getItemDropIndex === -1) {
+    getItemDropType = getItemType;
+    getItemDropIndex = getItemIndex;
   }
   
   return {

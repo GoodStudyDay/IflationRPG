@@ -138,6 +138,12 @@ export interface BattleState {
   comboCount: number;
   comboRate: number;
   critRate: number;
+  /** 基础连击率（battlevar 计算值，不含 HP 奖励，0-1） */
+  baseComboRate: number;
+  /** 基础暴击率（battlevar 计算值，不含 HP 奖励，0-1） */
+  baseCritRate: number;
+  /** Boss 类型 ID，普通敌人为 -1 */
+  bossType: number;
   hpRate: number;
   dropRate: number;
   dropItemName: string;

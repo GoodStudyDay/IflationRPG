@@ -8,7 +8,7 @@ import { BOSS_DATA } from '@/data/bossData';
 import { useTranslation } from '@/hooks/useTranslation';
 
 export const MainScreen = () => {
-  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, lastBossId, lastMapId } = useGameStore();
+  const { player, encounterRate, addEncounterRate, battlePoints, maxBattlePoints, resetGame, bonus, currentMap, teleportToMap, startBossBattle, defeatedBosses, lastBossId, lastMapId, hardmode } = useGameStore();
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -135,7 +135,7 @@ export const MainScreen = () => {
         
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-white font-bold text-lg">{currentMapData.icon} {t(currentMapData.name)}</div>
+            <div className="text-white font-bold text-lg">{currentMapData.icon} {t(currentMapData.name)}{hardmode === 1 ? ' (hard)' : hardmode === 2 ? ' (hell)' : ''}</div>
         <div className="text-gray-300 text-sm">{t('解锁等级')}: {currentMapData.unlockLevel}</div>
             {bonusText && (
               <div className="text-yellow-400 text-sm mt-1">{t('奖励')}: {bonusText}</div>
@@ -252,7 +252,7 @@ export const MainScreen = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-lg mr-2">{map.icon}</span>
-                        <span className="text-white font-bold">{t(map.name)}</span>
+                        <span className="text-white font-bold">{t(map.name)}{hardmode === 1 ? ' (hard)' : hardmode === 2 ? ' (hell)' : ''}</span>
                       </div>
                       <div className="text-xs">
                         {isCurrent ? (

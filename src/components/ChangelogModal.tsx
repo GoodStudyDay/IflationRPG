@@ -4,6 +4,19 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.70',
+    date: '2026-07-15 12:00:00',
+    changes: [
+      '修复连击率/暴击率计算逻辑：基础值改用 battlevar 的 speed/luck 综合计算，不再固定 5%',
+      '修复连击率 HP 来源错误：改为玩家自身血量（非敌人），低血量时固定加成 +13%',
+      '新增 Boss 76 连击率/暴击率 30% 削减逻辑，匹配原始 battle.txt',
+      '战斗中每回合实时更新 comboRate 显示',
+      '修复 Raccoon Soul 描述显示反序（Equip stat +100, equip % +5%）',
+      '修复 startBossBattle 地图奖励效果作用于 battleVarInit 之前的顺序错误',
+      '修复点击延迟问题（移除同步阻塞计算）',
+    ],
+  },
+  {
     version: 'v0.0.69',
     date: '2026-07-14 23:00:00',
     changes: [
