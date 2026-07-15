@@ -2396,11 +2396,6 @@ export const useGameStore = create<GameStore>()(
         let enemy: ReturnType<typeof getMapEnemies>[0] = { ...mapEnemies[randomIndex] };
         const bonus = get().bonus;
         
-        // 调试：Map 13/14 敌人掉落日志
-        if (currentMap === 13 || currentMap === 14) {
-          console.log(`[Map${currentMap}Encounter] enemy=${enemy.name}, id=${(enemy as any).id}, hp=${enemy.maxHp}, atk=${enemy.attack}, hardmode=${hardmode}, drops=`, JSON.stringify(enemy.drops));
-        }
-        
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
           const isHiddenMap = get().currentMap === 13 || get().currentMap === 14 || get().currentMap === 124;
           const bonusType = bonus.currentBonus.bonusType;
@@ -2563,10 +2558,6 @@ export const useGameStore = create<GameStore>()(
             const boss = getBossById(bossId, hardmode, currentMap);
             if (boss) {
               enemy = { ...boss };
-              // i地图(bossId=62) / iii地图(bossId=68) Boss 调试日志
-              if (bossId === 62 || bossId === 68) {
-                console.log(`[BonusBattle] 遭遇 ${bossId === 62 ? 'i' : 'iii'}地图 Boss, bossId=${bossId}, hardmode=${hardmode}, hp=${boss.maxHp}, drops=${JSON.stringify(boss.drops)}`);
-              }
             }
           }
         }
@@ -2603,10 +2594,6 @@ export const useGameStore = create<GameStore>()(
           activeDrops = normalDrops;
         }
         
-        // 调试：Map 13/14 activeDrops
-        if (currentMap === 13 || currentMap === 14) {
-          console.log(`[Map${currentMap}Drop] activeDrops=`, JSON.stringify(activeDrops));
-        }
         
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
           if (!drop) return null;
@@ -3214,13 +3201,11 @@ export const useGameStore = create<GameStore>()(
           if (bossId && spType) {
             if ((spType === 12 || spType === 14) && (bossId === 60 || bossId === 62)) {
               const map13 = MAP_LIST.find(m => m.id === 13);
-              console.log(`[Teleport] i地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map13Unlock=${map13?.unlockLevel}, eligible=${map13 && player.level >= map13.unlockLevel}`);
               if (map13 && player.level >= map13.unlockLevel) {
                 enterHiddenMap(13, 12);
               }
             } else if ((spType === 13 || spType === 15) && (bossId === 66 || bossId === 68)) {
               const map14 = MAP_LIST.find(m => m.id === 14);
-              console.log(`[Teleport] iii地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map14Unlock=${map14?.unlockLevel}, eligible=${map14 && player.level >= map14.unlockLevel}`);
               if (map14 && player.level >= map14.unlockLevel) {
                 enterHiddenMap(14, 13);
               }
