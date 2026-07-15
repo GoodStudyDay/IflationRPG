@@ -2396,6 +2396,11 @@ export const useGameStore = create<GameStore>()(
         let enemy: ReturnType<typeof getMapEnemies>[0] = { ...mapEnemies[randomIndex] };
         const bonus = get().bonus;
         
+        // 调试：Map 13/14 敌人掉落日志
+        if (currentMap === 13 || currentMap === 14) {
+          console.log(`[Map${currentMap}Encounter] enemy=${enemy.name}, id=${(enemy as any).id}, hp=${enemy.maxHp}, atk=${enemy.attack}, hardmode=${hardmode}, drops=`, JSON.stringify(enemy.drops));
+        }
+        
         if (bonus.currentBonus && bonus.currentBonus.remainingCount > 0) {
           const isHiddenMap = get().currentMap === 13 || get().currentMap === 14 || get().currentMap === 124;
           const bonusType = bonus.currentBonus.bonusType;
@@ -2602,6 +2607,11 @@ export const useGameStore = create<GameStore>()(
         } else {
           // 地图普通敌人：drop 全部属于当前难度，直接使用
           activeDrops = enemy.drops;
+        }
+        
+        // 调试：Map 13/14 activeDrops
+        if (currentMap === 13 || currentMap === 14) {
+          console.log(`[Map${currentMap}Drop] isBoss=${isBossEnemy}, activeDrops=`, JSON.stringify(activeDrops));
         }
         
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
