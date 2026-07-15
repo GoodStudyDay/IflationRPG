@@ -2585,33 +2585,27 @@ export const useGameStore = create<GameStore>()(
         enemy.expReward = Math.floor(enemy.expReward * multiplier.exp);
         enemy.goldReward = Math.floor(enemy.goldReward * multiplier.gold);
         
-        // Boss 掉落按 3 档拆分（normal/hard/hell 各 3 个），普通敌人直接用全部掉落
-        const isBossEnemy = (enemy as any).bossId !== undefined;
-        let activeDrops;
-        if (isBossEnemy) {
-          const normalDrops = enemy.drops.slice(0, 3);
-          const hardDrops = enemy.drops.slice(3, 6);
-          const hellDrops = enemy.drops.slice(6, 9);
-          if (hardmode === 2) {
-            activeDrops = hellDrops;
-          } else if (hardmode === 1) {
-            activeDrops = hardDrops;
-          } else {
-            activeDrops = normalDrops;
-          }
-          // 当对应难度掉落为空时，回退到普通掉落
-          const hasValidDrop = activeDrops.some((d: { equipmentId: string; dropRate: number } | null) => d !== null);
-          if (!hasValidDrop && activeDrops !== normalDrops) {
-            activeDrops = normalDrops;
-          }
+        // 掉落按 3 档拆分（normal/hard/hell 各 3 个），用 null 占位保持位置对齐
+        let activeDrops: ({ equipmentId: string; dropRate: number } | null)[];
+        const normalDrops = enemy.drops.slice(0, 3);
+        const hardDrops = enemy.drops.slice(3, 6);
+        const hellDrops = enemy.drops.slice(6, 9);
+        if (hardmode === 2) {
+          activeDrops = hellDrops;
+        } else if (hardmode === 1) {
+          activeDrops = hardDrops;
         } else {
-          // 地图普通敌人：drop 全部属于当前难度，直接使用
-          activeDrops = enemy.drops;
+          activeDrops = normalDrops;
+        }
+        // 当对应难度掉落为空时，回退到普通掉落
+        const hasValidDrop = activeDrops.some((d) => d !== null);
+        if (!hasValidDrop && activeDrops !== normalDrops) {
+          activeDrops = normalDrops;
         }
         
         // 调试：Map 13/14 activeDrops
         if (currentMap === 13 || currentMap === 14) {
-          console.log(`[Map${currentMap}Drop] isBoss=${isBossEnemy}, activeDrops=`, JSON.stringify(activeDrops));
+          console.log(`[Map${currentMap}Drop] activeDrops=`, JSON.stringify(activeDrops));
         }
         
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
