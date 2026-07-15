@@ -258,7 +258,7 @@ export const eneDropItemInit = (
   const listResult = dropItemList(slot1, slot2, slot3, difficultyRate, inventory, settings, saveSettings, greedBonus);
   getItemName = listResult.getItemName;
   
-  if (getItemType === -1 && (slot1 !== null || slot2 !== null || slot3 !== null)) {
+  if (slot1 !== null || slot2 !== null || slot3 !== null) {
     const slots = [slot1, slot2, slot3].filter(s => s !== null) as DropSlot[];
     
     const isSlotAvailable = (slot: DropSlot): boolean => {
