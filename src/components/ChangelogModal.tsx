@@ -4,6 +4,14 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.69',
+    date: '2026-07-14 23:00:00',
+    changes: [
+      '修复困难模式击杀 i/iii boss 不跳转隐藏地图的问题',
+      '修复暴风之力(4001)缺少连击伤害加成(renzoDamageUP=1.5)的问题',
+    ],
+  },
+  {
     version: 'v0.0.68',
     date: '2026-07-14 22:00:00',
     changes: [

@@ -145,7 +145,7 @@ function applyEquipmentBonuses(
   let resCount = 0;
   let resStatUP = 0;
   let trueDamage = 0;
-  let renzoDamageUP = 1;
+  let renzoDamageUP = 0;
   let fireSecretKeyOn = false;
   let reflection = 0;
   let refHealOn = false;
@@ -267,6 +267,9 @@ function applyEquipmentBonuses(
     } else if (t1 === 4000) {
       resCount = 2;
       resStatUP = 1.03;
+    } else if (t1 === 4001) {
+      renzoDamageUP = 1.5;
+      renzokuPlusKakuritu = 0.15;
     } else if (t1 === 4004) {
       resCount = 1;
       resStatUP = 1.03;
@@ -3019,12 +3022,12 @@ export const useGameStore = create<GameStore>()(
           const bossId = enemy?.bossId;
           const spType = battle.specialBonusType;
           if (bossId && spType) {
-            if (spType === 12 && bossId === 60) {
+            if (spType === 12 && (bossId === 60 || bossId === 62)) {
               const map13 = MAP_LIST.find(m => m.id === 13);
               if (map13 && player.level >= map13.unlockLevel) {
                 enterHiddenMap(13, 12);
               }
-            } else if (spType === 13 && bossId === 66) {
+            } else if (spType === 13 && (bossId === 66 || bossId === 68)) {
               const map14 = MAP_LIST.find(m => m.id === 14);
               if (map14 && player.level >= map14.unlockLevel) {
                 enterHiddenMap(14, 13);
