@@ -3218,13 +3218,13 @@ export const useGameStore = create<GameStore>()(
           const bossId = enemy?.bossId;
           const spType = battle.specialBonusType;
           if (bossId && spType) {
-            if (spType === 12 && (bossId === 60 || bossId === 62)) {
+            if ((spType === 12 || spType === 14) && (bossId === 60 || bossId === 62)) {
               const map13 = MAP_LIST.find(m => m.id === 13);
               console.log(`[Teleport] i地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map13Unlock=${map13?.unlockLevel}, eligible=${map13 && player.level >= map13.unlockLevel}`);
               if (map13 && player.level >= map13.unlockLevel) {
                 enterHiddenMap(13, 12);
               }
-            } else if (spType === 13 && (bossId === 66 || bossId === 68)) {
+            } else if ((spType === 13 || spType === 15) && (bossId === 66 || bossId === 68)) {
               const map14 = MAP_LIST.find(m => m.id === 14);
               console.log(`[Teleport] iii地图: bossId=${bossId}, spType=${spType}, playerLevel=${player.level}, map14Unlock=${map14?.unlockLevel}, eligible=${map14 && player.level >= map14.unlockLevel}`);
               if (map14 && player.level >= map14.unlockLevel) {
