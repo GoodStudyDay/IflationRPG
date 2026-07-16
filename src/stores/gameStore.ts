@@ -3737,6 +3737,16 @@ export const useGameStore = create<GameStore>()(
                     }
                   }
                   if (newEnemyHp <= 0) {
+                    const { player: newPlayer } = get();
+                    if (newPlayer.hp <= 0) {
+                      addBattleLog(t('战斗失败了'));
+                      battleEnded = true;
+                      set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                      setTimeout(() => {
+                        endBattle(false);
+                      }, 500);
+                      return;
+                    }
                     addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
