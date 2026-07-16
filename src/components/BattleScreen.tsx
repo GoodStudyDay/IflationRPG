@@ -304,7 +304,7 @@ export const BattleScreen = () => {
                         )}
                         <span className="truncate">{itemName}</span>
                       </div>
-                      <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
+                      <span className="text-yellow-400 ml-2">{(drop!.rate * 100).toFixed(1)}%</span>
                     </div>
                   );
                 });
