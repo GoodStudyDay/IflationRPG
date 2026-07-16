@@ -4,6 +4,79 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.82',
+    date: '2026-07-16 00:30:00',
+    changes: [
+      '修复 autoAllocateStPt 属性点分配逻辑：只更新 stPtAllocate，不再直接修改属性值',
+      'addExp 自动分配分支在调用 autoAllocateStPt 后用新 stPtAllocate 重新计算全部属性',
+      '修复属性分配后首次 addExp 时属性异常跳变的问题',
+    ],
+  },
+  {
+    version: 'v0.0.81',
+    date: '2026-07-16 00:00:00',
+    changes: [
+      '修复 autoAllocateStPt 后属性未重算导致下次 addExp 时属性跳变',
+    ],
+  },
+  {
+    version: 'v0.0.80',
+    date: '2026-07-15 23:30:00',
+    changes: [
+      '添加战斗前后属性变化 console.log，便于追踪奖励合理性',
+    ],
+  },
+  {
+    version: 'v0.0.79',
+    date: '2026-07-15 23:00:00',
+    changes: [
+      '修复 Map13 困难敌人掉落显示问题，drops 前加 3 个 null 占位对齐 3 档分片',
+    ],
+  },
+  {
+    version: 'v0.0.78',
+    date: '2026-07-15 22:30:00',
+    changes: [
+      '添加 eneDropItemInit 调试日志追踪掉落显示问题',
+      '清理所有调试 console.log',
+    ],
+  },
+  {
+    version: 'v0.0.77',
+    date: '2026-07-15 22:00:00',
+    changes: [
+      '修复 Map13/Map14 困难敌人掉落按 enedata 3 档分片',
+    ],
+  },
+  {
+    version: 'v0.0.76',
+    date: '2026-07-15 21:30:00',
+    changes: [
+      '修复敌人专属掉落被全局随机掉落覆盖的问题',
+    ],
+  },
+  {
+    version: 'v0.0.75',
+    date: '2026-07-15 21:00:00',
+    changes: [
+      '修复 bonus 类型 14/15 击败 i/iii Boss 不触发隐藏地图传送',
+    ],
+  },
+  {
+    version: 'v0.0.74',
+    date: '2026-07-15 20:30:00',
+    changes: [
+      '添加 Map13/Map14 敌人掉落调试日志',
+    ],
+  },
+  {
+    version: 'v0.0.73',
+    date: '2026-07-15 20:00:00',
+    changes: [
+      '修复地图普通敌人掉落使用错误的分片逻辑',
+    ],
+  },
+  {
     version: 'v0.0.72',
     date: '2026-07-15 18:00:00',
     changes: [
