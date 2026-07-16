@@ -2192,12 +2192,6 @@ export const useGameStore = create<GameStore>()(
         set({
           player: {
             ...player,
-            maxHp: player.maxHp + hpAdd * 5,
-            hp: player.hp + hpAdd * 5,
-            attack: player.attack + atkAdd * 3,
-            defense: player.defense + defAdd * 3,
-            agility: player.agility + agiAdd * 2,
-            luck: player.luck + lucAdd * 1,
             stPt: 0,
             stPtAllocate: newStPtAllocate,
           },
