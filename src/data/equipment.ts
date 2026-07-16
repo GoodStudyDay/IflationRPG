@@ -646,8 +646,8 @@ function itemload(): void {
   ItemAkusesaripush(123, '神秘信封', 7, 6, 0, 1999, '来自另一个世界的邀请函（不可重复）', 7, R2, 0, 2);
   ItemAkusesaripush(124, '诅咒王冠', 9, 9, 0, 899, '提升40%属性（地狱模式限定，不可重复）', 7, R2);
   ItemAkusesaripush(125, '移动速度宝石+2', 12, 9, 0, 1999, '提升移动速度', 7, R5, 4);
-  ItemAkusesaripush(129, "Sanctuary's Blessing", 8, 9, 0, 314, '走位，走位，手里干！3连闪避！', 7, R4, 1);
-  ItemAkusesaripush(131, 'Red Eye + 1', 11, 0, 0, 1999, '赤眼效果+1（被动）', 20, R5, 4);
+  ItemAkusesaripush(129, "Sanctuary's Blessing", 8, 9, 0, 314, '3连闪避！', 7, R4, 1);
+  ItemAkusesaripush(131, 'Red Eye + 1', 11, 0, 0, 1999, '根据获得数量提升15%HP', 20, R5, 4);
 
   ItemSoulpush(0, 'アライグマの魂', 0, 0, 10000, 100, '装备属性值增加[0]，装备百分比增加[1]%', 5, R1, 0, 0);
   ItemSoulpush(10, 'アライグマの魂+1', 0, 4, 1000000, 2000, '装备属性值增加[0]，装备百分比增加[1]%', 15, R1, 1, 0);

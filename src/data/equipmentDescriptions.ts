@@ -58,12 +58,14 @@ const equipmentDescriptionTranslations: Record<string, Record<LanguageCode, stri
   '闪避率和暴击率增加20%（不可重复）': { ja: '闪避率和暴击率增加20%（不可重复）', en: 'Evasion & crit rate +20% (not stackable)', 'zh-Hant': '閃避率和暴擊率增加20%（不可重複）', 'zh-Hans': '闪避率和暴击率增加20%（不可重复）', ko: '회피율 및 크리율 20% 증가 (중복 불가)', es: 'Tasa de evasión y crítica +20% (no apilable)', id: 'Tingkat evasi dan kritis +20% (tidak dapat ditumpuk)' },
   '全属性增加[0]（被动）': { ja: '全属性增加[0]（被动）', en: 'All stats +[0] (passive)', 'zh-Hant': '全屬性增加[0]（被動）', 'zh-Hans': '全属性增加[0]（被动）', ko: '모든 속성 [0] 증가 (패시브)', es: 'Todos los atributos +[0] (pasivo)', id: 'Semua atribut +[0] (pasif)' },
   '战神效果': { ja: 'Kill 5800,ATK + 100*KillNum,Over 100k,Increase 10% ATK', en: 'Kill 5800,ATK + 100*KillNum,Over 100k,Increase 10% ATK', 'zh-Hant': '你的力量取决于你自己,击杀10w敌人，攻击提升10%', 'zh-Hans': '你的力量取决于你自己,击杀10w敌人，攻击提升10%', ko: 'Kill 5800,ATK + 100*KillNum,Over 100k,Increase 10% ATK', es: 'Kill 5800,ATK + 100*KillNum,Over 100k,Increase 10% ATK', id: 'Kill 5800,ATK + 100*KillNum,Over 100k,Increase 10% ATK' },
-  '赤眼效果（被动）': { ja: '保有数だけHP[0]%増加', en: 'HP increases by [0]% by the number of possessions', 'zh-Hant': 'HP隨著擁有次數增加[0]%', 'zh-Hans': 'HP随着拥有次数增加[0]%', ko: '보유 개수만큼 HP [0]% 증가', es: 'HP aumenta en un [0]% por el número de posesiones', id: 'HP meningkat [0]% dengan jumlah kepemilikan' },'每次攻击回复最大HP的9%': { ja: '每次攻击回复最大HP的9%', en: 'Heal 9% max HP per attack', 'zh-Hant': '每次攻擊回復最大HP的9%', 'zh-Hans': '每次攻击回复最大HP的9%', ko: '매 공격마다 최대 HP의 9% 회복', es: 'Curar 9% del HP máximo por ataque', id: 'Pulihkan 9% HP maksimal per serangan' },
+  '赤眼效果（被动）': { ja: '保有数だけHP[0]%増加', en: 'HP increases by [0]% by the number of possessions', 'zh-Hant': 'HP隨著擁有次數增加[0]%', 'zh-Hans': 'HP随着拥有次数增加[0]%', ko: '보유 개수만큼 HP [0]% 증가', es: 'HP aumenta en un [0]% por el número de posesiones', id: 'HP meningkat [0]% dengan jumlah kepemilikan' },
+  '根据获得数量提升15%HP': { ja: '保有数だけHP15%増加', en: 'HP increases by 15% by the number of possessions', 'zh-Hant': '根據獲得數量提升15%HP', 'zh-Hans': '根据获得数量提升15%HP', ko: '보유 개수만큼 HP 15% 증가', es: 'HP aumenta en un 15% por el número de posesiones', id: 'HP meningkat 15% dengan jumlah kepemilikan' },'每次攻击回复最大HP的9%': { ja: '每次攻击回复最大HP的9%', en: 'Heal 9% max HP per attack', 'zh-Hant': '每次攻擊回復最大HP的9%', 'zh-Hans': '每次攻击回复最大HP的9%', ko: '매 공격마다 최대 HP의 9% 회복', es: 'Curar 9% del HP máximo por ataque', id: 'Pulihkan 9% HP maksimal per serangan' },
   '10%防御力转换为攻击力（被动）': { ja: '10%防御力转换为攻击力（被动）', en: '10% DEF to ATK (passive)', 'zh-Hant': '10%防禦力轉換為攻擊力（被動）', 'zh-Hans': '10%防御力转换为攻击力（被动）', ko: '방어력 10%를 공격력으로 변환 (패시브)', es: '10% DEF a ATK (pasivo)', id: '10% DEF ke ATK (pasif)' },
   '10%防御力转换为攻击力': { ja: '10%防御力转换为攻击力', en: '10% DEF to ATK', 'zh-Hant': '10%防禦力轉換為攻擊力', 'zh-Hans': '10%防御力转换为攻击力', ko: '방어력 10%를 공격력으로 변환', es: '10% DEF a ATK', id: '10% DEF ke ATK' },
   '20%概率扣除敌人当前HP的3%': { ja: '20%概率扣除敌人当前HP的3%', en: '20% chance to deduct 3% of enemy\'s current HP', 'zh-Hant': '20%概率扣除敵人當前HP的3%', 'zh-Hans': '20%概率扣除敌人当前HP的3%', ko: '적 현재 HP의 3%를 20% 확률로 차감', es: '20% de probabilidad de deducir el 3% del HP actual del enemigo', id: '20% kemungkinan mengurangi 3% HP musuh saat ini' },
   '提升最大等级至500万': { ja: '提升最大等级至500万', en: 'Max level increased to 5 million', 'zh-Hant': '提升最大等級至500萬', 'zh-Hans': '提升最大等级至500万', ko: '최대 레벨을 500만으로 증가', es: 'Nivel máximo aumentado a 5 millones', id: 'Level maksimal meningkat menjadi 5 juta' },
   '与恶魔签订契约，随机获得效果：单属性或全属性+15%，或全属性-10%，经验获得+80%': { ja: '与恶魔签订契约，随机获得效果：单属性或全属性+15%，或全属性-10%，经验获得+80%', en: 'Sign a contract with the devil and gain a random effect: single/all stats +15%, or all stats -10%, EXP +80%', 'zh-Hant': '與惡魔簽訂契約，隨機獲得效果：單屬性或全屬性+15%，或全屬性-10%，經驗獲得+80%', 'zh-Hans': '与恶魔签订契约，随机获得效果：单属性或全属性+15%，或全属性-10%，经验获得+80%', ko: '악마와 계약하고 무작위 효과를 얻습니다: 단일/모든 속성 +15%, 또는 모든 속성 -10%, EXP +80%', es: 'Firmar un contrato con el diablo y obtener un efecto aleatorio: atributo(s) +15%, o todos los atributos -10%, EXP +80%', id: 'Tandatangani kontrak dengan iblis dan dapatkan efek acak: atribut tunggal/semua +15%, atau semua atribut -10%, EXP +80%' },
+  '3连闪避！': { ja: '3連続回避！', en: '3 consecutive evasions!', 'zh-Hant': '3連閃避！', 'zh-Hans': '3连闪避！', ko: '3연속 회피!', es: '3 evasiones consecutivas!', id: '3 evasi berturut-turut!' },
   '蓝眼效果（被动）': { ja: 'Increase ATK by 10%', en: 'Increase ATK by 10%', 'zh-Hant': '每擁有1個提升10%攻擊', 'zh-Hans': '每拥有1个提升10%攻击', ko: 'Increase ATK by 10%', es: 'Increase ATK by 10%', id: 'Increase ATK by 10%' },
   '绿眼效果（被动）': { ja: 'Increase DEF by 10%', en: 'Increase DEF by 10%', 'zh-Hant': '每擁有1個提升10%防禦', 'zh-Hans': '每拥有1个提升10%防御', ko: 'Increase DEF by 10%', es: 'Increase DEF by 10%', id: 'Increase DEF by 10%' },
   '金币减少50%，每战伤害增加20%': { ja: '金币减少50%，每战伤害增加20%', en: 'Gold -50%, damage +20% per battle', 'zh-Hant': '金幣減少50%，每戰傷害增加20%', 'zh-Hans': '金币减少50%，每战伤害增加20%', ko: '골드 50% 감소, 매 전투마다 데미지 20% 증가', es: 'Oro -50%, daño +20% por batalla', id: 'Emas -50%, kerusakan +20% per pertempuran' },
@@ -77,15 +79,26 @@ const equipmentDescriptionTranslations: Record<string, Record<LanguageCode, stri
 };
 
 export const getEquipmentDescription = (setumei: string, lang: LanguageCode, t1?: number, t2?: number): string => {
+  const isSoul = setumei.includes('装备属性值增加');
   const translation = equipmentDescriptionTranslations[setumei];
   if (translation) {
     let result = translation[lang] || setumei;
-    result = result.replace('[0]', String(t2 || 0));
-    result = result.replace('[1]', String(t1 || 0));
+    if (isSoul) {
+      result = result.replace('[0]', String(t1 || 0));
+      result = result.replace('[1]', String(t2 || 0));
+    } else {
+      result = result.replace('[0]', String(t2 || 0));
+      result = result.replace('[1]', String(t1 || 0));
+    }
     return result;
   }
   let result = setumei;
-  result = result.replace('[0]', String(t2 || 0));
-  result = result.replace('[1]', String(t1 || 0));
+  if (isSoul) {
+    result = result.replace('[0]', String(t1 || 0));
+    result = result.replace('[1]', String(t2 || 0));
+  } else {
+    result = result.replace('[0]', String(t2 || 0));
+    result = result.replace('[1]', String(t1 || 0));
+  }
   return result;
 };

@@ -881,11 +881,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="text-white font-bold text-sm truncate">{player.equippedWeapon ? getEquipName(player.equippedWeapon.name) : t('未装备')}</div>
                     {player.equippedWeapon && (
                       <>
-                        <div className="text-red-300 text-xs mt-1">
-                          ATK +{player.equippedWeapon.attackBonus}{player.weaponSoul ? `+${player.weaponSoul.plus || player.weaponSoul.soulPlus || 0}` : ''}
+                        <div className="text-white text-xs mt-1">
+                          ATK +{player.equippedWeapon.attackBonus}
+                          {player.weaponSoul && (
+                            <span className="text-red-400 text-[10px] ml-1">+{player.weaponSoul.plus || player.weaponSoul.soulPlus || 0}</span>
+                          )}
                         </div>
-                        <div className="text-red-300 text-xs">
-                          ATK x {(player.equippedWeapon.attributeRate || 100)}%{player.weaponSoul ? `+${player.weaponSoul.t2 || player.weaponSoul.soulPerPlus || 0}%` : ''}
+                        <div className="text-white text-xs">
+                          ATK x {(player.equippedWeapon.attributeRate || 100)}%
+                          {player.weaponSoul && (
+                            <span className="text-red-400 text-[10px] ml-1">+{player.weaponSoul.t2 || player.weaponSoul.soulPerPlus || 0}%</span>
+                          )}
                         </div>
                       </>
                     )}
@@ -927,11 +933,17 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     <div className="text-white font-bold text-sm truncate">{player.equippedArmor ? getEquipName(player.equippedArmor.name) : t('未装备')}</div>
                     {player.equippedArmor && (
                       <>
-                        <div className="text-blue-300 text-xs mt-1">
-                          DEF +{player.equippedArmor.defenseBonus}{player.armorSoul ? `+${player.armorSoul.plus || player.armorSoul.soulPlus || 0}` : ''}
+                        <div className="text-white text-xs mt-1">
+                          DEF +{player.equippedArmor.defenseBonus}
+                          {player.armorSoul && (
+                            <span className="text-green-400 text-[10px] ml-1">+{player.armorSoul.plus || player.armorSoul.soulPlus || 0}</span>
+                          )}
                         </div>
-                        <div className="text-blue-300 text-xs">
-                          DEF x {(player.equippedArmor.attributeRate || 100)}%{player.armorSoul ? `+${player.armorSoul.t2 || player.armorSoul.soulPerPlus || 0}%` : ''}
+                        <div className="text-white text-xs">
+                          DEF x {(player.equippedArmor.attributeRate || 100)}%
+                          {player.armorSoul && (
+                            <span className="text-green-400 text-[10px] ml-1">+{player.armorSoul.t2 || player.armorSoul.soulPerPlus || 0}%</span>
+                          )}
                         </div>
                       </>
                     )}
