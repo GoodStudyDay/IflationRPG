@@ -3713,6 +3713,24 @@ export const useGameStore = create<GameStore>()(
                 updatePlayerHp(-tdame);
                 addBattleLog(t('敌人攻击 受到{0}伤害', Math.floor(tdame)));
                 
+                const { player: newPlayer } = get();
+                if (newPlayer.hp <= 0) {
+                  if (battle.resCount > 0) {
+                    eefi = 0;
+                    mode = 5;
+                    isProcessing = false;
+                    return;
+                  }
+                  
+                  addBattleLog(t('战斗失败了'));
+                  battleEnded = true;
+                  set((s) => ({ battle: { ...s.battle, _ending: true } }));
+                  setTimeout(() => {
+                    endBattle(false);
+                  }, 500);
+                  return;
+                }
+                
                 if (battle.reflection > 0) {
                   const reflectDamage = Math.floor(tdame * battle.reflection);
                   const newEnemyHp = Math.max(0, battle.enemy!.hp - reflectDamage);
@@ -3737,16 +3755,6 @@ export const useGameStore = create<GameStore>()(
                     }
                   }
                   if (newEnemyHp <= 0) {
-                    const { player: newPlayer } = get();
-                    if (newPlayer.hp <= 0) {
-                      addBattleLog(t('战斗失败了'));
-                      battleEnded = true;
-                      set((s) => ({ battle: { ...s.battle, _ending: true } }));
-                      setTimeout(() => {
-                        endBattle(false);
-                      }, 500);
-                      return;
-                    }
                     addBattleLog(t('战斗胜利！'));
                     battleEnded = true;
                     set((s) => ({ battle: { ...s.battle, _ending: true } }));
@@ -3764,24 +3772,6 @@ export const useGameStore = create<GameStore>()(
                     enemyAnimation: 'idle',
                   },
                 }));
-                
-                const { player: newPlayer, battle: currentBattle } = get();
-                if (newPlayer.hp <= 0) {
-                  if (currentBattle.resCount > 0) {
-                    eefi = 0;
-                    mode = 5;
-                    isProcessing = false;
-                    return;
-                  }
-                  
-                  addBattleLog(t('战斗失败了'));
-                  battleEnded = true;
-                  set((s) => ({ battle: { ...s.battle, _ending: true } }));
-                  setTimeout(() => {
-                    endBattle(false);
-                  }, 500);
-                  return;
-                }
               }
               
               eefi = 0;
