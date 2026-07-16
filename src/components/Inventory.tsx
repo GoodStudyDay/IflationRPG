@@ -284,7 +284,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                     {isOwned && (
                       <>
-                        <div className="text-red-300 text-sm mt-1">ATK +{weapon.attackBonus}</div>
+                        <div className="text-red-300 text-sm mt-1">
+                          ATK +{weapon.attackBonus}{isEquipped && player.weaponSoul ? `+${player.weaponSoul.plus || player.weaponSoul.soulPlus || 0}` : ''}
+                        </div>
                         <div className="text-gray-300 text-xs mt-0.5">
                           {t('数量')}: {weapon.quantity}
                           {weapon.quantity > 1 && <span className="text-yellow-300 ml-1">(+{(weapon.quantity - 1) * 10}%)</span>}
@@ -295,7 +297,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-green-400">{t('倍率')}: {weapon.attributeRate}%</div>
+                        <div className="text-xs text-green-400">
+                          {t('倍率')}: x{(weapon.attributeRate || 100)}%{isEquipped && player.weaponSoul ? `+${player.weaponSoul.t2 || player.weaponSoul.soulPerPlus || 0}%` : ''}
+                        </div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(weapon); }}
@@ -403,7 +407,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                     )}
                     {isOwned && (
                       <>
-                        <div className="text-blue-300 text-sm mt-1">DEF +{armor.defenseBonus}</div>
+                        <div className="text-blue-300 text-sm mt-1">
+                          DEF +{armor.defenseBonus}{isEquipped && player.armorSoul ? `+${player.armorSoul.plus || player.armorSoul.soulPlus || 0}` : ''}
+                        </div>
                         {armor.hpBonus > 0 && (
                           <div className="text-green-300 text-xs">HP +{armor.hpBonus}</div>
                         )}
@@ -417,7 +423,9 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                   <div className="flex flex-col items-end gap-1">
                     {isOwned ? (
                       <>
-                        <div className="text-xs text-green-400">{t('倍率')}: {armor.attributeRate}%</div>
+                        <div className="text-xs text-green-400">
+                          {t('倍率')}: x{(armor.attributeRate || 100)}%{isEquipped && player.armorSoul ? `+${player.armorSoul.t2 || player.armorSoul.soulPerPlus || 0}%` : ''}
+                        </div>
                         {!isEquipped && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleEquip(armor); }}

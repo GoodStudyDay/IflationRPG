@@ -1441,6 +1441,7 @@ export const BOSS_DATA: BossData[] = [
       null,
       null,
       { equipmentId: 'accessory-130', dropRate: 0.013 },
+      { equipmentId: 'accessory-131', dropRate: 0.008 },
     ],
   },
   {

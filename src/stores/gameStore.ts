@@ -3176,11 +3176,6 @@ export const useGameStore = create<GameStore>()(
           battlePointsChange = -3;
         }
         
-        if (speedHourglass) {
-          const hourglassMultiplier = speedHourglass.t1 === 4101 ? 3 : 2;
-          battlePointsChange = Math.floor(battlePointsChange * hourglassMultiplier);
-        }
-        
         const newBattlePoints = battlePoints + battlePointsChange;
         const newDefeatedBosses = victory && (battle.enemy as any).bossId !== undefined 
           ? [...defeatedBosses, (battle.enemy as any).bossId] 
