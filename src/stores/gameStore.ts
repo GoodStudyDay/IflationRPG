@@ -3086,8 +3086,12 @@ export const useGameStore = create<GameStore>()(
             goldReward = Math.floor(goldReward * hourglassGoldMultiplier);
           }
           
+          console.log(`[战斗奖励前] Lv.${player.level} | 金币:${player.gold} | 经验:${player.exp} | HP:${player.maxHp} | ATK:${player.attack} | DEF:${player.defense} | AGI:${player.agility} | LUC:${player.luck}`);
+          console.log(`[战斗奖励] 金币+${goldReward} | 经验+${expReward} | 敌人:${battle.enemy?.name}(${battle.enemy?.id}) | 难度:${get().hardmode || 0}`);
           addGold(goldReward);
           addExp(expReward);
+          const playerAfter = get().player;
+          console.log(`[战斗奖励后] Lv.${playerAfter.level} | 金币:${playerAfter.gold} | 经验:${playerAfter.exp} | HP:${playerAfter.maxHp} | ATK:${playerAfter.attack} | DEF:${playerAfter.defense} | AGI:${playerAfter.agility} | LUC:${playerAfter.luck}`);
           
           if (battle.isDropSuccess && battle.dropType !== -1 && battle.dropIndex !== -1) {
             const equipmentId = itemTypeAndIndexToEquipmentId(battle.dropType, battle.dropIndex);
