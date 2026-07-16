@@ -305,8 +305,6 @@ function applyEquipmentBonuses(
     } else if (t1 === 4006) {
       DamageReduced = 33;
       addMaxHP += 1.5;
-      resCount = 2;
-      resStatUP = 1.06;
     } else if (t1 === 78) {
       if (gold > 300000) {
         DamageIncreased = 40;
@@ -2411,6 +2409,7 @@ export const useGameStore = create<GameStore>()(
             _missTurnCount: 0,
           },
         });
+        console.log('[startGame] resCount:', bonuses.resCount, 'resStatUP:', bonuses.resStatUP);
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
         get().checkZeroEquips();
       },
