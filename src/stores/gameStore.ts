@@ -1361,26 +1361,93 @@ export const useGameStore = create<GameStore>()(
         let finalStPt = (player.stPt || 0) + stPtIncrease;
         
         if (autoAllocateEnabled && stPtIncrease > 0) {
-          const afterSet = {
+          // 先写入临时 stPt，供 autoAllocateStPt 消费
+          set({ player: { ...player, stPt: finalStPt } });
+          autoAllocateStPt();
+          
+          // autoAllocateStPt 更新了 stPtAllocate，重新获取
+          const updatedPlayer = get().player;
+          const newAlloc = updatedPlayer.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
+          
+          // 用新的 stPtAllocate 重新计算基础属性
+          let recalcBaseHp = initialPlayer.maxHp + bonus.hp + newAlloc.hp * 5;
+          let recalcBaseAtk = initialPlayer.attack + bonus.attack + newAlloc.atk * 3;
+          let recalcBaseDef = initialPlayer.defense + bonus.defense + newAlloc.def * 3;
+          let recalcBaseAgi = initialPlayer.agility + bonus.agility + newAlloc.agi * 2;
+          let recalcBaseLuc = initialPlayer.luck + bonus.luck + newAlloc.luc * 1;
+          
+          // 重新应用 Brave/War/FourGod Gems
+          for (const gem of braveGems) {
+            const val = gem.t2 || 0;
+            recalcBaseHp += val; recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val; recalcBaseLuc += val;
+          }
+          for (const gem of warGems) {
+            const val = gem.t2 || 0;
+            recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val;
+          }
+          for (const gem of fourGodGems) {
+            const val = gem.t2 || 0;
+            recalcBaseHp += val; recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val;
+          }
+          
+          // 重新应用勇敢证明
+          if (braveProof) {
+            const rate = (braveProof.t2 || 30) / 100;
+            recalcBaseHp = Math.ceil(recalcBaseHp * (1 + rate));
+            recalcBaseAtk = Math.ceil(recalcBaseAtk * (1 + rate));
+            recalcBaseDef = Math.ceil(recalcBaseDef * (1 + rate));
+            recalcBaseAgi = Math.ceil(recalcBaseAgi * (1 + rate));
+            recalcBaseLuc = Math.ceil(recalcBaseLuc * (1 + rate));
+          }
+          
+          // 重新应用 Play Gem
+          for (const gem of playerGems) {
+            const bonusPercent = gem.t2 || 0;
+            let itemCount = 0;
+            for (const item of inventory) {
+              const eq = getEquipmentById(item.equipmentId);
+              if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
+                itemCount += item.quantity;
+              }
+            }
+            const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
+            recalcBaseHp = Math.ceil(recalcBaseHp * (1 + rate));
+            recalcBaseAtk = Math.ceil(recalcBaseAtk * (1 + rate));
+            recalcBaseDef = Math.ceil(recalcBaseDef * (1 + rate));
+            recalcBaseAgi = Math.ceil(recalcBaseAgi * (1 + rate));
+          }
+          
+          // 重新计算 bonuses（用 updatedPlayer.gold）
+          const recalcBonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, updatedPlayer.gold);
+          
+          // 重新计算装备分量（epHp 依赖 baseHp）
+          const recalcEquip = getEquipComponents(weaponObj, weaponQty, updatedPlayer.weaponSoul, armorObj, armorQty, updatedPlayer.armorSoul, recalcBaseHp);
+          
+          // 重新计算最终属性
+          const recalcStats = computeFinalStats(recalcBaseHp, recalcBaseAtk, recalcBaseDef, recalcBaseAgi, recalcBaseLuc, recalcEquip, recalcBonuses, heroBonuses, kyaraLv);
+          let recalcFinalAtk = recalcStats.atk;
+          if (recalcBonuses.warGodBladeOn && updatedPlayer.killCount >= 100000) {
+            recalcFinalAtk = Math.floor(recalcFinalAtk * 1.1);
+          }
+          
+          set({
             player: {
-              ...player,
+              ...updatedPlayer,
               level: newLevel,
-              maxHp: finalHp,
-              hp: finalHp,
-              attack: finalAtk,
-              defense: finalDef,
-              agility: finalAgi,
-              luck: finalLuc,
+              maxHp: recalcStats.hp,
+              hp: recalcStats.hp,
+              attack: recalcFinalAtk,
+              defense: recalcStats.def,
+              agility: recalcStats.agi,
+              luck: recalcStats.luc,
               maxMana: initialPlayer.maxMana + bonus.mana,
               mana: initialPlayer.maxMana + bonus.mana,
-              stPt: finalStPt,
               exp: getExpNokori,
               expToNextLevel: expToNext,
               lvC2: newLvC2,
             },
-          };
-          set(afterSet);
-          autoAllocateStPt();
+          });
+          
           const stPtData = loadSaveData();
           stPtData.stPt = 0;
           saveSaveData(stPtData);
