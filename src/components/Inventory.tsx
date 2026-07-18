@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
-import { isPassiveEffectItem } from '@/utils/gdata';
+import { isPassiveEffectItem, EqStUpdate } from '@/utils/gdata';
 import { equipmentData } from '@/data/equipment';
+import { initialPlayer } from '@/data/initialData';
+import { computeHeroBonuses } from '@/utils/helpers';
+import { getCurrentKyaraLv } from '@/utils/kyaraLevel';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
 import { useEquipmentDescription } from '@/hooks/useEquipmentDescription';
@@ -17,7 +20,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const { getEquipName } = useEquipmentName();
   const { getEquipDescription } = useEquipmentDescription();
   const { t } = useTranslation();
-  const [viewMode, setViewMode] = useState<ViewMode>('main');
   const [selectedAccessorySlot, setSelectedAccessorySlot] = useState<number | null>(null);
   const [selectedSoulSlot, setSelectedSoulSlot] = useState<{ type: 'weapon' | 'armor'; slot: number } | null>(null);
   const [confirmEquipment, setConfirmEquipment] = useState<typeof equipmentData[0] | null>(null);
@@ -40,7 +42,16 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const purchaseEquipSet = useGameStore(state => state.purchaseEquipSet);
   const getEquipSetPrice = useGameStore(state => state.getEquipSetPrice);
   const logEquipmentBonuses = useGameStore(state => state.logEquipmentBonuses);
+  const lastInventoryViewMode = useGameStore(state => state.lastInventoryViewMode);
+  const setLastInventoryViewMode = useGameStore(state => state.setLastInventoryViewMode);
   const [activeEquipSetSlot, setActiveEquipSetSlot] = useState(0);
+  const [viewMode, setViewModeState] = useState<ViewMode>(lastInventoryViewMode || 'main');
+
+  // 同步 viewMode 到 store，以便关闭后重新打开能恢复到当前页
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    setLastInventoryViewMode(mode);
+  };
 
   useEffect(() => {
     logEquipmentBonuses();
@@ -50,69 +61,54 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   useEffect(() => {
     if (!confirmEquipment || confirmEquipment.type === 'soul') return;
 
-    const currentTotalAtk = player.attack + bonuses.atkBonus;
-    const currentTotalDef = player.defense + bonuses.defBonus;
-    const currentTotalHp = player.maxHp + bonuses.hpBonus;
-    const currentTotalAgi = player.agility + bonuses.agiBonus;
-    const currentTotalLuc = player.luck + bonuses.lucBonus;
+    // 使用 EqStUpdate 计算装备前后的属性变化
+    const { player: p, inventory: inv, hardmode: hm, kyarakutalv: klv, kyarakutaKozinExp: kke } = useGameStore.getState();
+    const heroBonuses = computeHeroBonuses(p.heroId || 0);
+    const currentKyaraLv = getCurrentKyaraLv(kke, p.heroId);
+    const stPtAllocate = p.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
+    const bHp = initialPlayer.maxHp + stPtAllocate.hp * 5;
+    const bAtk = initialPlayer.attack + stPtAllocate.atk * 3;
+    const bDef = initialPlayer.defense + stPtAllocate.def * 3;
+    const bAgi = initialPlayer.agility + stPtAllocate.agi * 2;
+    const bLuc = initialPlayer.luck + stPtAllocate.luc * 1;
+    const accs = p.equippedAccessories || [];
 
-    let hasChange = true;
+    const curBonuses = EqStUpdate(
+      accs, inv, hm || 0, p.gold, p.level, bHp, bAtk, bDef, bAgi, bLuc,
+      p.equippedWeapon, p.equippedArmor, heroBonuses, klv, currentKyaraLv
+    );
 
+    let newWeapon = p.equippedWeapon;
+    let newArmor = p.equippedArmor;
+    let newAccs = accs;
     if (confirmEquipment.type === 'weapon') {
-      const oldWeaponBonus = player.equippedWeapon?.attackBonus || 0;
-      const newTotalAtk = currentTotalAtk - oldWeaponBonus + confirmEquipment.attackBonus;
-      hasChange = newTotalAtk !== currentTotalAtk;
+      newWeapon = confirmEquipment;
     } else if (confirmEquipment.type === 'armor') {
-      const oldArmorDefBonus = player.equippedArmor?.defenseBonus || 0;
-      const oldArmorHpBonus = player.equippedArmor?.hpBonus || 0;
-      const newTotalDef = currentTotalDef - oldArmorDefBonus + confirmEquipment.defenseBonus;
-      const newTotalHp = currentTotalHp - oldArmorHpBonus + confirmEquipment.hpBonus;
-      hasChange = newTotalDef !== currentTotalDef || newTotalHp !== currentTotalHp;
+      newArmor = confirmEquipment;
     } else if (confirmEquipment.type === 'accessory') {
-      const newTotalAtk = currentTotalAtk + confirmEquipment.attackBonus;
-      const newTotalDef = currentTotalDef + confirmEquipment.defenseBonus;
-      const newTotalHp = currentTotalHp + confirmEquipment.hpBonus;
-      const newTotalAgi = currentTotalAgi + confirmEquipment.agilityBonus;
-      const newTotalLuc = currentTotalLuc + confirmEquipment.luckBonus;
-      hasChange = newTotalAtk !== currentTotalAtk || newTotalDef !== currentTotalDef ||
-        newTotalHp !== currentTotalHp || newTotalAgi !== currentTotalAgi ||
-        newTotalLuc !== currentTotalLuc;
+      const slotIdx = selectedAccessorySlot !== null ? selectedAccessorySlot : accs.findIndex(a => !a);
+      if (slotIdx >= 0 && slotIdx < 12) {
+        newAccs = [...accs];
+        newAccs[slotIdx] = confirmEquipment;
+      }
     }
+
+    const newBonuses = EqStUpdate(
+      newAccs, inv, hm || 0, p.gold, p.level, bHp, bAtk, bDef, bAgi, bLuc,
+      newWeapon, newArmor, heroBonuses, klv, currentKyaraLv
+    );
+
+    const hasChange =
+      curBonuses.ehp !== newBonuses.ehp ||
+      curBonuses.eatk !== newBonuses.eatk ||
+      curBonuses.edef !== newBonuses.edef ||
+      curBonuses.espeed !== newBonuses.espeed ||
+      curBonuses.eluk !== newBonuses.eluk;
 
     if (!hasChange) {
       handleConfirmEquip();
     }
   }, [confirmEquipment]);
-
-  const getTotalBonus = () => {
-    let atkBonus = 0;
-    let defBonus = 0;
-    let hpBonus = 0;
-    let agiBonus = 0;
-    let lucBonus = 0;
-    
-    if (player.equippedWeapon) {
-      atkBonus += player.equippedWeapon.attackBonus;
-    }
-    if (player.equippedArmor) {
-      defBonus += player.equippedArmor.defenseBonus;
-      hpBonus += player.equippedArmor.hpBonus;
-    }
-    (player.equippedAccessories || []).forEach(acc => {
-      if (!acc) return;
-      atkBonus += acc.attackBonus;
-      defBonus += acc.defenseBonus;
-      hpBonus += acc.hpBonus;
-      agiBonus += acc.agilityBonus;
-      lucBonus += acc.luckBonus;
-    });
-    
-    return { atkBonus, defBonus, hpBonus, agiBonus, lucBonus };
-  };
-
-  const bonuses = getTotalBonus();
-  const totalAttack = player.attack + bonuses.atkBonus;
-  const totalDefense = player.defense + bonuses.defBonus;
 
   const unlockedSlots = player.unlockedAccessorySlots || [true, true, true, false, false, false, false, false, false, false, false, false];
 
@@ -1096,23 +1092,23 @@ export const Inventory = ({ onClose }: InventoryProps) => {
           <div className="bg-[#6a8ac5] border-2 border-[#4a6fa5] rounded-lg p-3 space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-white">HP</span>
-              <span className="text-green-300">{player.maxHp}(+{bonuses.hpBonus})</span>
+              <span className="text-green-300">{player.maxHp.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">ATK</span>
-              <span className="text-red-300">{totalAttack}(+{bonuses.atkBonus})</span>
+              <span className="text-red-300">{player.attack.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">DEF</span>
-              <span className="text-blue-300">{totalDefense}(+{bonuses.defBonus})</span>
+              <span className="text-blue-300">{player.defense.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">AGI</span>
-              <span className="text-yellow-300">{player.agility}</span>
+              <span className="text-yellow-300">{player.agility.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-white">LUC</span>
-              <span className="text-purple-300">{player.luck}</span>
+              <span className="text-purple-300">{player.luck.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -1132,56 +1128,76 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const renderConfirmDialog = () => {
     if (!confirmEquipment) return null;
     
-    const currentTotalAtk = player.attack + bonuses.atkBonus;
-    const currentTotalDef = player.defense + bonuses.defBonus;
-    const currentTotalHp = player.maxHp + bonuses.hpBonus;
-    const currentTotalAgi = player.agility + bonuses.agiBonus;
-    const currentTotalLuc = player.luck + bonuses.lucBonus;
+    // 使用 EqStUpdate 计算装备前后的真实属性（包含武器multi、护甲multi、饰品效果、被动效果等）
+    const { player, inventory, hardmode, kyarakutalv, kyarakutaKozinExp } = useGameStore.getState();
+    const heroBonuses = computeHeroBonuses(player.heroId || 0);
+    const currentKyaraLv = getCurrentKyaraLv(kyarakutaKozinExp, player.heroId);
     
-    let newTotalAtk = currentTotalAtk;
-    let newTotalDef = currentTotalDef;
-    let newTotalHp = currentTotalHp;
-    let newTotalAgi = currentTotalAgi;
-    let newTotalLuc = currentTotalLuc;
+    const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
+    const baseHp = initialPlayer.maxHp + stPtAllocate.hp * 5;
+    const baseAtk = initialPlayer.attack + stPtAllocate.atk * 3;
+    const baseDef = initialPlayer.defense + stPtAllocate.def * 3;
+    const baseAgi = initialPlayer.agility + stPtAllocate.agi * 2;
+    const baseLuc = initialPlayer.luck + stPtAllocate.luc * 1;
     
-    const changedStats: { name: string; old: number; new: number }[] = [];
+    const accessories = player.equippedAccessories || [];
+    
+    // 计算当前装备的属性
+    const currentBonuses = EqStUpdate(
+      accessories, inventory, hardmode || 0, player.gold, player.level,
+      baseHp, baseAtk, baseDef, baseAgi, baseLuc,
+      player.equippedWeapon, player.equippedArmor,
+      heroBonuses, kyarakutalv, currentKyaraLv
+    );
+    const currentStats = {
+      hp: baseHp + currentBonuses.ehp,
+      atk: baseAtk + currentBonuses.eatk,
+      def: baseDef + currentBonuses.edef,
+      agi: baseAgi + currentBonuses.espeed,
+      luc: baseLuc + currentBonuses.eluk,
+    };
+    
+    // 计算装备新装备后的属性（用新装备替换旧装备）
+    let newWeapon = player.equippedWeapon;
+    let newArmor = player.equippedArmor;
+    let newAccessories = accessories;
     
     if (confirmEquipment.type === 'weapon') {
-      const oldWeaponBonus = player.equippedWeapon?.attackBonus || 0;
-      newTotalAtk = currentTotalAtk - oldWeaponBonus + confirmEquipment.attackBonus;
-      if (newTotalAtk !== currentTotalAtk) {
-        changedStats.push({ name: 'ATK', old: currentTotalAtk, new: newTotalAtk });
-      }
+      newWeapon = confirmEquipment;
     } else if (confirmEquipment.type === 'armor') {
-      const oldArmorDefBonus = player.equippedArmor?.defenseBonus || 0;
-      const oldArmorHpBonus = player.equippedArmor?.hpBonus || 0;
-      newTotalDef = currentTotalDef - oldArmorDefBonus + confirmEquipment.defenseBonus;
-      newTotalHp = currentTotalHp - oldArmorHpBonus + confirmEquipment.hpBonus;
-      if (newTotalDef !== currentTotalDef) {
-        changedStats.push({ name: 'DEF', old: currentTotalDef, new: newTotalDef });
-      }
+      newArmor = confirmEquipment;
     } else if (confirmEquipment.type === 'accessory') {
-      newTotalAtk += confirmEquipment.attackBonus;
-      newTotalDef += confirmEquipment.defenseBonus;
-      newTotalHp += confirmEquipment.hpBonus;
-      newTotalAgi += confirmEquipment.agilityBonus;
-      newTotalLuc += confirmEquipment.luckBonus;
-      if (newTotalAtk !== currentTotalAtk) {
-        changedStats.push({ name: 'ATK', old: currentTotalAtk, new: newTotalAtk });
-      }
-      if (newTotalDef !== currentTotalDef) {
-        changedStats.push({ name: 'DEF', old: currentTotalDef, new: newTotalDef });
-      }
-      if (newTotalHp !== currentTotalHp) {
-        changedStats.push({ name: 'HP', old: currentTotalHp, new: newTotalHp });
-      }
-      if (newTotalAgi !== currentTotalAgi) {
-        changedStats.push({ name: 'AGI', old: currentTotalAgi, new: newTotalAgi });
-      }
-      if (newTotalLuc !== currentTotalLuc) {
-        changedStats.push({ name: 'LUC', old: currentTotalLuc, new: newTotalLuc });
+      // 找到第一个空槽位或替换指定槽位
+      const slotIdx = selectedAccessorySlot !== null ? selectedAccessorySlot : accessories.findIndex(a => !a);
+      if (slotIdx >= 0 && slotIdx < 12) {
+        newAccessories = [...accessories];
+        newAccessories[slotIdx] = confirmEquipment;
       }
     }
+    
+    const newBonuses = EqStUpdate(
+      newAccessories, inventory, hardmode || 0, player.gold, player.level,
+      baseHp, baseAtk, baseDef, baseAgi, baseLuc,
+      newWeapon, newArmor,
+      heroBonuses, kyarakutalv, currentKyaraLv
+    );
+    const newStats = {
+      hp: baseHp + newBonuses.ehp,
+      atk: baseAtk + newBonuses.eatk,
+      def: baseDef + newBonuses.edef,
+      agi: baseAgi + newBonuses.espeed,
+      luc: baseLuc + newBonuses.eluk,
+    };
+    
+    // 收集变化的属性
+    const allStats = [
+      { name: 'HP', old: currentStats.hp, new: newStats.hp },
+      { name: 'ATK', old: currentStats.atk, new: newStats.atk },
+      { name: 'DEF', old: currentStats.def, new: newStats.def },
+      { name: 'AGI', old: currentStats.agi, new: newStats.agi },
+      { name: 'LUC', old: currentStats.luc, new: newStats.luc },
+    ];
+    const changedStats = allStats.filter(s => s.new !== s.old);
     
     if ((confirmEquipment.type === 'weapon' || confirmEquipment.type === 'armor' || confirmEquipment.type === 'accessory') && changedStats.length === 0) {
       return null;
@@ -1191,7 +1207,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
     
     return (
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-sm w-full mx-4">
+        <div className="bg-[#2d1b4e] border-2 border-[#4a2c7a] rounded-lg p-6 max-w-md w-full mx-4">
           <div className="text-center">
             <div className="text-xl font-bold text-white mb-4">
               {confirmEquipment.type === 'soul' ? t('安装') : t('装备')} {getEquipName(confirmEquipment.name)} {t('吗？')}
@@ -1210,21 +1226,30 @@ export const Inventory = ({ onClose }: InventoryProps) => {
             )}
             
             {changedStats.length > 0 && (
-              <div className="space-y-2 mb-4">
-                {changedStats.map(stat => (
-                  <div key={stat.name}>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{t('现在的')} {stat.name}:</span>
-                      <span className="text-white">{stat.old}</span>
+              <div className="space-y-3 mb-4">
+                {changedStats.map(stat => {
+                  const diff = stat.new - stat.old;
+                  const diffColor = diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white';
+                  const diffText = diff > 0 ? `+${diff.toLocaleString()}` : diff < 0 ? `${diff.toLocaleString()}` : '0';
+                  const newColor = diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white';
+                  return (
+                    <div key={stat.name} className="border-b border-gray-700 pb-2">
+                      <div className="text-sm font-bold text-yellow-300 mb-1">{stat.name}</div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">{t('现在的')}:</span>
+                        <span className="text-white">{stat.old.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">{t('差异')}:</span>
+                        <span className={`font-bold ${diffColor}`}>{diffText}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">{t('装备后的')}:</span>
+                        <span className={newColor}>{stat.new.toLocaleString()}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">{t('装备后的')} {stat.name}:</span>
-                      <span className={`${stat.new > stat.old ? 'text-green-400' : stat.new < stat.old ? 'text-red-400' : 'text-white'}`}>
-                        {stat.new}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
             

@@ -532,6 +532,7 @@ export const translations: Record<string, TranslationKey> = {
   '金币不足！': { ja: 'お金が足りません！', en: 'Not enough gold!', 'zh-Hant': '金幣不足！', 'zh-Hans': '金币不足！', ko: '골드가 부족합니다!', es: '¡No hay oro suficiente!', id: 'Gold tidak cukup!' },
   '现在的': { ja: '現在の', en: 'Current', 'zh-Hant': '現在的', 'zh-Hans': '现在的', ko: '현재의', es: 'Actual', id: 'Saat ini' },
   '装备后的': { ja: '装備後の', en: 'After equip', 'zh-Hant': '裝備後的', 'zh-Hans': '装备后的', ko: '장비 후의', es: 'Después de equipar', id: 'Setelah gunakan' },
+  '差异': { ja: '差異', en: 'Difference', 'zh-Hant': '差異', 'zh-Hans': '差异', ko: '차이', es: 'Diferencia', id: 'Perbedaan' },
   '确认': { ja: '確認', en: 'Confirm', 'zh-Hant': '確認', 'zh-Hans': '确认', ko: '확인', es: 'Confirmar', id: 'Konfirmasi' },
   '请先设置密码！': { ja: 'パスワードを設定してください！', en: 'Please set a password first!', 'zh-Hant': '請先設定密碼！', 'zh-Hans': '请先设置密码！', ko: '비밀번호를 먼저 설정해주세요!', es: '¡Establezca una contraseña primero!', id: 'Silakan atur kata sandi dulu!' },
   '请输入密码！': { ja: 'パスワードを入力してください！', en: 'Please enter password!', 'zh-Hant': '請輸入密碼！', 'zh-Hans': '请输入密码！', ko: '비밀번호를 입력해주세요!', es: '¡Ingrese la contraseña!', id: 'Silakan masukkan kata sandi!' },

@@ -144,53 +144,33 @@ export const getEquipComponents = (
   return { epAtk, ebAtk, epDef, ebDef, epHp };
 };
 
-/** 按 gdata.txt hwMode 公式计算最终属性 */
+/** 按 gdata.txt 逻辑计算最终属性
+ *  gdata.txt 第1290-1294行:
+ *    最终HP = hp + ehp
+ *    最终ATK = atk + eatk
+ *    最终DEF = def + edef
+ *    最终AGI = speed + espeed
+ *    最终LUC = luk + eluk
+ *  ehp/eatk/edef/espeed/eluk 已在 gdata.ts 的 EqStUpdate 中计算完成（包含英雄加成）
+ */
 export const computeFinalStats = (
   baseHp: number, baseAtk: number, baseDef: number, baseAgi: number, baseLuc: number,
-  equip: EquipComponents,
+  _equip: EquipComponents,
   bonuses: {
-    ebHp: number; ebAtk: number; ebDef: number; ebAgi: number; ebLuc: number;
-    epHp: number; epAtk: number; epDef: number; epAgi: number; epLuc: number;
-    addMaxHP: number; addMaxATK: number; addMaxDEF: number; addMaxAGI: number; addMaxLUC: number;
-    AllstatPer: number;
-    kyarakutaNouryokuUp: number;
+    ehp: number; eatk: number; edef: number; espeed: number; eluk: number;
     donyokuRing: boolean;
-    redEyeEffect: number; blueEyeEffect: number; greenEyeEffect: number;
   },
-  heroBonuses: HeroBonuses,
-  heroLevel: number
+  _heroBonuses: HeroBonuses,
+  _heroLevel: number
 ): { hp: number; atk: number; def: number; agi: number; luc: number } => {
-  const kyaraUpMultiplier = 1 + bonuses.kyarakutaNouryokuUp / 100;
   const donyokuMultiplier = bonuses.donyokuRing ? 0.5 : 1;
-  // gdata.txt hwMode: ebhp += KPhp * _loc6_ * 0.06
-  const ebhp = bonuses.ebHp + heroBonuses.KPhp * heroLevel * kyaraUpMultiplier * 0.06;
-  // 武器 ebAtk + 饰品 ebAtk + 英雄 KPatk
-  const ebatk = equip.ebAtk + bonuses.ebAtk + heroBonuses.KPatk * heroLevel * kyaraUpMultiplier * 0.07;
-  // 防具 ebDef + 饰品 ebDef + 英雄 KPdef
-  const ebdef = equip.ebDef + bonuses.ebDef + heroBonuses.KPdef * heroLevel * kyaraUpMultiplier * 0.07;
-  const ebspeed = bonuses.ebAgi + heroBonuses.KPspeed * heroLevel * kyaraUpMultiplier * 0.075;
-  const ebluk = bonuses.ebLuc + heroBonuses.KPluk * heroLevel * kyaraUpMultiplier * 0.08;
-  
-  // HP: (hp + ephp) * (1 + ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer)
-  const ephp = equip.epHp + bonuses.epHp;
-  const hp = Math.floor((baseHp + ephp) * (1 + ebhp) * (1 + bonuses.addMaxHP + bonuses.redEyeEffect + bonuses.AllstatPer) * donyokuMultiplier);
-  
-  // ATK: (atk + epatk) * (1 + ebatk) * (1 + addMaxATK + AllstatPer + blueEyeEffect)
-  const epatk = equip.epAtk + bonuses.epAtk;
-  const atk = Math.floor((baseAtk + epatk) * (1 + ebatk) * (1 + bonuses.addMaxATK + bonuses.AllstatPer + bonuses.blueEyeEffect) * donyokuMultiplier);
-  
-  // DEF: (def + epdef) * (1 + ebdef) * (1 + AllstatPer + greenEyeEffect + addMaxDEF)
-  const epdef = equip.epDef + bonuses.epDef;
-  const def = Math.floor((baseDef + epdef) * (1 + ebdef) * (1 + bonuses.AllstatPer + bonuses.greenEyeEffect + bonuses.addMaxDEF) * donyokuMultiplier);
-  
-  // AGI: (agi + epspeed) * (1 + ebspeed) * (1 + addMaxAGI + AllstatPer)
-  const epspeed = bonuses.epAgi;
-  const agi = Math.floor((baseAgi + epspeed) * (1 + ebspeed) * (1 + bonuses.addMaxAGI + bonuses.AllstatPer) * donyokuMultiplier);
-  
-  // LUC: (luc + epluk) * (1 + ebluk) * (1 + addMaxLUC + AllstatPer)
-  const epluk = bonuses.epLuc;
-  const luc = Math.floor((baseLuc + epluk) * (1 + ebluk) * (1 + bonuses.addMaxLUC + bonuses.AllstatPer) * donyokuMultiplier);
-  
+  // gdata.txt 第1290-1294行: 最终属性 = base + ehp/eatk/edef/espeed/eluk
+  const hp = Math.floor((baseHp + bonuses.ehp) * donyokuMultiplier);
+  const atk = Math.floor((baseAtk + bonuses.eatk) * donyokuMultiplier);
+  const def = Math.floor((baseDef + bonuses.edef) * donyokuMultiplier);
+  const agi = Math.floor((baseAgi + bonuses.espeed) * donyokuMultiplier);
+  const luc = Math.floor((baseLuc + bonuses.eluk) * donyokuMultiplier);
+
   return { hp, atk, def, agi, luc };
 };
 

@@ -4,6 +4,18 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.91',
+    date: '2026-07-19 00:00:00',
+    changes: [
+      '修复t1=2425(反射镜+回血)refHealOn位置：移入if块内，只在reflection实际更新时才设置refHealOn（匹配gdata.txt原始逻辑）',
+      '修复renzoDamageUP叠加问题：t1=4001(暴风之力)/4004(四神之力)/4006(恶魔之魂)改为+=以支持多饰品叠加连击伤害倍率',
+      '修复背包页码状态持久化：新增lastInventoryViewMode字段，关闭重新打开显示上次查看的页签（非默认main）',
+      '装备确认对话框改为3行显示：当前/差异/装备后，差异行高亮显示属性变化',
+      '添加"差异"多语言翻译（ja/en/zh-Hant/zh-Hans/ko/es/id）',
+      'helpers.ts computeFinalStats重构：直接使用EqStUpdate计算的ehp/eatk/edef/espeed/eluk，移除重复的英雄加成和倍率计算',
+    ],
+  },
+  {
     version: 'v0.0.90',
     date: '2026-07-19 00:00:00',
     changes: [

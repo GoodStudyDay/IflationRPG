@@ -131,10 +131,11 @@ function getItemAllCount(inventory: InventoryItem[], itemType: number, minTimes:
     const eq = equipmentData.find(e => e.id === item.equipmentId);
     if (!eq) continue;
     
-    let typeNum = 0;
+    let typeNum = -1;
     if (eq.type === 'weapon') typeNum = 0;
     else if (eq.type === 'armor') typeNum = 1;
     else if (eq.type === 'accessory') typeNum = 2;
+    else continue; // 非武器/防具/饰品（如灵魂、材料）跳过
     
     if (typeNum !== itemType) continue;
     
@@ -169,7 +170,12 @@ export function EqStUpdate(
   baseAtk: number = 0,
   baseDef: number = 0,
   baseSpeed: number = 0,
-  baseLuk: number = 0
+  baseLuk: number = 0,
+  weapon: Equipment | null = null,
+  armor: Equipment | null = null,
+  heroBonuses: { KPhp: number; KPatk: number; KPdef: number; KPspeed: number; KPluk: number } = { KPhp: 0, KPatk: 0, KPdef: 0, KPspeed: 0, KPluk: 0 },
+  kyarakutalv: number = 0,
+  currentKyaraLv: number = 0
 ): GDataBonuses {
   let ephp = 0, epatk = 0, epdef = 0, epspeed = 0, epluk = 0;
   let ebhp = 0, ebatk = 0, ebdef = 0, ebspeed = 0, ebluk = 0;
@@ -238,6 +244,18 @@ export function EqStUpdate(
   let weaponPerPlus = 0;
   let armorPlus = 0;
   let armorPerPlus = 0;
+  
+  if (weapon) {
+    epatk = (weapon.plus || weapon.attackBonus || 0) + weaponPlus;
+    ebatk = ((weapon.multi || 0) + weaponPerPlus) * 0.01;
+  }
+  
+  if (armor) {
+    epdef = (armor.plus || armor.defenseBonus || 0) + armorPlus;
+    ebdef = ((armor.multi || 0) + armorPerPlus) * 0.01;
+    ephp = Math.floor(baseHp * (((armor.multi || 0) - 0.1) * 0.0011));
+  }
+  
   let itemPasento = 0;
   let totalItemPasento = 0;
   let itemCount1 = 0;
@@ -270,9 +288,11 @@ export function EqStUpdate(
     } else if (t1 === 34) {
       epluk += t2;
     } else if (t1 === 35) {
-      itemCount1 = getItemAllCount(inventory, 2, 1);
-      itemCount1 += getItemAllCount(inventory, 0, 1);
-      itemCount1 += getItemAllCount(inventory, 1, 1);
+      const accCount = getItemAllCount(inventory, 2, 1);
+      const weaponCount = getItemAllCount(inventory, 0, 1);
+      const armorCount = getItemAllCount(inventory, 1, 1);
+      itemCount1 = accCount + weaponCount + armorCount;
+      console.log(`[gdata.ts] 玩家宝石计算: 饰品=${accCount}, 武器=${weaponCount}, 防具=${armorCount}, 总数=${itemCount1}`);
       if (itemCount1 > 1000) {
         itemCount2 = itemCount1 - 1000;
         itemCount1 = 1000;
@@ -380,7 +400,7 @@ export function EqStUpdate(
       resCount = 2;
       resStatUP = 1.03;
     } else if (t1 === 4001) {
-      renzoDamageUP = 1.5;
+      renzoDamageUP += 1.5;
       renzokuPlusKakuritu = 0.15;
     } else if (t1 === 4002) {
       trueDamageKakuritu = 0;
@@ -390,7 +410,7 @@ export function EqStUpdate(
       trueDamage = level * 40;
       resCount = 1;
       resStatUP = 1.03;
-      renzoDamageUP = 1.5;
+      renzoDamageUP += 1.5;
       renzokuPlusKakuritu = 0.15;
     } else if (t1 === 1889) {
       CurrentHpDamage = true;
@@ -401,7 +421,7 @@ export function EqStUpdate(
       trueDamage = level * 60;
       resCount = 2;
       resStatUP = 1.06;
-      renzoDamageUP = 1.7;
+      renzoDamageUP += 1.7;
       renzokuPlusKakuritu = 0.18;
       DamageReduced = 33;
       addMaxHP += 1.5;
@@ -435,8 +455,8 @@ export function EqStUpdate(
       const newReflection = t2 / 100;
       if (newReflection > (reflection || 0)) {
         reflection = newReflection;
+        refHealOn = true;
       }
-      refHealOn = true;
     } else if (t1 === 2777) {
       hourgclassOn = true;
     } else if (t1 === 2778) {
@@ -520,6 +540,20 @@ export function EqStUpdate(
     epluk = Math.floor(epluk * Dice - baseLuk * (1 - Dice));
   }
 
+  // gdata.txt 第1229-1233行: kyaraLv 计算
+  let kyaraLv = kyarakutalv;
+  if (kyaraLv > 0) {
+    kyaraLv = ((kyarakutalv + currentKyaraLv) * 0.25 + 0.75) * (1 + kyarakutaNouryokuUp / 100);
+  }
+
+  // gdata.txt 第1268-1272行: 英雄加成
+  ebhp += heroBonuses.KPhp * kyaraLv * 0.06;
+  ebatk += heroBonuses.KPatk * kyaraLv * 0.07;
+  ebdef += heroBonuses.KPdef * kyaraLv * 0.07;
+  ebspeed += heroBonuses.KPspeed * kyaraLv * 0.075;
+  ebluk += heroBonuses.KPluk * kyaraLv * 0.08;
+
+  // gdata.txt 第1273-1289行: ehp/eatk/edef/espeed/eluk 计算
   ehp = (ephp + (ephp + baseHp) * ebhp) * (1 + addMaxHP + redEyeEffect + AllstatPer);
   eatk = (epatk + (epatk + baseAtk) * ebatk) * (1 + addMaxATK + AllstatPer + blueEyeEffect);
   edef = (epdef + baseDef) * (1 + ebdef) * (1 + AllstatPer + greenEyeEffect + addMaxDEF) - baseDef;
@@ -628,7 +662,7 @@ function passiveUpdate(
   sandHourglassOn: boolean
 ): PassiveUpdateResult {
   redEyeEffect = GetItemTimesFromInventory(inventory, 2, 106) * 0.1;
-  redEyeEffect += GetItemTimesFromInventory(inventory, 2, 130) * 0.2;
+  redEyeEffect = GetItemTimesFromInventory(inventory, 2, 130) * 0.2;
 
   const allstat1 = allstatUpdate(ephp, epatk, epdef, epspeed, epluk, GetItemTimesFromInventory(inventory, 2, 95), 750000);
   ephp = allstat1.ephp;
