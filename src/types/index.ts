@@ -209,6 +209,8 @@ export interface BattleState {
   missrateOn: number;
   /** 已过敌人回合计数（用于missrateOn判断） */
   _missTurnCount: number;
+  /** 连击伤害倍率（暴风之力/四神之力效果） */
+  renzoDamageUP: number;
 }
 
 // 奖励类型

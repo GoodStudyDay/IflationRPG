@@ -760,13 +760,13 @@ const calculatePlayerDamage = (
   comboCount: number,
   accessories: Equipment[],
   playerLevel: number,
-  attackCount: number = 0
+  attackCount: number = 0,
+  renzoDamageUP: number = 0
 ): { damage: number; isCrit: boolean } => {
   let damage: number;
   
   const critPowerRing = accessories.find(acc => acc && acc.t1 === 210);
   const skyPower = accessories.find(acc => acc && acc.t1 === 4002);
-  const stormPower = accessories.find(acc => acc && acc.t1 === 4001);
   const powerStone = accessories.find(acc => acc && acc.t1 === 2222);
   const demonSoul = accessories.find(acc => acc && acc.t1 === 5);
   const curseCoin = accessories.find(acc => acc && acc.t1 === 78);
@@ -813,8 +813,8 @@ const calculatePlayerDamage = (
   
   if (comboCount >= 2) {
     let comboMultiplier = 1 + (comboCount - 1) * 0.1;
-    if (stormPower) {
-      comboMultiplier += (stormPower.t2 || 50) / 100;
+    if (renzoDamageUP > 0) {
+      comboMultiplier *= renzoDamageUP;
     }
     damage = Math.floor(damage * comboMultiplier);
   }
@@ -1068,6 +1068,7 @@ export const useGameStore = create<GameStore>()(
         hourgclassOn1: false,
         missrateOn: 0,
         _missTurnCount: 0,
+        renzoDamageUP: 0,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || (saveData.hardmode === 2 ? 10 : (saveData.hardmode === 1 ? 15 : 30)),
@@ -1311,8 +1312,7 @@ export const useGameStore = create<GameStore>()(
         }
         
         const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
-        for (const gem of playerGems) {
-          const bonusPercent = gem.t2 || 0;
+        if (playerGems.length > 0) {
           let itemCount = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
@@ -1320,11 +1320,15 @@ export const useGameStore = create<GameStore>()(
               itemCount += item.quantity;
             }
           }
-          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
-          baseHp = Math.ceil(baseHp * (1 + rate));
-          baseAtk = Math.ceil(baseAtk * (1 + rate));
-          baseDef = Math.ceil(baseDef * (1 + rate));
-          baseAgi = Math.ceil(baseAgi * (1 + rate));
+          const maxItemCount = Math.min(itemCount, 1000);
+          const totalRate = playerGems.reduce((sum, gem) => {
+            const bonusPercent = gem.t2 || 0;
+            return sum + (bonusPercent * maxItemCount / 1000) / 100;
+          }, 0);
+          baseHp = Math.ceil(baseHp * (1 + totalRate));
+          baseAtk = Math.ceil(baseAtk * (1 + totalRate));
+          baseDef = Math.ceil(baseDef * (1 + totalRate));
+          baseAgi = Math.ceil(baseAgi * (1 + totalRate));
         }
         
         const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
@@ -1653,8 +1657,7 @@ export const useGameStore = create<GameStore>()(
         
         // 能力宝石 (t1=35) 加成
         const playerGems1 = accessories.filter(acc => acc && acc.t1 === 35);
-        for (const gem of playerGems1) {
-          const bonusPercent = gem.t2 || 0;
+        if (playerGems1.length > 0) {
           let itemCount = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
@@ -1662,11 +1665,15 @@ export const useGameStore = create<GameStore>()(
               itemCount += item.quantity;
             }
           }
-          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
-          baseHp_calc = Math.ceil(baseHp_calc * (1 + rate));
-          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + rate));
-          baseDef_calc = Math.ceil(baseDef_calc * (1 + rate));
-          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + rate));
+          const maxItemCount = Math.min(itemCount, 1000);
+          const totalRate = playerGems1.reduce((sum, gem) => {
+            const bonusPercent = gem.t2 || 0;
+            return sum + (bonusPercent * maxItemCount / 1000) / 100;
+          }, 0);
+          baseHp_calc = Math.ceil(baseHp_calc * (1 + totalRate));
+          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + totalRate));
+          baseDef_calc = Math.ceil(baseDef_calc * (1 + totalRate));
+          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + totalRate));
         }
         
         // 饰品加成
@@ -1978,8 +1985,7 @@ export const useGameStore = create<GameStore>()(
         
         // 能力宝石 (t1=35) 加成
         const playerGems2 = accessories.filter(acc => acc && acc.t1 === 35);
-        for (const gem of playerGems2) {
-          const bonusPercent = gem.t2 || 0;
+        if (playerGems2.length > 0) {
           let itemCount = 0;
           for (const item of inventory) {
             const eq = getEquipmentById(item.equipmentId);
@@ -1987,11 +1993,15 @@ export const useGameStore = create<GameStore>()(
               itemCount += item.quantity;
             }
           }
-          const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
-          baseHp2 = Math.ceil(baseHp2 * (1 + rate));
-          baseAtk2 = Math.ceil(baseAtk2 * (1 + rate));
-          baseDef2 = Math.ceil(baseDef2 * (1 + rate));
-          baseAgi2 = Math.ceil(baseAgi2 * (1 + rate));
+          const maxItemCount = Math.min(itemCount, 1000);
+          const totalRate = playerGems2.reduce((sum, gem) => {
+            const bonusPercent = gem.t2 || 0;
+            return sum + (bonusPercent * maxItemCount / 1000) / 100;
+          }, 0);
+          baseHp2 = Math.ceil(baseHp2 * (1 + totalRate));
+          baseAtk2 = Math.ceil(baseAtk2 * (1 + totalRate));
+          baseDef2 = Math.ceil(baseDef2 * (1 + totalRate));
+          baseAgi2 = Math.ceil(baseAgi2 * (1 + totalRate));
         }
         console.log('🔍 [loadEquipSet] 基础属性(最终):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
         
@@ -2407,6 +2417,7 @@ export const useGameStore = create<GameStore>()(
             hourgclassOn1: bonuses.hourgclassOn1 || false,
             missrateOn: bonuses.missrateOn || 0,
             _missTurnCount: 0,
+            renzoDamageUP: bonuses.renzoDamageUP || 0,
           },
         });
         console.log('[startGame] resCount:', bonuses.resCount, 'resStatUP:', bonuses.resStatUP);
@@ -2654,6 +2665,7 @@ export const useGameStore = create<GameStore>()(
           activeDrops = normalDrops;
         }
         
+        enemy.drops = activeDrops;
         
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
           if (!drop) return null;
@@ -2844,6 +2856,7 @@ export const useGameStore = create<GameStore>()(
             hourgclassOn1: eqBonuses.hourgclassOn1 || false,
             missrateOn: eqBonuses.missrateOn || 0,
             _missTurnCount: 0,
+            renzoDamageUP: eqBonuses.renzoDamageUP || 0,
           },
         });
       },
@@ -3097,6 +3110,7 @@ export const useGameStore = create<GameStore>()(
             hourgclassOn1: eqBonuses2.hourgclassOn1 || false,
             missrateOn: eqBonuses2.missrateOn || 0,
             _missTurnCount: 0,
+            renzoDamageUP: eqBonuses2.renzoDamageUP || 0,
           },
         });
       },
@@ -3419,7 +3433,8 @@ export const useGameStore = create<GameStore>()(
                 currentComboCount,
                 accessories,
                 player.level,
-                battle.attackCount
+                battle.attackCount,
+                battle.renzoDamageUP
               );
               
               set((s) => ({
@@ -3958,6 +3973,7 @@ export const useGameStore = create<GameStore>()(
             hourgclassOn1: false,
             missrateOn: 0,
             _missTurnCount: 0,
+            renzoDamageUP: 0,
           },
         });
       },
@@ -4146,6 +4162,7 @@ export const useGameStore = create<GameStore>()(
             hourgclassOn1: false,
             missrateOn: 0,
             _missTurnCount: 0,
+            renzoDamageUP: 0,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,

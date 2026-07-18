@@ -35,7 +35,6 @@ export const BattleScreen = () => {
     resumeBattle, 
     tryEscape,
     setRecoverNextTurn,
-    hardmode,
     clearBattleEffect,
   } = useGameStore();
   
@@ -259,9 +258,7 @@ export const BattleScreen = () => {
             <div className="mt-1 text-[10px] sm:text-xs text-gray-400 max-w-xs mx-auto">
               <div className="text-gray-500 mb-1">{t('掉落')}:</div>
               {(() => {
-                const start = hardmode * 3;
-                const modeDrops = battle.enemy.drops.slice(start, start + 3);
-                return modeDrops.filter(d => d !== null).map((drop, index) => {
+                return battle.enemy.drops.filter(d => d !== null).map((drop, index) => {
                   const equipment = getEquipmentById(drop!.equipmentId);
                   const itemName = equipment ? getEquipName(equipment.name) : drop!.equipmentId;
                   const getSpriteType = () => {
@@ -304,7 +301,7 @@ export const BattleScreen = () => {
                         )}
                         <span className="truncate">{itemName}</span>
                       </div>
-                      <span className="text-yellow-400 ml-2">{(drop!.rate * 100).toFixed(1)}%</span>
+                      <span className="text-yellow-400 ml-2">{(drop!.dropRate * 100).toFixed(1)}%</span>
                     </div>
                   );
                 });
