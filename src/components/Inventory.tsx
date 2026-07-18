@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useGameStore, isPassiveEffectItem } from '@/stores/gameStore';
+import { useGameStore } from '@/stores/gameStore';
+import { isPassiveEffectItem } from '@/utils/gdata';
 import { equipmentData } from '@/data/equipment';
 import { SpriteIcon } from './SpriteIcon';
 import { useEquipmentName } from '@/hooks/useEquipmentName';
@@ -38,7 +39,12 @@ export const Inventory = ({ onClose }: InventoryProps) => {
   const loadEquipSet = useGameStore(state => state.loadEquipSet);
   const purchaseEquipSet = useGameStore(state => state.purchaseEquipSet);
   const getEquipSetPrice = useGameStore(state => state.getEquipSetPrice);
+  const logEquipmentBonuses = useGameStore(state => state.logEquipmentBonuses);
   const [activeEquipSetSlot, setActiveEquipSetSlot] = useState(0);
+
+  useEffect(() => {
+    logEquipmentBonuses();
+  }, []);
 
   // Auto-equip without confirmation dialog when no stat changes
   useEffect(() => {

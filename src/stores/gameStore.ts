@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Player, InventoryItem, Skill, GameScene, BattleState, Equipment, EquipSet } from '@/types';
+import type { Player as PlayerState, InventoryItem, Skill, GameScene, BattleState, Equipment, EquipSet, Enemy } from '@/types';
 import { BonusState } from '@/types';
 import { initialPlayer, initialInventory, initialSkills, GAME_CONFIG } from '@/data/initialData';
 import { getEquipmentById, equipmentData, getRecipeForEquipment, getEquipmentByTypeAndListnum } from '@/data/equipment';
@@ -29,438 +29,10 @@ import { getBossById } from '@/data/bossData';
 import { getHeroById } from '@/data/heroData';
 import { getCurrentKyaraLv, addExpKyarakutaKozinExp } from '@/utils/kyaraLevel';
 import { getTranslation } from '@/data/languageData';
-
-// 统计背包中物品数量（武器+防具+饰品）
-function getItemCount(inventory: InventoryItem[]): number {
-  let count = 0;
-  for (const item of inventory) {
-    const eq = getEquipmentById(item.equipmentId);
-    if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-      count += item.quantity;
-    }
-  }
-  return count;
-}
-
-// 统一计算饰品加成效果，遵循 gdata.txt 中 EqStUpdate 和 passiveUpdate 的模式
-// 返回加性属性加成和乘性属性加成
-// 被动效果饰品ID列表（无需装备即可生效）
-const PASSIVE_ACCESSORY_IDS = new Set([95, 103, 104, 106, 110, 116, 117, 119, 123, 125, 131]);
-
-export function isPassiveEffectItem(eqId: string): boolean {
-  const eqNum = parseInt(eqId.split('-')[1]) || 0;
-  return PASSIVE_ACCESSORY_IDS.has(eqNum);
-}
-
-function applyEquipmentBonuses(
-  accessories: (Equipment | null)[],
-  inventory: InventoryItem[],
-  hardmode: number,
-  gold: number = 0
-): {
-  epHp: number;
-  epAtk: number;
-  epDef: number;
-  epAgi: number;
-  epLuc: number;
-  ebHp: number;
-  ebAtk: number;
-  ebDef: number;
-  ebAgi: number;
-  ebLuc: number;
-  addMaxHP: number;
-  addMaxATK: number;
-  addMaxDEF: number;
-  addMaxAGI: number;
-  addMaxLUC: number;
-  AllstatPer: number;
-  kyarakutaNouryokuUp: number;
-  expMultiplier: number;
-  GetPlusStPt: number;
-  DamageReduced: number;
-  DamageIncreased: number;
-  crihPlusKakuritu: number;
-  crihplusdamage: number;
-  renzokuPlusKakuritu: number;
-  MoveSpeed: number;
-  SokusiKaihiKakuritu: number;
-  // passiveUpdate 效果
-  redEyeEffect: number;
-  blueEyeEffect: number;
-  greenEyeEffect: number;
-  secretKeyOn: boolean;
-  possiveDeftoAtk: boolean;
-  envelope: boolean;
-  missrate: number;
-  // getDecreasedHPRate/getDecreasedATKRate
-  hpReduceRate: number;
-  atkReduceRate: number;
-  donyokuRing: boolean;
-  // 复活相关（resCount=0表示无复活能力）
-  resCount: number;
-  resStatUP: number;
-  // Heart of the four gods 专属效果
-  trueDamage: number;
-  renzoDamageUP: number;
-  // 火焰秘钥效果
-  fireSecretKeyOn: boolean;
-  // 闪光沙漏1效果 (攻击累加ATK, 45次后斩杀)
-  sandHourglassOn: boolean;
-  // 圣树之叶效果 (每次攻击回复9%HP)
-  healOnAttackOn: boolean;
-  // 战神之刃效果 (击杀10w敌人ATK+10%)
-  warGodBladeOn: boolean;
-  // 反射之镜效果
-  reflection: number;
-  refHealOn: boolean;
-  // 闪光沙漏效果
-  hourgclassOn: boolean;
-  hourgclassOn1: boolean;
-  // Sanctuary's Blessing (t1=314) 强制闪避回合数
-  missrateOn: number;
-} {
-  let epHp = 0, epAtk = 0, epDef = 0, epAgi = 0, epLuc = 0;
-  let ebHp = 0, ebAtk = 0, ebDef = 0, ebAgi = 0, ebLuc = 0;
-  let addMaxHP = 0, addMaxATK = 0, addMaxDEF = 0, addMaxAGI = 0, addMaxLUC = 0;
-  let AllstatPer = 0;
-  let kyarakutaNouryokuUp = 0;
-  let expMultiplier = 1;
-  let GetPlusStPt = 0;
-  let DamageReduced = 0;
-  let DamageIncreased = 0;
-  let crihPlusKakuritu = 0;
-  let crihplusdamage = 1;
-  let renzokuPlusKakuritu = 0;
-  let MoveSpeed = 15;
-  let SokusiKaihiKakuritu = 0;
-  // passiveUpdate 效果
-  let redEyeEffect = 0;
-  let blueEyeEffect = 0;
-  let greenEyeEffect = 0;
-  let secretKeyOn = false;
-  let possiveDeftoAtk = false;
-  let sandHourglassOn = false;
-  let healOnAttackOn = false;
-  let warGodBladeOn = false;
-  let envelope = false;
-  let missrate = 0;
-  let resCount = 0;
-  let resStatUP = 0;
-  let trueDamage = 0;
-  let renzoDamageUP = 0;
-  let fireSecretKeyOn = false;
-  let reflection = 0;
-  let refHealOn = false;
-  let hourgclassOn = false;
-  let hourgclassOn1 = false;
-  let missrateOn = 0;
-
-  for (const acc of accessories) {
-    if (!acc) continue;
-    const t1 = acc.t1;
-    const t2 = acc.t2 || 0;
-
-    if (t1 === 30) {
-      epHp += t2;
-    } else if (t1 === 31) {
-      epAtk += t2;
-    } else if (t1 === 32) {
-      epDef += t2;
-    } else if (t1 === 33) {
-      epAgi += t2;
-    } else if (t1 === 34) {
-      epLuc += t2;
-    } else if (t1 === 35) {
-      const itemCount = getItemCount(inventory);
-      const itemCount1 = Math.min(itemCount, 1000);
-      const itemCount2 = Math.max(0, itemCount - 1000);
-      epHp += itemCount1 * t2;
-      epAtk += itemCount1 * t2;
-      epDef += itemCount1 * t2;
-      epAgi += itemCount1 * t2;
-      epLuc += itemCount2 * t2 * 4;
-    } else if (t1 === 40) {
-      epHp += t2;
-      epAtk += t2;
-      epDef += t2;
-      epAgi += t2;
-      epLuc += t2;
-    } else if (t1 === 41) {
-      epAtk += t2;
-      epDef += t2;
-      epAgi += t2;
-    } else if (t1 === 42) {
-      epHp += t2;
-      epAtk += t2;
-      epDef += t2;
-      epAgi += t2;
-    } else if (t1 === 43) {
-      epHp += t2 * 10;
-      epDef += t2 * 10;
-      epAgi += t2;
-    } else if (t1 === 2) {
-      DamageIncreased += 0.2;
-    } else if (t1 === 60) {
-      expMultiplier += t2 / 100;
-    } else if (t1 === 1111) {
-      DamageReduced = t2;
-      epHp += 1500000;
-    } else if (t1 === 2222) {
-      DamageIncreased = t2;
-      epAtk += 800000;
-    } else if (t1 === 700 && GetPlusStPt === 0) {
-      GetPlusStPt = 1;
-    } else if (t1 === 701) {
-      GetPlusStPt = 2;
-    } else if (t1 === 2701) {
-      GetPlusStPt = 3;
-      epHp += 1500000;
-    } else if (t1 === 888) {
-      AllstatPer = t2 / 100;
-    } else if (t1 === 889 && hardmode === 2) {
-      AllstatPer += 0.4;
-    } else if (t1 === 820) {
-      kyarakutaNouryokuUp += t2;
-    } else if (t1 === 3333) {
-      addMaxHP += 0.15;
-      expMultiplier += 1.05;
-    } else if (t1 === 3334) {
-      addMaxATK += 0.15;
-      expMultiplier += 0.8;
-    } else if (t1 === 3335) {
-      addMaxDEF += 0.15;
-      expMultiplier += 0.8;
-    } else if (t1 === 4003) {
-      DamageReduced = 25;
-      addMaxHP += 1;
-    } else if (t1 === 4005) {
-      DamageReduced = 33;
-      addMaxHP += 1.5;
-    } else if (t1 === 200) {
-      crihPlusKakuritu += 0.08;
-    } else if (t1 === 210) {
-      crihplusdamage += 0.2;
-    } else if (t1 === 211) {
-      crihplusdamage += 3;
-    } else if (t1 === 250) {
-      renzokuPlusKakuritu = 0.09;
-    } else if (t1 === 100) {
-      MoveSpeed += t2 / 100;
-    } else if (t1 === 1210) {
-      SokusiKaihiKakuritu += 1;
-    } else if (t1 === 1211) {
-      SokusiKaihiKakuritu += 10;
-    } else if (t1 === 1899) {
-      const randomDice = Math.random() * 100;
-      if (randomDice < 12) {
-        addMaxHP += 0.15;
-      } else if (randomDice < 24) {
-        addMaxATK += 0.15;
-      } else if (randomDice < 36) {
-        addMaxDEF += 0.15;
-      } else if (randomDice < 48) {
-        addMaxAGI += 0.15;
-      } else if (randomDice < 60) {
-        addMaxLUC += 0.15;
-      } else if (randomDice < 72) {
-        AllstatPer += 0.15;
-      } else {
-        expMultiplier += 0.8;
-      }
-    } else if (t1 === 4000) {
-      resCount = 2;
-      resStatUP = 1.03;
-    } else if (t1 === 4001) {
-      renzoDamageUP = 1.5;
-      renzokuPlusKakuritu = 0.15;
-    } else if (t1 === 4004) {
-      resCount = 1;
-      resStatUP = 1.03;
-      renzoDamageUP = 1.5;
-      renzokuPlusKakuritu = 0.15;
-      
-      const mixItems = [acc.mixbase1, acc.mixbase2, acc.mixbase3, acc.mixbase4].filter(Boolean);
-      let matchedCount = 0;
-      for (const mixItemId of mixItems) {
-        const hasItem = inventory.some(i => i.equipmentId === `accessory-${mixItemId}` && i.quantity > 0);
-        if (hasItem) {
-          matchedCount++;
-        }
-      }
-      
-      if (matchedCount >= 2) {
-        renzoDamageUP += 0.5;
-      }
-      if (matchedCount >= 3) {
-        renzoDamageUP += 0.5;
-        renzokuPlusKakuritu += 0.1;
-      }
-      if (matchedCount >= 4) {
-        renzoDamageUP += 0.5;
-        renzokuPlusKakuritu += 0.1;
-        AllstatPer += 0.3;
-      }
-    } else if (t1 === 1889) {
-      fireSecretKeyOn = true;
-    } else if (t1 === 4006) {
-      DamageReduced = 33;
-      addMaxHP += 1.5;
-    } else if (t1 === 78) {
-      if (gold > 300000) {
-        DamageIncreased = 40;
-      }
-    } else if (t1 === 899 && hardmode === 2) {
-      AllstatPer += 0.4;
-    } else if (t1 === 1888) {
-      possiveDeftoAtk = true;
-    } else if (t1 === 2424) {
-      const t2 = acc.t2 || 0;
-      const newReflection = t2 / 100;
-      if (newReflection > (reflection || 0)) {
-        reflection = newReflection;
-      }
-    } else if (t1 === 2425) {
-      const t2 = acc.t2 || 0;
-      const newReflection = t2 / 100;
-      if (newReflection > (reflection || 0)) {
-        reflection = newReflection;
-      }
-      refHealOn = true;
-    } else if (t1 === 2777) {
-      hourgclassOn = true;
-    } else if (t1 === 2778) {
-      hourgclassOn1 = true;
-    } else if (t1 === 314) {
-      missrateOn += 3;
-    }
-    
-    // passiveUpdate 效果（基于装备ID）
-    const eqId = acc.id;
-    const eqNum = parseInt(eqId.split('-')[1]) || 0;
-    
-    if (eqNum === 106) {
-      redEyeEffect += 0.1;
-    } else if (eqNum === 131) {
-      redEyeEffect += 0.2;
-    } else if (eqNum === 95) {
-      epHp += 750000;
-      epAtk += 750000;
-      epDef += 750000;
-      epAgi += 750000;
-      epLuc += 750000;
-    } else if (eqNum === 104) {
-      epHp += 1500000;
-      epAtk += 1500000;
-      epDef += 1500000;
-      epAgi += 1500000;
-      epLuc += 1500000;
-    } else if (eqNum === 116) {
-      blueEyeEffect += 0.1;
-    } else if (eqNum === 117) {
-      greenEyeEffect += 0.1;
-    } else if (eqNum === 119) {
-      secretKeyOn = true;
-    } else if (eqNum === 110) {
-      possiveDeftoAtk = true;
-    } else if (eqNum === 123) {
-      envelope = true;
-    } else if (eqNum === 103) {
-      crihPlusKakuritu += 0.2;
-      missrate += 0.2;
-    } else if (eqNum === 125) {
-      MoveSpeed = 22;
-    } else if (eqNum === 105) {
-      warGodBladeOn = true;
-    } else if (eqNum === 108) {
-      healOnAttackOn = true;
-    } else if (eqNum === 120) {
-      sandHourglassOn = true;
-    }
-  }
-  
-  // 从背包中扫描被动饰品（无需装备即可生效）
-  const equippedIds = new Set(accessories.filter(Boolean).map(acc => acc!.id));
-  for (const invItem of inventory) {
-    if (invItem.quantity <= 0) continue;
-    if (equippedIds.has(invItem.equipmentId)) continue; // 已装备的跳过（已在上面处理）
-    if (!isPassiveEffectItem(invItem.equipmentId)) continue;
-    
-    const eqData = equipmentData.find(e => e.id === invItem.equipmentId);
-    if (!eqData) continue;
-    
-    const eqNum = parseInt(eqData.id.split('-')[1]) || 0;
-    
-    if (eqNum === 106) {
-      redEyeEffect += 0.1;
-    } else if (eqNum === 131) {
-      redEyeEffect += 0.2;
-    } else if (eqNum === 95) {
-      epHp += 750000;
-      epAtk += 750000;
-      epDef += 750000;
-      epAgi += 750000;
-      epLuc += 750000;
-    } else if (eqNum === 104) {
-      epHp += 1500000;
-      epAtk += 1500000;
-      epDef += 1500000;
-      epAgi += 1500000;
-      epLuc += 1500000;
-    } else if (eqNum === 116) {
-      blueEyeEffect += 0.1;
-    } else if (eqNum === 117) {
-      greenEyeEffect += 0.1;
-    } else if (eqNum === 119) {
-      secretKeyOn = true;
-    } else if (eqNum === 110) {
-      possiveDeftoAtk = true;
-    } else if (eqNum === 123) {
-      envelope = true;
-    } else if (eqNum === 103) {
-      crihPlusKakuritu += 0.2;
-      missrate += 0.2;
-    } else if (eqNum === 125) {
-      MoveSpeed = 22;
-    } else if (eqNum === 105) {
-      warGodBladeOn = true;
-    } else if (eqNum === 108) {
-      healOnAttackOn = true;
-    } else if (eqNum === 120) {
-      sandHourglassOn = true;
-    }
-  }
-  
-  // getDecreasedHPRate (t1=96): HP减少率 -5% per item
-  const hpReduceItems = accessories.filter(acc => acc && acc.t1 === 96);
-  const hpReduceRate = hpReduceItems.length * 0.05;
-  
-  // getDecreasedATKRate (t1=97): ATK减少率 -5% per item  
-  const atkReduceItems = accessories.filter(acc => acc && acc.t1 === 97);
-  const atkReduceRate = atkReduceItems.length * 0.05;
-  
-  // 強欲リング (t1=12): 统计减半
-  const donyokuRing = accessories.some(acc => acc && acc.t1 === 12);
-
-  return {
-    epHp, epAtk, epDef, epAgi, epLuc,
-    ebHp, ebAtk, ebDef, ebAgi, ebLuc,
-    addMaxHP, addMaxATK, addMaxDEF, addMaxAGI, addMaxLUC,
-    AllstatPer, kyarakutaNouryokuUp, expMultiplier, GetPlusStPt, DamageReduced, DamageIncreased,
-    crihPlusKakuritu, crihplusdamage, renzokuPlusKakuritu, MoveSpeed, SokusiKaihiKakuritu,
-    redEyeEffect, blueEyeEffect, greenEyeEffect, secretKeyOn, possiveDeftoAtk, envelope, missrate,
-    hpReduceRate, atkReduceRate,
-    donyokuRing,
-    resCount, resStatUP,
-    trueDamage, renzoDamageUP,
-    fireSecretKeyOn,
-    sandHourglassOn, healOnAttackOn, warGodBladeOn,
-    reflection, refHealOn, hourgclassOn, hourgclassOn1,
-    missrateOn,
-  };
-}
+import { EqStUpdate } from '@/utils/gdata';
 
 interface GameStore {
-  player: Player;
+  player: PlayerState;
   inventory: InventoryItem[];
   skills: Skill[];
   currentScene: GameScene;
@@ -501,7 +73,7 @@ interface GameStore {
   debugKill: boolean;
   purchaseCounts: Record<string, number>;
   peakSnapshot: PeakSnapshot | null;
-  setPlayer: (player: Player) => void;
+  setPlayer: (player: PlayerState) => void;
   updatePlayerHp: (amount: number) => void;
   updatePlayerMana: (amount: number) => void;
   addGold: (amount: number) => void;
@@ -575,6 +147,8 @@ interface GameStore {
   loadEquipSet: (setId: string) => void;
   /** 删除装备套装 */
   deleteEquipSet: (setId: string) => void;
+  /** 记录装备效果详细计算信息（用于调试） */
+  logEquipmentBonuses: () => void;
   /** 更新装备套装名称 */
   renameEquipSet: (setId: string, name: string) => void;
   /** 购买装备套装槽位 */
@@ -623,7 +197,7 @@ const getStoredData = () => {
 
 const storedData = getStoredData();
 
-const fixStoredPlayerEquipment = (player: Player | undefined): { fixedPlayer: Player; unequippedAccessories: Equipment[] } => {
+const fixStoredPlayerEquipment = (player: PlayerState | undefined): { fixedPlayer: PlayerState; unequippedAccessories: Equipment[] } => {
   if (!player) return { fixedPlayer: initialPlayer, unequippedAccessories: [] };
   
   let fixedPlayer = { ...player };
@@ -878,95 +452,284 @@ type PatternResult = {
   skillUsed: boolean;
   damage: number;
   skillName: string;
-  effectType: 'damage' | 'heal' | 'buff' | 'debuff';
+  effectType: string;
+  requiresDoubleAttack: boolean;
+  requiresSecondAttack: boolean;
 } | null;
 
-const enePattern = (enemyNum: number, currentHp: number, maxHp: number, _turnCount: number, whichTurn: number): PatternResult => {
-  const hpPercent = (currentHp / maxHp) * 100;
-  
+interface PatternSideEffects {
+  updateEnemy?: Partial<Enemy>;
+  updateBattle?: Partial<BattleState>;
+  battleLog?: string;
+}
+
+const enePattern = (
+  enemyNum: number,
+  whichTurn: number,
+  battle: BattleState,
+  player: PlayerState,
+  hardmode: number
+): { result: PatternResult; effects?: PatternSideEffects } => {
   if (whichTurn === 0) {
     if (enemyNum === 70 || enemyNum === 74) {
-      return suzakuPattern(hpPercent);
+      return suzakuPattern(enemyNum, battle);
     }
     if (enemyNum === 76) {
-      return kouryuuPattern(hpPercent);
+      return kouryuuPattern(battle, player);
     }
   }
   
   if (enemyNum === 100 || enemyNum === 101 || enemyNum === 102) {
-    return twilightPattern(hpPercent);
+    return twilightPattern(enemyNum, whichTurn, battle, player);
   }
   
   if (whichTurn === 1) {
     if (enemyNum === 71 || enemyNum === 75 || enemyNum === 87) {
-      return genbuPattern();
+      if (battle.eneDouble < 27) {
+        return {
+          result: {
+            skillUsed: true,
+            damage: 0,
+            skillName: '玄武の力',
+            effectType: 'double_attack',
+            requiresDoubleAttack: true,
+            requiresSecondAttack: false,
+          },
+          effects: {
+            updateBattle: { eneDouble: battle.eneDouble + 1 },
+          },
+        };
+      }
     }
     if (enemyNum === 98 || enemyNum === 99) {
-      return angelPattern();
+      if (battle.eneSkill < 20) {
+        return { result: angelPattern(player) };
+      }
     }
     if (enemyNum === 72 || enemyNum === 86 || enemyNum === 87) {
-      return seiryuuPattern(enemyNum);
+      if (battle.eneSkill < 12) {
+        return { result: seiryuuPattern(enemyNum, player.hp, hardmode) };
+      }
     }
   }
   
   if (enemyNum === 73 || enemyNum === 87) {
-    return byakkoPattern(hpPercent);
+    return byakkoPattern(battle);
   }
   
-  return null;
+  return { result: null };
 };
 
-const suzakuPattern = (hpPercent: number): PatternResult => {
-  if (hpPercent <= 30 && Math.random() < 0.3) {
-    return { skillUsed: true, damage: 0, skillName: '炎の加護', effectType: 'heal' };
-  }
-  return null;
-};
-
-const kouryuuPattern = (hpPercent: number): PatternResult => {
-  if (hpPercent <= 40 && Math.random() < 0.4) {
-    return { skillUsed: true, damage: 0, skillName: '雷の加護', effectType: 'heal' };
-  }
-  return null;
-};
-
-const twilightPattern = (hpPercent: number): PatternResult => {
-  if (hpPercent <= 60 && Math.random() < 0.35) {
-    return { skillUsed: true, damage: 0, skillName: '永遠の暗闇', effectType: 'debuff' };
-  }
-  return null;
-};
-
-const genbuPattern = (): PatternResult => {
-  if (Math.random() < 0.5) {
-    return { skillUsed: true, damage: 0, skillName: '岩の壁', effectType: 'buff' };
-  }
-  return null;
-};
-
-const angelPattern = (): PatternResult => {
-  if (Math.random() < 0.3) {
-    return { skillUsed: true, damage: 0, skillName: '天使の祝福', effectType: 'heal' };
-  }
-  return null;
-};
-
-const seiryuuPattern = (enemyNum: number): PatternResult => {
-  if (Math.random() < 0.4) {
-    let damage = 150000000;
-    if (enemyNum === 86) {
-      damage = 160000000;
+const suzakuPattern = (enemyNum: number, battle: BattleState): { result: PatternResult; effects?: PatternSideEffects } => {
+  if (battle.patternCount === 0) {
+    let effects: PatternSideEffects | undefined;
+    if (enemyNum === 70) {
+      effects = { updateBattle: { eneHP2: 6000000000, eneHPM2: 6000000000, eneATK2: 0 } };
+    } else if (enemyNum === 74) {
+      effects = { updateBattle: { eneHP2: 10000000000, eneHPM2: 10000000000, eneATK2: 200000000 } };
     }
-    return { skillUsed: true, damage: damage, skillName: '感電されて力が抜けた', effectType: 'damage' };
+    return {
+      result: {
+        skillUsed: true,
+        damage: 0,
+        skillName: '朱雀の力',
+        effectType: 'passive',
+        requiresDoubleAttack: false,
+        requiresSecondAttack: false,
+      },
+      effects,
+    };
   }
-  return null;
+  
+  if (battle.eneHP2 > 0 && (battle.enemy?.hp === 0 || battle.suzakuTurnCount >= 1)) {
+    const newTurnCount = battle.suzakuTurnCount + 1;
+    let effects: PatternSideEffects | undefined;
+    
+    if (newTurnCount === 1) {
+      effects = {
+        updateBattle: {
+          patternCount: battle.patternCount + 1,
+          teneATK: (0.05 * (battle.patternCount + 1) + 1) * (battle.enemy?.attack || 1),
+        },
+      };
+    }
+    
+    if (newTurnCount <= 3) {
+      const update: PatternSideEffects = {
+        updateBattle: {
+          suzakuTurnCount: newTurnCount,
+        },
+        updateEnemy: {
+          hp: battle.eneHP2,
+          attack: battle.eneATK2,
+        },
+      };
+      if (newTurnCount === 1) {
+        update.battleLog = '朱雀の力が弱体化された';
+      }
+      if (effects) {
+        update.updateBattle = { ...effects.updateBattle, ...update.updateBattle };
+      }
+      effects = update;
+    } else {
+      effects = {
+        updateBattle: { suzakuTurnCount: 0 },
+        updateEnemy: { hp: battle.eneHPM2, attack: battle.teneATK },
+        battleLog: '朱雀が力を取り戻した',
+      };
+    }
+    
+    return {
+      result: {
+        skillUsed: true,
+        damage: 0,
+        skillName: '朱雀の力',
+        effectType: 'passive',
+        requiresDoubleAttack: false,
+        requiresSecondAttack: false,
+      },
+      effects,
+    };
+  }
+  
+  return { result: null };
 };
 
-const byakkoPattern = (hpPercent: number): PatternResult => {
-  if (hpPercent < 40) {
-    return { skillUsed: true, damage: 0, skillName: '猛威', effectType: 'buff' };
+const kouryuuPattern = (battle: BattleState, player: PlayerState): { result: PatternResult; effects?: PatternSideEffects } => {
+  const damage = Math.floor(player.maxHp * 0.15);
+  const requiresSecondAttack = Math.random() * 100 <= 20 && battle.patternCount >= 0;
+  
+  return {
+    result: {
+      skillUsed: true,
+      damage: damage,
+      skillName: '雷の力',
+      effectType: 'damage',
+      requiresDoubleAttack: false,
+      requiresSecondAttack: requiresSecondAttack,
+    },
+    effects: { updateBattle: { eneCounter: 20 } },
+  };
+};
+
+const twilightPattern = (enemyNum: number, whichTurn: number, battle: BattleState, player: PlayerState): { result: PatternResult; effects?: PatternSideEffects } => {
+  let damage = Math.floor(player.maxHp * 0.1);
+  
+  if (whichTurn === 0 && enemyNum === 100) {
+    if ((battle.enemy?.hp || 0) / (battle.enemy?.maxHp || 1) <= 0.4 && Math.random() <= 0.35) {
+      const healAmount = battle.enemy ? Math.floor(battle.enemy.maxHp * 0.2) : 0;
+      return {
+        result: {
+          skillUsed: true,
+          damage: 0,
+          skillName: '永遠の暗闇',
+          effectType: 'heal',
+          requiresDoubleAttack: false,
+          requiresSecondAttack: false,
+        },
+        effects: {
+          updateEnemy: { hp: Math.min(battle.enemy?.maxHp || 0, (battle.enemy?.hp || 0) + healAmount) },
+          battleLog: 'EneSkill: Recovery 20% Max HP!',
+        },
+      };
+    }
   }
-  return null;
+  
+  if (whichTurn === 1 && enemyNum === 101) {
+    const healAmount = Math.floor(damage * 0.1 + 1);
+    return {
+      result: {
+        skillUsed: true,
+        damage: 0,
+        skillName: '永遠の暗闇',
+        effectType: 'heal',
+        requiresDoubleAttack: false,
+        requiresSecondAttack: false,
+      },
+      effects: {
+        updateEnemy: { hp: Math.min(battle.enemy?.maxHp || 0, (battle.enemy?.hp || 0) + healAmount) },
+      },
+    };
+  }
+  
+  if (enemyNum === 102) {
+    damage = Math.floor(player.maxHp * 0.08);
+    return {
+      result: {
+        skillUsed: true,
+        damage: damage,
+        skillName: '永遠の暗闇',
+        effectType: 'damage',
+        requiresDoubleAttack: false,
+        requiresSecondAttack: false,
+      },
+    };
+  }
+  
+  return { result: null };
+};
+
+const angelPattern = (player: PlayerState): PatternResult => {
+  const damage = Math.floor(player.hp * 0.3);
+  
+  return {
+    skillUsed: true,
+    damage: damage,
+    skillName: '天使の祝福',
+    effectType: 'damage',
+    requiresDoubleAttack: false,
+    requiresSecondAttack: false,
+  };
+};
+
+const seiryuuPattern = (enemyNum: number, playerHp: number, hardmode: number): PatternResult => {
+  if (playerHp < 1) {
+    return null;
+  }
+  
+  let damage = 150000000;
+  if (hardmode === 1) {
+    damage += 700000000;
+  }
+  if (enemyNum === 86) {
+    damage += 1600000000;
+  }
+  
+  return {
+    skillUsed: true,
+    damage: damage,
+    skillName: '感電されて力が抜けた',
+    effectType: 'damage',
+    requiresDoubleAttack: false,
+    requiresSecondAttack: false,
+  };
+};
+
+const byakkoPattern = (battle: BattleState): { result: PatternResult; effects?: PatternSideEffects } => {
+  if (!battle.enemy) {
+    return { result: null };
+  }
+  
+  const damageReduced = battle.enemy.hp / battle.enemy.maxHp;
+  
+  if (damageReduced < 0.4) {
+    return {
+      result: {
+        skillUsed: true,
+        damage: 0,
+        skillName: '白虎の力',
+        effectType: 'passive',
+        requiresDoubleAttack: false,
+        requiresSecondAttack: false,
+      },
+      effects: {
+        updateBattle: { eneDamageReduced: 0.4 },
+        updateEnemy: { attack: Math.floor(battle.enemy.attack * 1.004) },
+      },
+    };
+  }
+  
+  return { result: null };
 };
 
 const collectionData = getCollection();
@@ -1069,6 +832,17 @@ export const useGameStore = create<GameStore>()(
         missrateOn: 0,
         _missTurnCount: 0,
         renzoDamageUP: 0,
+        isDoubleAttack: false,
+        eneHP2: 0,
+        eneHPM2: 0,
+        eneATK2: 0,
+        teneATK: 0,
+        patternCount: 0,
+        suzakuTurnCount: 0,
+        eneDouble: 0,
+        eneSkill: 0,
+        eneDamageReduced: 1,
+        eneCounter: 0,
         },
       battleInterval: null,
       battlePoints: storedData?.battlePoints || (saveData.hardmode === 2 ? 10 : (saveData.hardmode === 1 ? 15 : 30)),
@@ -1274,65 +1048,17 @@ export const useGameStore = create<GameStore>()(
         const agiStPtBonus = stPtAllocate.agi * 2;
         const lucStPtBonus = stPtAllocate.luc * 1;
         
-        // 基础属性
+        // 基础属性（所有装备效果都在 EqStUpdate 中处理，不再手动计算）
         let baseHp = initialPlayer.maxHp + bonus.hp + hpStPtBonus;
         let baseAtk = initialPlayer.attack + bonus.attack + atkStPtBonus;
         let baseDef = initialPlayer.defense + bonus.defense + defStPtBonus;
         let baseAgi = initialPlayer.agility + bonus.agility + agiStPtBonus;
         let baseLuc = initialPlayer.luck + bonus.luck + lucStPtBonus;
         
-        // 处理 Gem 饰品固定加成（Brave/War/FourGod Gems）
-        const braveGems = accessories.filter(acc => acc && acc.t1 === 40);
-        for (const gem of braveGems) {
-          const val = gem.t2 || 0;
-          baseHp += val; baseAtk += val; baseDef += val; baseAgi += val; baseLuc += val;
-        }
-        const warGems = accessories.filter(acc => acc && acc.t1 === 41);
-        for (const gem of warGems) {
-          const val = gem.t2 || 0;
-          baseAtk += val; baseDef += val; baseAgi += val;
-        }
-        const fourGodGems = accessories.filter(acc => acc && acc.t1 === 42);
-        for (const gem of fourGodGems) {
-          const val = gem.t2 || 0;
-          baseHp += val; baseAtk += val; baseDef += val; baseAgi += val;
-        }
-        
         updateHighLv(newLevel);
         
-        // 勇敢证明 (820) 和能力宝石 (35) 额外倍率
-        const braveProof = accessories.find(acc => acc && acc.t1 === 820);
-        if (braveProof) {
-          const rate = (braveProof.t2 || 30) / 100;
-          baseHp = Math.ceil(baseHp * (1 + rate));
-          baseAtk = Math.ceil(baseAtk * (1 + rate));
-          baseDef = Math.ceil(baseDef * (1 + rate));
-          baseAgi = Math.ceil(baseAgi * (1 + rate));
-          baseLuc = Math.ceil(baseLuc * (1 + rate));
-        }
-        
-        const playerGems = accessories.filter(acc => acc && acc.t1 === 35);
-        if (playerGems.length > 0) {
-          let itemCount = 0;
-          for (const item of inventory) {
-            const eq = getEquipmentById(item.equipmentId);
-            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-              itemCount += item.quantity;
-            }
-          }
-          const maxItemCount = Math.min(itemCount, 1000);
-          const totalRate = playerGems.reduce((sum, gem) => {
-            const bonusPercent = gem.t2 || 0;
-            return sum + (bonusPercent * maxItemCount / 1000) / 100;
-          }, 0);
-          baseHp = Math.ceil(baseHp * (1 + totalRate));
-          baseAtk = Math.ceil(baseAtk * (1 + totalRate));
-          baseDef = Math.ceil(baseDef * (1 + totalRate));
-          baseAgi = Math.ceil(baseAgi * (1 + totalRate));
-        }
-        
         const { hardmode, kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, player.gold);
+        const bonuses = EqStUpdate(accessories, inventory, hardmode || 0, player.gold, player.level);
         
         // 根据 gdata.txt 中的 lvupFunc()，每级属性点 = 4 + GetPlusStPt
         const stPtPerLevel = 4 + bonuses.GetPlusStPt;
@@ -1371,56 +1097,15 @@ export const useGameStore = create<GameStore>()(
           const updatedPlayer = get().player;
           const newAlloc = updatedPlayer.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
           
-          // 用新的 stPtAllocate 重新计算基础属性
+          // 用新的 stPtAllocate 重新计算基础属性（所有装备效果都在 EqStUpdate 中处理）
           let recalcBaseHp = initialPlayer.maxHp + bonus.hp + newAlloc.hp * 5;
           let recalcBaseAtk = initialPlayer.attack + bonus.attack + newAlloc.atk * 3;
           let recalcBaseDef = initialPlayer.defense + bonus.defense + newAlloc.def * 3;
           let recalcBaseAgi = initialPlayer.agility + bonus.agility + newAlloc.agi * 2;
           let recalcBaseLuc = initialPlayer.luck + bonus.luck + newAlloc.luc * 1;
           
-          // 重新应用 Brave/War/FourGod Gems
-          for (const gem of braveGems) {
-            const val = gem.t2 || 0;
-            recalcBaseHp += val; recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val; recalcBaseLuc += val;
-          }
-          for (const gem of warGems) {
-            const val = gem.t2 || 0;
-            recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val;
-          }
-          for (const gem of fourGodGems) {
-            const val = gem.t2 || 0;
-            recalcBaseHp += val; recalcBaseAtk += val; recalcBaseDef += val; recalcBaseAgi += val;
-          }
-          
-          // 重新应用勇敢证明
-          if (braveProof) {
-            const rate = (braveProof.t2 || 30) / 100;
-            recalcBaseHp = Math.ceil(recalcBaseHp * (1 + rate));
-            recalcBaseAtk = Math.ceil(recalcBaseAtk * (1 + rate));
-            recalcBaseDef = Math.ceil(recalcBaseDef * (1 + rate));
-            recalcBaseAgi = Math.ceil(recalcBaseAgi * (1 + rate));
-            recalcBaseLuc = Math.ceil(recalcBaseLuc * (1 + rate));
-          }
-          
-          // 重新应用 Play Gem
-          for (const gem of playerGems) {
-            const bonusPercent = gem.t2 || 0;
-            let itemCount = 0;
-            for (const item of inventory) {
-              const eq = getEquipmentById(item.equipmentId);
-              if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-                itemCount += item.quantity;
-              }
-            }
-            const rate = (bonusPercent * Math.min(itemCount, 1000) / 1000) / 100;
-            recalcBaseHp = Math.ceil(recalcBaseHp * (1 + rate));
-            recalcBaseAtk = Math.ceil(recalcBaseAtk * (1 + rate));
-            recalcBaseDef = Math.ceil(recalcBaseDef * (1 + rate));
-            recalcBaseAgi = Math.ceil(recalcBaseAgi * (1 + rate));
-          }
-          
           // 重新计算 bonuses（用 updatedPlayer.gold）
-          const recalcBonuses = applyEquipmentBonuses(accessories, inventory, hardmode || 0, updatedPlayer.gold);
+          const recalcBonuses = EqStUpdate(accessories, inventory, hardmode || 0, updatedPlayer.gold, updatedPlayer.level);
           
           // 重新计算装备分量（epHp 依赖 baseHp）
           const recalcEquip = getEquipComponents(weaponObj, weaponQty, updatedPlayer.weaponSoul, armorObj, armorQty, updatedPlayer.armorSoul, recalcBaseHp);
@@ -1644,41 +1329,11 @@ export const useGameStore = create<GameStore>()(
         let baseAgi_calc = initialPlayer.agility + getLevelBonus(newPlayer.level).agility + stPtAllocate.agi * 2;
         let baseLuc_calc = initialPlayer.luck + getLevelBonus(newPlayer.level).luck + stPtAllocate.luc * 1;
         
-        // 勇者の証明 (t1=820) 加成 - 角色能力效果增加t2%
-        const braveProof1 = accessories.find(acc => acc && acc.t1 === 820);
-        if (braveProof1) {
-          const rate = (braveProof1.t2 || 30) / 100;
-          baseHp_calc = Math.ceil(baseHp_calc * (1 + rate));
-          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + rate));
-          baseDef_calc = Math.ceil(baseDef_calc * (1 + rate));
-          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + rate));
-          baseLuc_calc = Math.ceil(baseLuc_calc * (1 + rate));
-        }
-        
-        // 能力宝石 (t1=35) 加成
-        const playerGems1 = accessories.filter(acc => acc && acc.t1 === 35);
-        if (playerGems1.length > 0) {
-          let itemCount = 0;
-          for (const item of inventory) {
-            const eq = getEquipmentById(item.equipmentId);
-            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-              itemCount += item.quantity;
-            }
-          }
-          const maxItemCount = Math.min(itemCount, 1000);
-          const totalRate = playerGems1.reduce((sum, gem) => {
-            const bonusPercent = gem.t2 || 0;
-            return sum + (bonusPercent * maxItemCount / 1000) / 100;
-          }, 0);
-          baseHp_calc = Math.ceil(baseHp_calc * (1 + totalRate));
-          baseAtk_calc = Math.ceil(baseAtk_calc * (1 + totalRate));
-          baseDef_calc = Math.ceil(baseDef_calc * (1 + totalRate));
-          baseAgi_calc = Math.ceil(baseAgi_calc * (1 + totalRate));
-        }
+        // 所有装备效果（包括勇敢证明、能力宝石、Brave/War/FourGod Gems等）都在 EqStUpdate 中处理
         
         // 饰品加成
         const { kyarakutalv, kyarakutaKozinExp } = get();
-        const bonuses1 = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, player.gold);
+        const bonuses1 = EqStUpdate(accessories, inventory, get().hardmode || 0, player.gold, player.level);
         
         // 武器/防具贡献分量
         const equip1 = getEquipComponents(weaponObj, weaponQty, newPlayer.weaponSoul, armorObj, armorQty, newPlayer.armorSoul, baseHp_calc);
@@ -1950,9 +1605,9 @@ export const useGameStore = create<GameStore>()(
         console.log('旧饰品:', player.equippedAccessories?.map(a => a ? `${a.name}(t1=${a.t1},t2=${a.t2})` : '空').join(', ') || '空');
         console.log('旧属性:', {hp: player.maxHp, atk: player.attack, def: player.defense, agi: player.agility, luc: player.luck});
         
-        // 使用统一的 applyEquipmentBonuses 函数计算饰品加成
+        // 使用统一的 EqStUpdate 函数计算饰品加成
         const { kyarakutalv: kclv, kyarakutaKozinExp: kcexp } = get();
-        const bonuses = applyEquipmentBonuses(accessories, inventory, get().hardmode || 0, player.gold);
+        const bonuses = EqStUpdate(accessories, inventory, get().hardmode || 0, player.gold, player.level);
         
         // 使用已分配的属性点
         const stPtAllocate = player.stPtAllocate || { hp: 0, atk: 0, def: 0, agi: 0, luc: 0 };
@@ -1968,41 +1623,7 @@ export const useGameStore = create<GameStore>()(
         console.log('🔍 [loadEquipSet] stPtAllocate:', stPtAllocate);
         console.log('🔍 [loadEquipSet] level bonus:', getLevelBonus(player.level));
         
-        // 勇者の証明 (t1=820) 加成 - 角色能力效果增加t2%
-        const braveProof = accessories.find(acc => acc && acc.t1 === 820);
-        if (braveProof) {
-          const rate = (braveProof.t2 || 30) / 100;
-          console.log('🔍 [loadEquipSet] 勇者の証明 found:', braveProof.name, 't2=', braveProof.t2, 'rate=', rate);
-          baseHp2 = Math.ceil(baseHp2 * (1 + rate));
-          baseAtk2 = Math.ceil(baseAtk2 * (1 + rate));
-          baseDef2 = Math.ceil(baseDef2 * (1 + rate));
-          baseAgi2 = Math.ceil(baseAgi2 * (1 + rate));
-          baseLuc2 = Math.ceil(baseLuc2 * (1 + rate));
-          console.log('🔍 [loadEquipSet] 基础属性(勇者の証明后):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
-        } else {
-          console.log('🔍 [loadEquipSet] 无勇者の証明');
-        }
-        
-        // 能力宝石 (t1=35) 加成
-        const playerGems2 = accessories.filter(acc => acc && acc.t1 === 35);
-        if (playerGems2.length > 0) {
-          let itemCount = 0;
-          for (const item of inventory) {
-            const eq = getEquipmentById(item.equipmentId);
-            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-              itemCount += item.quantity;
-            }
-          }
-          const maxItemCount = Math.min(itemCount, 1000);
-          const totalRate = playerGems2.reduce((sum, gem) => {
-            const bonusPercent = gem.t2 || 0;
-            return sum + (bonusPercent * maxItemCount / 1000) / 100;
-          }, 0);
-          baseHp2 = Math.ceil(baseHp2 * (1 + totalRate));
-          baseAtk2 = Math.ceil(baseAtk2 * (1 + totalRate));
-          baseDef2 = Math.ceil(baseDef2 * (1 + totalRate));
-          baseAgi2 = Math.ceil(baseAgi2 * (1 + totalRate));
-        }
+        // 所有装备效果（包括勇敢证明、能力宝石、Brave/War/FourGod Gems等）都在 EqStUpdate 中处理
         console.log('🔍 [loadEquipSet] 基础属性(最终):', { baseHp2, baseAtk2, baseDef2, baseAgi2, baseLuc2 });
         
         // 武器/防具贡献分量
@@ -2072,6 +1693,257 @@ export const useGameStore = create<GameStore>()(
         const data = loadSaveData();
         data.equipSets = updatedSets;
         saveSaveData(data);
+      },
+      logEquipmentBonuses: () => {
+        const { player, inventory, hardmode } = get();
+        
+        const weapon = player.equippedWeapon ? getEquipmentById(player.equippedWeapon.id) || null : null;
+        const armor = player.equippedArmor ? getEquipmentById(player.equippedArmor.id) || null : null;
+        const accessories = (player.equippedAccessories || []).map(acc => 
+          acc ? getEquipmentById(acc.id) || null : null
+        ).filter((acc): acc is Equipment => acc !== null);
+        
+        console.group('%c📊 装备效果详细计算', 'color: purple; font-weight: bold; font-size: 16px');
+        
+        console.log('%c--- 穿戴的装备 ---', 'color: blue; font-weight: bold');
+        
+        if (weapon) {
+          console.log(`%c武器: ${weapon.name}`, 'color: cyan');
+          console.log(`  - 攻击加成: +${weapon.attackBonus}`);
+        } else {
+          console.log('%c武器: 无', 'color: gray');
+        }
+        
+        if (armor) {
+          console.log(`%c护甲: ${armor.name}`, 'color: cyan');
+          console.log(`  - 防御加成: +${armor.defenseBonus}`);
+          console.log(`  - HP加成: +${armor.hpBonus}`);
+        } else {
+          console.log('%c护甲: 无', 'color: gray');
+        }
+        
+        console.log('%c饰品:', 'color: cyan');
+        accessories.forEach((acc, index) => {
+          if (!acc) return;
+          console.log(`%c  [${index + 1}] ${acc.name} (t1=${acc.t1}, t2=${acc.t2})`, 'color: green');
+          console.log(`    - 攻击: +${acc.attackBonus}, 防御: +${acc.defenseBonus}, HP: +${acc.hpBonus}, 敏捷: +${acc.agilityBonus}, 幸运: +${acc.luckBonus}`);
+        });
+        
+        console.log('%c--- EqStUpdate 计算结果 ---', 'color: blue; font-weight: bold');
+        const bonuses = EqStUpdate(accessories, inventory, hardmode || 0, player.gold, player.level);
+        
+        console.log('%c--- 玩家宝石详细计算 ---', 'color: blue; font-weight: bold');
+        const playerGemAccessoryCount = inventory.filter(item => {
+          const eq = getEquipmentById(item.equipmentId);
+          return eq?.type === 'accessory' && eq?.t1 === 35 && item.quantity >= 1;
+        }).reduce((sum, item) => sum + item.quantity, 0);
+        const playerGemWeaponCount = inventory.filter(item => {
+          const eq = getEquipmentById(item.equipmentId);
+          return eq?.type === 'weapon' && eq?.t1 === 35 && item.quantity >= 1;
+        }).reduce((sum, item) => sum + item.quantity, 0);
+        const playerGemArmorCount = inventory.filter(item => {
+          const eq = getEquipmentById(item.equipmentId);
+          return eq?.type === 'armor' && eq?.t1 === 35 && item.quantity >= 1;
+        }).reduce((sum, item) => sum + item.quantity, 0);
+        const totalPlayerGemCount = playerGemAccessoryCount + playerGemWeaponCount + playerGemArmorCount;
+        console.log(`  - 饰品栏玩家宝石数量: ${playerGemAccessoryCount}`);
+        console.log(`  - 武器栏玩家宝石数量: ${playerGemWeaponCount}`);
+        console.log(`  - 护甲栏玩家宝石数量: ${playerGemArmorCount}`);
+        console.log(`  - 玩家宝石总数量: ${totalPlayerGemCount}`);
+        
+        let playerGemBaseCount = totalPlayerGemCount;
+        let playerGemBonusCount = 0;
+        if (totalPlayerGemCount > 1000) {
+          playerGemBonusCount = totalPlayerGemCount - 1000;
+          playerGemBaseCount = 1000;
+        }
+        console.log(`  - 基础加成数量 (上限1000): ${playerGemBaseCount}`);
+        console.log(`  - 额外幸运加成数量 (超过1000部分): ${playerGemBonusCount}`);
+        
+        const playerGemT2 = 900;
+        console.log(`  - 玩家宝石t2值: ${playerGemT2}`);
+        
+        const playerGemPhpBonus = playerGemBaseCount * playerGemT2;
+        const playerGemAtkBonus = playerGemBaseCount * playerGemT2;
+        const playerGemDefBonus = playerGemBaseCount * playerGemT2;
+        const playerGemAgiBonus = playerGemBaseCount * playerGemT2;
+        const playerGemLucBonus = playerGemBonusCount * (playerGemT2 * 4);
+        
+        console.log(`%c  玩家宝石属性加成明细:`, 'color: green');
+        console.log(`    - HP加成: ${playerGemBaseCount} × ${playerGemT2} = ${playerGemPhpBonus}`);
+        console.log(`    - 攻击加成: ${playerGemBaseCount} × ${playerGemT2} = ${playerGemAtkBonus}`);
+        console.log(`    - 防御加成: ${playerGemBaseCount} × ${playerGemT2} = ${playerGemDefBonus}`);
+        console.log(`    - 敏捷加成: ${playerGemBaseCount} × ${playerGemT2} = ${playerGemAgiBonus}`);
+        console.log(`    - 幸运加成: ${playerGemBonusCount} × ${playerGemT2} × 4 = ${playerGemLucBonus}`);
+        
+        console.log('%c--- 属性来源详细分析 ---', 'color: blue; font-weight: bold');
+        
+        const attrSources: Record<string, { ephp: number; epatk: number; epdef: number; epspeed: number; epluk: number }> = {};
+        
+        const addSource = (name: string, ephp: number, epatk: number, epdef: number, epspeed: number, epluk: number) => {
+          if (!attrSources[name]) {
+            attrSources[name] = { ephp: 0, epatk: 0, epdef: 0, epspeed: 0, epluk: 0 };
+          }
+          attrSources[name].ephp += ephp;
+          attrSources[name].epatk += epatk;
+          attrSources[name].epdef += epdef;
+          attrSources[name].epspeed += epspeed;
+          attrSources[name].epluk += epluk;
+        };
+        
+        if (weapon) {
+          addSource(`${weapon.name} (基础属性)`, 0, weapon.attackBonus || 0, 0, 0, 0);
+        }
+        
+        if (armor) {
+          addSource(`${armor.name} (基础属性)`, armor.hpBonus || 0, 0, armor.defenseBonus || 0, 0, 0);
+        }
+        
+        accessories.forEach((acc, index) => {
+          if (!acc) return;
+          
+          if (acc.t1 === 30) {
+            addSource(`${acc.name} (t1=30)`, acc.t2 || 0, 0, 0, 0, 0);
+          } else if (acc.t1 === 31) {
+            addSource(`${acc.name} (t1=31)`, 0, acc.t2 || 0, 0, 0, 0);
+          } else if (acc.t1 === 32) {
+            addSource(`${acc.name} (t1=32)`, 0, 0, acc.t2 || 0, 0, 0);
+          } else if (acc.t1 === 33) {
+            addSource(`${acc.name} (t1=33)`, 0, 0, 0, acc.t2 || 0, 0);
+          } else if (acc.t1 === 34) {
+            addSource(`${acc.name} (t1=34)`, 0, 0, 0, 0, acc.t2 || 0);
+          } else if (acc.t1 === 35 && index === accessories.findIndex(a => a?.t1 === 35)) {
+            addSource(`${acc.name} (t1=35)`, playerGemPhpBonus, playerGemAtkBonus, playerGemDefBonus, playerGemAgiBonus, playerGemLucBonus);
+          } else if (acc.t1 === 40) {
+            addSource(`${acc.name} (t1=40)`, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0);
+          } else if (acc.t1 === 41) {
+            addSource(`${acc.name} (t1=41)`, 0, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0, 0);
+          } else if (acc.t1 === 42) {
+            addSource(`${acc.name} (t1=42)`, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0, acc.t2 || 0, 0);
+          } else if (acc.t1 === 43) {
+            addSource(`${acc.name} (t1=43)`, acc.t2 || 0, 0, acc.t2 || 0, acc.t2 || 0, 0);
+          } else if (acc.t1 === 2701) {
+            addSource(`${acc.name} (t1=2701)`, 1500000, 0, 0, 0, 0);
+          } else if (acc.t1 === 820) {
+            addSource(`${acc.name} (t1=820)`, 0, 0, 0, 0, 0);
+          } else {
+            addSource(`${acc.name} (t1=${acc.t1})`, acc.hpBonus || 0, acc.attackBonus || 0, acc.defenseBonus || 0, acc.agilityBonus || 0, acc.luckBonus || 0);
+          }
+        });
+        
+        console.log('%c  属性来源明细:', 'color: green');
+        Object.entries(attrSources).forEach(([name, attrs]) => {
+          const total = attrs.ephp + attrs.epatk + attrs.epdef + attrs.epspeed + attrs.epluk;
+          if (total > 0) {
+            console.log(`    ${name}:`);
+            if (attrs.ephp > 0) console.log(`      - HP: +${attrs.ephp}`);
+            if (attrs.epatk > 0) console.log(`      - ATK: +${attrs.epatk}`);
+            if (attrs.epdef > 0) console.log(`      - DEF: +${attrs.epdef}`);
+            if (attrs.epspeed > 0) console.log(`      - AGI: +${attrs.epspeed}`);
+            if (attrs.epluk > 0) console.log(`      - LUC: +${attrs.epluk}`);
+          }
+        });
+        
+        const sumEphp = Object.values(attrSources).reduce((sum, src) => sum + src.ephp, 0);
+        const sumEpatk = Object.values(attrSources).reduce((sum, src) => sum + src.epatk, 0);
+        const sumEpdef = Object.values(attrSources).reduce((sum, src) => sum + src.epdef, 0);
+        const sumEpspeed = Object.values(attrSources).reduce((sum, src) => sum + src.epspeed, 0);
+        const sumEpluk = Object.values(attrSources).reduce((sum, src) => sum + src.epluk, 0);
+        
+        console.log('%c  属性来源总计:', 'color: yellow');
+        console.log(`    - HP: ${sumEphp}`);
+        console.log(`    - ATK: ${sumEpatk}`);
+        console.log(`    - DEF: ${sumEpdef}`);
+        console.log(`    - AGI: ${sumEpspeed}`);
+        console.log(`    - LUC: ${sumEpluk}`);
+        
+        console.log('%c  EqStUpdate 返回值:', 'color: red');
+        console.log(`    - ephp: ${bonuses.ephp} (差异: ${bonuses.ephp - sumEphp})`);
+        console.log(`    - epatk: ${bonuses.epatk} (差异: ${bonuses.epatk - sumEpatk})`);
+        console.log(`    - epdef: ${bonuses.epdef} (差异: ${bonuses.epdef - sumEpdef})`);
+        console.log(`    - epspeed: ${bonuses.epspeed} (差异: ${bonuses.epspeed - sumEpspeed})`);
+        console.log(`    - epluk: ${bonuses.epluk} (差异: ${bonuses.epluk - sumEpluk})`);
+        
+        console.log('%c--- PassiveUpdate 被动加成详细计算 ---', 'color: blue; font-weight: bold');
+        
+        const castleRingCount = inventory.filter(item => {
+          const eq = getEquipmentById(item.equipmentId);
+          return eq?.type === 'accessory' && eq?.listnum === 95 && item.quantity >= 1;
+        }).reduce((sum, item) => sum + item.quantity, 0);
+        const divinePowerCount = inventory.filter(item => {
+          const eq = getEquipmentById(item.equipmentId);
+          return eq?.type === 'accessory' && eq?.listnum === 104 && item.quantity >= 1;
+        }).reduce((sum, item) => sum + item.quantity, 0);
+        
+        console.log(`  - 城堡紫水晶戒指 (listnum=95) 数量: ${castleRingCount}`);
+        console.log(`    - 每个提供全属性+750000`);
+        console.log(`    - 总加成: ${castleRingCount} × 750000 = ${castleRingCount * 750000}`);
+        
+        console.log(`  - 神之力 (listnum=104) 数量: ${divinePowerCount}`);
+        console.log(`    - 每个提供全属性+1500000`);
+        console.log(`    - 总加成: ${divinePowerCount} × 1500000 = ${divinePowerCount * 1500000}`);
+        
+        const passiveTotalBonus = castleRingCount * 750000 + divinePowerCount * 1500000;
+        console.log(`  - PassiveUpdate总加成: 全属性+${passiveTotalBonus}`);
+        
+        console.log('%c基础属性加成 (ephp/epatk/epdef/epspeed/epluk):', 'color: orange');
+        console.log(`  - ephp: ${bonuses.ephp}`);
+        console.log(`  - epatk: ${bonuses.epatk}`);
+        console.log(`  - epdef: ${bonuses.epdef}`);
+        console.log(`  - epspeed: ${bonuses.epspeed}`);
+        console.log(`  - epluk: ${bonuses.epluk}`);
+        
+        console.log('%c百分比加成:', 'color: orange');
+        console.log(`  - ebhp: ${(bonuses.ebhp * 100).toFixed(2)}%`);
+        console.log(`  - ebatk: ${(bonuses.ebatk * 100).toFixed(2)}%`);
+        console.log(`  - ebdef: ${(bonuses.ebdef * 100).toFixed(2)}%`);
+        console.log(`  - ebspeed: ${(bonuses.ebspeed * 100).toFixed(2)}%`);
+        console.log(`  - ebluk: ${(bonuses.ebluk * 100).toFixed(2)}%`);
+        
+        console.log('%c额外加成:', 'color: orange');
+        console.log(`  - addMaxHP: ${(bonuses.addMaxHP * 100).toFixed(2)}%`);
+        console.log(`  - addMaxATK: ${(bonuses.addMaxATK * 100).toFixed(2)}%`);
+        console.log(`  - addMaxDEF: ${(bonuses.addMaxDEF * 100).toFixed(2)}%`);
+        console.log(`  - addMaxAGI: ${(bonuses.addMaxAGI * 100).toFixed(2)}%`);
+        console.log(`  - addMaxLUC: ${(bonuses.addMaxLUC * 100).toFixed(2)}%`);
+        console.log(`  - AllstatPer: ${(bonuses.AllstatPer * 100).toFixed(2)}%`);
+        console.log(`  - kyarakutaNouryokuUp: ${bonuses.kyarakutaNouryokuUp}`);
+        
+        console.log('%c战斗相关:', 'color: orange');
+        console.log(`  - 暴击率加成: ${(bonuses.crihPlusKakuritu * 100).toFixed(2)}%`);
+        console.log(`  - 暴击伤害倍数: ${bonuses.crihplusdamage}`);
+        console.log(`  - 连击率加成: ${(bonuses.renzokuPlusKakuritu * 100).toFixed(2)}%`);
+        console.log(`  - 连击伤害倍率: ${bonuses.renzoDamageUP}`);
+        console.log(`  - 真实伤害: ${bonuses.trueDamage}`);
+        console.log(`  - 伤害减免: ${bonuses.DamageReduced}%`);
+        console.log(`  - 伤害提升: ${bonuses.DamageIncreased}`);
+        console.log(`  - 复活次数: ${bonuses.resCount}`);
+        console.log(`  - 复活属性提升: ${(bonuses.resStatUP * 100 - 100).toFixed(2)}%`);
+        
+        console.log('%c被动效果:', 'color: orange');
+        console.log(`  - 双倍攻击: ${bonuses.doubleAttack}`);
+        console.log(`  - 伤害反射: ${(bonuses.reflection * 100).toFixed(2)}%`);
+        console.log(`  - 反射回血: ${bonuses.refHealOn}`);
+        console.log(`  - 防御转攻击: ${bonuses.deftoatk}`);
+        console.log(`  - 当前HP伤害: ${bonuses.CurrentHpDamage}`);
+        console.log(`  - HP恢复: ${bonuses.myhprecovery}`);
+        console.log(`  - 伤害恢复: ${bonuses.DamegeKaihukuOn}`);
+        console.log(`  - 索敌回避: ${bonuses.SokusiKaihiKakuritu}`);
+        console.log(`  - 遭遇率: ${(bonuses.encountBairitu * 100).toFixed(2)}%`);
+        console.log(`  - 移动速度: ${(bonuses.MoveSpeed * 100).toFixed(2)}%`);
+        console.log(`  - 贪婪模式: ${bonuses.goyokuOn}`);
+        console.log(`  - 懒惰模式: ${bonuses.donyokuOn}`);
+        console.log(`  - 暮光模式: ${bonuses.twilightON}`);
+        console.log(`  - 经验倍率: ${(bonuses.expbairitu * 100).toFixed(2)}%`);
+        
+        console.log('%c--- 最终属性计算 ---', 'color: blue; font-weight: bold');
+        console.log(`  - 最终HP加成: ${bonuses.ehp}`);
+        console.log(`  - 最终攻击加成: ${bonuses.eatk}`);
+        console.log(`  - 最终防御加成: ${bonuses.edef}`);
+        console.log(`  - 最终敏捷加成: ${bonuses.espeed}`);
+        console.log(`  - 最终幸运加成: ${bonuses.eluk}`);
+        
+        console.groupEnd();
       },
       renameEquipSet: (setId, name) => {
         const { equipSets } = get();
@@ -2325,7 +2197,7 @@ export const useGameStore = create<GameStore>()(
         const equip = getEquipComponents(weaponObj, weaponQty, finalWeaponSoul, armorObj, armorQty, finalArmorSoul, baseHp);
         
         // 饰品加成
-        const bonuses = applyEquipmentBonuses(accessories, finalInventory, hardmode, player.gold);
+        const bonuses = EqStUpdate(accessories, finalInventory, hardmode, player.gold, player.level);
         
         // 英雄加成
         const heroBonuses = computeHeroBonuses(player.heroId || 0);
@@ -2418,6 +2290,17 @@ export const useGameStore = create<GameStore>()(
             missrateOn: bonuses.missrateOn || 0,
             _missTurnCount: 0,
             renzoDamageUP: bonuses.renzoDamageUP || 0,
+            isDoubleAttack: false,
+            eneHP2: 0,
+            eneHPM2: 0,
+            eneATK2: 0,
+            teneATK: 0,
+            patternCount: 0,
+            suzakuTurnCount: 0,
+            eneDouble: 0,
+            eneSkill: 0,
+            eneDamageReduced: 1,
+            eneCounter: 0,
           },
         });
         console.log('[startGame] resCount:', bonuses.resCount, 'resStatUP:', bonuses.resStatUP);
@@ -2682,8 +2565,8 @@ export const useGameStore = create<GameStore>()(
         const slot3 = dropSlots[2] || null;
         
         // 计算装备加成（包括连击率等）
-        const eqBonuses = applyEquipmentBonuses(
-          accessories, inventory, hardmode
+        const eqBonuses = EqStUpdate(
+          accessories, inventory, hardmode, player.gold, player.level
         );
         
         const battleVarResult = battleVarInit(
@@ -2857,6 +2740,17 @@ export const useGameStore = create<GameStore>()(
             missrateOn: eqBonuses.missrateOn || 0,
             _missTurnCount: 0,
             renzoDamageUP: eqBonuses.renzoDamageUP || 0,
+            isDoubleAttack: false,
+            eneHP2: 0,
+            eneHPM2: 0,
+            eneATK2: 0,
+            teneATK: 0,
+            patternCount: 0,
+            suzakuTurnCount: 0,
+            eneDouble: 0,
+            eneSkill: 0,
+            eneDamageReduced: 1,
+            eneCounter: 0,
           },
         });
       },
@@ -2923,6 +2817,8 @@ export const useGameStore = create<GameStore>()(
           activeDrops = normalDrops;
         }
         
+        modifiedBoss.drops = activeDrops;
+        
         const dropSlots = activeDrops.map((drop: { equipmentId: string; dropRate: number } | null) => {
           if (!drop) return null;
           const { itemType, itemIndex } = equipmentIdToItemTypeAndIndex(drop.equipmentId);
@@ -2938,8 +2834,8 @@ export const useGameStore = create<GameStore>()(
         const slot3 = dropSlots[2] || null;
         
         // 计算装备加成（包括连击率等）
-        const eqBonuses2 = applyEquipmentBonuses(
-          accessories, inventory, hardmode
+        const eqBonuses2 = EqStUpdate(
+          accessories, inventory, hardmode, player.gold, player.level
         );
         
         const battleVarResult = battleVarInit(
@@ -3111,6 +3007,17 @@ export const useGameStore = create<GameStore>()(
             missrateOn: eqBonuses2.missrateOn || 0,
             _missTurnCount: 0,
             renzoDamageUP: eqBonuses2.renzoDamageUP || 0,
+            isDoubleAttack: false,
+            eneHP2: 0,
+            eneHPM2: 0,
+            eneATK2: 0,
+            teneATK: 0,
+            patternCount: 0,
+            suzakuTurnCount: 0,
+            eneDouble: 0,
+            eneSkill: 0,
+            eneDamageReduced: 1,
+            eneCounter: 0,
           },
         });
       },
@@ -3507,46 +3414,78 @@ export const useGameStore = create<GameStore>()(
                 isProcessing = false;
               } else {
                 const enemyNum = battle.bossType;
-                let patternResult = enePattern(enemyNum, battle.enemy!.hp, battle.enemy!.maxHp, battle.turnCount, whichTurn);
+                const { result: patternResult, effects } = enePattern(enemyNum, whichTurn, battle, player, saveData.hardmode);
               
               if (patternResult && patternResult.skillUsed) {
-                const { damage, skillName, effectType } = patternResult;
+                const { damage, skillName, effectType, requiresDoubleAttack, requiresSecondAttack } = patternResult;
+                
+                if (effects) {
+                  const update: Partial<GameStore> = {};
+                  if (effects.updateBattle) {
+                    update.battle = { ...battle, ...effects.updateBattle };
+                  }
+                  if (effects.updateEnemy && battle.enemy) {
+                    if (!update.battle) update.battle = { ...battle };
+                    update.battle.enemy = { ...battle.enemy, ...effects.updateEnemy };
+                  }
+                  if (Object.keys(update).length > 0) {
+                    set(update);
+                  }
+                  if (effects.battleLog) {
+                    addBattleLog(effects.battleLog);
+                  }
+                }
+                
                 tdame = damage;
                 
                 if (effectType === 'damage') {
                   addBattleLog(`${t(skillName)}！${Math.floor(damage)}伤害！`);
-                } else {
+                } else if (effectType !== 'passive') {
                   addBattleLog(`${t(skillName)}！`);
                 }
                 
-                set((s) => ({
-                  battle: {
-                    ...s.battle,
-                    playerAnimation: effectType === 'heal' ? 'idle' : 'hurt',
-                    enemyAnimation: 'attack',
-                    damageDisplay: effectType === 'damage' ? damage : null,
-                    isCrit: false,
-                    isCombo: false,
-                    isMiss: false,
-                    missPosition: null,
-                    lastAttacker: 'enemy',
-                    activeEffect: { effectId: effectType === 'heal' ? 4 : 13, position: effectType === 'heal' ? 'enemy' : 'player' },
-                  },
-                }));
-                
-                if (effectType === 'heal' && battle.enemy) {
-                  const newEnemyHp = Math.min(battle.enemy.maxHp, battle.enemy.hp + damage);
+                if (effectType === 'double_attack' || requiresDoubleAttack) {
                   set((s) => ({
                     battle: {
                       ...s.battle,
-                      enemy: s.battle.enemy ? { ...s.battle.enemy, hp: newEnemyHp } : null,
+                      isDoubleAttack: true,
                     },
                   }));
+                  eefi = 0;
+                  mode = 4;
+                  isProcessing = false;
+                  tdame = 0;
+                } else if (effectType === 'passive') {
+                  eefi = 0;
+                  mode = 4;
+                  isProcessing = false;
+                  tdame = 0;
+                } else {
+                  set((s) => ({
+                    battle: {
+                      ...s.battle,
+                      playerAnimation: effectType === 'heal' ? 'idle' : 'hurt',
+                      enemyAnimation: 'attack',
+                      damageDisplay: effectType === 'damage' ? damage : null,
+                      isCrit: false,
+                      isCombo: false,
+                      isMiss: false,
+                      missPosition: null,
+                      lastAttacker: 'enemy',
+                      activeEffect: { effectId: effectType === 'heal' ? 4 : 13, position: effectType === 'heal' ? 'enemy' : 'player' },
+                    },
+                  }));
+                  
+                  eefi = 0;
+                  mode = 4;
+                  isProcessing = false;
                 }
                 
-                eefi = 0;
-                mode = 4;
-                isProcessing = false;
+                if (requiresSecondAttack) {
+                  const secondDamage = Math.floor(damage * 0.1);
+                  tdame += secondDamage;
+                  addBattleLog(`追加攻击！${Math.floor(secondDamage)}伤害！`);
+                }
               } else {
                 const isPlayerMiss = Math.random() < battle.missrate;
               
@@ -3788,6 +3727,17 @@ export const useGameStore = create<GameStore>()(
                 }));
               }
               
+              if (battle.isDoubleAttack) {
+                set((s) => ({
+                  battle: {
+                    ...s.battle,
+                    isDoubleAttack: false,
+                  },
+                }));
+                isProcessing = false;
+                return;
+              }
+              
               eefi = 0;
               mode = 5;
             }
@@ -3974,6 +3924,17 @@ export const useGameStore = create<GameStore>()(
             missrateOn: 0,
             _missTurnCount: 0,
             renzoDamageUP: 0,
+            isDoubleAttack: false,
+            eneHP2: 0,
+            eneHPM2: 0,
+            eneATK2: 0,
+            teneATK: 0,
+            patternCount: 0,
+            suzakuTurnCount: 0,
+            eneDouble: 0,
+            eneSkill: 0,
+            eneDamageReduced: 1,
+            eneCounter: 0,
           },
         });
       },
@@ -4023,65 +3984,22 @@ export const useGameStore = create<GameStore>()(
         const baseResetLuc = initialPlayer.luck + levelBonus.luck + stPtAlloc.luc * 1;
         
         const equipR = getEquipComponents(equippedWeapon, weaponQty, weaponSoul, equippedArmor, armorQty, armorSoul, baseResetHp);
-        const bonusesR = applyEquipmentBonuses(equippedAccessories, savedInventory, get().hardmode || 0, currentPlayer.gold);
+        const bonusesR = EqStUpdate(equippedAccessories, savedInventory, get().hardmode || 0, currentPlayer.gold, currentPlayer.level);
         const heroBonusesR = computeHeroBonuses(initialPlayer.heroId || 0);
         const currentKyaraLvR = getCurrentKyaraLv(get().kyarakutaKozinExp, initialPlayer.heroId);
         const kyaraLvR = ((get().kyarakutalv + currentKyaraLvR) * 0.25 + 0.75);
         
         const statsR = computeFinalStats(baseResetHp, baseResetAtk, baseResetDef, baseResetAgi, baseResetLuc, equipR, bonusesR, heroBonusesR, kyaraLvR);
         
-        // 处理 PlayerGems (t1=35) 固定加成
-        const playerGems = equippedAccessories.filter(acc => acc && acc.t1 === 35);
-        let gemBonusHp = 0, gemBonusAtk = 0, gemBonusDef = 0, gemBonusAgi = 0, gemBonusLuc = 0;
-        for (const gem of playerGems) {
-          const gemLevel = gem.y || 0;
-          const _loc2_ = gemLevel + 1;
-          
-          let itemCount1 = 0;
-          for (const item of savedInventory) {
-            const eq = getEquipmentById(item.equipmentId);
-            if (eq && (eq.type === 'accessory' || eq.type === 'weapon' || eq.type === 'armor')) {
-              itemCount1 += item.quantity;
-            }
-          }
-          
-          let itemCount2 = 0;
-          if (itemCount1 > 1000) {
-            itemCount2 = itemCount1 - 1000;
-            itemCount1 = 1000;
-          }
-          
-          gemBonusHp += itemCount1 * _loc2_;
-          gemBonusAtk += itemCount1 * _loc2_;
-          gemBonusDef += itemCount1 * _loc2_;
-          gemBonusAgi += itemCount1 * _loc2_;
-          gemBonusLuc += itemCount2 * (_loc2_ * 4);
-        }
-        
-        // 处理 Brave/War/FourGod Gems 固定加成
-        const braveGems = equippedAccessories.filter(acc => acc && acc.t1 === 40);
-        for (const gem of braveGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemBonusHp += _loc2_; gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_; gemBonusLuc += _loc2_;
-        }
-        const warGems = equippedAccessories.filter(acc => acc && acc.t1 === 41);
-        for (const gem of warGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_;
-        }
-        const fourGodGems = equippedAccessories.filter(acc => acc && acc.t1 === 42);
-        for (const gem of fourGodGems) {
-          const _loc2_ = gem.t2 || 0;
-          gemBonusHp += _loc2_; gemBonusAtk += _loc2_; gemBonusDef += _loc2_; gemBonusAgi += _loc2_;
-        }
+        // 注意：PlayerGems(t1=35)和Brave/War/FourGod Gems(t1=40/41/42)的加成已在 EqStUpdate 中通过加法应用，不再在此处重复计算
         
         const newPlayer = {
           ...initialPlayer,
-          maxHp: statsR.hp + gemBonusHp,
-          attack: statsR.atk + gemBonusAtk,
-          defense: statsR.def + gemBonusDef,
-          agility: statsR.agi + gemBonusAgi,
-          luck: statsR.luc + gemBonusLuc,
+          maxHp: statsR.hp,
+          attack: statsR.atk,
+          defense: statsR.def,
+          agility: statsR.agi,
+          luck: statsR.luc,
           equippedWeapon,
           equippedArmor,
           equippedAccessories,
@@ -4163,6 +4081,17 @@ export const useGameStore = create<GameStore>()(
             missrateOn: 0,
             _missTurnCount: 0,
             renzoDamageUP: 0,
+            isDoubleAttack: false,
+            eneHP2: 0,
+            eneHPM2: 0,
+            eneATK2: 0,
+            teneATK: 0,
+            patternCount: 0,
+            suzakuTurnCount: 0,
+            eneDouble: 0,
+            eneSkill: 0,
+            eneDamageReduced: 1,
+            eneCounter: 0,
           },
           battleInterval: null,
           playTimes: saveData.playTimes,
@@ -4655,36 +4584,19 @@ export const useGameStore = create<GameStore>()(
           
           const equipM = getEquipComponents(weapon, weaponQty, state.player.weaponSoul, armor, armorQty, state.player.armorSoul, baseMergeHp);
           const globalState = useGameStore.getState();
-          const bonusesM = applyEquipmentBonuses(accessories, inventory, globalState.hardmode || 0, state.player.gold);
+          const bonusesM = EqStUpdate(accessories, inventory, globalState.hardmode || 0, state.player.gold, state.player.level);
           const heroBonusesM = computeHeroBonuses(state.player.heroId || 0);
           const currentKyaraLvM = getCurrentKyaraLv(globalState.kyarakutaKozinExp, state.player.heroId);
           const kyaraLvM = ((globalState.kyarakutalv + currentKyaraLvM) * 0.25 + 0.75);
           
           const statsM = computeFinalStats(baseMergeHp, baseMergeAtk, baseMergeDef, baseMergeAgi, baseMergeLuc, equipM, bonusesM, heroBonusesM, kyaraLvM);
           
-          // Gem 固定加成
-          let gemHp = 0, gemAtk = 0, gemDef = 0, gemAgi = 0, gemLuc = 0;
-          const braveGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 40);
-          for (const gem of braveGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            gemHp += _loc2_; gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_; gemLuc += _loc2_;
-          }
-          const warGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 41);
-          for (const gem of warGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_;
-          }
-          const fourGodGems = accessories.filter((acc: Equipment) => (acc as any).t1 === 42);
-          for (const gem of fourGodGems) {
-            const _loc2_ = (gem as any).t2 || 0;
-            gemHp += _loc2_; gemAtk += _loc2_; gemDef += _loc2_; gemAgi += _loc2_;
-          }
-          
-          state.player.attack = statsM.atk + gemAtk;
-          state.player.defense = statsM.def + gemDef;
-          state.player.maxHp = statsM.hp + gemHp;
-          state.player.agility = statsM.agi + gemAgi;
-          state.player.luck = statsM.luc + gemLuc;
+          // 所有装备效果都在 EqStUpdate 中处理，不再手动计算
+          state.player.attack = statsM.atk;
+          state.player.defense = statsM.def;
+          state.player.maxHp = statsM.hp;
+          state.player.agility = statsM.agi;
+          state.player.luck = statsM.luc;
           
           console.log('[merge] After recalculation - player stats:', { maxHp: state.player.maxHp, attack: state.player.attack, defense: state.player.defense, agility: state.player.agility, luck: state.player.luck });
         }

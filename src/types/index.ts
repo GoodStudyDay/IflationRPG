@@ -211,6 +211,28 @@ export interface BattleState {
   _missTurnCount: number;
   /** 连击伤害倍率（暴风之力/四神之力效果） */
   renzoDamageUP: number;
+  /** 是否触发双倍攻击（玄武技能） */
+  isDoubleAttack: boolean;
+  /** 朱雀第二阶段HP */
+  eneHP2: number;
+  /** 朱雀第二阶段最大HP */
+  eneHPM2: number;
+  /** 朱雀第二阶段攻击 */
+  eneATK2: number;
+  /** 朱雀恢复后的攻击 */
+  teneATK: number;
+  /** 阶段计数器 */
+  patternCount: number;
+  /** 回合计数器（用于朱雀阶段转换） */
+  suzakuTurnCount: number;
+  /** 玄武双倍攻击计数 */
+  eneDouble: number;
+  /** 技能冷却计数器 */
+  eneSkill: number;
+  /** 白虎伤害减少比率 */
+  eneDamageReduced: number;
+  /** 黄龙追加攻击计数器 */
+  eneCounter: number;
 }
 
 // 奖励类型

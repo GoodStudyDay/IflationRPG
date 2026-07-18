@@ -4,6 +4,15 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.90',
+    date: '2026-07-19 00:00:00',
+    changes: [
+      '修复玩家宝石(t1=35)数量计算错误：移除"每件最多2个"的错误限制，正确统计背包中实际数量（gdata.txt itemAllCount逻辑）',
+      '修复gdata.ts中EqStUpdate的getItemAllCount调用参数，移除第4个参数(maxTimes=2)，与gdata.txt逻辑一致',
+      '修复gameStore.ts中日志显示逻辑，移除玩家宝石统计的"(最多2个/每件)"限制',
+    ],
+  },
+  {
     version: 'v0.0.89',
     date: '2026-07-18 00:00:00',
     changes: [
