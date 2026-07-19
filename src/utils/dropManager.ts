@@ -18,7 +18,7 @@ export const equipmentIdToItemTypeAndIndex = (equipmentId: string): { itemType: 
   }
   
   const prefix = match[1];
-  const index = parseInt(match[2], 10) - 1;
+  const index = parseInt(match[2], 10);
   
   switch (prefix) {
     case 'weapon': return { itemType: 0, itemIndex: index };
@@ -33,12 +33,12 @@ export const equipmentIdToItemTypeAndIndex = (equipmentId: string): { itemType: 
 
 export const itemTypeAndIndexToEquipmentId = (itemType: number, itemIndex: number): string => {
   switch (itemType) {
-    case 0: return `weapon-${itemIndex + 1}`;
-    case 1: return `armor-${itemIndex + 1}`;
-    case 2: return `accessory-${itemIndex + 1}`;
-    case 3: return `soul-${itemIndex + 1}`;
-    case 4: return `material-${itemIndex + 1}`;
-    default: return `weapon-${itemIndex + 1}`;
+    case 0: return `weapon-${itemIndex}`;
+    case 1: return `armor-${itemIndex}`;
+    case 2: return `accessory-${itemIndex}`;
+    case 3: return `soul-${itemIndex}`;
+    case 4: return `material-${itemIndex}`;
+    default: return `weapon-${itemIndex}`;
   }
 };
 
@@ -220,7 +220,8 @@ export const eneDropItemInit = (
   inventory: any[],
   settings: GameSettings,
   saveSettings: GameSaveSettings,
-  greedBonus: number = 1
+  greedBonus: number = 1,
+  mapNum: number = 0
 ): DropResult => {
   let getItemType = -1;
   let getItemIndex = -1;
@@ -229,10 +230,14 @@ export const eneDropItemInit = (
   let getItemDropRate = 0;
   let getItemName = '';
   
-  randomDrop(2, 118, 3, 0.008, inventory, (type, index) => {
-    getItemType = type;
-    getItemIndex = index;
-  });
+  const isSecretKeyArea = (mapNum >= 73 && mapNum <= 77) || (mapNum >= 109 && mapNum <= 118);
+  
+  if (isSecretKeyArea) {
+    randomDrop(2, 118, 3, 0.008, inventory, (type, index) => {
+      getItemType = type;
+      getItemIndex = index;
+    });
+  }
   
   if (getItemType === -1) {
     randomDrop(2, 105, 3, 0.012, inventory, (type, index) => {

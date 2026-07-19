@@ -2671,7 +2671,7 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1);
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1, get().currentMap);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))
@@ -2994,7 +2994,7 @@ export const useGameStore = create<GameStore>()(
           Highlv,
         };
         
-        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1);
+        const dropResult = eneDropItemInit(slot1, slot2, slot3, battleVarResult.itemDropRate, inventory, settings, saveSettings, 1, get().currentMap);
         
         const dropEquipment = dropResult.getItemDropType !== -1 
           ? getEquipmentById(itemTypeAndIndexToEquipmentId(dropResult.getItemDropType, dropResult.getItemDropIndex))

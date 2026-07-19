@@ -199,7 +199,8 @@ export const TitleScreen = () => {
     { spriteBase: 'heropng4', fileId: 942 },
   ];
   const heroConfig = heroConfigs[heroIndex];
-  const heroImage = `/images/player/${heroConfig.fileId}_${heroConfig.spriteBase}_0.png`;
+  const BASE = import.meta.env.BASE_URL;
+  const heroImage = `${BASE}images/player/${heroConfig.fileId}_${heroConfig.spriteBase}_0.png`;
 
   const fogX = -(Math.cos(fogRef.current.time / 280 + fogRef.current.time / 500) * 0.5 + 0.5) * 640;
   const fogY = -(Math.sin(fogRef.current.time / 140 + fogRef.current.time / 900) * 0.5 + 0.5) * 60;
@@ -220,13 +221,13 @@ export const TitleScreen = () => {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
           <img 
-            src="/images/logo/145_titlebackpng.png" 
+            src={`${BASE}images/logo/145_titlebackpng.png`} 
             alt="Background"
             className="absolute inset-0 w-full h-full object-cover"
           />
 
           <img 
-            src="/images/logo/143_logoENpng.png" 
+            src={`${BASE}images/logo/143_logoENpng.png`} 
             alt="Logo"
             className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
           />
@@ -269,14 +270,14 @@ export const TitleScreen = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
         <img 
-          src="/images/logo/145_titlebackpng.png" 
+          src={`${BASE}images/logo/145_titlebackpng.png`} 
           alt="Background"
           className="absolute inset-0 w-full h-full"
           style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
         />
 
         <img 
-          src="/images/logo/143_logoENpng.png" 
+          src={`${BASE}images/logo/143_logoENpng.png`} 
           alt="Logo"
           className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
         />
@@ -336,7 +337,7 @@ export const TitleScreen = () => {
         )}
 
         <img 
-          src="/images/logo/1066.png"
+          src={`${BASE}images/logo/1066.png`}
           alt="Fog"
           className="absolute z-30 pointer-events-none"
           style={{ 
@@ -348,7 +349,7 @@ export const TitleScreen = () => {
           }}
         />
         <img 
-          src="/images/logo/1066.png"
+          src={`${BASE}images/logo/1066.png`}
           alt="Fog 2"
           className="absolute z-30 pointer-events-none"
           style={{ 
