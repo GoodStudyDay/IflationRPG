@@ -1267,6 +1267,7 @@ export const translations: Record<string, TranslationKey> = {
 '静音': { ja: 'ミュート', en: 'Mute', 'zh-Hant': '靜音', 'zh-Hans': '静音', ko: '음소거', es: 'Silencio', id: 'Bisu' },
 '最大': { ja: '最大', en: 'Max', 'zh-Hant': '最大', 'zh-Hans': '最大', ko: '최대', es: 'Máx', id: 'Maks' },
 '调整背景音乐音量，设置后立即生效': { ja: 'BGM音量を調整、設定後すぐに反映されます', en: 'Adjust BGM volume, takes effect immediately', 'zh-Hant': '調整背景音樂音量，設定後立即生效', 'zh-Hans': '调整背景音乐音量，设置后立即生效', ko: 'BGM 볼륨 조정, 설정 후 즉시 적용', es: 'Ajustar volumen BGM, efecto inmediato', id: 'Sesuaikan volume BGM, langsung berlaku' },
+'调整背景音乐音量': { ja: 'BGM音量を調整', en: 'Adjust BGM volume', 'zh-Hant': '調整背景音樂音量', 'zh-Hans': '调整背景音乐音量', ko: 'BGM 볼륨 조정', es: 'Ajustar volumen BGM', id: 'Sesuaikan volume BGM' },
 };
 export const getTranslation = (key: string, lang: LanguageCode): string => {
   const translation = translations[key];

@@ -20,7 +20,7 @@
  *   - BossSyu <  0：从 3/4/5 battle BGM 中随机选择一首
  */
 
-const SOUND_BASE = '/sounds';
+const SOUND_BASE = `${import.meta.env.BASE_URL}sounds`;
 
 // category → 文件名映射
 const BGM_FILES: Record<number, string> = {
