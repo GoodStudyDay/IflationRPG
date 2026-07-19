@@ -1054,6 +1054,10 @@ export const useGameStore = create<GameStore>()(
         const lvC2Increase = lvupsitanum * 0.5;
         const newLvC2 = (player.lvC2 || 0.5) + lvC2Increase;
         
+        if (lvupsitanum > 0) {
+          bgmManager.lvupstart();
+        }
+        
         // 计算最终属性加成（包含装备和存货加成）
         
         const weaponObj = player.equippedWeapon;
@@ -2730,6 +2734,7 @@ export const useGameStore = create<GameStore>()(
         // 普通战斗开始：播放战斗BGM（BossSyu = -1 表示普通战，参考 battle.txt#L198-199）
         bgmManager.bgmstopf();
         bgmManager.bgmstartf(5, -1);
+        bgmManager.okstart();
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -3004,6 +3009,7 @@ export const useGameStore = create<GameStore>()(
         // Boss 战开始：播放 Boss 战斗BGM（BossSyu = bossId >= 0，参考 battle.txt#L198-199）
         bgmManager.bgmstopf();
         bgmManager.bgmstartf(5, bossId);
+        bgmManager.okstart();
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -3280,9 +3286,11 @@ export const useGameStore = create<GameStore>()(
           }
           set({ battle: { ...battle, status: 'fighting' } });
           startBattleLoop();
+          bgmManager.okstart();
         } else if (battle.status === 'fighting' && !battle._ending) {
           stopBattleLoop();
           set({ battle: { ...battle, status: 'paused' } });
+          bgmManager.okstart();
         }
       },
       resumeBattle: () => {
@@ -3292,6 +3300,7 @@ export const useGameStore = create<GameStore>()(
         }
         set((state) => ({ battle: { ...state.battle, status: 'fighting' } }));
         startBattleLoop();
+        bgmManager.okstart();
       },
       pauseBattle: () => {
         const { stopBattleLoop } = get();
@@ -3330,6 +3339,7 @@ export const useGameStore = create<GameStore>()(
           const cost = recvCost ? currentGold : recoveryCost;
           const newGold = currentGold - cost;
           set({ player: { ...player, gold: Math.max(0, newGold) } });
+          bgmManager.okstart();
         }
       },
       startBattleLoop: () => {
@@ -3427,6 +3437,7 @@ export const useGameStore = create<GameStore>()(
               } else {
                 attackEffectIndex = Math.floor(Math.random() * 4);
               }
+              bgmManager.myef(attackEffectIndex + 1);
               
               set((s) => ({
               battle: {
@@ -3495,8 +3506,10 @@ export const useGameStore = create<GameStore>()(
                 
                 if (effectType === 'damage') {
                   addBattleLog(`${t(skillName)}！${Math.floor(damage)}伤害！`);
+                  bgmManager.eneef(2);
                 } else if (effectType !== 'passive') {
                   addBattleLog(`${t(skillName)}！`);
+                  bgmManager.eneef(1);
                 }
                 
                 if (effectType === 'double_attack' || requiresDoubleAttack) {
@@ -3574,6 +3587,7 @@ export const useGameStore = create<GameStore>()(
                     battle.hitCount
                   );
                   tdame = enemyDamage;
+                  bgmManager.eneef(1);
 
                   // 闪光沙漏 (t1=2777): 受到敌人攻击时 hitCount +1
                   const shiningHourglass = accessories.find(acc => acc && acc.t1 === 2777);
@@ -3883,6 +3897,7 @@ export const useGameStore = create<GameStore>()(
               if (battle.recoverNextTurn) {
                 updatePlayerHp(player.maxHp);
                 addBattleLog(t('全部恢复了'));
+                bgmManager.kaihukustart();
                 set((s) => ({
                   battle: { ...s.battle, recoverNextTurn: false },
                 }));

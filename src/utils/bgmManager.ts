@@ -52,6 +52,18 @@ const NORMAL_BATTLE_BGM = [
 // Boss 战 BGM
 const BOSS_BATTLE_BGM = '6_boss1_bgm.mp3';
 
+// SE 文件名映射
+const EF_SE_FILES: Record<number, string> = {
+  1: '65_ef1_se.mp3',
+  2: '66_ef2_se.mp3',
+  3: '67_ef3_se.mp3',
+  4: '68_ef4_se.mp3',
+  5: '69_ef5_se.mp3',
+};
+const OK_SE = '73_ok_se.mp3';
+const LVUP_SE = '71_lvup_se.mp3';
+const KAIHUKU_SE = '70_kaihuku_se.mp3';
+
 class BgmManager {
   private audio: HTMLAudioElement | null = null;
   private currentCategory: number = -1;
@@ -199,6 +211,47 @@ class BgmManager {
   /** 应用关闭时调用（对应原版 appOff） */
   public appOff(): void {
     this.bgmstopf();
+  }
+
+  /** 播放一段 SE（音效），允许重叠播放 */
+  private playSE(fileName: string): void {
+    if (!this.bgmEnabled || typeof window === 'undefined') return;
+    try {
+      const se = new Audio(`${SOUND_BASE}/${fileName}`);
+      se.volume = this.volume;
+      se.play().catch(() => {}); // SE 失败静默
+      // 播放完成后自动释放
+      se.addEventListener('ended', () => { se.remove(); });
+    } catch {
+      // ignore
+    }
+  }
+
+  /** 玩家攻击/技能音效 */
+  public myef(SkNum: number): void {
+    const idx = ((SkNum - 1) % 5) + 1;
+    this.playSE(EF_SE_FILES[idx]);
+  }
+
+  /** 敌人攻击/技能音效 */
+  public eneef(SkNum: number): void {
+    const idx = ((SkNum - 1) % 5) + 1;
+    this.playSE(EF_SE_FILES[idx]);
+  }
+
+  /** 确认音效 */
+  public okstart(): void {
+    this.playSE(OK_SE);
+  }
+
+  /** 升级音效 */
+  public lvupstart(): void {
+    this.playSE(LVUP_SE);
+  }
+
+  /** 回复音效 */
+  public kaihukustart(): void {
+    this.playSE(KAIHUKU_SE);
   }
 }
 
