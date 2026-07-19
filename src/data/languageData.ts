@@ -1268,6 +1268,7 @@ export const translations: Record<string, TranslationKey> = {
 '格斗家': { ja: '格闘家', en: 'Fighter', 'zh-Hant': '格鬥家', 'zh-Hans': '格斗家', ko: '격투가', es: 'Luchador', id: 'Petarung' },
 '狂战士': { ja: 'バーサーカー', en: 'Berserker', 'zh-Hant': '狂戰士', 'zh-Hans': '狂战士', ko: '버서커', es: 'Berserker', id: 'Berserker' },
 'BGM设置': { ja: 'BGM設定', en: 'BGM Settings', 'zh-Hant': 'BGM設定', 'zh-Hans': 'BGM设置', ko: 'BGM 설정', es: 'Config. BGM', id: 'Pengaturan BGM' },
+'BGM开关': { ja: 'BGMオン/オフ', en: 'BGM On/Off', 'zh-Hant': 'BGM開關', 'zh-Hans': 'BGM开关', ko: 'BGM 켜기/끄기', es: 'BGM On/Off', id: 'BGM On/Off' },
 'BGM音量': { ja: 'BGM音量', en: 'BGM Volume', 'zh-Hant': 'BGM音量', 'zh-Hans': 'BGM音量', ko: 'BGM 볼륨', es: 'Volumen BGM', id: 'Volume BGM' },
 '静音': { ja: 'ミュート', en: 'Mute', 'zh-Hant': '靜音', 'zh-Hans': '静音', ko: '음소거', es: 'Silencio', id: 'Bisu' },
 '最大': { ja: '最大', en: 'Max', 'zh-Hant': '最大', 'zh-Hans': '最大', ko: '최대', es: 'Máx', id: 'Maks' },

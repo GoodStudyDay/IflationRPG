@@ -8,6 +8,7 @@ import { LoadingScreen } from './LoadingScreen';
 import { VERSION } from '@/data/version';
 import { useTranslation } from '@/hooks/useTranslation';
 import { preloadImages } from '@/utils/imageCache';
+import { preloadLogos, getLogoFromCache } from '@/utils/logoCache';
 import { getAllGameImageUrls } from '@/utils/gameAssets';
 import { bgmManager } from '@/utils/bgmManager';
 
@@ -29,9 +30,14 @@ export const TitleScreen = () => {
   const [leftStats, setLeftStats] = useState<{ hp: string; atk: string; def: string; agi: string; luc: string }>({ hp: '', atk: '', def: '', agi: '', luc: '' });
   const [rightStats, setRightStats] = useState<{ lv: string; gold: string; exp: string }>({ lv: '', gold: '', exp: '' });
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [titleBackUrl, setTitleBackUrl] = useState<string>(`${import.meta.env.BASE_URL}images/logo/145_titlebackpng.png`);
+  const [logoEnUrl, setLogoEnUrl] = useState<string>(`${import.meta.env.BASE_URL}images/logo/143_logoENpng.png`);
+  const [fogUrl, setFogUrl] = useState<string>(`${import.meta.env.BASE_URL}images/logo/1066.png`);
   
   const fogRef = useRef({ time: 0, time2: 0 });
   const animationFrameRef = useRef<number>();
+
+  const BASE = import.meta.env.BASE_URL;
 
   const hasSavedGame = player.gold > 0 || player.exp > 0 || player.level > 1;
   const canContinue = battlePoints > 0;
@@ -52,6 +58,24 @@ export const TitleScreen = () => {
       document.removeEventListener('touchstart', playTitleBgm);
     };
   }, []);
+
+  // 从 localStorage 缓存加载 logo 图片
+  useEffect(() => {
+    const logoBase = `${BASE}images/logo/`;
+    // 同步读取缓存
+    setTitleBackUrl(getLogoFromCache('145_titlebackpng.png') || `${logoBase}145_titlebackpng.png`);
+    setLogoEnUrl(getLogoFromCache('143_logoENpng.png') || `${logoBase}143_logoENpng.png`);
+    setFogUrl(getLogoFromCache('1066.png') || `${logoBase}1066.png`);
+    // 异步预加载确保后续访问有缓存
+    preloadLogos(logoBase).then(() => {
+      const tb = getLogoFromCache('145_titlebackpng.png');
+      if (tb) setTitleBackUrl(tb);
+      const le = getLogoFromCache('143_logoENpng.png');
+      if (le) setLogoEnUrl(le);
+      const fg = getLogoFromCache('1066.png');
+      if (fg) setFogUrl(fg);
+    });
+  }, [BASE]);
 
   useEffect(() => {
     setHeroIndex(Math.floor(Math.random() * 16));
@@ -199,7 +223,6 @@ export const TitleScreen = () => {
     { spriteBase: 'heropng4', fileId: 942 },
   ];
   const heroConfig = heroConfigs[heroIndex];
-  const BASE = import.meta.env.BASE_URL;
   const heroImage = `${BASE}images/player/${heroConfig.fileId}_${heroConfig.spriteBase}_0.png`;
 
   const fogX = -(Math.cos(fogRef.current.time / 280 + fogRef.current.time / 500) * 0.5 + 0.5) * 640;
@@ -221,13 +244,13 @@ export const TitleScreen = () => {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
           <img 
-            src={`${BASE}images/logo/145_titlebackpng.png`} 
+            src={titleBackUrl} 
             alt="Background"
             className="absolute inset-0 w-full h-full object-cover"
           />
 
           <img 
-            src={`${BASE}images/logo/143_logoENpng.png`} 
+            src={logoEnUrl} 
             alt="Logo"
             className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
           />
@@ -270,14 +293,14 @@ export const TitleScreen = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
         <img 
-          src={`${BASE}images/logo/145_titlebackpng.png`} 
+          src={titleBackUrl} 
           alt="Background"
           className="absolute inset-0 w-full h-full"
           style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
         />
 
         <img 
-          src={`${BASE}images/logo/143_logoENpng.png`} 
+          src={logoEnUrl} 
           alt="Logo"
           className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
         />
@@ -337,7 +360,7 @@ export const TitleScreen = () => {
         )}
 
         <img 
-          src={`${BASE}images/logo/1066.png`}
+          src={fogUrl}
           alt="Fog"
           className="absolute z-30 pointer-events-none"
           style={{ 
@@ -349,7 +372,7 @@ export const TitleScreen = () => {
           }}
         />
         <img 
-          src={`${BASE}images/logo/1066.png`}
+          src={fogUrl}
           alt="Fog 2"
           className="absolute z-30 pointer-events-none"
           style={{ 

@@ -83,9 +83,11 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     presets,
     presetNum,
     autoAllocateEnabled,
+    bgmEnabled,
     setPreset,
     setPresetNum,
     setAutoAllocateEnabled,
+    setBgmEnabled,
     language,
     setLanguage,
   } = useGameStore();
@@ -567,6 +569,22 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const renderBgmSection = () => (
     <div className="space-y-3">
       {renderSectionHeader(t('BGM设置'))}
+
+      <div className="flex items-center justify-between bg-[#1a0a2e] rounded-lg p-3">
+        <span className="text-gray-300 text-sm">{t('BGM开关')}</span>
+        <button
+          onClick={() => setBgmEnabled(!bgmEnabled)}
+          className={`w-12 h-6 rounded-full transition-colors ${
+            bgmEnabled ? 'bg-green-500' : 'bg-gray-600'
+          }`}
+        >
+          <div
+            className={`w-5 h-5 bg-white rounded-full transition-transform ${
+              bgmEnabled ? 'translate-x-6' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+      </div>
 
       <div className="bg-[#1a0a2e] rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">

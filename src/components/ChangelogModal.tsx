@@ -4,6 +4,15 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.94',
+    date: '2026-07-19 00:00:00',
+    changes: [
+      'Logo图片缓存优化：图片存入localStorage，后续访问直接从缓存读取，减少网络请求',
+      'BGM设置页面新增开关按钮：支持关闭/开启BGM，开关状态持久化保存到localStorage',
+      '修复BGM开关状态未持久化问题：将bgmEnabled加入Zustand persist partialize列表',
+    ],
+  },
+  {
     version: 'v0.0.93',
     date: '2026-07-19 00:00:00',
     changes: [

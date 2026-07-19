@@ -74,6 +74,9 @@ interface GameStore {
   debugKill: boolean;
   purchaseCounts: Record<string, number>;
   peakSnapshot: PeakSnapshot | null;
+  /** BGM 开关 */
+  bgmEnabled: boolean;
+  setBgmEnabled: (enabled: boolean) => void;
   /** 上次关闭背包时显示的页面（用于重新打开时恢复） */
   lastInventoryViewMode: 'main' | 'weapon' | 'armor' | 'accessory' | 'soul' | 'material';
   /** 设置上次背包页面 */
@@ -793,6 +796,10 @@ export const useGameStore = create<GameStore>()(
         }
       }
       
+      // Sync BGM enabled state from persisted data
+      const persistedBgmEnabled = storedData?.bgmEnabled ?? true;
+      bgmManager.setBgmEnabled(persistedBgmEnabled);
+      
       return {
       player: fixedPlayer,
       inventory: initialInv,
@@ -939,6 +946,11 @@ export const useGameStore = create<GameStore>()(
       debugKill: false,
       purchaseCounts: storedData?.purchaseCounts || {},
       peakSnapshot: storedData?.peakSnapshot || null,
+      bgmEnabled: storedData?.bgmEnabled ?? true,
+      setBgmEnabled: (enabled) => {
+        set({ bgmEnabled: enabled });
+        bgmManager.setBgmEnabled(enabled);
+      },
       lastInventoryViewMode: storedData?.lastInventoryViewMode || 'main',
       setLastInventoryViewMode: (mode) => set({ lastInventoryViewMode: mode }),
       setPlayer: (player) => set({ player }),
@@ -4706,6 +4718,7 @@ export const useGameStore = create<GameStore>()(
         purchaseCounts: state.purchaseCounts,
         peakSnapshot: state.peakSnapshot,
         currentEquipSetSlotIndex: state.currentEquipSetSlotIndex,
+        bgmEnabled: state.bgmEnabled,
       }),
     }
   )
