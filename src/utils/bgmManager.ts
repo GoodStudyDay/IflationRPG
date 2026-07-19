@@ -62,6 +62,29 @@ class BgmManager {
   public volume: number = 0.4;
   /** 上一次普通战斗 BGM 索引，避免连续重复 */
   private lastNormalBattleIdx: number = -1;
+  /** 用户是否已交互过 */
+  private userInteracted: boolean = false;
+  /** 等待用户交互后重试的播放请求 */
+  private pendingPlay: (() => void) | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const onInteract = () => {
+        this.userInteracted = true;
+        if (this.pendingPlay) {
+          this.pendingPlay();
+          this.pendingPlay = null;
+        }
+        // 清除所有交互事件监听
+        ['click', 'keydown', 'touchstart'].forEach((evt) => {
+          document.removeEventListener(evt, onInteract);
+        });
+      };
+      ['click', 'keydown', 'touchstart'].forEach((evt) => {
+        document.addEventListener(evt, onInteract, { once: false });
+      });
+    }
+  }
 
   private ensureAudio(): HTMLAudioElement {
     if (!this.audio) {
@@ -122,10 +145,26 @@ class BgmManager {
     audio.currentTime = 0;
     audio.volume = this.volume;
     audio.loop = category !== 7; // 胜利 BGM 只播放一次
-    audio.play().catch((err) => {
-      // 浏览器自动播放策略可能阻止，静默忽略
-      console.warn('[BGM] 播放失败:', err?.message || err);
-    });
+
+    const doPlay = () => {
+      audio.play().catch((err) => {
+        // 自动播放策略阻止时，等待用户交互后重试
+        if (err.name === 'NotAllowedError' && !this.userInteracted) {
+          this.pendingPlay = doPlay;
+          console.warn('[BGM] 等待用户交互后播放');
+        } else {
+          console.warn('[BGM] 播放失败:', err?.message || err);
+        }
+      });
+    };
+
+    if (this.userInteracted) {
+      doPlay();
+    } else {
+      // 还没交互过，直接尝试播放；被拦截则等待交互
+      this.pendingPlay = doPlay;
+      doPlay();
+    }
 
     this.currentCategory = category;
     this.currentSubId = subId;
