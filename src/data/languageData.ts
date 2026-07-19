@@ -1262,6 +1262,11 @@ export const translations: Record<string, TranslationKey> = {
 '武僧': { ja: '武僧', en: 'Monk', 'zh-Hant': '武僧', 'zh-Hans': '武僧', ko: '무승', es: 'Monje', id: 'Buddha' },
 '格斗家': { ja: '格闘家', en: 'Fighter', 'zh-Hant': '格鬥家', 'zh-Hans': '格斗家', ko: '격투가', es: 'Luchador', id: 'Petarung' },
 '狂战士': { ja: 'バーサーカー', en: 'Berserker', 'zh-Hant': '狂戰士', 'zh-Hans': '狂战士', ko: '버서커', es: 'Berserker', id: 'Berserker' },
+'BGM设置': { ja: 'BGM設定', en: 'BGM Settings', 'zh-Hant': 'BGM設定', 'zh-Hans': 'BGM设置', ko: 'BGM 설정', es: 'Config. BGM', id: 'Pengaturan BGM' },
+'BGM音量': { ja: 'BGM音量', en: 'BGM Volume', 'zh-Hant': 'BGM音量', 'zh-Hans': 'BGM音量', ko: 'BGM 볼륨', es: 'Volumen BGM', id: 'Volume BGM' },
+'静音': { ja: 'ミュート', en: 'Mute', 'zh-Hant': '靜音', 'zh-Hans': '静音', ko: '음소거', es: 'Silencio', id: 'Bisu' },
+'最大': { ja: '最大', en: 'Max', 'zh-Hant': '最大', 'zh-Hans': '最大', ko: '최대', es: 'Máx', id: 'Maks' },
+'调整背景音乐音量，设置后立即生效': { ja: 'BGM音量を調整、設定後すぐに反映されます', en: 'Adjust BGM volume, takes effect immediately', 'zh-Hant': '調整背景音樂音量，設定後立即生效', 'zh-Hans': '调整背景音乐音量，设置后立即生效', ko: 'BGM 볼륨 조정, 설정 후 즉시 적용', es: 'Ajustar volumen BGM, efecto inmediato', id: 'Sesuaikan volume BGM, langsung berlaku' },
 };
 export const getTranslation = (key: string, lang: LanguageCode): string => {
   const translation = translations[key];
