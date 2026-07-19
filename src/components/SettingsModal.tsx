@@ -6,13 +6,14 @@ import { ChangelogModal } from './ChangelogModal';
 import { DropGuideModal } from './DropGuideModal';
 import { LANGUAGES } from '@/data/languageData';
 import { useTranslation } from '@/hooks/useTranslation';
+import { bgmManager } from '@/utils/bgmManager';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ActiveSection = 'main' | 'cloud' | 'language' | 'preset' | 'cache' | 'about';
+type ActiveSection = 'main' | 'cloud' | 'language' | 'preset' | 'cache' | 'about' | 'bgm';
 
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const { t } = useTranslation();
@@ -27,6 +28,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [downloadUuid, setDownloadUuid] = useState('');
   const [cloudPassword, setCloudPassword] = useState('');
   const [activeSection, setActiveSection] = useState<ActiveSection>('main');
+  const [bgmVolume, setBgmVolume] = useState(40);
 
   const handlePresetChange = (index: number, value: number) => {
     const preset = [...presets[editingPreset]];
@@ -56,8 +58,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       };
       updateCacheSize();
       setActiveSection('main');
+      setBgmVolume(Math.round(bgmManager.volume * 100));
     }
   }, [isOpen]);
+
+  const handleBgmVolumeChange = (value: number) => {
+    setBgmVolume(value);
+    bgmManager.setVolume(value / 100);
+  };
   
   const handleClearCache = async () => {
     await clearCache();
@@ -275,6 +283,14 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         {t('关于游戏')}
       </button>
       <div className="text-xs text-gray-400 px-2 mb-2">{t('查看更新日志和装备图鉴')}</div>
+
+      <button
+        onClick={() => setActiveSection('bgm')}
+        className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
+      >
+        {t('BGM设置')}
+      </button>
+      <div className="text-xs text-gray-400 px-2 mb-2">{t('调整背景音乐音量')}</div>
 
       <button
         onClick={onClose}
@@ -548,6 +564,48 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     </div>
   );
 
+  const renderBgmSection = () => (
+    <div className="space-y-3">
+      {renderSectionHeader(t('BGM设置'))}
+
+      <div className="bg-[#1a0a2e] rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-gray-300 text-sm">{t('BGM音量')}</span>
+          <span className="text-white text-sm font-bold">{bgmVolume}%</span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={bgmVolume}
+          onChange={(e) => handleBgmVolumeChange(parseInt(e.target.value))}
+          className="w-full h-2 bg-[#3d2b5e] rounded-lg appearance-none cursor-pointer
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-5
+            [&::-webkit-slider-thumb]:h-5
+            [&::-webkit-slider-thumb]:bg-[#6a4c9a]
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:cursor-pointer
+            [&::-webkit-slider-thumb]:hover:bg-[#7a5caa]
+            [&::-moz-range-thumb]:w-5
+            [&::-moz-range-thumb]:h-5
+            [&::-moz-range-thumb]:bg-[#6a4c9a]
+            [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:cursor-pointer
+            [&::-moz-range-thumb]:border-0"
+        />
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <span>{t('静音')}</span>
+          <span>{t('最大')}</span>
+        </div>
+      </div>
+
+      <div className="text-xs text-gray-400 px-2">
+        {t('调整背景音乐音量，设置后立即生效')}
+      </div>
+    </div>
+  );
+
   return (
     <div 
         className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
@@ -567,6 +625,7 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         {activeSection === 'preset' && renderPresetSection()}
         {activeSection === 'cache' && renderCacheSection()}
         {activeSection === 'about' && renderAboutSection()}
+        {activeSection === 'bgm' && renderBgmSection()}
       </div>
 
       {importMsg && (

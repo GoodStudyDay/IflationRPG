@@ -30,6 +30,7 @@ import { getHeroById } from '@/data/heroData';
 import { getCurrentKyaraLv, addExpKyarakutaKozinExp } from '@/utils/kyaraLevel';
 import { getTranslation } from '@/data/languageData';
 import { EqStUpdate } from '@/utils/gdata';
+import { bgmManager } from '@/utils/bgmManager';
 
 interface GameStore {
   player: PlayerState;
@@ -348,16 +349,24 @@ const calculatePlayerDamage = (
   const powerStone = accessories.find(acc => acc && acc.t1 === 2222);
   const demonSoul = accessories.find(acc => acc && acc.t1 === 5);
   const curseCoin = accessories.find(acc => acc && acc.t1 === 78);
-  
+  const shiningHourglass1 = accessories.find(acc => acc && acc.t1 === 2778);
+
+  // 闪光沙漏1: 每次攻击 ATK +2%, 上限 +50% (gdata.txt hourglassUpdate(hourgclassOn1, hitCount1, 0.5, 0.02))
+  let effectiveAttack = playerAttack;
+  if (shiningHourglass1) {
+    const atkMultiplier = 1 + Math.min(attackCount * 0.02, 0.5);
+    effectiveAttack = playerAttack * atkMultiplier;
+  }
+
   if (isCrit) {
     const critBonus = Math.random() * 1.2;
     let critMultiplier = 1.75 + critBonus / 5;
     if (critPowerRing) {
       critMultiplier += 0.3;
     }
-    damage = (playerAttack + 1) * critMultiplier + 4;
+    damage = (effectiveAttack + 1) * critMultiplier + 4;
   } else {
-    damage = playerAttack;
+    damage = effectiveAttack;
   }
   
   if (powerStone) {
@@ -408,16 +417,24 @@ const calculatePlayerDamage = (
   return { damage: Math.floor(damage), isCrit };
 };
 
-const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, accessories: Equipment[]): number => {
-  let damage = (enemyAttack * 2 + (enemyAttack - playerDefense * 0.5) * 12) / 14;
-  
+const calculateEnemyDamage = (enemyAttack: number, playerDefense: number, accessories: Equipment[], hitCount: number = 0): number => {
+  // 闪光沙漏 (t1=2777): 每次受到攻击 DEF +3%, 上限 +100%
+  const shiningHourglass = accessories.find(acc => acc && acc.t1 === 2777);
+  let effectiveDefense = playerDefense;
+  if (shiningHourglass) {
+    const defMultiplier = 1 + Math.min(hitCount * 0.03, 1);
+    effectiveDefense = playerDefense * defMultiplier;
+  }
+
+  let damage = (enemyAttack * 2 + (enemyAttack - effectiveDefense * 0.5) * 12) / 14;
+
   const protectionStone = accessories.find(acc => acc && acc.t1 === 1111);
   const earthPower = accessories.find(acc => acc && acc.t1 === 4003);
-  
+
   if (protectionStone) {
     damage *= (1 - (protectionStone.t2 || 20) / 100);
   }
-  
+
   if (earthPower) {
     damage *= (1 - 25 / 100);
   }
@@ -809,6 +826,7 @@ export const useGameStore = create<GameStore>()(
           dropIndex: -1,
           isDropSuccess: false,
           goldMultiplier: 1,
+          expMultiplier: 1,
           battleResult: null,
           _ending: false,
           damageDisplay: null,
@@ -820,6 +838,7 @@ export const useGameStore = create<GameStore>()(
           _loopTick: 0,
           _loopComboCount: 1,
           attackCount: 0,
+          hitCount: 0,
         specialBonusType: null,
         activeEffect: null,
         resCount: 0,
@@ -1502,6 +1521,9 @@ export const useGameStore = create<GameStore>()(
       },
       setCurrentScene: (scene) => set({ currentScene: scene }),
       goToTitle: () => {
+        // 返回标题画面：播放标题BGM（参考 title.txt#L177）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(0);
         set({ currentScene: 'title' });
       },
       killPlayer: () => {
@@ -1518,12 +1540,15 @@ export const useGameStore = create<GameStore>()(
           newKyarakutalv = Math.max(currentKyaraLv, 1);
         }
         
-        set({ 
+        set({
           battlePoints: 0,
           currentScene: 'gameover',
           kyarakutalv: newKyarakutalv,
           kyarakutaKozinExp: newKyarakutaKozinExp,
         });
+        // 玩家死亡：播放游戏结束BGM（参考 gameover.txt#L68-69）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(15);
 
         const saveData = loadSaveData();
         saveData.kyarakutalv = newKyarakutalv;
@@ -2279,6 +2304,7 @@ export const useGameStore = create<GameStore>()(
             dropIndex: -1,
             isDropSuccess: false,
             goldMultiplier: 1,
+          expMultiplier: 1,
             battleResult: null,
             _ending: false,
             damageDisplay: null,
@@ -2290,6 +2316,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             attackCount: 0,
+          hitCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: bonuses.resCount,
@@ -2321,6 +2348,9 @@ export const useGameStore = create<GameStore>()(
         });
         console.log('[startGame] resCount:', bonuses.resCount, 'resStatUP:', bonuses.resStatUP);
         console.log('[startGame] End - player stats:', { maxHp: newMaxHp, attack: newAtk, defense: newDef, agility: newAgi, luck: newLuc }, 'hardmode:', hardmode, 'newBattlePoints:', newBattlePoints);
+        // 进入地图：播放当前地图BGM（参考 StageMap.txt#L608）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(3, get().currentMap || 1);
         get().checkZeroEquips();
       },
       addEncounterRate: (amount) => {
@@ -2613,11 +2643,11 @@ export const useGameStore = create<GameStore>()(
             crihPlusKakuritu: eqBonuses.crihPlusKakuritu,
             speedwariai: 0,
             lukwariai: 0,
-            hourGlassON: false,
-            hourGlassON1: false,
+            hourGlassON: eqBonuses.hourGlassON,
+            hourGlassON1: eqBonuses.hourGlassON1,
             missrate: eqBonuses.missrate,
             enemissrate: 0,
-            expbairitu: 1,
+            expbairitu: eqBonuses.expbairitu,
           }
         );
         
@@ -2695,8 +2725,11 @@ export const useGameStore = create<GameStore>()(
         const specialBonusType = bonus.currentBonus && bonus.currentBonus.bonusType >= 12
           ? bonus.currentBonus.bonusType
           : null;
-        
+
         const lang = get().language;
+        // 普通战斗开始：播放战斗BGM（BossSyu = -1 表示普通战，参考 battle.txt#L198-199）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(5, -1);
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -2735,6 +2768,7 @@ export const useGameStore = create<GameStore>()(
             dropIndex: dropResult.getItemDropIndex,
             isDropSuccess: dropResult.isDropSuccess,
             goldMultiplier: battleVarResult.goldMultiplier,
+            expMultiplier: battleVarResult.expMultiplier,
             battleResult: null,
             _ending: false,
             damageDisplay: null,
@@ -2746,6 +2780,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             attackCount: 0,
+          hitCount: 0,
             activeEffect: null,
             resCount: eqBonuses.resCount,
             resStatUP: eqBonuses.resStatUP,
@@ -2885,11 +2920,11 @@ export const useGameStore = create<GameStore>()(
             crihPlusKakuritu: eqBonuses2.crihPlusKakuritu,
             speedwariai: 0,
             lukwariai: 0,
-            hourGlassON: false,
-            hourGlassON1: false,
+            hourGlassON: eqBonuses2.hourGlassON,
+            hourGlassON1: eqBonuses2.hourGlassON1,
             missrate: eqBonuses2.missrate,
             enemissrate: 0,
-            expbairitu: 1,
+            expbairitu: eqBonuses2.expbairitu,
           }
         );
         
@@ -2964,8 +2999,11 @@ export const useGameStore = create<GameStore>()(
         const specialBonusType = bonus.currentBonus && bonus.currentBonus.bonusType >= 12
           ? bonus.currentBonus.bonusType
           : null;
-        
+
         const lang = get().language;
+        // Boss 战开始：播放 Boss 战斗BGM（BossSyu = bossId >= 0，参考 battle.txt#L198-199）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(5, bossId);
         set({
           player: { ...player, hp: player.maxHp },
           currentScene: 'battle',
@@ -3004,6 +3042,7 @@ export const useGameStore = create<GameStore>()(
             dropIndex: dropResult.getItemDropIndex,
             isDropSuccess: dropResult.isDropSuccess,
             goldMultiplier: battleVarResult.goldMultiplier,
+            expMultiplier: battleVarResult.expMultiplier,
             battleResult: null,
             _ending: false,
             damageDisplay: null,
@@ -3015,6 +3054,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             attackCount: 0,
+          hitCount: 0,
             specialBonusType,
             activeEffect: null,
             resCount: eqBonuses2.resCount,
@@ -3046,51 +3086,37 @@ export const useGameStore = create<GameStore>()(
         });
       },
       endBattle: (victory) => {
-        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, kyarakutalv, kyarakutaKozinExp, battle: { comboCount, goldMultiplier } } = get();
-        
+        const { battle, player, addGold, addExp, addToInventory, updatePlayerHp, incrementWinBattle, incrementLoseBattle, updateHighCombo, battlePoints, defeatedBosses, kyarakutalv, kyarakutaKozinExp, battle: { comboCount, goldMultiplier, expMultiplier } } = get();
+
         if (battle.battleResult) {
           return;
         }
-        
+
         const { battleInterval } = get();
         if (battleInterval) {
           clearInterval(battleInterval);
           set({ battleInterval: null });
         }
-        
+
         let goldReward = 0;
         let expReward = 0;
         let dropItem = undefined;
         let battlePointsChange = 0;
-        
-        const accessories = player.equippedAccessories || [];
-        const greedPendant = accessories.find(acc => acc && acc.t1 === 77);
-        const speedHourglass = accessories.find(acc => acc && (acc.t1 === 4100 || acc.t1 === 4101));
-        
+
         if (victory && battle.enemy) {
+          // 战斗胜利：播放胜利BGM（参考 battle.txt#L793-797）
+          // BossSyu = bossType >= 0 表示Boss战，普通战为 -1
+          const bossSyu = battle.bossType >= 0 ? battle.bossType : -1;
+          bgmManager.bgmstopf();
+          bgmManager.bgmstartf(7, bossSyu);
+
+          // gdata.txt battlevar.txt#L202-213:
+          // EneG *= hourGlass(2x/3x) * gUpBairitu  → goldMultiplier
+          // EneExp *= hourGlass(2x/3x) * expbairitu → expMultiplier
+          // expbairitu 已包含 t1=60/3333/3334/3335/4100/1899 的加成；goyokuOn(t1=77) 会将 expbairitu 置 0
           goldReward = Math.floor(battle.enemy.goldReward * goldMultiplier);
-          expReward = battle.enemy.expReward;
-          
-          if (greedPendant) {
-            expReward = 0;
-          }
-          
-          const expGems = accessories.filter(acc => acc && acc.t1 === 60);
-          for (const gem of expGems) {
-            const expBonus = (gem.t2 || 0) / 100;
-            expReward = Math.floor(expReward * (1 + expBonus));
-          }
-          
-          if (speedHourglass) {
-            const hourglassType = speedHourglass.t1;
-            const hourglassExpMultiplier = hourglassType === 4101 ? 3 : 2;
-            const hourglassGoldMultiplier = hourglassType === 4101 ? 3 : 2;
-            const hourglassBonus = speedHourglass.t2 || 0;
-            
-            expReward = Math.floor(expReward * hourglassExpMultiplier * (1 + hourglassBonus));
-            goldReward = Math.floor(goldReward * hourglassGoldMultiplier);
-          }
-          
+          expReward = Math.floor(battle.enemy.expReward * expMultiplier);
+
           console.log(`[战斗奖励前] Lv.${player.level} | 金币:${player.gold} | 经验:${player.exp} | HP:${player.maxHp} | ATK:${player.attack} | DEF:${player.defense} | AGI:${player.agility} | LUC:${player.luck}`);
           console.log(`[战斗奖励] 金币+${goldReward} | 经验+${expReward} | 敌人:${battle.enemy?.name}(${battle.enemy?.id}) | 难度:${get().hardmode || 0}`);
           addGold(goldReward);
@@ -3114,6 +3140,8 @@ export const useGameStore = create<GameStore>()(
             battlePointsChange = WinBossGetBattlePoint((battle.enemy as any).bossId);
           }
         } else if (!victory) {
+          // 战斗失败：停止BGM（参考 battle.txt#L1193）
+          bgmManager.bgmstopf();
           const damage = Math.floor(player.maxHp * 0.3);
           updatePlayerHp(-damage);
           incrementLoseBattle();
@@ -3239,6 +3267,9 @@ export const useGameStore = create<GameStore>()(
       },
       clearBattleResult: () => {
         set((state) => ({ battle: { ...state.battle, battleResult: null } }));
+        // 战斗结果清除后返回地图：恢复地图BGM（参考 StageMap.txt#L608）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(3, get().currentMap || 1);
       },
       toggleBattle: () => {
         const { battle, startBattleLoop, stopBattleLoop } = get();
@@ -3539,10 +3570,22 @@ export const useGameStore = create<GameStore>()(
                   const enemyDamage = calculateEnemyDamage(
                     battle.enemy!.attack,
                     totalDefense,
-                    accessories
+                    accessories,
+                    battle.hitCount
                   );
                   tdame = enemyDamage;
-                  
+
+                  // 闪光沙漏 (t1=2777): 受到敌人攻击时 hitCount +1
+                  const shiningHourglass = accessories.find(acc => acc && acc.t1 === 2777);
+                  if (shiningHourglass) {
+                    set((s) => ({
+                      battle: {
+                        ...s.battle,
+                        hitCount: s.battle.hitCount + 1,
+                      },
+                    }));
+                  }
+
                   set((s) => ({
                     battle: {
                       ...s.battle,
@@ -3557,7 +3600,7 @@ export const useGameStore = create<GameStore>()(
                       activeEffect: { effectId: 13, position: 'player' },
                     },
                   }));
-                  
+
                   eefi = 0;
                   mode = 4;
                   isProcessing = false;
@@ -3657,8 +3700,8 @@ export const useGameStore = create<GameStore>()(
                   }
                 }
                 
-                if (battle.sandHourglassOn) {
-                  if (battle.turnCount >= 45 && newEnemyHp < battle.enemy!.maxHp * 0.4) {
+                if (battle.hourgclassOn1) {
+                  if (battle.attackCount >= 45 && newEnemyHp <= battle.enemy!.maxHp * 0.4) {
                     set((s) => ({
                       battle: {
                         ...s.battle,
@@ -3921,6 +3964,7 @@ export const useGameStore = create<GameStore>()(
             dropIndex: -1,
             isDropSuccess: false,
             goldMultiplier: 1,
+          expMultiplier: 1,
             battleResult: null,
             _ending: false,
             damageDisplay: null,
@@ -3932,6 +3976,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             attackCount: 0,
+          hitCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: 0,
@@ -4076,6 +4121,7 @@ export const useGameStore = create<GameStore>()(
             dropIndex: -1,
             isDropSuccess: false,
             goldMultiplier: 1,
+          expMultiplier: 1,
             battleResult: null,
             _ending: false,
             damageDisplay: null,
@@ -4087,6 +4133,7 @@ export const useGameStore = create<GameStore>()(
             _loopTick: 0,
             _loopComboCount: 1,
             attackCount: 0,
+          hitCount: 0,
             specialBonusType: null,
             activeEffect: null,
             resCount: 0,
@@ -4388,6 +4435,9 @@ export const useGameStore = create<GameStore>()(
           currentScene: 'world',
           encounterRate: 0,
         });
+        // 退出隐藏地图回到原地图：恢复地图BGM（参考 StageMap.txt#L608）
+        bgmManager.bgmstopf();
+        bgmManager.bgmstartf(3, originalMap || 1);
         console.log(`[HiddenMap] Exited, returned to map ${originalMap}`);
       },
       unlockAccessorySlot: (slotIndex?: number) => {

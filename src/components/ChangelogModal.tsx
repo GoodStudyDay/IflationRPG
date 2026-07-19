@@ -4,6 +4,19 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.92',
+    date: '2026-07-19 00:00:00',
+    changes: [
+      '新增BGM系统：参考原版SeBgm实现bgmManager.ts，封装HTML5 Audio API',
+      '战斗BGM：普通战随机播放3首battle BGM之一，Boss战固定播放boss1 BGM（参考battle.txt#L198-199）',
+      '胜利BGM：战斗胜利后播放win1 BGM，单次播放不循环（参考battle.txt#L793-797）',
+      '失败BGM：战斗失败时停止BGM（参考battle.txt#L1193）',
+      '标题BGM：标题画面用户首次交互后播放title BGM（浏览器自动播放策略要求）',
+      '地图BGM：进入地图/退出隐藏地图/战斗结束返回地图时播放对应地图BGM（参考StageMap.txt#L608）',
+      '游戏结束BGM：玩家死亡时播放gameover BGM（参考gameover.txt#L68-69）',
+    ],
+  },
+  {
     version: 'v0.0.91',
     date: '2026-07-19 00:00:00',
     changes: [

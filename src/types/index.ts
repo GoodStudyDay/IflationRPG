@@ -164,6 +164,8 @@ export interface BattleState {
   dropIndex: number;
   isDropSuccess: boolean;
   goldMultiplier: number;
+  /** 经验倍率（含 hourGlass 加成与 expbairitu，gdata.txt battlevar.txt#L202-213） */
+  expMultiplier: number;
   battleResult: BattleResult | null;
   _ending: boolean;
   damageDisplay: number | null;
@@ -177,6 +179,8 @@ export interface BattleState {
   _loopComboCount: number;
   /** 攻击计数（用于恶魔之魂效果） */
   attackCount: number;
+  /** 受击计数（用于闪光沙漏DEF加成，每次受到敌人攻击+1） */
+  hitCount: number;
   /** 恢复费用部分支付标记 */
   _recvCost?: boolean;
   /** 触发战斗的特殊 bonus 类型 (12=i, 13=iii, etc) */

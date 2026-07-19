@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { SettingsModal } from './SettingsModal';
 import { Leaderboard } from './Leaderboard';
@@ -9,6 +9,7 @@ import { VERSION } from '@/data/version';
 import { useTranslation } from '@/hooks/useTranslation';
 import { preloadImages } from '@/utils/imageCache';
 import { getAllGameImageUrls } from '@/utils/gameAssets';
+import { bgmManager } from '@/utils/bgmManager';
 
 type ScreenMode = 'top' | 'gamestart' | 'charselect';
 
@@ -25,6 +26,24 @@ export const TitleScreen = () => {
 
   const hasSavedGame = player.gold > 0 || player.exp > 0 || player.level > 1;
   const canContinue = battlePoints > 0;
+
+  // 标题画面：用户首次交互后播放标题BGM（浏览器自动播放策略要求用户交互后才能播放音频）
+  useEffect(() => {
+    const playTitleBgm = () => {
+      bgmManager.bgmstartf(0);
+      document.removeEventListener('click', playTitleBgm);
+      document.removeEventListener('keydown', playTitleBgm);
+      document.removeEventListener('touchstart', playTitleBgm);
+    };
+    document.addEventListener('click', playTitleBgm, { once: true });
+    document.addEventListener('keydown', playTitleBgm, { once: true });
+    document.addEventListener('touchstart', playTitleBgm, { once: true });
+    return () => {
+      document.removeEventListener('click', playTitleBgm);
+      document.removeEventListener('keydown', playTitleBgm);
+      document.removeEventListener('touchstart', playTitleBgm);
+    };
+  }, []);
 
   const handlePreloadAndStart = useCallback(async (callback: () => void) => {
     if (isLoading) return;

@@ -278,6 +278,15 @@ export const battleVarInit = (
     goldMultiplier *= 3;
   }
 
+  // gdata.txt battlevar.txt#L202-213: EneExp 也要乘以 hourGlass 倍率
+  let expMultiplier = settings.expbairitu;
+  if (settings.hourGlassON) {
+    expMultiplier *= 2;
+  }
+  if (settings.hourGlassON1) {
+    expMultiplier *= 3;
+  }
+
   return {
     missrate: settings.missrate || 0,
     enemissrate: settings.enemissrate || 0,
@@ -285,7 +294,7 @@ export const battleVarInit = (
     critRate,
     itemDropRate: itemKakuritu,
     goldMultiplier,
-    expMultiplier: settings.expbairitu,
+    expMultiplier,
     playerStats: playerStatus,
   };
 };

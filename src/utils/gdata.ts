@@ -446,17 +446,11 @@ export function EqStUpdate(
       goyokuOn = true;
     } else if (t1 === 500) {
       MAXnokoriBattleTimes += t2;
-    } else if (t1 === 2424) {
-      const newReflection = t2 / 100;
-      if (newReflection > (reflection || 0)) {
-        reflection = newReflection;
-      }
-    } else if (t1 === 2425) {
-      const newReflection = t2 / 100;
-      if (newReflection > (reflection || 0)) {
-        reflection = newReflection;
-        refHealOn = true;
-      }
+    } else if (t1 === 2424 && (reflection || 0) < t2) {
+      reflection = t2 / 100;
+    } else if (t1 === 2425 && (reflection || 0) < t2) {
+      reflection = t2 / 100;
+      refHealOn = true;
     } else if (t1 === 2777) {
       hourgclassOn = true;
     } else if (t1 === 2778) {
@@ -478,7 +472,7 @@ export function EqStUpdate(
     } else if (t1 === 1203) {
       DamegeKaihukuOn2 = true;
     } else if (t1 === 2000) {
-      myhprecovery = true;
+      healOnAttackOn = true;
     } else if (t1 === 4101 && !hourGlassON1) {
       hourGlassON1 = true;
     } else if (t1 === 4100 && !hourGlassON) {
@@ -497,7 +491,7 @@ export function EqStUpdate(
     redEyeEffect, blueEyeEffect, greenEyeEffect,
     secretKeyOn, possiveDeftoAtk, envelope,
     crihPlusKakuritu, missrate, MoveSpeed,
-    warGodBladeOn, healOnAttackOn, sandHourglassOn
+    warGodBladeOn, sandHourglassOn
   );
   ephp = result.ephp;
   epatk = result.epatk;
@@ -511,7 +505,6 @@ export function EqStUpdate(
   possiveDeftoAtk = result.possiveDeftoAtk;
   envelope = result.envelope;
   warGodBladeOn = result.warGodBladeOn;
-  healOnAttackOn = result.healOnAttackOn;
   sandHourglassOn = result.sandHourglassOn;
   crihPlusKakuritu = result.crihPlusKakuritu;
   missrate = result.missrate;
@@ -637,7 +630,6 @@ interface PassiveUpdateResult {
   missrate: number;
   MoveSpeed: number;
   warGodBladeOn: boolean;
-  healOnAttackOn: boolean;
   sandHourglassOn: boolean;
 }
 
@@ -658,7 +650,6 @@ function passiveUpdate(
   missrate: number,
   MoveSpeed: number,
   warGodBladeOn: boolean,
-  healOnAttackOn: boolean,
   sandHourglassOn: boolean
 ): PassiveUpdateResult {
   redEyeEffect = GetItemTimesFromInventory(inventory, 2, 106) * 0.1;
@@ -684,7 +675,6 @@ function passiveUpdate(
   possiveDeftoAtk = GetItemTimes_zerocheck(inventory, 2, 110);
   envelope = GetItemTimes_zerocheck(inventory, 2, 123);
   warGodBladeOn = GetItemTimes_zerocheck(inventory, 2, 105);
-  healOnAttackOn = GetItemTimes_zerocheck(inventory, 2, 108);
   sandHourglassOn = GetItemTimes_zerocheck(inventory, 2, 120);
 
   if (GetItemTimes_zerocheck(inventory, 2, 103)) {
@@ -701,7 +691,7 @@ function passiveUpdate(
     redEyeEffect, blueEyeEffect, greenEyeEffect,
     secretKeyOn, possiveDeftoAtk, envelope,
     crihPlusKakuritu, missrate, MoveSpeed,
-    warGodBladeOn, healOnAttackOn, sandHourglassOn
+    warGodBladeOn, sandHourglassOn
   };
 }
 
