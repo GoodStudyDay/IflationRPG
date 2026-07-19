@@ -265,24 +265,36 @@ export const PlayerInfo = ({ isOpen, onClose }: PlayerInfoProps) => {
                   <>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                        {src.equippedWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={src.equippedWeapon.x} y={src.equippedWeapon.y} size="medium" bit32={src.equippedWeapon.bit32} /> : <span className="text-lg">📦</span>}
+                        {(() => {
+                          const weaponInfo = equipmentData.find(e => e.id === src.equippedWeapon?.id);
+                          const displayWeapon = weaponInfo || src.equippedWeapon;
+                          return displayWeapon?.x !== undefined ? <SpriteIcon type="weapon" x={displayWeapon.x} y={displayWeapon.y} size="medium" bit32={displayWeapon.bit32} /> : <span className="text-lg">📦</span>;
+                        })()}
                       </div>
                       <div className="text-xs text-gray-400 truncate">{src.equippedWeapon ? getEquipName(src.equippedWeapon.name) : t('无')}</div>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                        {src.equippedArmor?.x !== undefined ? <SpriteIcon type="armor" x={src.equippedArmor.x} y={src.equippedArmor.y} size="medium" bit32={src.equippedArmor.bougu32png} /> : <span className="text-lg">📦</span>}
+                        {(() => {
+                          const armorInfo = equipmentData.find(e => e.id === src.equippedArmor?.id);
+                          const displayArmor = armorInfo || src.equippedArmor;
+                          return displayArmor?.x !== undefined ? <SpriteIcon type="armor" x={displayArmor.x} y={displayArmor.y} size="medium" bit32={displayArmor.bougu32png} /> : <span className="text-lg">📦</span>;
+                        })()}
                       </div>
                       <div className="text-xs text-gray-400 truncate">{src.equippedArmor ? getEquipName(src.equippedArmor.name) : t('无')}</div>
                     </div>
-                    {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => (
-                      <div key={idx} className="text-center">
-                        <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
-                          {acc?.x !== undefined ? <SpriteIcon type="accessory" x={acc.x} y={acc.y} size="medium" image={acc.image} /> : <span className="text-lg">📦</span>}
-                        </div>
-                        <div className="text-xs text-gray-400 truncate">{acc ? getEquipName(acc.name) : t('无')}</div>
-                      </div>
-                    ))}
+                    {(src.equippedAccessories || []).filter(Boolean).map((acc: any, idx: number) => {
+                        const equipmentInfo = equipmentData.find(e => e.id === acc.id);
+                        const displayAcc = equipmentInfo || acc;
+                        return (
+                          <div key={idx} className="text-center">
+                            <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1">
+                              {displayAcc?.x !== undefined ? <SpriteIcon type="accessory" x={displayAcc.x} y={displayAcc.y} size="medium" image={displayAcc.image} /> : <span className="text-lg">📦</span>}
+                            </div>
+                            <div className="text-xs text-gray-400 truncate">{displayAcc ? getEquipName(displayAcc.name) : t('无')}</div>
+                          </div>
+                        );
+                      })}
                     {((src.equippedAccessories || []).length === 0) && [0, 1].map(i => (
                       <div key={i} className="text-center">
                         <div className="w-10 h-10 mx-auto bg-[#3d2b6e] rounded-lg flex items-center justify-center mb-1"><span className="text-lg">📦</span></div>

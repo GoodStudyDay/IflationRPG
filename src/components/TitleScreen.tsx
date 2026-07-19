@@ -308,8 +308,8 @@ export const TitleScreen = () => {
         <div
           className="absolute z-10"
           style={{ 
-            left: '296px', 
-            top: '250px', 
+            left: '316px', 
+            top: '220px', 
             transform: 'scale(1.5)',
             imageRendering: 'pixelated',
             width: '32px',
@@ -326,7 +326,7 @@ export const TitleScreen = () => {
             className="absolute z-20 pointer-events-none"
             style={{ 
               left: '270px', 
-              top: '220px',
+              top: '180px',
               animation: 'levelUpFloat 0.8s ease-out forwards',
             }}
           >
