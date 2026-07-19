@@ -418,6 +418,7 @@ export const translations: Record<string, TranslationKey> = {
   downloading: { ja: 'ダウンロード中...', en: 'Downloading...', 'zh-Hant': '下載中...', 'zh-Hans': '下载中...', ko: '다운로드 중...', es: 'Descargando...', id: 'Mengunduh...' },
   '游戏开始': { ja: 'ゲームスタート', en: 'Start Game', 'zh-Hant': '遊戲開始', 'zh-Hans': '游戏开始', ko: '게임 시작', es: 'Comenzar Juego', id: 'Mulai Game' },
   '玩家信息': { ja: 'プレイヤー情報', en: 'Player Info', 'zh-Hant': '玩家資訊', 'zh-Hans': '玩家信息', ko: '플레이어 정보', es: 'Info del Jugador', id: 'Info Pemain' },
+  '游戏信息': { ja: 'ゲーム情報', en: 'Game Info', 'zh-Hant': '遊戲資訊', 'zh-Hans': '游戏信息', ko: '게임 정보', es: 'Info del Juego', id: 'Info Game' },
   '重新开始': { ja: 'やり直す', en: 'Try Again', 'zh-Hant': '重新開始', 'zh-Hans': '重新开始', ko: '다시 하기', es: 'Reempezar', id: 'Mulai ulang' },
   '继承上次进度': { ja: '前回までの引き継いでます', en: 'Continue from last save', 'zh-Hant': '繼承上次進度', 'zh-Hans': '继承上次进度', ko: '이전 진행 상황 이어가기', es: 'Continuar desde la última partida', id: 'Lanjutkan dari simpanan sebelumnya' },
   '继续游戏': { ja: '続きから', en: 'Continue', 'zh-Hant': '繼續遊戲', 'zh-Hans': '继续游戏', ko: '계속하기', es: 'Continuar', id: 'Lanjutkan' },

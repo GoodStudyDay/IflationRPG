@@ -4,6 +4,21 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.93',
+    date: '2026-07-19 00:00:00',
+    changes: [
+      '标题画面重制：参考原版title.txt实现完整标题画面效果',
+      '新增标题背景图(145_titlebackpng.png)和Logo(143_logoENpng.png)',
+      '实现Hero精灵动画：随机选择英雄，3帧循环播放',
+      '实现左右属性面板：倾斜角度、白色文字、无背景、数字实时变化',
+      '实现LEVEL UP!飘字动画：角色头顶随机显示升级文字',
+      '实现两层雾动画：使用1066.png图片，动态移动和缩放',
+      '修复圣树之叶回复效果：改为通过已装备饰品检测(t1=2000)，而非背包检测',
+      '设置页面新增BGM音量控制：拖动滑块调整背景音乐音量',
+      '新增战斗音效系统：攻击(myef)、敌人攻击(eneef)、确认(okstart)、升级(lvupstart)、回复(kaihukustart)',
+    ],
+  },
+  {
     version: 'v0.0.92',
     date: '2026-07-19 00:00:00',
     changes: [

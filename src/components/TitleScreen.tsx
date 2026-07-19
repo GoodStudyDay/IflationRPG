@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useGameStore } from '@/stores/gameStore';
 import { SettingsModal } from './SettingsModal';
 import { Leaderboard } from './Leaderboard';
@@ -23,11 +23,19 @@ export const TitleScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [totalImages, setTotalImages] = useState(0);
+  
+  const [heroFrame, setHeroFrame] = useState(0);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [leftStats, setLeftStats] = useState<{ hp: string; atk: string; def: string; agi: string; luc: string }>({ hp: '', atk: '', def: '', agi: '', luc: '' });
+  const [rightStats, setRightStats] = useState<{ lv: string; gold: string; exp: string }>({ lv: '', gold: '', exp: '' });
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  
+  const fogRef = useRef({ time: 0, time2: 0 });
+  const animationFrameRef = useRef<number>();
 
   const hasSavedGame = player.gold > 0 || player.exp > 0 || player.level > 1;
   const canContinue = battlePoints > 0;
 
-  // 标题画面：用户首次交互后播放标题BGM（浏览器自动播放策略要求用户交互后才能播放音频）
   useEffect(() => {
     const playTitleBgm = () => {
       bgmManager.bgmstartf(0);
@@ -43,6 +51,54 @@ export const TitleScreen = () => {
       document.removeEventListener('keydown', playTitleBgm);
       document.removeEventListener('touchstart', playTitleBgm);
     };
+  }, []);
+
+  useEffect(() => {
+    setHeroIndex(Math.floor(Math.random() * 16));
+    const generateStats = () => {
+      const rand = () => Math.floor(Math.random() * 99999);
+      const randBig = () => Math.floor(Math.random() * 9999999999);
+      setLeftStats({
+        hp: `${rand()}(+${randBig()})`,
+        atk: `${rand()}(+${rand()})`,
+        def: `${rand()}(+${rand()})`,
+        agi: `${rand()}(+${rand()})`,
+        luc: `${rand()}(+${rand()})`,
+      });
+      setRightStats({
+        lv: String(Math.floor(Math.random() * 99999)),
+        gold: String(Math.floor(Math.random() * 9999999)),
+        exp: String(Math.floor(Math.random() * 999999999)),
+      });
+    };
+    generateStats();
+    const interval = setInterval(generateStats, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const animate = () => {
+      setHeroFrame(prev => (prev + 1) % 12);
+      fogRef.current.time += 2;
+      fogRef.current.time2 += 2;
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+    animationFrameRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const showLvUp = () => {
+      setShowLevelUp(true);
+      setTimeout(() => setShowLevelUp(false), 800);
+    };
+    const interval = setInterval(showLvUp, 3000 + Math.random() * 2000);
+    showLvUp();
+    return () => clearInterval(interval);
   }, []);
 
   const handlePreloadAndStart = useCallback(async (callback: () => void) => {
@@ -64,6 +120,7 @@ export const TitleScreen = () => {
   }, [isLoading]);
 
   const handleStartGame = () => {
+    bgmManager.okstart();
     if (hasSavedGame) {
       setScreenMode('gamestart');
     } else {
@@ -72,29 +129,35 @@ export const TitleScreen = () => {
   };
 
   const handleNewGame = () => {
+    bgmManager.okstart();
     resetGame();
     setScreenMode('charselect');
   };
 
   const handleContinue = () => {
+    bgmManager.okstart();
     handlePreloadAndStart(() => {
       startGame();
     });
   };
 
   const handleBack = () => {
+    bgmManager.okstart();
     setScreenMode('top');
   };
 
   const handlePlayerInfo = () => {
+    bgmManager.okstart();
     setShowPlayerInfo(true);
   };
 
   const handleRanking = () => {
+    bgmManager.okstart();
     setShowLeaderboard(true);
   };
 
   const handleHeroSelect = (heroId: number) => {
+    bgmManager.okstart();
     handlePreloadAndStart(() => {
       selectHero(heroId);
       startGame();
@@ -102,6 +165,7 @@ export const TitleScreen = () => {
   };
 
   const handleCharSelectBack = () => {
+    bgmManager.okstart();
     setScreenMode('top');
   };
 
@@ -115,6 +179,33 @@ export const TitleScreen = () => {
     );
   }
 
+  const heroFrameIndex = Math.floor(heroFrame * 0.25) % 3;
+  const heroConfigs = [
+    { spriteBase: 'heropng83', fileId: 963 },
+    { spriteBase: 'heropng55', fileId: 945 },
+    { spriteBase: 'heropng31', fileId: 936 },
+    { spriteBase: 'heropng11', fileId: 23 },
+    { spriteBase: 'heropng103', fileId: 957 },
+    { spriteBase: 'heropng19', fileId: 972 },
+    { spriteBase: 'heropng8', fileId: 966 },
+    { spriteBase: 'heropng64', fileId: 954 },
+    { spriteBase: 'heropng69', fileId: 978 },
+    { spriteBase: 'heropng33', fileId: 951 },
+    { spriteBase: 'heropng110', fileId: 939 },
+    { spriteBase: 'heropng7', fileId: 960 },
+    { spriteBase: 'heropng30', fileId: 975 },
+    { spriteBase: 'heropng63', fileId: 969 },
+    { spriteBase: 'heropng61', fileId: 948 },
+    { spriteBase: 'heropng4', fileId: 942 },
+  ];
+  const heroConfig = heroConfigs[heroIndex];
+  const heroImage = `/images/player/${heroConfig.fileId}_${heroConfig.spriteBase}_0.png`;
+
+  const fogX = -(Math.cos(fogRef.current.time / 280 + fogRef.current.time / 500) * 0.5 + 0.5) * 640;
+  const fogY = -(Math.sin(fogRef.current.time / 140 + fogRef.current.time / 900) * 0.5 + 0.5) * 60;
+  const fog2X = -64 + Math.cos(fogRef.current.time2 / 500 + fogRef.current.time2 / 700) * 32;
+  const fog2ScaleY = 0.8 + Math.cos(fogRef.current.time2 / 400 + fogRef.current.time2 / 400) * 0.4;
+
   const renderContent = () => {
     if (screenMode === 'charselect') {
       return (
@@ -127,24 +218,20 @@ export const TitleScreen = () => {
 
     if (screenMode === 'gamestart') {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-[#87CEEB] to-[#90EE90] flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-10 left-10 w-8 h-8 bg-yellow-400 rounded-full" />
-            <div className="absolute top-20 left-20 w-4 h-4 bg-white rounded-full" />
-            <div className="absolute top-15 right-20 w-6 h-6 bg-white rounded-full" />
-            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#7CFC00]" />
-          </div>
+        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+          <img 
+            src="/images/logo/145_titlebackpng.png" 
+            alt="Background"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
 
-          <div className="relative z-10 mb-8">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-6xl font-black tracking-wider">
-                <span className="text-red-600 drop-shadow-lg">Iflation</span>
-                <span className="text-yellow-500 drop-shadow-lg">RPG</span>
-              </h1>
-            </div>
-          </div>
+          <img 
+            src="/images/logo/143_logoENpng.png" 
+            alt="Logo"
+            className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
+          />
 
-          <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs px-4">
+          <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs px-4 mt-32">
             <button
               onClick={handleNewGame}
               className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
@@ -180,43 +267,100 @@ export const TitleScreen = () => {
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#87CEEB] to-[#90EE90] flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-10 left-10 w-8 h-8 bg-yellow-400 rounded-full" />
-          <div className="absolute top-20 left-20 w-4 h-4 bg-white rounded-full" />
-          <div className="absolute top-15 right-20 w-6 h-6 bg-white rounded-full" />
-          
-          <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-[#7CFC00]">
-            <div className="absolute top-10 left-1/4 w-4 h-4 bg-pink-400 rounded-full" />
-            <div className="absolute top-15 left-1/3 w-3 h-3 bg-yellow-400 rounded-full" />
-            <div className="absolute top-8 left-1/2 w-4 h-4 bg-pink-400 rounded-full" />
-            <div className="absolute top-20 left-2/3 w-3 h-3 bg-yellow-400 rounded-full" />
-            <div className="absolute top-12 right-1/4 w-4 h-4 bg-pink-400 rounded-full" />
-            
-            <div className="absolute top-0 left-1/5 w-8 h-32 bg-[#654321] rounded-t-lg">
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-              <div className="absolute top-14 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-              <div className="absolute top-24 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-            </div>
-            
-            <div className="absolute top-0 right-1/5 w-8 h-32 bg-[#654321] rounded-t-lg">
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-              <div className="absolute top-14 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-              <div className="absolute top-24 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#8B7355] rounded-full" />
-            </div>
+      <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+        <img 
+          src="/images/logo/145_titlebackpng.png" 
+          alt="Background"
+          className="absolute inset-0 w-full h-full"
+          style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
+        />
+
+        <img 
+          src="/images/logo/143_logoENpng.png" 
+          alt="Logo"
+          className="absolute top-5 left-1/2 -translate-x-1/2 z-20"
+        />
+
+        <div 
+          className="absolute z-10 pointer-events-none"
+          style={{ left: '20px', top: '130px', transform: 'skewX(-15deg)' }}
+        >
+          <div className="p-1">
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">HP {leftStats.hp}</div>
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">ATK {leftStats.atk}</div>
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">DEF {leftStats.def}</div>
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">AGI {leftStats.agi}</div>
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">LUC {leftStats.luc}</div>
           </div>
         </div>
 
-        <div className="relative z-10 mb-8">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-6xl font-black tracking-wider">
-              <span className="text-red-600 drop-shadow-lg">Iflation</span>
-              <span className="text-yellow-500 drop-shadow-lg">RPG</span>
-            </h1>
+        <div 
+          className="absolute z-10 pointer-events-none"
+          style={{ right: '25px', top: '150px', transform: 'skewX(15deg)' }}
+        >
+          <div className="p-1">
+            <div className="text-white text-sm font-mono font-bold whitespace-nowrap opacity-90">{rightStats.lv}LV</div>
+            <div className="text-white text-sm font-mono font-bold whitespace-nowrap opacity-90">{rightStats.gold}G</div>
+            <div className="text-white text-xs font-mono font-bold whitespace-nowrap opacity-90">{rightStats.exp}EXP</div>
           </div>
         </div>
 
-        <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs px-4">
+        <div
+          className="absolute z-10"
+          style={{ 
+            left: '296px', 
+            top: '250px', 
+            transform: 'scale(1.5)',
+            imageRendering: 'pixelated',
+            width: '32px',
+            height: '32px',
+            backgroundImage: `url(${heroImage})`,
+            backgroundPosition: `-${heroFrameIndex * 32}px 0px`,
+            backgroundSize: '96px 128px',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+
+        {showLevelUp && (
+          <div
+            className="absolute z-20 pointer-events-none"
+            style={{ 
+              left: '270px', 
+              top: '220px',
+              animation: 'levelUpFloat 0.8s ease-out forwards',
+            }}
+          >
+            <div className="text-pink-500 text-xl font-bold" style={{ textShadow: '2px 2px 0 #000' }}>LEVEL UP!</div>
+            <div className="text-pink-500 text-xl font-bold" style={{ textShadow: '2px 2px 0 #000', marginTop: '-8px' }}>LEVEL UP!</div>
+          </div>
+        )}
+
+        <img 
+          src="/images/logo/1066.png"
+          alt="Fog"
+          className="absolute z-30 pointer-events-none"
+          style={{ 
+            left: fogX, 
+            top: fogY, 
+            opacity: 0.42,
+            transform: 'scale(4)',
+            transformOrigin: 'top left',
+          }}
+        />
+        <img 
+          src="/images/logo/1066.png"
+          alt="Fog 2"
+          className="absolute z-30 pointer-events-none"
+          style={{ 
+            left: fog2X, 
+            top: 0, 
+            opacity: 0.85,
+            transform: `scaleX(1.2) scaleY(${fog2ScaleY})`,
+            transformOrigin: 'top left',
+          }}
+        />
+
+        <div className="relative z-20 flex flex-col gap-3 w-full max-w-xs px-4 mt-40">
           <button
             onClick={handleStartGame}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-lg sm:text-xl py-3 sm:py-4 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
@@ -228,26 +372,26 @@ export const TitleScreen = () => {
             onClick={handlePlayerInfo}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            {t('玩家信息')}
+            {t('游戏信息')}
           </button>
           
           <button
             onClick={handleRanking}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            {t('ランキング')}
+            {t('排行')}
           </button>
           
           <button
             onClick={() => setShowSettings(true)}
             className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold text-base sm:text-lg py-2 sm:py-3 px-8 rounded-lg border-4 border-gray-400 shadow-lg active:scale-95 transition-all"
           >
-            {t('オプション')}
+            {t('设置')}
             <span className="block text-xs sm:text-sm opacity-70">SETTING</span>
           </button>
         </div>
 
-        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+        <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
           <a 
             href="https://github.com/GoodStudyDay/IflationRPG/actions" 
             target="_blank" 
@@ -268,6 +412,13 @@ export const TitleScreen = () => {
 
   return (
     <>
+      <style>{`
+        @keyframes levelUpFloat {
+          0% { opacity: 0; transform: translateY(0) scale(0.5); }
+          20% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+          100% { opacity: 0; transform: translateY(-30px) scale(1); }
+        }
+      `}</style>
       {renderContent()}
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
       <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
