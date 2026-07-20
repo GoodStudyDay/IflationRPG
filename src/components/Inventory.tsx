@@ -545,23 +545,6 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         {accessory.setumei && (
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(accessory.setumei, accessory.t1, accessory.t2)}</div>
                         )}
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {accessory.hpBonus > 0 && (
-                            <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
-                          )}
-                          {accessory.attackBonus > 0 && (
-                            <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                          )}
-                          {accessory.defenseBonus > 0 && (
-                            <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                          )}
-                          {accessory.agilityBonus > 0 && (
-                            <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{accessory.agilityBonus}</span>
-                          )}
-                          {accessory.luckBonus > 0 && (
-                            <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
-                          )}
-                        </div>
                       </div>
                     )}
                     {isOwned && (
@@ -569,24 +552,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                         {accessory.setumei && (
                           <div className="text-purple-300 text-sm mt-1">{getEquipDescription(accessory.setumei, accessory.t1, accessory.t2)}</div>
                         )}
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {accessory.hpBonus > 0 && (
-                            <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
-                          )}
-                          {accessory.attackBonus > 0 && (
-                            <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                          )}
-                          {accessory.defenseBonus > 0 && (
-                            <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                          )}
-                          {accessory.agilityBonus > 0 && (
-                            <span className="bg-cyan-900/50 text-cyan-300 px-1.5 py-0.5 rounded text-xs">AGI +{accessory.agilityBonus}</span>
-                          )}
-                          {accessory.luckBonus > 0 && (
-                            <span className="bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded text-xs">LUC +{accessory.luckBonus}</span>
-                          )}
-                        </div>
-                        <div className="text-gray-300 text-xs mt-0.5">{t('数量')}: {accessory.quantity}</div>
+                        <div className="text-gray-300 text-xs mt-1">{t('数量')}: {accessory.quantity}</div>
                       </>
                     )}
                   </div>
@@ -980,19 +946,7 @@ export const Inventory = ({ onClose }: InventoryProps) => {
                       {accessory.effectDescription && (
                         <div className="text-gray-200 text-xs mt-0.5 truncate">{accessory.effectDescription}</div>
                       )}
-                      {(accessory.hpBonus > 0 || accessory.attackBonus > 0 || accessory.defenseBonus > 0) && (
-                        <div className="flex gap-1 mt-0.5">
-                          {accessory.hpBonus > 0 && (
-                            <span className="bg-green-900/50 text-green-300 px-1.5 py-0.5 rounded text-xs">HP +{accessory.hpBonus}</span>
-                          )}
-                          {accessory.attackBonus > 0 && (
-                            <span className="bg-red-900/50 text-red-300 px-1.5 py-0.5 rounded text-xs">ATK +{accessory.attackBonus}</span>
-                          )}
-                          {accessory.defenseBonus > 0 && (
-                            <span className="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-xs">DEF +{accessory.defenseBonus}</span>
-                          )}
-                        </div>
-                      )}
+
                     </div>
                   </div>
                 ) : isUnlocked ? (

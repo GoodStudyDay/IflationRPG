@@ -44,7 +44,7 @@ export const SpriteIcon = ({ type, x, y, size = 'medium', className = '', image,
   if (type === 'weapon') {
     switch (bit32) {
       case 1: config = SPRITE_CONFIG.weapon1; break;
-      case 2: config = SPRITE_CONFIG.weapon2; break;
+      case 2: config = SPRITE_CONFIG.weapon1; break;
       case 3: config = SPRITE_CONFIG.weapon3; break;
       case 4: config = SPRITE_CONFIG.weapon4; break;
       case 5: config = SPRITE_CONFIG.weapon5; break;

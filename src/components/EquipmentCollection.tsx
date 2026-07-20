@@ -174,38 +174,11 @@ export const EquipmentCollection = ({ onClose }: EquipmentCollectionProps) => {
                           {getTypeLabel(equipment.type)}
                         </span>
                       </div>
-                      {showInfo && (
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          {equipment.attackBonus > 0 && (
-                            <span className="bg-red-900/50 text-red-400 px-2 py-0.5 rounded text-xs">
-                              ATK +{equipment.attackBonus}
-                            </span>
-                          )}
-                          {equipment.defenseBonus > 0 && (
-                            <span className="bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded text-xs">
-                              DEF +{equipment.defenseBonus}
-                            </span>
-                          )}
-                          {equipment.hpBonus > 0 && (
-                            <span className="bg-green-900/50 text-green-400 px-2 py-0.5 rounded text-xs">
-                              HP +{equipment.hpBonus}
-                            </span>
-                          )}
-                          {equipment.agilityBonus > 0 && (
-                            <span className="bg-cyan-900/50 text-cyan-400 px-2 py-0.5 rounded text-xs">
-                              AGI +{equipment.agilityBonus}
-                            </span>
-                          )}
-                          {equipment.luckBonus > 0 && (
-                            <span className="bg-yellow-900/50 text-yellow-400 px-2 py-0.5 rounded text-xs">
-                              LUC +{equipment.luckBonus}
-                            </span>
-                          )}
-                          {equipment.setumei && (
-                            <span className="text-purple-400 text-xs">
-                              {getEquipDescription(equipment.setumei, equipment.t1, equipment.t2)}
-                            </span>
-                          )}
+                      {showInfo && equipment.setumei && (
+                        <div className="mt-1">
+                          <span className="text-purple-400 text-xs">
+                            {getEquipDescription(equipment.setumei, equipment.t1, equipment.t2)}
+                          </span>
                         </div>
                       )}
                     </div>

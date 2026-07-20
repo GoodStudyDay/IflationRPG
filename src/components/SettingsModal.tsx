@@ -13,7 +13,7 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-type ActiveSection = 'main' | 'cloud' | 'language' | 'preset' | 'cache' | 'about' | 'bgm';
+type ActiveSection = 'main' | 'cloud' | 'language' | 'preset' | 'about' | 'bgm';
 
 export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const { t } = useTranslation();
@@ -271,14 +271,6 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
       <div className="text-xs text-gray-400 px-2 mb-2">{t('设置战斗结算后属性点自动分配比例')}</div>
 
       <button
-        onClick={() => setActiveSection('cache')}
-        className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
-      >
-        {t('缓存管理')}
-      </button>
-      <div className="text-xs text-gray-400 px-2 mb-2">{t('管理游戏图片缓存')}</div>
-
-      <button
         onClick={() => setActiveSection('about')}
         className="w-full bg-[#5a3c8a] text-white font-bold py-3 rounded-lg hover:bg-[#6a4c9a] transition-colors"
       >
@@ -505,45 +497,6 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     </div>
   );
 
-  const renderCacheSection = () => (
-    <div className="space-y-3">
-      {renderSectionHeader(t('缓存管理'))}
-
-      <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
-        <div className="text-xs text-gray-400">{t('当前缓存大小')}</div>
-        <div className="text-white font-bold text-lg mt-1">{cacheSize}</div>
-      </div>
-      
-      {!showConfirmClear ? (
-        <button
-          onClick={() => setShowConfirmClear(true)}
-          className="w-full bg-red-700 text-white font-bold py-3 rounded-lg hover:bg-red-600 transition-colors"
-        >
-          {t('清除缓存')}
-        </button>
-      ) : (
-        <div className="space-y-2">
-          <div className="text-xs text-red-400 px-2">{t('确定要清除图片缓存吗？存档数据不会受影响。')}</div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleClearCache}
-              className="flex-1 bg-red-700 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-colors text-sm"
-            >
-              {t('确认清除')}
-            </button>
-            <button
-              onClick={() => setShowConfirmClear(false)}
-              className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
-            >
-              {t('キャンセル')}
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="text-xs text-gray-400 px-2 mt-2">{t('清除后下次加载图片会重新下载')}</div>
-    </div>
-  );
-
   const renderAboutSection = () => (
     <div className="space-y-3">
       {renderSectionHeader(t('关于游戏'))}
@@ -563,6 +516,41 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         {t('更新日志')}
       </button>
       <div className="text-xs text-gray-400 px-2 mb-2">{t('查看游戏版本更新记录')}</div>
+
+      <div className="border-t border-[#4a2c7a] pt-3 mt-2">
+        <div className="bg-[#1a0a2e] rounded-lg p-3 mb-2">
+          <div className="text-xs text-gray-400">{t('当前缓存大小')}</div>
+          <div className="text-white font-bold text-lg mt-1">{cacheSize}</div>
+        </div>
+        
+        {!showConfirmClear ? (
+          <button
+            onClick={() => setShowConfirmClear(true)}
+            className="w-full bg-red-700 text-white font-bold py-3 rounded-lg hover:bg-red-600 transition-colors"
+          >
+            {t('清除缓存')}
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="text-xs text-red-400 px-2">{t('确定要清除图片缓存吗？存档数据不会受影响。')}</div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleClearCache}
+                className="flex-1 bg-red-700 text-white font-bold py-2 rounded-lg hover:bg-red-600 transition-colors text-sm"
+              >
+                {t('确认清除')}
+              </button>
+              <button
+                onClick={() => setShowConfirmClear(false)}
+                className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition-colors text-sm"
+              >
+                {t('キャンセル')}
+              </button>
+            </div>
+          </div>
+        )}
+        <div className="text-xs text-gray-400 px-2 mt-2">{t('清除后下次加载图片会重新下载')}</div>
+      </div>
     </div>
   );
 
@@ -641,7 +629,6 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
         {activeSection === 'cloud' && renderCloudSection()}
         {activeSection === 'language' && renderLanguageSection()}
         {activeSection === 'preset' && renderPresetSection()}
-        {activeSection === 'cache' && renderCacheSection()}
         {activeSection === 'about' && renderAboutSection()}
         {activeSection === 'bgm' && renderBgmSection()}
       </div>

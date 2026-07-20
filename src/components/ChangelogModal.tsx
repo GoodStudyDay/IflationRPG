@@ -4,6 +4,22 @@ interface ChangelogModalProps {
 
 const changelog = [
   {
+    version: 'v0.0.95',
+    date: '2026-07-20 00:00:00',
+    changes: [
+      '修复战斗失败动画：失败时统一显示倒地动画',
+      'EquipmentCollection武器/防具显示优化：名称在图片上方，属性格式ATK/DEF x 基础值+plus',
+      '修复Undying Sword数据显示：attackBonus/defenseBonus使用plus值，price做基础值',
+      '装备详情弹窗新增plus和multi字段显示',
+      'EquipmentCollection页面移除所有ATK/DEF/HP/AGI/LUC属性标签，只保留描述',
+      'soul和material列表新增描述显示',
+      'Title页面角色位置改为百分比定位(50%/35%)，确保移动端居中',
+      'CharacterSelect角色改为正面行走动画，不再旋转',
+      'Settings页面缓存管理移至关于游戏页面下',
+      '修复Legendary Astra贴图：bit32=2使用weapon1精灵表',
+    ],
+  },
+  {
     version: 'v0.0.94',
     date: '2026-07-19 00:00:00',
     changes: [

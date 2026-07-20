@@ -34,11 +34,12 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
       setFrames(prev => {
         const next = { ...prev };
         heroData.forEach(hero => {
-          next[hero.id] = (next[hero.id] || 0 + 1) % COLS;
+          const current = next[hero.id] || 0;
+          next[hero.id] = (current + 1) % COLS;
         });
         return next;
       });
-    }, 300);
+    }, 150);
 
     return () => {
       if (intervalRef.current) {
@@ -155,7 +156,7 @@ export const CharacterSelect = ({ onSelect, onBack }: CharacterSelectProps) => {
             const bgSizeX = COLS * displaySize;
             const bgSizeY = ROWS * displaySize;
             const frame = frames[hero.id] || 0;
-            const bgPosX = -frame * displaySize;
+            const bgPosX = -(frame % COLS) * displaySize;
             const bgPosY = 0;
             
             const imagePath = BASE_URL + getHeroSpritePath(hero.id, 'idle').replace(/^\//, '');

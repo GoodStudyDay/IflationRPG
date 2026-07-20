@@ -332,9 +332,9 @@ export const TitleScreen = () => {
         <div
           className="absolute z-10"
           style={{ 
-            left: '316px', 
+            left: '50%', 
             top: '220px', 
-            transform: 'scale(1.5)',
+            transform: 'translate(-50%, -50%) scale(1.5)',
             imageRendering: 'pixelated',
             width: '32px',
             height: '32px',
